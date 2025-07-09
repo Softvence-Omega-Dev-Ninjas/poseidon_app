@@ -1,0 +1,27 @@
+model User {
+    id         String   @id @unique @default(uuid())
+    provider   String
+    email      String   @unique
+    Password   String?
+    otp        String
+    varify     Boolean  @default(false)
+    deactivate Boolean  @default(false)
+    Profile    Profile?
+
+    // supporters
+    supporter               SupporterPay[]
+    support_cart_layout     SupportCartLayout?
+}
+
+model Profile {
+    id        String @default(uuid())
+    userid    String @unique
+    user      User   @relation(fields: [userid], references: [id])
+    fristName String
+    lastName  String
+    address   String
+    state     String
+    city      String
+    country   String
+    postcode  String
+}

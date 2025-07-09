@@ -1,0 +1,34 @@
+model SupporterPay {
+    id                           String                    @id @unique @default(uuid())
+    supporter_id                 String? // optional
+    supporter_user               User?                     @relation(fields: [supporter_id], references: [id]) // optional
+    // core
+    support_cart_id              String
+    supporter_package_Owner_info SupportCartLayout         @relation(fields: [support_cart_id], references: [id])
+    package_id                   String?
+    package_type_info            Cheers_live_package_type? @relation(fields: [package_id], references: [id])
+    name                         String
+    country                      String
+    massage                      String
+}
+
+// first create this tb on user SignUp
+model SupportCartLayout {
+    id                       String                     @unique @default(uuid())
+    userid                   String                     @unique
+    user                     User                       @relation(fields: [userid], references: [id])
+    choose_layout            String                     @default("standard") // default - standard and Suggest - cart
+    default_price            Int                        @default(5)
+    Cheers_live_package_type Cheers_live_package_type[]
+    supporter_info           SupporterPay[]
+}
+
+model Cheers_live_package_type {
+    id                     String            @unique @default(uuid())
+    package_name           String            @db.VarChar(100)
+    package_time           Float
+    package_price          Float
+    support_cart_layout_id String
+    support_cart_layout    SupportCartLayout @relation(fields: [support_cart_layout_id], references: [id])
+    SupporterPay           SupporterPay[]
+}
