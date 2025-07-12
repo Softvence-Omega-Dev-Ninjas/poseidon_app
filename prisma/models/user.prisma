@@ -7,10 +7,12 @@ model User {
     varify     Boolean  @default(false)
     deactivate Boolean  @default(false)
     Profile    Profile?
+    role       Role     @default(user)
 
     // supporters
-    supporter               SupporterPay[]
-    support_cart_layout     SupportCartLayout?
+    supporter           SupporterPay[]
+    author_supportor    SupporterPay[]     @relation("author_supportor")
+    support_cart_layout SupportCartLayout?
 }
 
 model Profile {
@@ -24,4 +26,10 @@ model Profile {
     city      String
     country   String
     postcode  String
+}
+
+enum Role {
+    admin
+    supporter
+    user
 }
