@@ -1,17 +1,17 @@
 model User {
     id         String   @id @unique @default(uuid())
-    provider   String
+    provider   String   @default("credentials") // credentials, google, facebook
     email      String   @unique
     Password   String?
-    otp        String
+    otp        String?
     varify     Boolean  @default(false)
     deactivate Boolean  @default(false)
     Profile    Profile?
     role       Role     @default(user)
 
     // supporters
-    supporter           SupporterPay[]
-    author_supportor    SupporterPay[]     @relation("author_supportor")
+    supporter           SupporterPay[] // user buy support info
+    author_supportor    SupporterPay[]     @relation("author_supportor") // author access
     support_cart_layout SupportCartLayout?
 }
 
@@ -21,11 +21,11 @@ model Profile {
     user      User   @relation(fields: [userid], references: [id])
     fristName String
     lastName  String
-    address   String
-    state     String
-    city      String
-    country   String
-    postcode  String
+    address   String?
+    state     String?
+    city      String?
+    country   String?
+    postcode  String?
 }
 
 enum Role {
