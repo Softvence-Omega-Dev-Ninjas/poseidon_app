@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CreateUserDto } from 'src/main/user/dto/create-user.dto';
+// import { CreateUserDto } from 'src/main/user/dto/create-user.dto';
 
-export class CreateCredentialsUserDto extends CreateUserDto {}
+// export class CreateCredentialsUserDto extends CreateUserDto {}
 
 export class CredentialsSignInInfo {
   @ApiProperty({

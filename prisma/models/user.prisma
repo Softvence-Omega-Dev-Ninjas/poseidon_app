@@ -2,11 +2,11 @@ model User {
     id         String   @id @unique @default(uuid())
     provider   String   @default("credentials") // credentials, google, facebook
     email      String   @unique
-    Password   String?
+    password   String?
     otp        String?
     varify     Boolean  @default(false)
     deactivate Boolean  @default(false)
-    Profile    Profile?
+    profile    Profile?
     role       Role     @default(user)
 
     // supporters
@@ -18,7 +18,7 @@ model User {
 model Profile {
     id       String  @default(uuid())
     userid   String  @unique
-    user     User    @relation(fields: [userid], references: [id])
+    user     User    @relation(fields: [userid], references: [id], onDelete: Cascade)
     name     String
     address  String?
     state    String?
