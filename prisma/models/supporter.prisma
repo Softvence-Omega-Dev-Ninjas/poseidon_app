@@ -6,8 +6,8 @@ model SupporterPay {
     author_id         String?
     author            User?              @relation("author_supportor", fields: [author_id], references: [id])
     oder_package_name oder_package_name?
-    Transaction_id    String
-    total_pay         Float
+    transaction_id    String
+    total_price       Float
     //optional
     name              String
     country           String

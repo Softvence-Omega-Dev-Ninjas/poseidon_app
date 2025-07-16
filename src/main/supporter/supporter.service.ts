@@ -1,26 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSupporterDto } from './dto/create-supporter.dto';
-import { UpdateSupporterDto } from './dto/update-supporter.dto';
+import { CreateSupporterPayDto } from './dto/create-supporter.dto';
+import { PrismaService } from 'src/prisma-client/prisma-client.service';
+// import { UpdateSupporterDto } from './dto/update-supporter.dto';
 
 @Injectable()
 export class SupporterService {
-  create(createSupporterDto: CreateSupporterDto) {
-    return 'This action adds a new supporter';
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return `This action returns all supporter`;
-  }
+  async create(createSupporterDto: CreateSupporterPayDto) {
+    const { oder_package_name, ...rootData } = createSupporterDto;
 
-  findOne(id: number) {
-    return `This action returns a #${id} supporter`;
-  }
-
-  update(id: number, updateSupporterDto: UpdateSupporterDto) {
-    return `This action updates a #${id} supporter`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} supporter`;
+    console.log('oder_package_name', oder_package_name);
+    console.log('rootData', rootData);
+    const newSupporter = await this.prisma.supporterPay.create({
+      data: {
+        ...rootData,
+        oder_package_name: {
+          create: {
+            ...oder_package_name,
+          },
+        },
+      },
+    });
+    return newSupporter;
   }
 }
