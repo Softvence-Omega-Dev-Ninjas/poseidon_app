@@ -60,9 +60,11 @@ model Order {
   postCode         String?
   apartmentOrHouse String
   phoneNumber      String
-
+  paymentId        String?
+  userId           String?
   productId        String
   product          Product  @relation(fields: [productId], references: [id])
+  user             User?       @relation(fields: [userId], references: [id])
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
