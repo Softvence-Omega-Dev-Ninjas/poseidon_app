@@ -13,6 +13,7 @@ model User {
     supporter           SupporterPay[] // user buy support info
     author_supportor    SupporterPay[]     @relation("author_supportor") // author access
     support_cart_layout SupportCartLayout?
+    shop      Shop?
 }
 
 model Profile {
