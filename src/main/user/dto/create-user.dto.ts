@@ -46,7 +46,7 @@ export class CreateUserDto {
   password: string;
 
   @ApiProperty({
-    required: true,
+    required: false,
     type: () => CreateUserProfileDto,
     example: {
       name: 'John Doe',

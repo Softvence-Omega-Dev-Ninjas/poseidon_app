@@ -12,24 +12,33 @@ export class CloudinaryService {
   async imageUpload(file?: Express.Multer.File) {
     try {
       if (file) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         const uploadRes = await this.cloudinary.uploader.upload(file.path, {
-          folder: 'quotes',
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
           public_id: file.originalname,
         });
-        // imageUrl = uploadRes.secure_url;
-        // publicId = uploadRes.public_id;
         return {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
           imageUrl: uploadRes.secure_url,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
           publicId: uploadRes.public_id,
         };
       }
     } catch (err) {
       console.error('Error uploading quote:', err);
       throw new InternalServerErrorException('Failed to upload Image');
+    }
+  }
+
+  // remove file with cloudinary
+  async deleteFile(publicId: string) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = await this.cloudinary.uploader.destroy(publicId, {});
+      console.log('Deleted:', result);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return result;
+    } catch (error) {
+      console.error('Cloudinary deletion error:', error);
+      throw new InternalServerErrorException(
+        'Failed to delete file from Cloudinary',
+      );
     }
   }
 }
