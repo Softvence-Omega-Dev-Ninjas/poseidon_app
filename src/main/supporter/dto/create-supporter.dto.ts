@@ -22,16 +22,16 @@ export class PackageTypePay {
 
 export class CreateSupporterPayDto {
   @ApiProperty({
-    required: false,
+    required: true,
     example: '5cde7c60-24ce-4129-a62d-9b591c11bb79',
   })
-  user_id?: string;
+  user_id: string;
 
   @ApiProperty({
-    required: false,
+    required: true,
     example: 'a4f57e39-b7a8-4d98-b810-657dfa7c0987',
   })
-  author_id?: string;
+  author_id: string;
 
   @ApiProperty({
     required: true,

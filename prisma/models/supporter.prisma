@@ -1,10 +1,10 @@
 model SupporterPay {
     id                String             @id @unique @default(uuid())
-    user_id           String? // optional
-    user              User?              @relation(fields: [user_id], references: [id]) // optional
+    user_id           String // optional
+    user              User               @relation(fields: [user_id], references: [id]) // optional
     // core
-    author_id         String?
-    author            User?              @relation("author_supportor", fields: [author_id], references: [id])
+    author_id         String
+    author            User               @relation("author_supportor", fields: [author_id], references: [id])
     oder_package_name oder_package_name?
     transaction_id    String
     total_price       Float
