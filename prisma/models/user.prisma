@@ -13,7 +13,7 @@ model User {
     supporter           SupporterPay[] // user buy support info
     author_supportor    SupporterPay[]     @relation("author_supportor") // author access
     support_cart_layout SupportCartLayout?
-    shop      Shop?
+    shop                Shop?
 }
 
 model Profile {
@@ -21,6 +21,7 @@ model Profile {
     userid   String  @unique
     user     User    @relation(fields: [userid], references: [id], onDelete: Cascade)
     name     String
+    image    String
     address  String?
     state    String?
     city     String?
