@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import { FindAllOrdersDto } from './dto/find-all-orders.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Order')
@@ -15,32 +15,12 @@ export class OrderController {
   }
 
   @Get()
-  findAll() {
-    return this.orderService.findAll();
+  findAll(@Query() query: FindAllOrdersDto) {
+    return this.orderService.findAll(query);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.orderService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(id, updateOrderDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.orderService.remove(id);
-  }
-
-  @Get('shop/:shopId')
-  findByShopId(@Param('shopId') shopId: string) {
-    return this.orderService.findByShopId(shopId);
-  }
-
-  @Get('user/:userId')
-  findByUserId(@Param('userId') userId: string) {
-    return this.orderService.findByUserId(userId);
   }
 }
