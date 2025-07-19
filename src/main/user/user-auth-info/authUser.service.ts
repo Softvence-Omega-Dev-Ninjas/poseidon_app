@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -17,29 +18,29 @@ export class AuthUserService {
 
   // chack user db isExestUser - yes or not
   private async isExestUser(email: string) {
-    try {
-      const result = await this.prisma.user.findFirst({
-        where: {
-          email: email,
-        },
-        select: {
-          id: true,
-          email: true,
-          deactivate: true,
-        },
-      });
-      if (result?.email && !result.deactivate) {
-        return true;
-      }
-      return false;
-    } catch (error) {
-      throw new InternalServerErrorException({
-        massage: 'Something went wrong.',
-        error: error instanceof Error ? error : String(error),
-        data: null,
-        status: false,
-      });
+    // try {
+    const result = await this.prisma.user.findFirst({
+      where: {
+        email: email,
+      },
+      select: {
+        id: true,
+        email: true,
+        deactivate: true,
+      },
+    });
+    if (result?.email && !result.deactivate) {
+      return true;
     }
+    return false;
+    // } catch (error) {
+    //   throw new InternalServerErrorException({
+    //     massage: 'Something went wrong.',
+    //     error: error instanceof Error ? error : String(error),
+    //     data: null,
+    //     success: false,
+    //   });
+    // }
   }
 
   // credentials register system
@@ -93,7 +94,7 @@ export class AuthUserService {
         massage: 'user created fail',
         error: err instanceof Error ? err : String(err),
         data: null,
-        status: false,
+        success: false,
       });
     }
   }
@@ -109,7 +110,7 @@ export class AuthUserService {
           redirect_url: 'http://localhost:3000/signup',
           error: null,
           data: null,
-          status: false,
+          success: false,
         },
         HttpStatus.CONFLICT,
       );
@@ -133,35 +134,33 @@ export class AuthUserService {
           },
         },
       });
-      // if (!userInfo.id) {
-      //   throw new BadRequestException('User not found');
-      // }
+      if (!userinfo) {
+        throw new BadRequestException('User not found');
+      }
       // password match logic
-      if (userinfo?.password !== loginUserDto.password) {
+      const { password, ...user } = userinfo;
+      if (password !== loginUserDto.password) {
         throw new HttpException(
           {
             message: 'Incorrect credentials. Please try again.',
             redirect_url: null,
             error: 'INVALID_PASSWORD',
             data: null,
-            status: false,
+            success: false,
           },
           HttpStatus.BAD_REQUEST,
         );
       }
 
       return {
-        id: userinfo.id,
-        provider: userinfo.provider,
-        email: userinfo.email,
-        role: userinfo.role,
+        ...user,
       };
     } catch (error) {
       throw new InternalServerErrorException({
         massage: 'Something went wrong.',
         error: error instanceof Error ? error : String(error),
         data: null,
-        status: false,
+        success: false,
       });
     }
   }
