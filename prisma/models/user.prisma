@@ -8,12 +8,15 @@ model User {
     deactivate Boolean  @default(false)
     profile    Profile?
     role       Role     @default(user)
-
+     
     // supporters
+    orders Order[] 
     supporter           SupporterPay[] // user buy support info
     author_supportor    SupporterPay[]     @relation("author_supportor") // author access
     support_cart_layout SupportCartLayout?
+
     shop                Shop?
+
 }
 
 model Profile {

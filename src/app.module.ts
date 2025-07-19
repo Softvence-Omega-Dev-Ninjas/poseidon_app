@@ -13,6 +13,7 @@ import { HttpExceptionFiller } from './common/fillters/http-exception.fillter';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+   
   ],
   controllers: [AppController],
   providers: [

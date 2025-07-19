@@ -1,3 +1,10 @@
+
+enum SuccessPage {
+  message
+  redirect
+
+}
+
 model Shop {
   id          String     @id @default(uuid())
    userId    String     @unique 
@@ -23,9 +30,12 @@ model Product {
   color          String[]
   features       String[]
   offerPrice     String
+  successPage    SuccessPage
+  successPagefield String
 
   shop            Shop             @relation(fields: [shopId], references: [id])
   category        ProductCategory  @relation(fields: [categoryId], references: [id])
+   orders      Order[]
   
   
 }
@@ -39,6 +49,27 @@ model ProductCategory {
 
   products  Product[]
 }
+
+
+model Order {
+  id               String   @id @default(uuid())
+  fullName         String
+  email            String
+  country          String
+  city             String
+  postCode         String?
+  apartmentOrHouse String
+  phoneNumber      String
+  paymentId        String?
+  userId           String?
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id])
+  user             User?       @relation(fields: [userId], references: [id])
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
 
 
 
