@@ -16,7 +16,8 @@ export class AuthController {
     return this.authUserService.createUser(createAuthDto);
   }
   @Post('signin')
-  signin(@Body() createAuthDto: CredentialsSignInInfo) {
-    return createAuthDto;
+  async signin(@Body() createAuthDto: CredentialsSignInInfo) {
+    const userDto = await this.authUserService.loginUser(createAuthDto);
+    return this.authService.authenticationUser(userDto);
   }
 }

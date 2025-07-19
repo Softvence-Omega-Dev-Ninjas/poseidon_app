@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CredentialsSignInInfo } from 'src/auth/dto/create-auth.dto';
@@ -22,6 +16,7 @@ export class AuthUserService {
     const result = await this.prisma.user.findFirst({
       where: {
         email: email,
+        deactivate: false,
       },
       select: {
         id: true,
@@ -29,18 +24,7 @@ export class AuthUserService {
         deactivate: true,
       },
     });
-    if (result?.email && !result.deactivate) {
-      return true;
-    }
-    return false;
-    // } catch (error) {
-    //   throw new InternalServerErrorException({
-    //     massage: 'Something went wrong.',
-    //     error: error instanceof Error ? error : String(error),
-    //     data: null,
-    //     success: false,
-    //   });
-    // }
+    return !!result;
   }
 
   // credentials register system
@@ -58,46 +42,41 @@ export class AuthUserService {
         HttpStatus.CONFLICT,
       );
     }
-    try {
-      const newUser = await this.prisma.user.create({
-        data: {
-          email: createUserDto.email,
-          password: createUserDto.password,
-          profile: {
-            create: {
-              ...createUserDto.profile,
-            },
-          },
-          support_cart_layout: {
-            create: {},
+    const newUser = await this.prisma.user.create({
+      data: {
+        email: createUserDto.email,
+        password: createUserDto.password,
+        profile: {
+          create: {
+            ...createUserDto.profile,
           },
         },
-        select: {
-          id: true,
-          email: true,
-          provider: true,
-          profile: {
-            select: {
-              name: true,
-              image: true,
-            },
+        support_cart_layout: {
+          create: {},
+        },
+        shop: {
+          create: {},
+        },
+      },
+      select: {
+        id: true,
+        email: true,
+        provider: true,
+        profile: {
+          select: {
+            name: true,
+            image: true,
           },
         },
-      });
-      return {
-        message: 'Your Have SignUp Successful',
-        error: null,
-        data: newUser,
-        stutas: true,
-      };
-    } catch (err) {
-      throw new InternalServerErrorException({
-        massage: 'user created fail',
-        error: err instanceof Error ? err : String(err),
-        data: null,
-        success: false,
-      });
-    }
+      },
+    });
+    return {
+      message: 'Your Have SignUp Successful',
+      redirect_url: 'http://localhost:3000/signin',
+      error: null,
+      data: { name: newUser.profile?.name },
+      stutas: true,
+    };
   }
 
   // credentials login system
@@ -116,53 +95,41 @@ export class AuthUserService {
         HttpStatus.CONFLICT,
       );
     }
-    try {
-      const userinfo = await this.prisma.user.findFirst({
-        where: {
-          email: loginUserDto.email,
-        },
-        select: {
-          id: true,
-          provider: true,
-          email: true,
-          password: true,
-          role: true,
-          profile: {
-            select: {
-              name: true,
-              image: true,
-            },
+    return await this.prisma.user.findFirst({
+      where: {
+        AND: [{ email: loginUserDto.email }, { deactivate: false }],
+      },
+      select: {
+        id: true,
+        provider: true,
+        email: true,
+        password: true,
+        role: true,
+        profile: {
+          select: {
+            name: true,
+            image: true,
           },
         },
-      });
-      if (!userinfo) {
-        throw new BadRequestException('User not found');
-      }
-      // password match logic
-      const { password, ...user } = userinfo;
-      if (password !== loginUserDto.password) {
-        throw new HttpException(
-          {
-            message: 'Incorrect credentials. Please try again.',
-            redirect_url: null,
-            error: 'INVALID_PASSWORD',
-            data: null,
-            success: false,
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      return {
-        ...user,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException({
-        massage: 'Something went wrong.',
-        error: error instanceof Error ? error : String(error),
-        data: null,
-        success: false,
-      });
-    }
+      },
+    });
+    // if (!userinfo) {
+    //   throw new BadRequestException('Incorrect credentials. Please try again.');
+    // }
+    // // password match logic
+    // const { password, ...user } = userinfo;
+    // if (password !== loginUserDto.password) {
+    //   throw new HttpException(
+    //     {
+    //       message: 'Incorrect credentials. Please try again.',
+    //       redirect_url: null,
+    //       error: 'INVALID_PASSWORD',
+    //       data: null,
+    //       success: false,
+    //     },
+    //     HttpStatus.BAD_REQUEST,
+    //   );
+    // }
+    // return user;
   }
 }
