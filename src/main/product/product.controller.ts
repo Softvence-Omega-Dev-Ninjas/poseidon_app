@@ -17,8 +17,15 @@ export class ProductController {
   @Get()
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number for pagination' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page' })
-  findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10) {
-    return this.productService.findAll(+page, +limit);
+  @ApiQuery({ name: 'categoryId', required: false, type: String, description: 'Filter by category ID' })
+  @ApiQuery({ name: 'draft', required: false, type: Boolean, description: 'Filter by draft status' })
+  findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+    @Query('categoryId') categoryId?: string,
+    @Query('draft') draft?: boolean,
+  ) {
+    return this.productService.findAll(+page, +limit, categoryId, draft);
   }
 
   @Get(':id')

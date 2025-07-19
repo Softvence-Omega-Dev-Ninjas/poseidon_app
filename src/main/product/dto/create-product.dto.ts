@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsArray, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsOptional, IsArray, IsEnum, IsBoolean } from 'class-validator';
 import { SuccessPage } from 'generated/prisma';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -18,10 +18,16 @@ export class CreateProductDto {
   @IsNotEmpty()
   price: number;
 
-  @ApiProperty({ required: false })
-  @IsString()
+@ApiProperty({ example: false, description: 'Whether the product is a draft' })
+@IsBoolean()
+@IsNotEmpty()
+draft: boolean;
+
+  @ApiProperty({ required: false, type: [String] })
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  imageUrl?: string;
+  images?: string[];
 
   @ApiProperty()
   @IsString()
@@ -29,9 +35,11 @@ export class CreateProductDto {
   shopId: string;
 
   @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  categoryId: string;
+  @ApiProperty({ type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  categoryIds: string[];
 
   @ApiProperty({ required: false })
   @IsArray()
@@ -44,9 +52,9 @@ export class CreateProductDto {
   features?: string[];
 
   @ApiProperty()
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  offerPrice: string;
+  offerPrice: number;
 
   @ApiProperty({ enum: SuccessPage })
   @IsEnum(SuccessPage)
