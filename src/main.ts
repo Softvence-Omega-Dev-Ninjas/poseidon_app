@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerSetting } from './config/swagger';
+import { ValidationPipe } from '@nestjs/common';
 // import { NestExpressApplication } from '@nestjs/platform-express';
 // import { join } from 'path';
 import { AuthGuardGuard } from './auth/auth_guard/auth_guard.guard';
@@ -11,6 +12,7 @@ async function bootstrap() {
   // const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.useGlobalGuards(new AuthGuardGuard());
+  app.useGlobalPipes(new ValidationPipe());
 
   // app.useStaticAssets(join(process.cwd(), 'public'), {
   //   // Optionally set prefix if you want URL like /static/sharif.txt
