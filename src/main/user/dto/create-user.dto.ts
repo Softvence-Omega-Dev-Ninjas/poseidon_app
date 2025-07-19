@@ -6,26 +6,37 @@ export class CreateUserProfileDto {
     example: 'user name',
   })
   name: string;
+
+  @ApiProperty({
+    required: true,
+    example: 'user image',
+  })
+  image: string;
+
   @ApiProperty({
     required: false,
     example: 'user address',
   })
   address?: string;
+
   @ApiProperty({
     required: false,
     example: 'user state',
   })
   state?: string;
+
   @ApiProperty({
     required: false,
     example: 'user city',
   })
   city?: string;
+
   @ApiProperty({
     required: false,
     example: 'user country',
   })
   country?: string;
+
   @ApiProperty({
     required: false,
     example: 'user post code',
@@ -50,6 +61,7 @@ export class CreateUserDto {
     type: () => CreateUserProfileDto,
     example: {
       name: 'John Doe',
+      image: 'iamge url',
       address: '123 Main Street',
       state: 'California',
       city: 'Los Angeles',
