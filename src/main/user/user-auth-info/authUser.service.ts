@@ -73,6 +73,7 @@ export class AuthUserService {
           },
         },
         select: {
+          id:true,
           email: true,
           provider: true,
           profile: {

@@ -1,39 +1,35 @@
 model User {
-    id         String   @id @unique @default(uuid())
-    provider   String   @default("credentials") // credentials, google, facebook
-    email      String
-    password   String?
-    otp        String?
-    varify     Boolean  @default(false)
-    deactivate Boolean  @default(false)
-    profile    Profile?
-    role       Role     @default(user)
-     
-    // supporters
-    orders Order[] 
-    supporter           SupporterPay[] // user buy support info
-    author_supportor    SupporterPay[]     @relation("author_supportor") // author access
-    support_cart_layout SupportCartLayout?
-
-    shop                Shop?
-
+  id                  String             @id @unique @default(uuid())
+  provider            String             @default("credentials")
+  email               String
+  password            String?
+  otp                 String?
+  varify              Boolean            @default(false)
+  deactivate          Boolean            @default(false)
+  role                Role               @default(user)
+  orders              Order[]
+  profile             Profile?
+  shop                Shop?
+  support_cart_layout SupportCartLayout?
+  author_supportor    SupporterPay[]     @relation("author_supportor")
+  supporter           SupporterPay[]
 }
 
 model Profile {
-    id       String  @default(uuid())
-    userid   String  @unique
-    user     User    @relation(fields: [userid], references: [id], onDelete: Cascade)
-    name     String
-    image    String
-    address  String?
-    state    String?
-    city     String?
-    country  String?
-    postcode String?
+  id       String  @default(uuid())
+  userid   String  @unique
+  name     String
+  image    String
+  address  String?
+  state    String?
+  city     String?
+  country  String?
+  postcode String?
+  user     User    @relation(fields: [userid], references: [id], onDelete: Cascade)
 }
 
 enum Role {
-    admin
-    supporter
-    user
+  admin
+  supporter
+  user
 }

@@ -1,54 +1,50 @@
 model SupporterPay {
-    id                String             @id @unique @default(uuid())
-    user_id           String // optional
-    user              User               @relation(fields: [user_id], references: [id]) // optional
-    // core
-    author_id         String
-    author            User               @relation("author_supportor", fields: [author_id], references: [id])
-    oder_package_name oder_package_name?
-    transaction_id    String
-    total_price       Float
-    //optional
-    name              String
-    country           String
-    massage           String
-    createAt          DateTime           @default(now())
-    updateAt          DateTime           @updatedAt
+  id                String             @id @unique @default(uuid())
+  user_id           String
+  author_id         String
+  transaction_id    String
+  total_price       Float
+  name              String
+  country           String
+  massage           String
+  createAt          DateTime           @default(now())
+  updateAt          DateTime           @updatedAt
+  author            User               @relation("author_supportor", fields: [author_id], references: [id])
+  user              User               @relation(fields: [user_id], references: [id])
+  oder_package_name oder_package_name?
 }
 
 model oder_package_name {
-    id               String       @id @unique @default(uuid())
-    supporter_pay_id String       @unique
-    supporter_pay    SupporterPay @relation(fields: [supporter_pay_id], references: [id])
-    package_name     String       @db.VarChar(100)
-    package_time     Float
-    package_price    Float
-    complate         Boolean      @default(false)
-    createAt         DateTime     @default(now())
-    updateAt         DateTime     @updatedAt
+  id               String       @id @unique @default(uuid())
+  supporter_pay_id String       @unique
+  package_name     String       @db.VarChar(100)
+  package_time     Float
+  package_price    Float
+  complate         Boolean      @default(false)
+  createAt         DateTime     @default(now())
+  updateAt         DateTime     @updatedAt
+  supporter_pay    SupporterPay @relation(fields: [supporter_pay_id], references: [id])
 }
 
-//only for author
-// first create this tb on user SignUp
 model SupportCartLayout {
-    id                       String                     @unique @default(uuid())
-    author_id                String                     @unique
-    author                   User                       @relation(fields: [author_id], references: [id], onDelete: Cascade)
-    choose_layout            LayoutType                 @default(standard) // default - standard and suggest - cart
-    default_price            Int                        @default(5)
-    cheers_live_package_type Cheers_live_package_type[]
+  id                       String                     @unique @default(uuid())
+  author_id                String                     @unique
+  choose_layout            LayoutType                 @default(standard)
+  default_price            Int                        @default(5)
+  cheers_live_package_type Cheers_live_package_type[]
+  author                   User                       @relation(fields: [author_id], references: [id], onDelete: Cascade)
 }
 
 model Cheers_live_package_type {
-    id                     String            @unique @default(uuid())
-    package_name           String            @db.VarChar(100)
-    package_time           Float
-    package_price          Float
-    support_cart_layout_id String
-    support_cart_layout    SupportCartLayout @relation(fields: [support_cart_layout_id], references: [id], onDelete: Cascade)
+  id                     String            @unique @default(uuid())
+  package_name           String            @db.VarChar(100)
+  package_time           Float
+  package_price          Float
+  support_cart_layout_id String
+  support_cart_layout    SupportCartLayout @relation(fields: [support_cart_layout_id], references: [id], onDelete: Cascade)
 }
 
 enum LayoutType {
-    standard
-    suggest
+  standard
+  suggest
 }
