@@ -7,7 +7,14 @@ import { ProductCategoryModule } from './product-category/product-category.modul
 import { ShopModule } from './shop/shop.module';
 
 @Module({
-  imports: [UserModule, SupporterModule, OrderModule, ProductModule, ProductCategoryModule, ShopModule],
+  imports: [
+    UserModule,
+    SupporterModule,
+    OrderModule,
+    ProductModule,
+    ProductCategoryModule,
+    ShopModule,
+  ],
   controllers: [],
   providers: [],
   exports: [],
