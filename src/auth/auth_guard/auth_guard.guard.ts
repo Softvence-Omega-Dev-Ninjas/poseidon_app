@@ -6,6 +6,7 @@ export class AuthGuardGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
+// Replace with actual user ID from authentication
     return true;
   }
 }

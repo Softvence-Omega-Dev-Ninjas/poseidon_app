@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Req, UseGuards } from '@nestjs/common';
+import { AuthGuardGuard } from 'src/auth/auth_guard/auth_guard.guard';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -44,6 +45,7 @@ export class PostController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuardGuard)
   @ApiOperation({ summary: 'Delete a post by ID' })
   @ApiResponse({ status: 200, description: 'The post has been successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Post not found.' })

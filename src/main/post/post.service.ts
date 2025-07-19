@@ -40,7 +40,7 @@ export class PostService {
     const [posts, total] = await this.prisma.$transaction([
       this.prisma.post.findMany({
         skip: offset,
-        take: limit,
+        take: parseInt(limit as any),
         orderBy,
       }),
       this.prisma.post.count(),
@@ -72,9 +72,36 @@ export class PostService {
   }
 
   async update(id: string, updatePostDto: UpdatePostDto): Promise<Post> {
+    const { images, authorId, ...restOfUpdateDto } = updatePostDto;
+    let updatedImages: string[] | undefined;
+
+    if (images) {
+      const existingPost = await this.prisma.post.findUnique({
+        where: { id },
+        select: { images: true },
+      });
+
+      if (!existingPost) {
+        throw new NotFoundException(`Post with ID ${id} not found`);
+      }
+
+      updatedImages = [...existingPost.images];
+
+      for (const imageAction of images) {
+        if (imageAction.action === 'add') {
+          updatedImages.push(imageAction.value);
+        } else if (imageAction.action === 'delete') {
+          updatedImages = updatedImages.filter(img => img !== imageAction.value);
+        }
+      }
+    }
+
     const post = await this.prisma.post.update({
       where: { id },
-      data: updatePostDto,
+      data: {
+        ...restOfUpdateDto,
+        ...(updatedImages !== undefined && { images: updatedImages }),
+      },
     });
     if (!post) {
       throw new NotFoundException(`Post with ID ${id} not found`);
