@@ -1,15 +1,27 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
+// import { Observable } from 'rxjs';
 import { Role } from './role.enum';
 import { ROLES_KEY } from './roles.decorator';
 import { IS_PUBLIC_KEY } from './public.decorator';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { PayloadType } from './jwtPayloadType';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<Request>();
 
     // 1. Allow if route is public
@@ -24,10 +36,21 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
+    if (!requiredRoles) return false;
 
+    // 3. Validate token and extract user info
+    //    Check if user has required roles
     const token = this.extractBearerToken(request);
+    if (token === '') throw new UnauthorizedException();
+    const payload = await this.jwtService.verifyAsync<PayloadType>(token, {
+      secret: this.configService.get<string>('AUTHSECRET'),
+    });
+    if (!payload) {
+      throw new UnauthorizedException();
+    }
 
-    return true;
+    request['sub'] = payload.id;
+    return requiredRoles.some((role) => payload.role?.includes(role));
   }
 
   private extractBearerToken(req: Request): string {

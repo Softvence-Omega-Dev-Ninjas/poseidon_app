@@ -4,6 +4,7 @@ import { CredentialsSignInInfo } from './dto/create-auth.dto';
 import { CreateUserDto } from 'src/main/user/dto/create-user.dto';
 import { AuthUserService } from 'src/main/user/user-auth-info/authUser.service';
 import { Response } from 'express';
+import { Public } from './guard/public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -12,10 +13,13 @@ export class AuthController {
     private readonly authUserService: AuthUserService,
   ) {}
 
+  @Public()
   @Post('signup')
   signup(@Body() createAuthDto: CreateUserDto) {
     return this.authUserService.createUser(createAuthDto);
   }
+
+  @Public()
   @Post('signin')
   async signin(
     @Body() createAuthDto: CredentialsSignInInfo,

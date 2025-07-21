@@ -1,4 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
+import { Roles } from './auth/guard/roles.decorator';
+import { Role } from './auth/guard/role.enum';
 // import { Response } from 'express';
 // import { join } from 'path';
 
@@ -7,6 +9,7 @@ export class AppController {
   constructor() {}
 
   @Get()
+  @Roles(Role.Admin, Role.Supporter, Role.User)
   getHello(): string {
     return 'welcome to poseidon project';
   }
