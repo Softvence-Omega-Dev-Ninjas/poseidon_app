@@ -32,7 +32,7 @@ export class AuthService {
       profile: user?.profile,
     };
     const access_token = await this.jwtService.signAsync({
-      sub: user?.id,
+      id: user?.id,
       ...payload,
     });
 
