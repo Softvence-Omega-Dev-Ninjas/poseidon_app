@@ -1,26 +1,24 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
-import { OrderService } from './order.service';
+import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { FindAllOrdersDto } from './dto/find-all-orders.dto';
+import { AuthGuardGuard } from 'src/auth/auth_guard/auth_guard.guard';
 import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Order')
+@ApiTags('order')
+@UseGuards(AuthGuardGuard)
 @Controller('order')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
-
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
+    return `This action creates a new order with data: ${JSON.stringify(createOrderDto)}`;
   }
 
   @Get()
-  findAll(@Query() query: FindAllOrdersDto) {
-    return this.orderService.findAll(query);
+  findAll() {
+    return 'This action returns all orders';
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.orderService.findOne(id);
+    return `This action returns a #${id} order`;
   }
 }

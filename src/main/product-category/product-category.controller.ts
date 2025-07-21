@@ -3,7 +3,11 @@ import { ProductCategoryService } from './product-category.service';
 import { CreateProductCategoryDto } from './dto/create-product-category.dto';
 import { ApiTags, ApiQuery } from '@nestjs/swagger';
 
+import { UseGuards } from '@nestjs/common';
+import { AuthGuardGuard } from 'src/auth/auth_guard/auth_guard.guard';
+
 @ApiTags('ProductCategory')
+@UseGuards(AuthGuardGuard)
 @Controller('product-category')
 export class ProductCategoryController {
   constructor(

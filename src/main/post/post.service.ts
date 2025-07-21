@@ -13,12 +13,11 @@ import { Post, Prisma } from '../../../generated/prisma';
 export class PostService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createPostDto: CreatePostDto): Promise<Post> {
-    const { authorId, ...rest } = createPostDto;
+  async create(createPostDto: CreatePostDto, userId: string): Promise<Post> {
     return this.prisma.post.create({
       data: {
-        ...rest,
-        userId: authorId, // Map authorId to userId for the relation
+        ...createPostDto,
+        userId,
       },
     });
   }
@@ -80,7 +79,7 @@ export class PostService {
   }
 
   async update(id: string, updatePostDto: UpdatePostDto): Promise<Post> {
-    const { images, authorId, ...restOfUpdateDto } = updatePostDto;
+    const { images, ...restOfUpdateDto } = updatePostDto;
     let updatedImages: string[] | undefined;
 
     if (images) {

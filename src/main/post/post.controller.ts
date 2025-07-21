@@ -15,7 +15,13 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { FindAllPostsDto } from './dto/find-all-posts.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
+import { UseGuards } from '@nestjs/common';
+import { AuthGuardGuard } from 'src/auth/auth_guard/auth_guard.guard';
+import { Role } from 'src/auth/guard/role.enum';
+import { Roles } from 'src/auth/guard/roles.decorator';
+
 @ApiTags('posts')
+@Roles(Role.Admin, Role.Supporter, Role.User)
 @Controller('posts')
 export class PostController {
   constructor(private readonly postService: PostService) {}
@@ -26,8 +32,10 @@ export class PostController {
     status: 201,
     description: 'The post has been successfully created.',
   })
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postService.create(createPostDto);
+  @Roles(Role.Admin, Role.Supporter, Role.User)
+  create(@Body() createPostDto: CreatePostDto, @Req() req) {
+    console.log(req.user)
+    return this.postService.create(createPostDto,req.user.sub);
   }
 
   @Get()

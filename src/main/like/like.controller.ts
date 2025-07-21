@@ -3,7 +3,11 @@ import { LikeService } from './like.service';
 import { CreateLikeDto } from './dto/create-like.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
+import { UseGuards } from '@nestjs/common';
+import { AuthGuardGuard } from 'src/auth/auth_guard/auth_guard.guard';
+
 @ApiTags('likes')
+@UseGuards(AuthGuardGuard)
 @Controller('likes')
 export class LikeController {
   constructor(private readonly likeService: LikeService) {}

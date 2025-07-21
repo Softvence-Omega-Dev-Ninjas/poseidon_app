@@ -37,10 +37,5 @@ export class CreatePostDto {
   @IsEnum(WhoCanSee)
   whoCanSee: WhoCanSee;
 
-  @ApiProperty({
-    example: 'uuid-of-user',
-    description: 'ID of the post author',
-  })
-  @IsString()
-  authorId: string;
+  
 }
