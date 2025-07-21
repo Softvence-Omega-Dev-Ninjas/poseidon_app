@@ -1,6 +1,8 @@
-import { IsString, IsOptional, IsNumber, IsArray, IsNotEmpty, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsArray, IsNotEmpty, IsEnum, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { SuccessPage } from 'generated/prisma';
 import { ApiProperty } from '@nestjs/swagger';
+import { StructuredArrayItemDto } from 'src/common/dto/structured-array.dto';
 
 export class UpdateProductDto {
   @ApiProperty({ required: false })
@@ -18,30 +20,38 @@ export class UpdateProductDto {
   @IsOptional()
   price?: number;
 
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  imageUrl?: string;
-
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsNotEmpty()
-  categoryId: string;
-
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, type: () => [StructuredArrayItemDto] })
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => StructuredArrayItemDto)
   @IsOptional()
-  color?: string[];
+  images?: StructuredArrayItemDto[];
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, type: () => [StructuredArrayItemDto] })
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => StructuredArrayItemDto)
   @IsOptional()
-  features?: string[];
+  categoryIds?: StructuredArrayItemDto[];
+
+  @ApiProperty({ required: false, type: () => [StructuredArrayItemDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => StructuredArrayItemDto)
+  @IsOptional()
+  color?: StructuredArrayItemDto[];
+
+  @ApiProperty({ required: false, type: () => [StructuredArrayItemDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => StructuredArrayItemDto)
+  @IsOptional()
+  features?: StructuredArrayItemDto[];
 
   @ApiProperty({ required: false })
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  offerPrice?: string;
+  offerPrice?: number;
 
   @ApiProperty({ required: false, enum: SuccessPage })
   @IsEnum(SuccessPage)
