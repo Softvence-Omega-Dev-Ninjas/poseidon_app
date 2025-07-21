@@ -7,10 +7,20 @@ import { ProductCategoryModule } from './product-category/product-category.modul
 import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
 import { LikeModule } from './like/like.module';
-
+import { ShopModule } from './shop/shop.module';
 
 @Module({
-  imports: [UserModule, SupporterModule, OrderModule, ProductModule, ProductCategoryModule, PostModule, CommentModule, LikeModule],
+  imports: [
+    UserModule,
+    SupporterModule,
+    OrderModule,
+    ProductModule,
+    ProductCategoryModule,
+    PostModule,
+    CommentModule,
+    LikeModule,
+    ShopModule,
+  ],
   controllers: [],
   providers: [],
   exports: [],
