@@ -6,7 +6,7 @@ model User {
   otp                 String?
   varify              Boolean            @default(false)
   deactivate          Boolean            @default(false)
-  role                Role               @default(user)
+  role                Roles               @default(user)
   orders              Order[]
   profile             Profile?
   shop                Shop?
@@ -28,7 +28,7 @@ model Profile {
   user     User    @relation(fields: [userid], references: [id], onDelete: Cascade)
 }
 
-enum Role {
+enum Roles {
   admin
   supporter
   user
