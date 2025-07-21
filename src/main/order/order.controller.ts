@@ -1,10 +1,8 @@
 import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { AuthGuardGuard } from 'src/auth/auth_guard/auth_guard.guard';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('order')
-@UseGuards(AuthGuardGuard)
 @Controller('order')
 export class OrderController {
   @Post()

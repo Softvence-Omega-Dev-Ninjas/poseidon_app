@@ -16,7 +16,7 @@ import { FindAllPostsDto } from './dto/find-all-posts.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
 import { UseGuards } from '@nestjs/common';
-import { AuthGuardGuard } from 'src/auth/auth_guard/auth_guard.guard';
+
 import { Role } from 'src/auth/guard/role.enum';
 import { Roles } from 'src/auth/guard/roles.decorator';
 
@@ -34,8 +34,7 @@ export class PostController {
   })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   create(@Body() createPostDto: CreatePostDto, @Req() req) {
-    console.log(req.user)
-    return this.postService.create(createPostDto,req.user.sub);
+    return this.postService.create(createPostDto,req.sub);
   }
 
   @Get()

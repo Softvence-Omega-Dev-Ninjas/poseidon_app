@@ -5,10 +5,8 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { UseGuards } from '@nestjs/common';
-import { AuthGuardGuard } from 'src/auth/auth_guard/auth_guard.guard';
 
 @ApiTags('comments')
-@UseGuards(AuthGuardGuard)
 @Controller('comments')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
