@@ -36,7 +36,9 @@ export class LikeService {
       }
       return existingLike;
     } else {
-      const newLike = await this.prisma.like.create({ data: { userId, postId } });
+      const newLike = await this.prisma.like.create({
+        data: { userId, postId },
+      });
       await this.prisma.post.update({
         where: { id: postId },
         data: { likeCount: { increment: 1 } },

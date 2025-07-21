@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsArray, IsEnum, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsArray,
+  IsEnum,
+  IsBoolean,
+} from 'class-validator';
 import { SuccessPage } from 'generated/prisma';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -18,10 +26,13 @@ export class CreateProductDto {
   @IsNotEmpty()
   price: number;
 
-@ApiProperty({ example: false, description: 'Whether the product is a draft' })
-@IsBoolean()
-@IsNotEmpty()
-draft: boolean;
+  @ApiProperty({
+    example: false,
+    description: 'Whether the product is a draft',
+  })
+  @IsBoolean()
+  @IsNotEmpty()
+  draft: boolean;
 
   @ApiProperty({ required: false, type: [String] })
   @IsArray()

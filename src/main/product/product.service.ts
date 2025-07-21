@@ -2,7 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Action, StructuredArrayItemDto } from 'src/common/dto/structured-array.dto';
+import {
+  Action,
+  StructuredArrayItemDto,
+} from 'src/common/dto/structured-array.dto';
 
 @Injectable()
 export class ProductService {
@@ -19,7 +22,9 @@ export class ProductService {
       });
 
       if (existingCategories.length !== categoryIds.length) {
-        throw new NotFoundException('One or more product categories not found.');
+        throw new NotFoundException(
+          'One or more product categories not found.',
+        );
       }
     }
 
@@ -46,7 +51,12 @@ export class ProductService {
     });
   }
 
-  async findAll(page: number, limit: number, categoryId?: string, draft?: boolean) {
+  async findAll(
+    page: number,
+    limit: number,
+    categoryId?: string,
+    draft?: boolean,
+  ) {
     const skip = (page - 1) * limit;
     const where: any = {};
 
@@ -102,7 +112,8 @@ export class ProductService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
-    const { categoryIds, images, color, features, ...productData } = updateProductDto;
+    const { categoryIds, images, color, features, ...productData } =
+      updateProductDto;
 
     const product = await this.prisma.product.findUnique({
       where: { id },
@@ -134,25 +145,34 @@ export class ProductService {
     // Handle features
     if (features) {
       const currentFeatures = product.features || [];
-      const newFeatures = this.processStructuredArray(currentFeatures, features);
+      const newFeatures = this.processStructuredArray(
+        currentFeatures,
+        features,
+      );
       updateData.features = newFeatures;
     }
 
     // Handle categoryIds
     if (categoryIds) {
       const categoriesToConnect: { categoryId: string }[] = [];
-      const categoriesToDisconnect: { productId: string; categoryId: string }[] = [];
+      const categoriesToDisconnect: {
+        productId: string;
+        categoryId: string;
+      }[] = [];
 
       for (const item of categoryIds) {
         if (item.action === Action.ADD) {
           categoriesToConnect.push({ categoryId: item.value });
         } else if (item.action === Action.DELETE) {
-          categoriesToDisconnect.push({ productId: id, categoryId: item.value });
+          categoriesToDisconnect.push({
+            productId: id,
+            categoryId: item.value,
+          });
         }
       }
 
       // Validate if all categories to connect exist
-      const allCategoryIds = categoriesToConnect.map(c => c.categoryId);
+      const allCategoryIds = categoriesToConnect.map((c) => c.categoryId);
       if (allCategoryIds.length > 0) {
         const existingCategories = await this.prisma.productCategory.findMany({
           where: {
@@ -161,13 +181,23 @@ export class ProductService {
         });
 
         if (existingCategories.length !== allCategoryIds.length) {
-          throw new NotFoundException('One or more product categories not found.');
+          throw new NotFoundException(
+            'One or more product categories not found.',
+          );
         }
       }
 
       updateData.productCategories = {
-        deleteMany: categoriesToDisconnect.length > 0 ? { OR: categoriesToDisconnect } : undefined,
-        create: categoriesToConnect.length > 0 ? categoriesToConnect.map(c => ({ category: { connect: { id: c.categoryId } } })) : undefined,
+        deleteMany:
+          categoriesToDisconnect.length > 0
+            ? { OR: categoriesToDisconnect }
+            : undefined,
+        create:
+          categoriesToConnect.length > 0
+            ? categoriesToConnect.map((c) => ({
+                category: { connect: { id: c.categoryId } },
+              }))
+            : undefined,
       };
     }
 
@@ -184,7 +214,10 @@ export class ProductService {
     });
   }
 
-  private processStructuredArray(currentArray: string[], updates: StructuredArrayItemDto[]): string[] {
+  private processStructuredArray(
+    currentArray: string[],
+    updates: StructuredArrayItemDto[],
+  ): string[] {
     let newArray = [...currentArray];
 
     for (const item of updates) {

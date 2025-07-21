@@ -6,7 +6,9 @@ import { ApiTags, ApiQuery } from '@nestjs/swagger';
 @ApiTags('ProductCategory')
 @Controller('product-category')
 export class ProductCategoryController {
-  constructor(private readonly productCategoryService: ProductCategoryService) {}
+  constructor(
+    private readonly productCategoryService: ProductCategoryService,
+  ) {}
 
   @Post()
   create(@Body() createProductCategoryDto: CreateProductCategoryDto) {
@@ -14,7 +16,12 @@ export class ProductCategoryController {
   }
 
   @Get()
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Limit the number of product categories returned' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Limit the number of product categories returned',
+  })
   findAll(@Query('limit') limit?: number) {
     return this.productCategoryService.findAll(limit ? +limit : undefined);
   }

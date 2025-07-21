@@ -5,8 +5,13 @@ import { IsArray, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdatePostDto extends PartialType(OmitType(CreatePostDto, ['images'])) {
-  @ApiProperty({ type: [StructuredArrayItemDto], description: 'Array of image URLs with actions' })
+export class UpdatePostDto extends PartialType(
+  OmitType(CreatePostDto, ['images']),
+) {
+  @ApiProperty({
+    type: [StructuredArrayItemDto],
+    description: 'Array of image URLs with actions',
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

@@ -3,13 +3,21 @@ import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class FindAllOrdersDto {
-  @ApiProperty({ required: false, default: 1, description: 'Page number for pagination' })
+  @ApiProperty({
+    required: false,
+    default: 1,
+    description: 'Page number for pagination',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   page?: number = 1;
 
-  @ApiProperty({ required: false, default: 10, description: 'Number of items per page' })
+  @ApiProperty({
+    required: false,
+    default: 10,
+    description: 'Number of items per page',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()

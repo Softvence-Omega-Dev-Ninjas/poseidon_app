@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -19,7 +23,11 @@ export class PostService {
     });
   }
 
-  async findAll(query: FindAllPostsDto): Promise<{ data: Post[]; total: number; page: number; lastPage: number } | Post[]> {
+  async findAll(
+    query: FindAllPostsDto,
+  ): Promise<
+    { data: Post[]; total: number; page: number; lastPage: number } | Post[]
+  > {
     const { page = 1, limit = 10, sortBy = PostSortBy.NEWEST } = query;
     const offset = (page - 1) * limit;
 
@@ -91,7 +99,9 @@ export class PostService {
         if (imageAction.action === 'add') {
           updatedImages.push(imageAction.value);
         } else if (imageAction.action === 'delete') {
-          updatedImages = updatedImages.filter(img => img !== imageAction.value);
+          updatedImages = updatedImages.filter(
+            (img) => img !== imageAction.value,
+          );
         }
       }
     }
@@ -117,7 +127,9 @@ export class PostService {
       throw new NotFoundException(`Post with ID ${id} not found`);
     }
     if (post.userId !== userId) {
-      throw new ForbiddenException('You are not authorized to delete this post.');
+      throw new ForbiddenException(
+        'You are not authorized to delete this post.',
+      );
     }
     return this.prisma.post.delete({
       where: { id },
