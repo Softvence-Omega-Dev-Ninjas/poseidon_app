@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { authenticationUserDto } from './dto/create-auth.dto';
 import { JwtService } from '@nestjs/jwt';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class AuthService {
@@ -10,7 +11,9 @@ export class AuthService {
     user: authenticationUserDto | null,
     passwordDto: string,
   ) {
-    if (user && user.password !== passwordDto) {
+    const userpassword = user && user.password ? user.password : '';
+    const isPasswordValid = await argon2.verify(userpassword, passwordDto);
+    if (!isPasswordValid) {
       throw new HttpException(
         {
           message: 'Incorrect credentials. Please try again.',

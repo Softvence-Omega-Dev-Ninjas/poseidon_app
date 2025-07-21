@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CredentialsSignInInfo } from 'src/auth/dto/create-auth.dto';
+import * as argon2 from 'argon2';
 // import { UserInfoType } from './response.type';
 // import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
@@ -12,7 +13,6 @@ export class AuthUserService {
 
   // chack user db isExestUser - yes or not
   private async isExestUser(email: string) {
-    // try {
     const result = await this.prisma.user.findFirst({
       where: {
         email: email,
@@ -42,10 +42,12 @@ export class AuthUserService {
         HttpStatus.CONFLICT,
       );
     }
+    // create a hash password
+    const hashedPassword = await argon2.hash(createUserDto.password);
     const newUser = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
-        password: createUserDto.password,
+        password: hashedPassword,
         profile: {
           create: {
             ...createUserDto.profile,
@@ -113,23 +115,5 @@ export class AuthUserService {
         },
       },
     });
-    // if (!userinfo) {
-    //   throw new BadRequestException('Incorrect credentials. Please try again.');
-    // }
-    // // password match logic
-    // const { password, ...user } = userinfo;
-    // if (password !== loginUserDto.password) {
-    //   throw new HttpException(
-    //     {
-    //       message: 'Incorrect credentials. Please try again.',
-    //       redirect_url: null,
-    //       error: 'INVALID_PASSWORD',
-    //       data: null,
-    //       success: false,
-    //     },
-    //     HttpStatus.BAD_REQUEST,
-    //   );
-    // }
-    // return user;
   }
 }
