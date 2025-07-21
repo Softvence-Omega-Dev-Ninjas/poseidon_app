@@ -44,6 +44,8 @@ export class AuthUserService {
     }
     // create a hash password
     const hashedPassword = await argon2.hash(createUserDto.password);
+    // let hashedPassword = '';
+    // hashedPassword = await argon2.hash(createUserDto.password);
     const newUser = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
