@@ -24,11 +24,14 @@ export class PostService {
 
   async findAll(
     query: FindAllPostsDto,
+    userId?: string,
   ): Promise<
-    { data: Post[]; total: number; page: number; lastPage: number } | Post[]
+    { data: (Post & { isLiked?: boolean })[]; total: number; currentPage: number; limit: number; totalPages: number } | (Post & { isLiked?: boolean })[]
   > {
     const { page = 1, limit = 10, sortBy = PostSortBy.NEWEST } = query;
-    const offset = (page - 1) * limit;
+    const pageNumber = typeof page === 'string' ? parseInt(page, 10) : page;
+    const limitNumber = typeof limit === 'string' ? parseInt(limit, 10) : limit;
+    const offset = (pageNumber - 1) * limitNumber;
 
     let orderBy: Prisma.PostOrderByWithRelationInput;
     switch (sortBy) {
@@ -49,23 +52,31 @@ export class PostService {
         skip: offset,
         take: parseInt(limit as any),
         orderBy,
+        include: { likes: { where: { userId } } },
       }),
       this.prisma.post.count(),
     ]);
 
-    const lastPage = Math.ceil(total / limit);
+    const postsWithIsLiked = posts.map((post) => {
+      const { likes, ...rest } = post;
+      return { ...rest, isLiked: likes.length > 0 };
+    });
+
+    const totalPages = Math.ceil(total / limitNumber);
 
     return {
-      data: posts,
+      data: postsWithIsLiked,
       total,
-      page,
-      lastPage,
+      currentPage: pageNumber,
+      limit: limitNumber,
+      totalPages,
     };
   }
 
-  async findOne(id: string): Promise<Post> {
+  async findOne(id: string, userId?: string): Promise<Post & { isLiked?: boolean }> {
     const post = await this.prisma.post.findUnique({
       where: { id },
+      include: { likes: { where: { userId } } },
     });
     if (!post) {
       throw new NotFoundException(`Post with ID ${id} not found`);
@@ -75,7 +86,9 @@ export class PostService {
       where: { id },
       data: { view: { increment: 1 } },
     });
-    return post;
+
+    const { likes, ...rest } = post;
+    return { ...rest, isLiked: likes.length > 0 };
   }
 
   async update(id: string, updatePostDto: UpdatePostDto): Promise<Post> {

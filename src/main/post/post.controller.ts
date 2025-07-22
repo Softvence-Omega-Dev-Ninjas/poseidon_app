@@ -58,16 +58,16 @@ export class PostController {
     enum: ['viewed', 'liked', 'newest'],
     description: 'Sort order',
   })
-  findAll(@Query() query: FindAllPostsDto) {
-    return this.postService.findAll(query);
+  findAll(@Query() query: FindAllPostsDto, @Req() req) {
+    return this.postService.findAll(query, req.user?.sub);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a single post by ID' })
   @ApiResponse({ status: 200, description: 'Returns the post.' })
   @ApiResponse({ status: 404, description: 'Post not found.' })
-  findOne(@Param('id') id: string) {
-    return this.postService.findOne(id);
+  findOne(@Param('id') id: string, @Req() req) {
+    return this.postService.findOne(id, req.user?.sub);
   }
 
   @Patch(':id')
@@ -88,7 +88,8 @@ export class PostController {
     description: 'The post has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Post not found.' })
+  @Roles(Role.Admin, Role.Supporter, Role.User)
   remove(@Param('id') id: string, @Req() req) {
-    return this.postService.remove(id, req.user.id);
+    return this.postService.remove(id, req.sub);
   }
 }

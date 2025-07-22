@@ -12,8 +12,19 @@ import { Comment } from '../../../generated/prisma';
 export class CommentService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createCommentDto: CreateCommentDto): Promise<Comment> {
-    return this.prisma.comment.create({ data: createCommentDto });
+  async create(createCommentDto: CreateCommentDto, userId: string): Promise<Comment> {
+    return this.prisma.$transaction(async (prisma) => {
+      const newComment = await prisma.comment.create({
+        data: { ...createCommentDto, userId },
+      });
+
+      await prisma.post.update({
+        where: { id: createCommentDto.postId },
+        data: { commentCount: { increment: 1 } },
+      });
+
+      return newComment;
+    });
   }
 
   async update(

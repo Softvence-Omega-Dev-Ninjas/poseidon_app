@@ -5,8 +5,11 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { UseGuards } from '@nestjs/common';
+import { Role } from 'src/auth/guard/role.enum';
+import { Roles } from 'src/auth/guard/roles.decorator';
 
 @ApiTags('comments')
+
 @Controller('comments')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
@@ -19,8 +22,9 @@ export class CommentController {
     status: 201,
     description: 'The comment has been successfully created.',
   })
-  create(@Body() createCommentDto: CreateCommentDto) {
-    return this.commentService.create(createCommentDto);
+  @Roles(Role.Admin, Role.Supporter, Role.User)
+  create(@Body() createCommentDto: CreateCommentDto, @Req() req) {
+    return this.commentService.create(createCommentDto, req.sub);
   }
 
   @Patch(':id')
@@ -35,7 +39,7 @@ export class CommentController {
     @Body() updateCommentDto: UpdateCommentDto,
     @Req() req,
   ) {
-    return this.commentService.update(id, updateCommentDto, req.user.id);
+    return this.commentService.update(id, updateCommentDto, req.sub);
   }
 
   @Get('count/:postId')

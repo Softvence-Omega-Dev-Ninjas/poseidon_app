@@ -1,9 +1,11 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Req, Delete, Param } from '@nestjs/common';
 import { LikeService } from './like.service';
 import { CreateLikeDto } from './dto/create-like.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { UseGuards } from '@nestjs/common';
+import { Roles } from 'src/auth/guard/roles.decorator';
+import { Role } from 'src/auth/guard/role.enum';
 
 
 @ApiTags('likes')
@@ -21,10 +23,22 @@ export class LikeController {
     status: 409,
     description: 'User has already liked this post.',
   })
-  create(@Body() createLikeDto: CreateLikeDto) {
+  @Roles(Role.Admin, Role.Supporter, Role.User)
+  create(@Body() createLikeDto: CreateLikeDto, @Req() req) {
     return this.likeService.create(
       createLikeDto,
-      '1ba16d22-d678-4ddb-af6b-cc8e11c1af1c',
+      req.sub,
     );
+  }
+
+  @Delete(':postId')
+  @ApiOperation({ summary: 'Delete a like for a post' })
+  @ApiResponse({
+    status: 204,
+    description: 'The like has been successfully deleted.',
+  })
+  @Roles(Role.Admin, Role.Supporter, Role.User)
+  delete(@Param('postId') postId: string, @Req() req) {
+    return this.likeService.delete(postId, req.sub);
   }
 }

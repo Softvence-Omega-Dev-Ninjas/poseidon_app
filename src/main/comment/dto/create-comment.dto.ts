@@ -17,18 +17,11 @@ export class CreateCommentDto {
   postId: string;
 
   @ApiProperty({
-    example: 'uuid-of-user',
-    description: 'ID of the user who created the comment',
-  })
-  @IsString()
-  userId: string;
-
-  @ApiProperty({
     example: 'uuid-of-parent-comment',
     description: 'ID of the parent comment if this is a reply',
     required: false,
   })
   @IsOptional()
   @IsString()
-  parentCommentId?: string;
+  parentId?: string;
 }
