@@ -9,6 +9,7 @@ import { CommentModule } from './comment/comment.module';
 import { LikeModule } from './like/like.module';
 import { ShopModule } from './shop/shop.module';
 import { ImageModule } from './image/image.module';
+import { SupporterProfileModule } from './supporter-profile/supporter-profile.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ImageModule } from './image/image.module';
     LikeModule,
     ShopModule,
     ImageModule,
+    SupporterProfileModule,
   ],
   controllers: [],
   providers: [],
