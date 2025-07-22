@@ -6,29 +6,30 @@ model User {
   otp                 String?
   varify              Boolean            @default(false)
   deactivate          Boolean            @default(false)
-  role                Roles               @default(user)
+  role                Roles              @default(user)
   orders              Order[]
   profile             Profile?
   shop                Shop?
   support_cart_layout SupportCartLayout?
   author_supportor    SupporterPay[]     @relation("author_supportor")
   supporter           SupporterPay[]
-    posts     Post[]
-  comments  Comment[]
-  likes     Like[]
+  posts               Post[]
+  comments            Comment[]
+  likes               Like[]
 }
 
 model Profile {
-  id       String  @default(uuid())
-  userid   String  @unique
-  name     String
-  image    String
-  address  String?
-  state    String?
-  city     String?
-  country  String?
-  postcode String?
-  user     User    @relation(fields: [userid], references: [id], onDelete: Cascade)
+  id          String  @default(uuid())
+  userid      String  @unique
+  name        String
+  image       String
+  cover_image String?
+  address     String?
+  state       String?
+  city        String?
+  country     String?
+  postcode    String?
+  user        User    @relation(fields: [userid], references: [id], onDelete: Cascade)
 }
 
 enum Roles {
