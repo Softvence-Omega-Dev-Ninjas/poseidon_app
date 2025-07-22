@@ -7,6 +7,14 @@ import { PrismaService } from 'src/prisma-client/prisma-client.service';
 export class SupporterService {
   constructor(private readonly prisma: PrismaService) {}
 
+  getSupportCart(profile_id: string) {
+    return this.prisma.supporterPay.findMany({
+      include: {
+        oder_package_name: true,
+      },
+    });
+  }
+
   async create(createSupporterDto: CreateSupporterPayDto) {
     const { oder_package_name, ...rootData } = createSupporterDto;
 
