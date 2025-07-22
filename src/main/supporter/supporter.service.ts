@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSupporterPayDto } from './dto/create-supporter.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
-// import { UpdateSupporterDto } from './dto/update-supporter.dto';
+import { UpdateSupporterDto } from './dto/update-supporter.dto';
 
 @Injectable()
 export class SupporterService {
