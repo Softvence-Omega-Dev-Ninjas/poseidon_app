@@ -7,3 +7,10 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+/// @prisma/import ./models/post.prisma
+/// @prisma/import ./models/shop.prisma
+/// @prisma/import ./models/supporter.prisma
+/// @prisma/import ./models/user.prisma
+/// @prisma/import ./models/media.prisma
+/// @prisma/import ./models/image.prisma

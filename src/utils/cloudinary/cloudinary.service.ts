@@ -4,12 +4,12 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Cloudinary } from './cloudinaryConfig.types';
+import { PrismaService } from 'src/prisma-client/prisma-client.service';
 
 @Injectable()
 export class CloudinaryService {
-  constructor(@Inject('CLOUDINARY') private cloudinary: Cloudinary) {}
-
-  async imageUpload(file?: Express.Multer.File) {
+  constructor(@Inject('CLOUDINARY') private cloudinary: Cloudinary, private readonly prisma: PrismaService) {}
+  async imageUpload(file?: Express.Multer.File): Promise<{ imageUrl: string; publicId: string }> {
     try {
       if (file) {
         const uploadRes = await this.cloudinary.uploader.upload(file.path, {
@@ -20,6 +20,7 @@ export class CloudinaryService {
           publicId: uploadRes.public_id,
         };
       }
+      return { imageUrl: '', publicId: '' }; // Return empty strings if no file
     } catch (err) {
       console.error('Error uploading quote:', err);
       throw new InternalServerErrorException('Failed to upload Image');
