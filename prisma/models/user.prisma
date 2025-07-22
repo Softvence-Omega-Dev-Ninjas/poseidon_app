@@ -13,18 +13,12 @@ model User {
   support_cart_layout SupportCartLayout?
   author_supportor    SupporterPay[]     @relation("author_supportor")
   supporter           SupporterPay[]
-<<<<<<< HEAD
-  posts     Post[]
-  comments  Comment[]
-  likes     Like[]
-  images    Image[]
-  imageslikes     ImageLike []
-  imagescomments  ImageComment[]
-=======
   posts               Post[]
   comments            Comment[]
   likes               Like[]
->>>>>>> supporter-profile
+  images              Image[]
+  imageslikes         ImageLike[]
+  imagescomments      ImageComment[]
 }
 
 model Profile {
