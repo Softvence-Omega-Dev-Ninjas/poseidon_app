@@ -10,6 +10,9 @@ export class SupporterProfileService {
       const profileInfo = await tx.profile.findUnique({
         where: {
           userid: userid,
+          user: {
+            role: 'supporter',
+          },
         },
         select: {
           cover_image: true,
@@ -21,6 +24,9 @@ export class SupporterProfileService {
       const supporte_card = await tx.supportCartLayout.findFirst({
         where: {
           author_id: userid,
+          author: {
+            role: 'supporter',
+          },
         },
       });
       // const membership_card = await tx. TODO
@@ -28,6 +34,9 @@ export class SupporterProfileService {
         where: {
           userId: userid,
           whoCanSee: 'PUBLIC',
+          user: {
+            role: 'supporter',
+          },
         },
         select: {
           images: true,
