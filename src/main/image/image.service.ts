@@ -15,13 +15,7 @@ export class ImageService {
 
     if (file) {
       const uploadRes = await this.cloudinaryService.imageUpload(file);
-      const media = await this.prisma.media.create({
-        data: {
-          imageUrl: uploadRes.imageUrl,
-          publicId: uploadRes.publicId,
-        },
-      });
-      mediaId = media.id;
+      mediaId = uploadRes.mediaId;
     }
 
     return this.prisma.image.create({
@@ -124,25 +118,23 @@ export class ImageService {
       throw new ForbiddenException('You are not authorized to update this image.');
     }
 
-    let newImageUrl: string | undefined;
-    let newPublicId: string | undefined;
+    let newMediaId: string | undefined;
 
     if (file) {
       // Delete old image from Cloudinary if it exists
       if (existingImage.media && existingImage.media.publicId) {
         await this.cloudinaryService.deleteFile(existingImage.media.publicId);
+        await this.prisma.media.delete({ where: { id: existingImage.media.id } });
       }
       const uploadRes = await this.cloudinaryService.imageUpload(file);
-      newImageUrl = uploadRes.imageUrl;
-      newPublicId = uploadRes.publicId;
+      newMediaId = uploadRes.mediaId;
     }
 
     return this.prisma.image.update({
       where: { id },
       data: {
         ...updateImageDto,
-        ...(newImageUrl && { imageUrl: newImageUrl }),
-        ...(newPublicId && { publicId: newPublicId }),
+        ...(newMediaId && { mediaId: newMediaId }),
       },
     });
   }

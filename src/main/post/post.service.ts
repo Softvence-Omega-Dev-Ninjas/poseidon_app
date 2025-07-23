@@ -7,17 +7,28 @@ import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { FindAllPostsDto, PostSortBy } from './dto/find-all-posts.dto';
+import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { Post, Prisma } from '../../../generated/prisma';
 
 @Injectable()
 export class PostService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private cloudinaryService: CloudinaryService) {}
 
-  async create(createPostDto: CreatePostDto, userId: string): Promise<Post> {
+  async create(createPostDto: CreatePostDto, userId: string, files?: Array<Express.Multer.File>): Promise<Post> {
+    const mediaIds: string[] = [];
+
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const uploadRes = await this.cloudinaryService.imageUpload(file);
+        mediaIds.push(uploadRes.mediaId);
+      }
+    }
+
     return this.prisma.post.create({
       data: {
         ...createPostDto,
         userId,
+        images: mediaIds,
       },
     });
   }
@@ -91,45 +102,40 @@ export class PostService {
     return { ...rest, isLiked: likes.length > 0 };
   }
 
-  async update(id: string, updatePostDto: UpdatePostDto): Promise<Post> {
-    const { images, ...restOfUpdateDto } = updatePostDto;
-    let updatedImages: string[] | undefined;
+async update(id: string, dto: UpdatePostDto, files: Express.Multer.File[], userId: string) {
+  const post = await this.prisma.post.findUnique({ where: { id } });
+  if (!post) throw new NotFoundException('Post not found');
 
-    if (images) {
-      const existingPost = await this.prisma.post.findUnique({
-        where: { id },
-        select: { images: true },
-      });
+  const updatedImages = [...(post.images || [])];
 
-      if (!existingPost) {
-        throw new NotFoundException(`Post with ID ${id} not found`);
-      }
-
-      updatedImages = [...existingPost.images];
-
-      for (const imageAction of images) {
-        if (imageAction.action === 'add') {
-          updatedImages.push(imageAction.value);
-        } else if (imageAction.action === 'delete') {
-          updatedImages = updatedImages.filter(
-            (img) => img !== imageAction.value,
-          );
-        }
+  // Handle image actions
+  if (dto.images?.length) {
+    for (const { action, value } of dto.images) {
+      if (action === 'add' && !updatedImages.includes(value)) {
+        updatedImages.push(value);
+      } else if (action === 'remove') {
+        const index = updatedImages.indexOf(value);
+        if (index > -1) updatedImages.splice(index, 1);
       }
     }
-
-    const post = await this.prisma.post.update({
-      where: { id },
-      data: {
-        ...restOfUpdateDto,
-        ...(updatedImages !== undefined && { images: updatedImages }),
-      },
-    });
-    if (!post) {
-      throw new NotFoundException(`Post with ID ${id} not found`);
-    }
-    return post;
   }
+
+  // Handle new uploaded images (Cloudinary, etc.)
+  // if (files?.length) {
+  //   for (const file of files) {
+  //     const uploaded = await this.cloudinaryService.imageUpload(file); // returns secure_url
+  //     updatedImages.push(uploaded.secure_url);
+  //   }
+  // }
+
+  return this.prisma.post.update({
+    where: { id },
+    data: {
+      ...dto,
+      images: updatedImages,
+    },
+  });
+}
 
   async remove(id: string, userId: string): Promise<Post> {
     const post = await this.prisma.post.findUnique({
@@ -143,6 +149,16 @@ export class PostService {
         'You are not authorized to delete this post.',
       );
     }
+
+    // Delete associated media from Cloudinary and database
+    for (const mediaId of post.images) {
+      const media = await this.prisma.media.findUnique({ where: { id: mediaId } });
+      if (media) {
+        await this.cloudinaryService.deleteFile(media.publicId);
+        await this.prisma.media.delete({ where: { id: media.id } });
+      }
+    }
+
     return this.prisma.post.delete({
       where: { id },
     });
