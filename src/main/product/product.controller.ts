@@ -12,10 +12,8 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ApiTags, ApiQuery } from '@nestjs/swagger';
 
-import { UseGuards } from '@nestjs/common';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
-
 
 @ApiTags('Product')
 @Controller('product')
@@ -27,7 +25,7 @@ export class ProductController {
     return this.productService.create(createProductDto);
   }
 
-  @Roles( Role.Supporter, Role.User)
+  @Roles(Role.Supporter, Role.User)
   @Get()
   @ApiQuery({
     name: 'page',
@@ -62,18 +60,18 @@ export class ProductController {
     return this.productService.findAll(+page, +limit, categoryId, draft);
   }
 
-  @Roles( Role.Supporter, Role.User)
+  @Roles(Role.Supporter, Role.User)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productService.findOne(id);
   }
 
-  @Roles( Role.Supporter, Role.User)
+  @Roles(Role.Supporter, Role.User)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     return this.productService.update(id, updateProductDto);
   }
- @Roles( Role.Supporter, Role.User)
+  @Roles(Role.Supporter, Role.User)
   @Get('shop/:shopId')
   @ApiQuery({
     name: 'page',

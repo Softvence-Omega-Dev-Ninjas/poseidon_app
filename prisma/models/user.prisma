@@ -26,6 +26,7 @@ model Profile {
   userid      String  @unique
   name        String
   image       String
+  description String?
   cover_image String?
   address     String?
   state       String?

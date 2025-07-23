@@ -7,13 +7,13 @@ import { ProductCategoryModule } from './product-category/product-category.modul
 import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
 import { LikeModule } from './like/like.module';
-import { ShopModule } from './shop/shop.module';
 import { ImageModule } from './image/image.module';
 import { SupporterProfileModule } from './supporter-profile/supporter-profile.module';
 
 @Module({
   imports: [
     UserModule,
+    SupporterProfileModule,
     SupporterModule,
     OrderModule,
     ProductModule,
@@ -21,9 +21,7 @@ import { SupporterProfileModule } from './supporter-profile/supporter-profile.mo
     PostModule,
     CommentModule,
     LikeModule,
-    ShopModule,
     ImageModule,
-    SupporterProfileModule,
   ],
   controllers: [],
   providers: [],

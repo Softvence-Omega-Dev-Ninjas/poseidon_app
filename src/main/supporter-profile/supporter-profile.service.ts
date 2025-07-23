@@ -1,26 +1,45 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSupporterProfileDto } from './dto/create-supporter-profile.dto';
-import { UpdateSupporterProfileDto } from './dto/update-supporter-profile.dto';
+import { PrismaService } from 'src/prisma-client/prisma-client.service';
 
 @Injectable()
 export class SupporterProfileService {
-  create(createSupporterProfileDto: CreateSupporterProfileDto) {
-    return 'This action adds a new supporterProfile';
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return `This action returns all supporterProfile`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} supporterProfile`;
-  }
-
-  update(id: number, updateSupporterProfileDto: UpdateSupporterProfileDto) {
-    return `This action updates a #${id} supporterProfile`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} supporterProfile`;
+  async profilePage(userid: string) {
+    return await this.prisma.$transaction(async (tx) => {
+      const profileInfo = await tx.profile.findUnique({
+        where: {
+          userid: userid,
+        },
+        select: {
+          cover_image: true,
+          name: true,
+          image: true,
+          description: true,
+        },
+      });
+      const supporte_card = await tx.supportCartLayout.findFirst({
+        where: {
+          author_id: userid,
+        },
+      });
+      // const membership_card = await tx. TODO
+      const posts = await tx.post.findMany({
+        where: {
+          userId: userid,
+          whoCanSee: 'PUBLIC',
+        },
+        select: {
+          images: true,
+          description: true,
+          createdAt: true,
+        },
+      });
+      return {
+        profileInfo,
+        supporte_card,
+        posts,
+      };
+    });
   }
 }

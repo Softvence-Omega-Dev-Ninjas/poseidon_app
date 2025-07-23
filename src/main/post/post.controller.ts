@@ -19,6 +19,7 @@ import { UseGuards } from '@nestjs/common';
 
 import { Role } from 'src/auth/guard/role.enum';
 import { Roles } from 'src/auth/guard/roles.decorator';
+import { Request } from 'express';
 
 @ApiTags('posts')
 @Roles(Role.Admin, Role.Supporter, Role.User)
@@ -34,7 +35,7 @@ export class PostController {
   })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   create(@Body() createPostDto: CreatePostDto, @Req() req) {
-    return this.postService.create(createPostDto,req.sub);
+    return this.postService.create(createPostDto, req.sub);
   }
 
   @Get()
@@ -89,7 +90,7 @@ export class PostController {
   })
   @ApiResponse({ status: 404, description: 'Post not found.' })
   @Roles(Role.Admin, Role.Supporter, Role.User)
-  remove(@Param('id') id: string, @Req() req) {
-    return this.postService.remove(id, req.sub);
+  remove(@Param('id') id: string, @Req() req: Request) {
+    return this.postService.remove(id, req['sub'] as string);
   }
 }
