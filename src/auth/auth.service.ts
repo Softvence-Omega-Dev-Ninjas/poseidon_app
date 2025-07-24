@@ -11,7 +11,7 @@ export class AuthService {
     user: authenticationUserDto | null,
     passwordDto: string,
   ) {
-    const userpassword = user && user.password ? user.password : '';
+    // const userpassword = user && user.password ? user.password : '';
     // const isPasswordValid = await argon2.verify(userpassword, passwordDto);
     // if (!isPasswordValid) {
     //   throw new HttpException(

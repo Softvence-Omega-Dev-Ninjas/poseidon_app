@@ -6,9 +6,10 @@ import {
   IsArray,
   IsEnum,
   IsBoolean,
+  IsIn,
 } from 'class-validator';
-import { SuccessPage } from 'generated/prisma';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CreateProductDto {
   @ApiProperty()
@@ -24,6 +25,7 @@ export class CreateProductDto {
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
+  @Transform(({ value }) => parseFloat(value))
   price: number;
 
   @ApiProperty({
@@ -32,13 +34,8 @@ export class CreateProductDto {
   })
   @IsBoolean()
   @IsNotEmpty()
+  @Transform(({ value }) => value === 'true')
   draft: boolean;
-
-  @ApiProperty({ required: false, type: [String] })
-  @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
-  images?: string[];
 
   @ApiProperty()
   @IsString()
@@ -50,27 +47,31 @@ export class CreateProductDto {
   @IsArray()
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
+  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : value))
   categoryIds: string[];
 
   @ApiProperty({ required: false })
   @IsArray()
   @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : value))
   color?: string[];
 
   @ApiProperty({ required: false })
   @IsArray()
   @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : value))
   features?: string[];
 
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
+  @Transform(({ value }) => parseFloat(value))
   offerPrice: number;
 
-  @ApiProperty({ enum: SuccessPage })
-  @IsEnum(SuccessPage)
+  @ApiProperty({ enum: ['message', 'redirect'] })
+  @IsIn(['message', 'redirect'])
   @IsNotEmpty()
-  successPage: SuccessPage;
+  successPage: 'message' | 'redirect';
 
   @ApiProperty()
   @IsString()
