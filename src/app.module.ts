@@ -8,8 +8,7 @@ import { HttpExceptionFiller } from './common/fillters/http-exception.fillter';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from './auth/guard/auth.guard';
 import { PostModule } from './main/post/post.module';
-import { CommentModule } from './main/comment/comment.module';
-import { LikeModule } from './main/like/like.module';
+
 import { PrismaClientModule } from './prisma-client/prisma-client.module';
 
 @Module({
@@ -30,8 +29,7 @@ import { PrismaClientModule } from './prisma-client/prisma-client.module';
       }),
     }),
     PostModule,
-    CommentModule,
-    LikeModule,
+ 
   ],
   controllers: [AppController],
   providers: [

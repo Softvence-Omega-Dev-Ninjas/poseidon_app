@@ -4,22 +4,10 @@ import {
   IsArray,
   IsEnum,
   IsOptional,
-  ValidateNested,
-  IsIn,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import { WhoCanSee } from 'generated/prisma';
-
-class ImageActionDto {
-  @ApiProperty({ example: 'https://image.jpg' })
-  @IsString()
-  value: string;
-
-  @ApiProperty({ example: 'add', enum: ['add', 'remove'] })
-  @IsIn(['add', 'remove'])
-  action: 'add' | 'remove';
-}
 
 export class UpdatePostDto {
   @ApiProperty({ example: true, required: false })
@@ -28,35 +16,25 @@ export class UpdatePostDto {
   @IsBoolean()
   drafted?: boolean;
 
-  @ApiProperty({ example: 'Updated post!', required: false })
+  @ApiProperty({ example: 'Updated post text', required: false })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiProperty({
-    description: 'Who can see the post',
-    enum: WhoCanSee,
-    required: false,
-  })
+  @ApiProperty({ enum: WhoCanSee, required: false })
   @IsOptional()
   @IsEnum(WhoCanSee)
   whoCanSee?: WhoCanSee;
 
   @ApiProperty({
-    description: 'JSON string for images with action (add/remove)',
-    example: `[{"value":"url1","action":"add"}]`,
+    type: [String],
+    description: 'List of image media IDs to remove',
+    example: ['media_id_1', 'media_id_2'],
     required: false,
   })
   @IsOptional()
-  @Transform(({ value }) => {
-    try {
-      return typeof value === 'string' ? JSON.parse(value) : value;
-    } catch {
-      return [];
-    }
-  })
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value].filter(Boolean)))
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ImageActionDto)
-  images?: ImageActionDto[];
+  @IsString({ each: true })
+  images?: string[];
 }

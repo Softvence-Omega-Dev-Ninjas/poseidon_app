@@ -23,13 +23,15 @@ import {
   ApiQuery,
   ApiConsumes,
   ApiBody,
+  ApiParam,
 } from '@nestjs/swagger';
 
 import { UseGuards } from '@nestjs/common';
 
 import { Role } from 'src/auth/guard/role.enum';
 import { Roles } from 'src/auth/guard/roles.decorator';
-import { ApiFile } from 'src/common/dto/structured-array.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
+import { FindAllCommentsDto } from './dto/find-all-comments.dto';
 
 @ApiTags('posts')
 @Roles(Role.Admin, Role.Supporter, Role.User)
@@ -57,7 +59,7 @@ export class PostController {
         },
         whoCanSee: {
           type: 'string',
-          enum: ['PUBLIC', 'PRIVATE', 'FRIENDS'], // Match your WhoCanSee enum
+         enum: ['PUBLIC', 'ONLY_SUPPORTERS', 'ONLY_MEMBERS"'],
         },
         images: {
           type: 'array',
@@ -108,49 +110,48 @@ export class PostController {
   @ApiOperation({ summary: 'Get a single post by ID' })
   @ApiResponse({ status: 200, description: 'Returns the post.' })
   @ApiResponse({ status: 404, description: 'Post not found.' })
+  @ApiParam({ name: 'id', description: 'The ID of the post', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
   findOne(@Param('id') id: string, @Req() req) {
     return this.postService.findOne(id, req.user?.sub);
   }
 
-  @Patch(':id')
-  @UseInterceptors(FilesInterceptor('newImages'))
-  @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Update a post by ID' })
-  @ApiResponse({ status: 200, description: 'Post updated successfully' })
-  @ApiResponse({ status: 404, description: 'Post not found' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        drafted: { type: 'boolean', example: true },
-        description: { type: 'string', example: 'Updated post text' },
-        whoCanSee: {
-          type: 'string',
-          enum: ['PUBLIC', 'PRIVATE', 'FRIENDS'],
-        },
-        images: {
-          type: 'string',
-          description: 'JSON string of image actions',
-          example: '[{"value":"https://img.jpg","action":"add"}]',
-        },
-        newImages: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-          description: 'Optional new image files to upload',
-        },
+@Patch(':id')
+@UseInterceptors(FilesInterceptor('newImages'))
+@ApiConsumes('multipart/form-data')
+@ApiOperation({ summary: 'Update a post by ID' })
+@ApiParam({ name: 'id', description: 'The ID of the post', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      drafted: { type: 'boolean', example: true },
+      description: { type: 'string', example: 'Updated post!' },
+      whoCanSee: {
+        type: 'string',
+        enum: ['PUBLIC', 'ONLY_SUPPORTERS', 'ONLY_MEMBERS"'],
+      },
+      images: {
+        type: 'array',
+        items: { type: 'string', example: 'media id' },
+        description: 'Image string format: value:action',
+      },
+      newImages: {
+        type: 'array',
+        items: { type: 'string', format: 'binary' },
       },
     },
-  })
-  @Roles(Role.Admin, Role.Supporter, Role.User)
-  update(
-    @Param('id') id: string,
-    @Body() updatePostDto: UpdatePostDto,
-    @UploadedFiles() newImages: Express.Multer.File[],
-    @Req() req,
-  ) {
-     console.log(id,updatePostDto,newImages,req.sub)
-    // return this.postService.update(id, updatePostDto, newImages, req.sub);
-  }
+  },
+})
+@Roles(Role.Admin, Role.Supporter, Role.User)
+update(
+  @Param('id') id: string,
+  @Body() updatePostDto: UpdatePostDto,
+  @UploadedFiles() newImages: Express.Multer.File[],
+  @Req() req,
+) {
+  return this.postService.update(id, updatePostDto, newImages, req.sub);
+}
+
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a post by ID' })
@@ -159,8 +160,82 @@ export class PostController {
     description: 'The post has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Post not found.' })
+  @ApiParam({ name: 'id', description: 'The ID of the post', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   remove(@Param('id') id: string, @Req() req) {
     return this.postService.remove(id, req.sub);
+  }
+
+  @Post(':postId/likes')
+  @ApiOperation({ summary: 'Create a new like for a post' })
+  @ApiResponse({
+    status: 201,
+    description: 'The like has been successfully created.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'User has already liked this post.',
+  })
+  @ApiParam({ name: 'postId', description: 'The ID of the post', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @Roles(Role.Admin, Role.Supporter, Role.User)
+  createLike(@Param('postId') postId: string, @Req() req) {
+    return this.postService.createLike(postId, req.sub);
+  }
+
+  @Delete(':postId/likes')
+  @ApiOperation({ summary: 'Delete a like for a post' })
+  @ApiResponse({
+    status: 204,
+    description: 'The like has been successfully deleted.',
+  })
+  @ApiResponse({ status: 404, description: 'Like not found.' })
+  @ApiParam({ name: 'postId', description: 'The ID of the post', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @Roles(Role.Admin, Role.Supporter, Role.User)
+  deleteLike(@Param('postId') postId: string, @Req() req) {
+    return this.postService.deleteLike(postId, req.sub);
+  }
+
+  @Post(':postId/comments')
+  @ApiOperation({ summary: 'Create a new comment for a post' })
+  @ApiResponse({
+    status: 201,
+    description: 'The comment has been successfully created.',
+  })
+  @ApiParam({ name: 'postId', description: 'The ID of the post', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @Roles(Role.Admin, Role.Supporter, Role.User)
+  createComment(@Param('postId') postId: string, @Body() createCommentDto: CreateCommentDto, @Req() req) {
+    return this.postService.createComment(postId, createCommentDto, req.sub);
+  }
+
+  @Delete('comments/:commentId')
+  @ApiOperation({ summary: 'Delete a comment for a post' })
+  @ApiResponse({
+    status: 204,
+    description: 'The comment has been successfully deleted.',
+  })
+  @ApiResponse({ status: 404, description: 'Comment not found.' })
+  @ApiParam({ name: 'commentId', description: 'The ID of the comment', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @Roles(Role.Admin, Role.Supporter, Role.User)
+  deleteComment(@Param('commentId') commentId: string, @Req() req) {
+    return this.postService.deleteComment(commentId, req.sub);
+  }
+
+  @Get(':postId/comments')
+  @ApiOperation({ summary: 'Get all comments for a post' })
+  @ApiResponse({ status: 200, description: 'Returns a list of comments.' })
+  @ApiParam({ name: 'postId', description: 'The ID of the post', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
+  findAllComments(@Param('postId') postId: string, @Query() query: FindAllCommentsDto) {
+    return this.postService.findAllComments(postId, query);
+  }
+
+  @Get('comments/:commentId')
+  @ApiOperation({ summary: 'Get a single comment by ID' })
+  @ApiResponse({ status: 200, description: 'Returns the comment.' })
+  @ApiResponse({ status: 404, description: 'Comment not found.' })
+  @ApiParam({ name: 'commentId', description: 'The ID of the comment', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  findCommentById(@Param('commentId') commentId: string) {
+    return this.postService.findCommentById(commentId);
   }
 }
