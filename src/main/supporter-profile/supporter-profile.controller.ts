@@ -4,6 +4,8 @@ import { SupporterProfileService } from './supporter-profile.service';
 // import { UpdateSupporterProfileDto } from './dto/update-supporter-profile.dto';
 import { Public } from 'src/auth/guard/public.decorator';
 import { Request } from 'express';
+import { Roles } from 'src/auth/guard/roles.decorator';
+import { Role } from 'src/auth/guard/role.enum';
 
 @Public()
 @Controller('supporter-profile')
@@ -13,12 +15,19 @@ export class SupporterProfileController {
   ) {}
 
   @Public()
+  @Roles(Role.Supporter)
   @Get(':profile_id')
   async getSupportCart(
     @Param('profile_id') profile_id: string,
     @Req() res: Request,
   ) {
-    // try {
+    console.log(
+      profile_id,
+      '===',
+      res['sub'],
+      '>>>>',
+      profile_id == res['sub'],
+    );
     const hPageData =
       await this.supporterProfileService.profilePage(profile_id);
     return {
@@ -28,17 +37,5 @@ export class SupporterProfileController {
       success: true,
       editing: profile_id == res['sub'],
     };
-    // } catch (error) {
-    //   console.log(error);
-    //   throw new HttpException(
-    //     {
-    //       message: 'failed',
-    //       error: 'something went wrong',
-    //       success: false,
-    //       data: null,
-    //     },
-    //     HttpStatus.BAD_REQUEST,
-    //   );
-    // }
   }
 }
