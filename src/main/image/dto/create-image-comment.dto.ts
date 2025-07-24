@@ -1,28 +1,12 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateImageCommentDto {
-  @ApiProperty({
-    example: 'This is a great comment!',
-    description: 'Content of the comment',
-  })
+  @ApiProperty({ description: 'The content of the comment', example: 'This is a great comment!' })
   @IsString()
-  @IsNotEmpty()
   content: string;
 
-  @ApiProperty({
-    example: 'uuid-of-image',
-    description: 'ID of the image the comment belongs to',
-  })
-  @IsString()
-  @IsNotEmpty()
-  imageId: string;
-
-  @ApiProperty({
-    example: 'uuid-of-parent-comment',
-    description: 'ID of the parent comment if this is a reply',
-    required: false,
-  })
+  @ApiProperty({ description: 'The ID of the parent comment if this is a reply', required: false, example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
   @IsOptional()
   @IsString()
   parentId?: string;
