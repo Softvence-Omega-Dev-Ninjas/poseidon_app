@@ -19,6 +19,15 @@ model User {
   images              Image[]
   imageslikes         ImageLike[]
   imagescomments      ImageComment[]
+
+  //messages
+  conversations1   Conversation[] @relation("User1Conversations")
+  conversations2   Conversation[] @relation("User2Conversations")
+
+  sentMessages     Message[]   @relation("SentMessages")
+  receivedMessages Message[]   @relation("ReceivedMessages")
+   sentOffers     Offer[] @relation("OfferSender")
+  receivedOffers Offer[] @relation("OfferReceiver")
 }
 
 model Profile {
