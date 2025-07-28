@@ -6,10 +6,12 @@ import {
   IsOptional,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { WhoCanSee } from 'generated/prisma';
 
 export class CreatePostDto {
   @ApiProperty({ example: true, description: 'Whether the post is drafted' })
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   drafted: boolean;
 
@@ -22,12 +24,24 @@ export class CreatePostDto {
 
   @ApiProperty({
     example: ['url1', 'url2'],
-    description: 'Array of image URLs',
+    description: 'Array of image URLs (optional if uploading files)',
     type: [String],
+    required: false,
   })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  images: string[];
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return [value];
+      }
+    }
+    return value;
+  })
+  images?: string[];
 
   @ApiProperty({
     example: WhoCanSee.PUBLIC,
@@ -36,6 +50,4 @@ export class CreatePostDto {
   })
   @IsEnum(WhoCanSee)
   whoCanSee: WhoCanSee;
-
-  
 }

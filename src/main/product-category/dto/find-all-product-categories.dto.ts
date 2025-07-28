@@ -1,15 +1,13 @@
 import { IsOptional, IsInt, Min, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { Visibility } from 'generated/prisma';
 
-export enum ImageSortBy {
-  VIEWED = 'viewed',
-  LIKED = 'liked',
+export enum ProductCategorySortBy {
   NEWEST = 'newest',
+  NAME = 'name',
 }
 
-export class FindAllImagesDto {
+export class FindAllProductCategoriesDto {
   @ApiProperty({
     example: 1,
     description: 'Page number for pagination',
@@ -33,22 +31,12 @@ export class FindAllImagesDto {
   limit?: number = 10;
 
   @ApiProperty({
-    example: ImageSortBy.NEWEST,
-    enum: ImageSortBy,
-    description: 'Sort images by',
+    example: ProductCategorySortBy.NEWEST,
+    enum: ProductCategorySortBy,
+    description: 'Sort product categories by',
     required: false,
   })
   @IsOptional()
-  @IsEnum(ImageSortBy)
-  sortBy?: ImageSortBy = ImageSortBy.NEWEST;
-
-  @ApiProperty({
-    example: Visibility.PUBLIC,
-    enum: Visibility,
-    description: 'Filter images by visibility',
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(Visibility)
-  visibility?: Visibility;
+  @IsEnum(ProductCategorySortBy)
+  sortBy?: ProductCategorySortBy = ProductCategorySortBy.NEWEST;
 }

@@ -3,11 +3,11 @@ import {
   IsOptional,
   IsNumber,
   IsArray,
-  IsNotEmpty,
   IsEnum,
+  IsBoolean,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { SuccessPage } from 'generated/prisma';
 import { ApiProperty } from '@nestjs/swagger';
 import { StructuredArrayItemDto } from 'src/common/dto/structured-array.dto';
@@ -26,6 +26,7 @@ export class UpdateProductDto {
   @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
+  @Transform(({ value }) => (value === '' || value === null || value === undefined) ? undefined : parseFloat(value))
   price?: number;
 
   @ApiProperty({ required: false, type: () => [StructuredArrayItemDto] })
@@ -59,11 +60,19 @@ export class UpdateProductDto {
   @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
+  @Transform(({ value }) => (value === '' || value === null || value === undefined) ? undefined : parseFloat(value))
   offerPrice?: number;
 
   @ApiProperty({ required: false, enum: SuccessPage })
   @IsEnum(SuccessPage)
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      if (value === 'message') return SuccessPage.message;
+      if (value === 'redirect') return SuccessPage.redirect;
+    }
+    return undefined;
+  })
   successPage?: SuccessPage;
 
   @ApiProperty({ required: false })

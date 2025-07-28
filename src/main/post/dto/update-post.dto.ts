@@ -1,20 +1,40 @@
-import { PartialType, OmitType } from '@nestjs/swagger';
-import { CreatePostDto } from './create-post.dto';
-import { StructuredArrayItemDto } from 'src/common/dto/structured-array.dto';
-import { IsArray, IsOptional, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsString,
+  IsArray,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { WhoCanSee } from 'generated/prisma';
 
-export class UpdatePostDto extends PartialType(
-  OmitType(CreatePostDto, ['images']),
-) {
+export class UpdatePostDto {
+  @ApiProperty({ example: true, required: false })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  drafted?: boolean;
+
+  @ApiProperty({ example: 'Updated post text', required: false })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({ enum: WhoCanSee, required: false })
+  @IsOptional()
+  @IsEnum(WhoCanSee)
+  whoCanSee?: WhoCanSee;
+
   @ApiProperty({
-    type: [StructuredArrayItemDto],
-    description: 'Array of image URLs with actions',
+    type: [String],
+    description: 'List of image media IDs to remove',
+    example: ['media_id_1', 'media_id_2'],
+    required: false,
   })
   @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value].filter(Boolean)))
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => StructuredArrayItemDto)
-  images?: StructuredArrayItemDto[];
+  @IsString({ each: true })
+  images?: string[];
 }

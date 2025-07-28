@@ -6,11 +6,22 @@ import {
   Patch,
   Param,
   Query,
+  Req,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiTags, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiQuery,
+  ApiConsumes,
+  ApiBody,
+  ApiResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 
 import { UseGuards } from '@nestjs/common';
 import { Roles } from 'src/auth/guard/roles.decorator';
@@ -23,8 +34,41 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
   @Roles(Role.Admin, Role.Supporter, Role.User)
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('images'))
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        description: { type: 'string' },
+        price: { type: 'number' },
+        draft: { type: 'boolean' },
+        shopId: { type: 'string' },
+        categoryIds: { type: 'array', items: { type: 'string' } },
+        color: { type: 'array', items: { type: 'string' } },
+        features: { type: 'array', items: { type: 'string' } },
+        offerPrice: { type: 'number' },
+       successPage: {
+        type: 'string',
+        enum: ['message', 'redirect'],
+      },
+        successPagefield: { type: 'string' },
+        images: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
+  create(
+    @Body() createProductDto: CreateProductDto,
+    @UploadedFiles() files?: Array<Express.Multer.File>,
+  ) {
+    return this.productService.create(createProductDto, files);
   }
 
   @Roles( Role.Supporter, Role.User)
@@ -68,8 +112,147 @@ export class ProductController {
     return this.productService.findOne(id);
   }
 
-  @Roles( Role.Supporter, Role.User)
-  @Patch(':id')
+   @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('images'))
+  @ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      name: { type: 'string', nullable: true },
+      description: { type: 'string', nullable: true },
+      price: { type: 'number', nullable: true },
+      offerPrice: { type: 'number', nullable: true },
+      draft: { type: 'boolean', nullable: true },
+      shopId: { type: 'string', nullable: true },
+      successPage: {
+        type: 'string',
+        enum: ['message', 'redirect'],
+        nullable: true,
+      },
+      successPagefield: { type: 'string', nullable: true },
+
+      // Arrays of objects with value and action
+      images: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            value: { type: 'string' }, // Could be a media URL or ID
+            action: { type: 'string', enum: ['add', 'remove'] },
+          },
+        },
+        nullable: true,
+      },
+      categoryIds: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            value: { type: 'string' },
+            action: { type: 'string', enum: ['add', 'remove'] },
+          },
+        },
+        nullable: true,
+      },
+      color: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            value: { type: 'string' },
+            action: { type: 'string', enum: ['add', 'remove'] },
+          },
+        },
+        nullable: true,
+      },
+      features: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            value: { type: 'string' },
+            action: { type: 'string', enum: ['add', 'remove'] },
+          },
+        },
+        nullable: true,
+      },
+    },
+  },
+})
+
+@Patch(':id')
+  @Roles(Role.Supporter, Role.User)
+  @ApiOperation({ summary: 'Update a product' })
+  @ApiResponse({
+    status: 200,
+    description: 'Product updated successfully.',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input.' })
+  @ApiResponse({ status: 404, description: 'Product not found.' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', nullable: true },
+        description: { type: 'string', nullable: true },
+        price: { type: 'number', nullable: true },
+        offerPrice: { type: 'number', nullable: true },
+        draft: { type: 'boolean', nullable: true },
+        shopId: { type: 'string', nullable: true },
+        successPage: {
+          type: 'string',
+          enum: ['message', 'redirect'],
+          nullable: true,
+        },
+        successPagefield: { type: 'string', nullable: true },
+
+        images: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              value: { type: 'string' },
+              action: { type: 'string', enum: ['add', 'remove'] },
+            },
+          },
+          nullable: true,
+        },
+        categoryIds: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              value: { type: 'string' },
+              action: { type: 'string', enum: ['add', 'remove'] },
+            },
+          },
+          nullable: true,
+        },
+        color: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              value: { type: 'string' },
+              action: { type: 'string', enum: ['add', 'remove'] },
+            },
+          },
+          nullable: true,
+        },
+        features: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              value: { type: 'string' },
+              action: { type: 'string', enum: ['add', 'remove'] },
+            },
+          },
+          nullable: true,
+        },
+      },
+    },
+  })
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     return this.productService.update(id, updateProductDto);
   }
