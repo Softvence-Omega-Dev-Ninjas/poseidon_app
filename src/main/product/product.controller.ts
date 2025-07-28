@@ -6,11 +6,22 @@ import {
   Patch,
   Param,
   Query,
+  Req,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiTags, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiQuery,
+  ApiConsumes,
+  ApiBody,
+  ApiResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
@@ -21,8 +32,41 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
   @Roles(Role.Admin, Role.Supporter, Role.User)
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('images'))
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        description: { type: 'string' },
+        price: { type: 'number' },
+        draft: { type: 'boolean' },
+        shopId: { type: 'string' },
+        categoryIds: { type: 'array', items: { type: 'string' } },
+        color: { type: 'array', items: { type: 'string' } },
+        features: { type: 'array', items: { type: 'string' } },
+        offerPrice: { type: 'number' },
+        successPage: {
+          type: 'string',
+          enum: ['message', 'redirect'],
+        },
+        successPagefield: { type: 'string' },
+        images: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
+  create(
+    @Body() createProductDto: CreateProductDto,
+    @UploadedFiles() files?: Array<Express.Multer.File>,
+  ) {
+    return this.productService.create(createProductDto, files);
   }
 
   @Roles(Role.Supporter, Role.User)

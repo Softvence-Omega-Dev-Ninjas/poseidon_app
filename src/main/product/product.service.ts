@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import {
   Action,
   StructuredArrayItemDto,
@@ -9,10 +10,24 @@ import {
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
-  async create(createProductDto: CreateProductDto) {
-    const { categoryIds, ...productData } = createProductDto;
+  async create(
+    createProductDto: CreateProductDto,
+    files?: Array<Express.Multer.File>,
+  ) {
+    const { categoryIds, ...restOfProductData } = createProductDto;
+
+    const mediaIds: string[] = [];
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const uploadRes = await this.cloudinaryService.imageUpload(file);
+        mediaIds.push(uploadRes.mediaId);
+      }
+    }
 
     if (categoryIds && categoryIds.length > 0) {
       const existingCategories = await this.prisma.productCategory.findMany({
@@ -30,9 +45,10 @@ export class ProductService {
 
     return await this.prisma.product.create({
       data: {
-        ...productData,
+        ...restOfProductData,
+        images: mediaIds,
         productCategories: {
-          create: categoryIds.map((categoryId) => ({
+          create: categoryIds.map((categoryId: string) => ({
             category: {
               connect: {
                 id: categoryId,

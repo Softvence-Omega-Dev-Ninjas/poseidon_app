@@ -1,6 +1,7 @@
 import { IsOptional, IsInt, Min, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { WhoCanSee } from 'generated/prisma';
 
 export enum PostSortBy {
   VIEWED = 'viewed',
@@ -40,4 +41,14 @@ export class FindAllPostsDto {
   @IsOptional()
   @IsEnum(PostSortBy)
   sortBy?: PostSortBy = PostSortBy.NEWEST;
+
+  @ApiProperty({
+    example: WhoCanSee.PUBLIC,
+    enum: WhoCanSee,
+    description: 'Filter posts by who can see them',
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(WhoCanSee)
+  whoCanSee?: WhoCanSee;
 }
