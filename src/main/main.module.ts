@@ -19,7 +19,6 @@ import { SupporterProfileModule } from './supporter-profile/supporter-profile.mo
     ProductCategoryModule,
     PostModule,
     ImageModule,
-
     ShopModule,
     SupporterProfileModule,
   ],
