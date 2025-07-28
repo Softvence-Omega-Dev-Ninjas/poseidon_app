@@ -9,9 +9,9 @@ import {
   Query,
   Req,
   UseInterceptors,
-  UploadedFiles,
+  UploadedFile,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageService } from './image.service';
 import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
@@ -42,7 +42,7 @@ export class ImageController {
 
   @Post()
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FilesInterceptor('images'))
+  @UseInterceptors(FileInterceptor('image'))
   @ApiOperation({ summary: 'Create a new image' })
   @ApiResponse({
     status: 201,
@@ -58,24 +58,21 @@ export class ImageController {
           type: 'string',
           enum: ['PUBLIC', 'SUPPORTERS'],
         },
-        images: {
-          type: 'array',
-          items: {
-            type: 'string',
-            format: 'binary',
-          },
+        image: {
+          type: 'string',
+          format: 'binary',
         },
       },
-      required: ['title', 'visibility', 'images'],
+      required: ['title', 'visibility', 'image'],
     },
   })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   create(
     @Body() createImageDto: CreateImageDto,
     @Req() req,
-    @UploadedFiles() files?: Array<Express.Multer.File>,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.imageService.create(createImageDto, req.sub, files);
+    return this.imageService.create(createImageDto, req.sub, file);
   }
 
   @Get()
@@ -119,7 +116,7 @@ export class ImageController {
   }
 
   @Patch(':id')
-  @UseInterceptors(FilesInterceptor('newImages'))
+  @UseInterceptors(FileInterceptor('newImage'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Update an image by ID' })
   @ApiParam({ name: 'id', description: 'The ID of the image', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
@@ -132,15 +129,9 @@ export class ImageController {
           type: 'string',
           enum: ['PUBLIC', 'SUPPORTERS'],
         },
-        images: {
-          type: 'array',
-          items: { type: 'string', example: 'media id' },
-          description: 'List of media IDs to remove.',
-        },
-        newImages: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-          description: 'New image files to upload.',
+        newImage: {
+          type: 'string',
+          format: 'binary'
         },
       },
     },
@@ -149,10 +140,10 @@ export class ImageController {
   update(
     @Param('id') id: string,
     @Body() updateImageDto: UpdateImageDto,
-    @UploadedFiles() newImages: Express.Multer.File[],
+    @UploadedFile() newImage: Express.Multer.File,
     @Req() req,
   ) {
-    return this.imageService.update(id, updateImageDto, newImages, req.sub);
+    return this.imageService.update(id, updateImageDto, newImage, req.sub);
   }
 
   @Delete(':id')

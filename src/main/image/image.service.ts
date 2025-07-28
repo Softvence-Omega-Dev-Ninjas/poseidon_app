@@ -19,22 +19,26 @@ import { HttpStatus } from 'src/common/utils/http-status.enum';
 export class ImageService {
   constructor(private prisma: PrismaService, private cloudinaryService: CloudinaryService) {}
 
-  async create(createImageDto: CreateImageDto, userId: string, files?: Array<Express.Multer.File>): Promise<any> {
+  async create(createImageDto: CreateImageDto, userId: string, file: Express.Multer.File): Promise<any> {
     try {
-      const mediaIds: string[] = [];
+      let mediaId: string;
 
-      if (files && files.length > 0) {
-        for (const file of files) {
-          const uploadRes = await this.cloudinaryService.imageUpload(file);
-          mediaIds.push(uploadRes.mediaId);
-        }
+      if (file) {
+        const uploadRes = await this.cloudinaryService.imageUpload(file);
+        mediaId = uploadRes.mediaId;
+      } else {
+        return sendResponse(
+          'Image file is required.',
+          null,
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       const newImage = await this.prisma.image.create({
         data: {
           ...createImageDto,
           userId,
-          mediaIds,
+          mediaId,
         },
       });
       return sendResponse(
@@ -154,7 +158,7 @@ export class ImageService {
     }
   }
 
-async update(id: string, updateImageDto: UpdateImageDto, newImages: Express.Multer.File[], userId: string): Promise<any> {
+async update(id: string, updateImageDto: UpdateImageDto, newImage: Express.Multer.File, userId: string): Promise<any> {
   try {
     const image = await this.prisma.image.findUnique({ where: { id } });
 
@@ -166,37 +170,24 @@ async update(id: string, updateImageDto: UpdateImageDto, newImages: Express.Mult
       throw new ForbiddenException('You are not authorized to update this image.');
     }
 
-    const currentMediaIds = image.mediaIds || [];
-    let updatedMediaIds = [...currentMediaIds];
+    let updatedMediaId = image.mediaId;
 
-    // Handle images to remove
-    if (updateImageDto.images && updateImageDto.images.length > 0) {
-      for (const mediaId of updateImageDto.images) {
-        const media = await this.prisma.media.findUnique({ where: { id: mediaId } });
-        if (media) {
-          await this.cloudinaryService.deleteFile(media.publicId);
-          await this.prisma.media.delete({ where: { id: media.id } });
-          updatedMediaIds = updatedMediaIds.filter((img) => img !== mediaId);
-        }
+    // Handle new image to upload
+    if (newImage) {
+      const media = await this.prisma.media.findUnique({ where: { id: image.mediaId } });
+      if (media) {
+        await this.cloudinaryService.deleteFile(media.publicId);
+        await this.prisma.media.delete({ where: { id: media.id } });
       }
+      const uploadRes = await this.cloudinaryService.imageUpload(newImage);
+      updatedMediaId = uploadRes.mediaId;
     }
-
-    // Handle new images to upload
-    if (newImages && newImages.length > 0) {
-      for (const file of newImages) {
-        const uploadRes = await this.cloudinaryService.imageUpload(file);
-        updatedMediaIds.push(uploadRes.mediaId);
-      }
-    }
-
-    // Create a new object for the update data, excluding the 'images' field from the DTO
-    const { images, ...updateData } = updateImageDto;
 
     const updatedImage = await this.prisma.image.update({
       where: { id },
       data: {
-        ...updateData,
-        mediaIds: updatedMediaIds,
+        ...updateImageDto,
+        mediaId: updatedMediaId,
       },
     });
 
@@ -229,12 +220,10 @@ async update(id: string, updateImageDto: UpdateImageDto, newImages: Express.Mult
       }
 
       // Delete associated media from Cloudinary and database
-      for (const mediaId of image.mediaIds) {
-        const media = await this.prisma.media.findUnique({ where: { id: mediaId } });
-        if (media) {
-          await this.cloudinaryService.deleteFile(media.publicId);
-          await this.prisma.media.delete({ where: { id: media.id } });
-        }
+      const media = await this.prisma.media.findUnique({ where: { id: image.mediaId } });
+      if (media) {
+        await this.cloudinaryService.deleteFile(media.publicId);
+        await this.prisma.media.delete({ where: { id: media.id } });
       }
 
       const deletedImage = await this.prisma.image.delete({
