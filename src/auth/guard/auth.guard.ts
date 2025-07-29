@@ -42,7 +42,7 @@ export class AuthGuard implements CanActivate {
       // 3. Validate token and extract user info
       //    Check if user has required roles
       const token = this.extractBearerToken(request);
-      console.log('jwt token', token);
+      
       if (token === '') throw new UnauthorizedException();
       const payload = await this.jwtService.verifyAsync<PayloadType>(token, {
         secret: this.configService.get<string>('AUTHSECRET'),
@@ -60,7 +60,7 @@ export class AuthGuard implements CanActivate {
   private extractBearerToken(req: Request): string {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const authHeader = req.headers['authorization'];
-    console.log('authHeader', authHeader);
+    
     if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       return authHeader.split(' ')[1] ?? '';
     }

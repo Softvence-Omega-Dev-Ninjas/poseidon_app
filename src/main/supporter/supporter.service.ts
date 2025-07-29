@@ -10,8 +10,8 @@ export class SupporterService {
   async create(createSupporterDto: CreateSupporterPayDto) {
     const { oder_package_name, ...rootData } = createSupporterDto;
 
-    console.log('oder_package_name', oder_package_name);
-    console.log('rootData', rootData);
+    
+    
     const newSupporter = await this.prisma.supporterPay.create({
       data: {
         ...rootData,

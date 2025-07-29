@@ -31,7 +31,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
 
   async handleConnection(client: Socket) {
-    console.log(`Socket connected: ${client.id}`);
+   
   }
 
   async handleDisconnect(client: Socket) {
@@ -43,7 +43,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (userId) {
       await this.redisService.hDel('userSocketMap', userId);
       await this.redisService.hDel('userActiveChatMap', userId);
-      console.log(`User ${userId} disconnected and removed`);
+     
     }
   }
 
@@ -53,7 +53,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     await this.redisService.hSet('userSocketMap', data.userId, client.id);
-    console.log(`User ${data.userId} registered with socket ${client.id}`);
+    
   }
 
 @SubscribeMessage('sendMessage')
