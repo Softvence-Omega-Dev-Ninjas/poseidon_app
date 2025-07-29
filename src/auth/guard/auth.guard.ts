@@ -66,7 +66,7 @@ export class AuthGuard implements CanActivate {
   private extractBearerToken(req: Request): string {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const authHeader = req.headers['authorization'];
-    console.log('authHeader', authHeader);
+
     if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       return authHeader.split(' ')[1] ?? '';
     }
