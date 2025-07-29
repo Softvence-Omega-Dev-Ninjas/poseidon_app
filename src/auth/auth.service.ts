@@ -11,20 +11,20 @@ export class AuthService {
     user: authenticationUserDto | null,
     passwordDto: string,
   ) {
-    // const userpassword = user && user.password ? user.password : '';
-    // const isPasswordValid = await argon2.verify(userpassword, passwordDto);
-    // if (!isPasswordValid) {
-    //   throw new HttpException(
-    //     {
-    //       message: 'Incorrect credentials. Please try again.',
-    //       redirect_url: null,
-    //       error: 'UNAUTHORIZED',
-    //       data: null,
-    //       success: false,
-    //     },
-    //     HttpStatus.UNAUTHORIZED,
-    //   );
-    // }
+    const userpassword = user && user.password ? user.password : '';
+    const isPasswordValid = await argon2.verify(userpassword, passwordDto);
+    if (!isPasswordValid) {
+      throw new HttpException(
+        {
+          message: 'Incorrect credentials. Please try again.',
+          redirect_url: null,
+          error: 'UNAUTHORIZED',
+          data: null,
+          success: false,
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
     const payload = {
       provider: user?.provider,
       email: user?.email,
