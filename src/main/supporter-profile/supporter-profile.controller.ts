@@ -6,28 +6,23 @@ import { Public } from 'src/auth/guard/public.decorator';
 import { Request } from 'express';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
+import { GetShopDataService } from '../product/supporter-profile-pass-data/getShopData.service';
 
 @Public()
 @Controller('supporter-profile')
 export class SupporterProfileController {
   constructor(
     private readonly supporterProfileService: SupporterProfileService,
+    private readonly getShopDataService: GetShopDataService,
   ) {}
 
   @Public()
-  @Roles(Role.Supporter)
+  @Roles(Role.User, Role.Supporter)
   @Get(':profile_id')
   async getSupportCart(
     @Param('profile_id') profile_id: string,
     @Req() res: Request,
   ) {
-    console.log(
-      profile_id,
-      '===',
-      res['sub'],
-      '>>>>',
-      profile_id == res['sub'],
-    );
     const hPageData =
       await this.supporterProfileService.profilePage(profile_id);
     return {
@@ -37,5 +32,12 @@ export class SupporterProfileController {
       success: true,
       editing: profile_id == res['sub'],
     };
+  }
+
+  @Public()
+  @Roles(Role.User, Role.Supporter)
+  @Get('shop/:shop_id')
+  shop(@Param('shop_id') shop_id: string) {
+    return this.getShopDataService.getAllShopData(shop_id);
   }
 }

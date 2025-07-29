@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
+import { GetShopDataService } from '../product/supporter-profile-pass-data/getShopData.service';
 
 @Injectable()
 export class SupporterProfileService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly getShopDataService: GetShopDataService,
+  ) {}
 
   async profilePage(userid: string) {
     return await this.prisma.$transaction(async (tx) => {
@@ -29,6 +33,18 @@ export class SupporterProfileService {
           },
         },
       });
+      // shop id
+      const shopid = await tx.shop.findFirst({
+        where: {
+          userId: userid,
+          user: {
+            role: 'supporter',
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
       // const membership_card = await tx. TODO
       const posts = await tx.post.findMany({
         where: {
@@ -47,6 +63,7 @@ export class SupporterProfileService {
       return {
         profileInfo,
         supporte_card,
+        shopid: shopid ? shopid.id : null,
         posts,
       };
     });
