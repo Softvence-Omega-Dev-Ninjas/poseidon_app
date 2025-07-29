@@ -5,6 +5,9 @@ import { OrderModule } from './order/order.module';
 import { ProductModule } from './product/product.module';
 import { ProductCategoryModule } from './product-category/product-category.module';
 import { PostModule } from './post/post.module';
+// import { CommentModule } from './comment/comment.module';
+// import { LikeModule } from './like/like.module';
+// import { ShopModule } from './shop/shop.module';
 import { ImageModule } from './image/image.module';
 
 import { ShopModule } from './shop/shop.module';
@@ -13,14 +16,14 @@ import { SupporterProfileModule } from './supporter-profile/supporter-profile.mo
 @Module({
   imports: [
     UserModule,
+    SupporterProfileModule,
     SupporterModule,
     OrderModule,
     ProductModule,
     ProductCategoryModule,
     PostModule,
-    ImageModule,
-
     ShopModule,
+    ImageModule,
     SupporterProfileModule,
   ],
   controllers: [],

@@ -3,7 +3,6 @@ import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { WhoCanSee } from 'generated/prisma';
 
-
 export enum PostSortBy {
   VIEWED = 'viewed',
   LIKED = 'liked',

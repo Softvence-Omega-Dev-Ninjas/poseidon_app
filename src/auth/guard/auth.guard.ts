@@ -30,19 +30,23 @@ export class AuthGuard implements CanActivate {
         IS_PUBLIC_KEY,
         context.getHandler(),
       );
-      if (isPublic) return true;
-
       // 2. Get required roles from metadata
       const requiredRoles = this.reflector.getAllAndOverride<Role[]>(
         ROLES_KEY,
         [context.getHandler(), context.getClass()],
       );
+      if (isPublic && !requiredRoles) return true;
       if (!requiredRoles) return false;
 
       // 3. Validate token and extract user info
       //    Check if user has required roles
       const token = this.extractBearerToken(request);
-      console.log('jwt token', token);
+      // without token free access
+      if (token === '' && isPublic) {
+        request['sub'] = '';
+        return true;
+      }
+      // token checking
       if (token === '') throw new UnauthorizedException();
       const payload = await this.jwtService.verifyAsync<PayloadType>(token, {
         secret: this.configService.get<string>('AUTHSECRET'),
@@ -50,7 +54,9 @@ export class AuthGuard implements CanActivate {
       if (!payload) {
         throw new UnauthorizedException();
       }
+
       request['sub'] = payload.id;
+      if (isPublic) return true;
       return requiredRoles.some((role) => payload.role?.includes(role));
     } catch {
       throw new UnauthorizedException();

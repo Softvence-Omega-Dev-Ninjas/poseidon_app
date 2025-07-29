@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { CreateProductCategoryDto } from './dto/create-product-category.dto';
 import { UpdateProductCategoryDto } from './dto/update-product-category.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
-import { FindAllProductCategoriesDto, ProductCategorySortBy } from './dto/find-all-product-categories.dto';
+import {
+  FindAllProductCategoriesDto,
+  ProductCategorySortBy,
+} from './dto/find-all-product-categories.dto';
 import { Prisma } from 'generated/prisma';
 
 @Injectable()
@@ -14,12 +17,12 @@ export class ProductCategoryService {
       data: createProductCategoryDto,
     });
     return {
-       message: 'create productCategory',
-          redirect_url: null,
-          error: null,
-          data: data,
-          success: true,
-    }
+      message: 'create productCategory',
+      redirect_url: null,
+      error: null,
+      data: data,
+      success: true,
+    };
   }
 
   async findAll(query: FindAllProductCategoriesDto) {
@@ -54,30 +57,30 @@ export class ProductCategoryService {
   }
 
   async findOne(id: string) {
-     const data = await this.prisma.productCategory.findUnique({
+    const data = await this.prisma.productCategory.findUnique({
       where: { id: id.toString() },
     });
     return {
-       message: 'gest single productgetory',
-          redirect_url: null,
-          error: null,
-          data: data,
-          success: true,
-    }
+      message: 'gest single productgetory',
+      redirect_url: null,
+      error: null,
+      data: data,
+      success: true,
+    };
   }
 
   async update(id: string, updateProductCategoryDto: UpdateProductCategoryDto) {
-     const data =  await this.prisma.productCategory.update({
+    const data = await this.prisma.productCategory.update({
       where: { id: id.toString() },
       data: updateProductCategoryDto,
     });
     return {
-       message: 'update product-category',
-          redirect_url: null,
-          error: null,
-          data: data,
-          success: true,
-    }
+      message: 'update product-category',
+      redirect_url: null,
+      error: null,
+      data: data,
+      success: true,
+    };
   }
 
   async remove(id: string) {
@@ -85,12 +88,11 @@ export class ProductCategoryService {
       where: { id: id.toString() },
     });
     return {
-       message: 'update product-category',
-          redirect_url: null,
-          error: null,
-          data: data,
-          success: true,
-    }
-    
+      message: 'update product-category',
+      redirect_url: null,
+      error: null,
+      data: data,
+      success: true,
+    };
   }
 }

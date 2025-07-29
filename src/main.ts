@@ -10,9 +10,9 @@ async function bootstrap() {
 
   // const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
- app.useGlobalPipes(
+  app.useGlobalPipes(
     new ValidationPipe({
-      transform: true, 
+      transform: true,
       whitelist: true,
       // forbidNonWhitelisted: true,
     }),

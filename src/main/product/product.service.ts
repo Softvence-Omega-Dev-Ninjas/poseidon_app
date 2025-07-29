@@ -10,9 +10,15 @@ import {
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly prisma: PrismaService, private cloudinaryService: CloudinaryService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
-  async create(createProductDto: CreateProductDto, files?: Array<Express.Multer.File>) {
+  async create(
+    createProductDto: CreateProductDto,
+    files?: Array<Express.Multer.File>,
+  ) {
     const { categoryIds, ...restOfProductData } = createProductDto;
 
     const mediaIds: string[] = [];
@@ -194,8 +200,8 @@ export class ProductService {
           throw new NotFoundException(
             'One or more product categories not found.',
           );
-        };
-      };
+        }
+      }
 
       updateData.productCategories = {
         deleteMany:

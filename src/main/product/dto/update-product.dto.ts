@@ -26,7 +26,11 @@ export class UpdateProductDto {
   @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
-  @Transform(({ value }) => (value === '' || value === null || value === undefined) ? undefined : parseFloat(value))
+  @Transform(({ value }) =>
+    value === '' || value === null || value === undefined
+      ? undefined
+      : parseFloat(value),
+  )
   price?: number;
 
   @ApiProperty({ required: false, type: () => [StructuredArrayItemDto] })
@@ -60,7 +64,11 @@ export class UpdateProductDto {
   @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
-  @Transform(({ value }) => (value === '' || value === null || value === undefined) ? undefined : parseFloat(value))
+  @Transform(({ value }) =>
+    value === '' || value === null || value === undefined
+      ? undefined
+      : parseFloat(value),
+  )
   offerPrice?: number;
 
   @ApiProperty({ required: false, enum: SuccessPage })

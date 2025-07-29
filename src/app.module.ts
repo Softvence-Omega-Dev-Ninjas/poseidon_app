@@ -31,7 +31,6 @@ import { PrismaClientModule } from './prisma-client/prisma-client.module';
     }),
     PostModule,
     ImageModule,
- 
   ],
   controllers: [AppController],
   providers: [

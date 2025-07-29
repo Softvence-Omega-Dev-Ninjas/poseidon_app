@@ -47,19 +47,25 @@ export class CreateProductDto {
   @IsArray()
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
-  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.split(',') : value,
+  )
   categoryIds: string[];
 
   @ApiProperty({ required: false })
   @IsArray()
   @IsOptional()
-  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.split(',') : value,
+  )
   color?: string[];
 
   @ApiProperty({ required: false })
   @IsArray()
   @IsOptional()
-  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.split(',') : value,
+  )
   features?: string[];
 
   @ApiProperty()
