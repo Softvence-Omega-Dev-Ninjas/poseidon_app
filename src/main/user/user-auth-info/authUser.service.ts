@@ -115,6 +115,11 @@ export class AuthUserService {
             image: true,
           },
         },
+        shop: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
   }
