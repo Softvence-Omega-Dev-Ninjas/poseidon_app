@@ -115,6 +115,7 @@ export class ProductController {
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     return this.productService.update(id, updateProductDto);
   }
+
   @Roles(Role.Supporter, Role.User)
   @Get('shop/:shopId')
   @ApiQuery({

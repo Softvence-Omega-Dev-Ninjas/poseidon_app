@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { SupporterProfileService } from './supporter-profile.service';
 import { SupporterProfileController } from './supporter-profile.controller';
-import { ProductModule } from '../product/product.module';
+import { GetShopDataService } from './getShopData.service';
 
 @Module({
-  imports: [ProductModule],
+  imports: [],
   controllers: [SupporterProfileController],
-  providers: [SupporterProfileService],
+  providers: [SupporterProfileService, GetShopDataService],
 })
 export class SupporterProfileModule {}

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
-import { GetShopDataService } from '../product/supporter-profile-pass-data/getShopData.service';
+// import { GetShopDataService } from './getShopData.service';
 
 @Injectable()
 export class SupporterProfileService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly getShopDataService: GetShopDataService,
+    // private readonly getShopDataService: GetShopDataService,
   ) {}
 
   async profilePage(userid: string) {

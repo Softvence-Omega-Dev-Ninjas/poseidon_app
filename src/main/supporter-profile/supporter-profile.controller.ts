@@ -6,7 +6,8 @@ import { Public } from 'src/auth/guard/public.decorator';
 import { Request } from 'express';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
-import { GetShopDataService } from '../product/supporter-profile-pass-data/getShopData.service';
+import { GetShopDataService } from './getShopData.service';
+// import { ProductService } from '../product/product.service';
 
 @Public()
 @Controller('supporter-profile')
@@ -14,6 +15,7 @@ export class SupporterProfileController {
   constructor(
     private readonly supporterProfileService: SupporterProfileService,
     private readonly getShopDataService: GetShopDataService,
+    // private readonly productService: ProductService,
   ) {}
 
   @Public()
@@ -39,5 +41,10 @@ export class SupporterProfileController {
   @Get('shop/:shop_id')
   shop(@Param('shop_id') shop_id: string) {
     return this.getShopDataService.getAllShopData(shop_id);
+  }
+
+  @Get('shop/products-details/:id')
+  productsDetails(@Param('id') id: string) {
+    return this.getShopDataService.getFindOne(id);
   }
 }
