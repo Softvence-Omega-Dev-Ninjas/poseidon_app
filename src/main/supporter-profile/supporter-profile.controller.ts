@@ -41,7 +41,7 @@ export class SupporterProfileController {
   }
 
   @Get('shop/products-details/:id')
-  productsDetails(@Param('id') id: string, @Req() res: Request) {
+  productsDetails(@Param('id') id: string) {
     return this.getShopDataService.getFindOne(id);
   }
 
