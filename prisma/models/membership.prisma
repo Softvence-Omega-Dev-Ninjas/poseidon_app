@@ -1,0 +1,7 @@
+model Membership_owner {
+    id        String   @id @default(uuid())
+    ownerId   String   @unique
+    owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
