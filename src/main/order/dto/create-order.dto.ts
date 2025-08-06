@@ -47,8 +47,5 @@ export class CreateOrderDto {
   @IsNotEmpty()
   productId: string;
 
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  userId?: string;
+  
 }
