@@ -28,4 +28,5 @@ export class authenticationUserDto {
   password?: string | null;
   role: string;
   profile?: profileDto | null;
+  shop?: { id: string } | null;
 }

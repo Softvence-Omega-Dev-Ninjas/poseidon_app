@@ -22,6 +22,9 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext) {
+    const isPublicCatchBlock: { isPublic: boolean | undefined } = {
+      isPublic: undefined,
+    };
     try {
       const request = context.switchToHttp().getRequest<Request>();
 
@@ -35,13 +38,15 @@ export class AuthGuard implements CanActivate {
         ROLES_KEY,
         [context.getHandler(), context.getClass()],
       );
+
+      // If the route is public, we can skip further checks
+      isPublicCatchBlock.isPublic = isPublic;
       if (isPublic && !requiredRoles) return true;
       if (!requiredRoles) return false;
 
       // 3. Validate token and extract user info
       //    Check if user has required roles
       const token = this.extractBearerToken(request);
-      // without token free access
       if (token === '' && isPublic) {
         request['sub'] = '';
         return true;
@@ -51,22 +56,21 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync<PayloadType>(token, {
         secret: this.configService.get<string>('AUTHSECRET'),
       });
-      if (!payload) {
-        throw new UnauthorizedException();
-      }
 
       request['sub'] = payload.id;
+      request['shop_id'] = payload.shop_id;
       if (isPublic) return true;
       return requiredRoles.some((role) => payload.role?.includes(role));
     } catch {
+      if (isPublicCatchBlock.isPublic) return true;
       throw new UnauthorizedException();
     }
   }
 
   private extractBearerToken(req: Request): string {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const authHeader = req.headers['authorization'];
-
+    const authHeader: string | undefined = req.headers[
+      'authorization'
+    ] as string;
     if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       return authHeader.split(' ')[1] ?? '';
     }

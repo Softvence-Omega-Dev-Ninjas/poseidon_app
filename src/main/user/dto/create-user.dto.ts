@@ -74,6 +74,8 @@ export class CreateUserDto {
     example: {
       name: 'John Doe',
       image: 'iamge url',
+      description: 'A brief description about the user',
+      cover_image: 'cover image url',
       address: '123 Main Street',
       state: 'California',
       city: 'Los Angeles',
