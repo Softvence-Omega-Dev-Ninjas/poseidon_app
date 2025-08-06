@@ -11,6 +11,8 @@ model Membership_owner {
     updatedAt                   DateTime                      @updatedAt
     Membership_levels           Membership_levels[]
     MembershipAccessToVideoCall MembershipAccessToVideoCall[] @relation("MembershipAccessToVideoCall")
+    MembershipAccessToGallery   MembershipAccessToGallery[]   @relation("AccessToGallery")
+    MembershipAccessToPosts     MembershipAccessToPosts[]     @relation("AccessToPosts")
 }
 
 model Membership_levels {
@@ -37,8 +39,10 @@ model MembershipSubscriptionPlan {
     // Access controls:
     membershipAccessToVideoCallId String?
     callLimitAccess               MembershipAccessToVideoCall? @relation(fields: [membershipAccessToVideoCallId], references: [id])
-    postAccess                    Boolean                      @default(true)
-    galleryAccess                 Boolean                      @default(true)
+    membershipAccessGalleryId     String?
+    galleryAccess                 MembershipAccessToGallery?   @relation(fields: [membershipAccessGalleryId], references: [id])
+    membershipAccessToPostsId     String?
+    MembershipAccessToPosts       MembershipAccessToPosts?     @relation(fields: [membershipAccessToPostsId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -55,7 +59,24 @@ model MembershipAccessToVideoCall {
     description                String?                      @default("Access to video calls with the owner")
     totalVideoCalls            Int                          @default(0) // total number of video calls allowed
     unlimitedVideoCalls        Boolean                      @default(false) // if true, totalVideoCalls is ignored
-    createdAt                  DateTime                     @default(now())
-    updatedAt                  DateTime                     @updatedAt
+    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
+}
+
+model MembershipAccessToGallery {
+    id                         String                       @id @default(uuid())
+    membership_ownerId         String
+    Membership_owner           Membership_owner             @relation("AccessToGallery", fields: [membership_ownerId], references: [id])
+    title                      String                       @default("Gallery Access")
+    description                String                       @default("Access to the gallery with the owner")
+    AccessToPosts              Boolean                      @default(true) // if true, access to posts is granted
+    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
+}
+
+model MembershipAccessToPosts {
+    id                         String                       @id @default(uuid())
+    membership_ownerId         String
+    Membership_owner           Membership_owner             @relation("AccessToPosts", fields: [membership_ownerId], references: [id])
+    title                      String                       @default("Posts Access")
+    description                String                       @default("Access to the posts with the owner")
     MembershipSubscriptionPlan MembershipSubscriptionPlan[]
 }
