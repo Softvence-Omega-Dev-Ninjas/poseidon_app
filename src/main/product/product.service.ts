@@ -152,14 +152,15 @@ export class ProductService {
   return sendResponse('Product retrieved successfully', product, 200);
 }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
-    const { categoryIds, images, color, features, ...productData } =
-      updateProductDto;
-
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+    newImages: Express.Multer.File[],
+  ) {
     const product = await this.prisma.product.findUnique({
       where: { id },
       include: {
-        productCategories: true, // Include existing categories for processing
+        productCategories: true,
       },
     });
 
@@ -167,14 +168,63 @@ export class ProductService {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
-    const updateData: any = { ...productData };
+    const {
+      categoryIds,
+      images,
+      color,
+      features,
+      draft,
+      ...productData
+    } = updateProductDto;
+
+    const updateData: any = {};
+
+    // Handle simple properties, only if they are not null/undefined
+    if (productData.name !== null && productData.name !== undefined) {
+      updateData.name = productData.name;
+    }
+    if (productData.description !== null && productData.description !== undefined) {
+      updateData.description = productData.description;
+    }
+    if (productData.price !== null && productData.price !== undefined && !isNaN(productData.price)) {
+      updateData.price = productData.price;
+    }
+    if (productData.offerPrice !== null && productData.offerPrice !== undefined && !isNaN(productData.offerPrice)) {
+      updateData.offerPrice = productData.offerPrice;
+    }
+     if (draft !== null && draft !== undefined) {
+      updateData.draft = draft;
+    }
+    if (productData.successPage !== null && productData.successPage !== undefined) {
+      updateData.successPage = productData.successPage;
+    }
+    if (productData.successPagefield !== null && productData.successPagefield !== undefined) {
+      updateData.successPagefield = productData.successPagefield;
+    }
+
 
     // Handle images
+    let updatedImages = [...(product.images || [])];
     if (images) {
-      const currentImages = product.images || [];
-      const newImages = this.processStructuredArray(currentImages, images);
-      updateData.images = newImages;
+      for (const item of images) {
+        if (item.action === Action.DELETE) {
+          const media = await this.prisma.media.findUnique({ where: { id: item.value } });
+          if (media) {
+            await this.cloudinaryService.deleteFile(media.publicId);
+            await this.prisma.media.delete({ where: { id: media.id } });
+            updatedImages = updatedImages.filter(imgId => imgId !== item.value);
+          }
+        }
+      }
     }
+    if (newImages && newImages.length > 0) {
+      for (const file of newImages) {
+        const uploadRes = await this.cloudinaryService.imageUpload(file);
+        updatedImages.push(uploadRes.mediaId);
+      }
+    }
+    updateData.images = updatedImages;
+
 
     // Handle color
     if (color) {
@@ -192,7 +242,7 @@ export class ProductService {
       );
       updateData.features = newFeatures;
     }
-
+   
     // Handle categoryIds
     if (categoryIds) {
       const categoriesToConnect: { categoryId: string }[] = [];
@@ -201,9 +251,22 @@ export class ProductService {
         categoryId: string;
       }[] = [];
 
+      // Initialize productCategories in updateData to ensure it's always an object
+      // with create and deleteMany properties, even if empty.
+      updateData.productCategories = {
+        deleteMany: [],
+        create: [],
+      };
+
       for (const item of categoryIds) {
         if (item.action === Action.ADD) {
-          categoriesToConnect.push({ categoryId: item.value });
+          // Check if the category is already connected to avoid unique constraint violation
+          const isAlreadyConnected = product.productCategories.some(
+            (pc) => pc.categoryId === item.value,
+          );
+          if (!isAlreadyConnected) {
+            categoriesToConnect.push({ categoryId: item.value });
+          }
         } else if (item.action === Action.DELETE) {
           categoriesToDisconnect.push({
             productId: id,
@@ -212,9 +275,11 @@ export class ProductService {
         }
       }
 
-      // Validate if all categories to connect exist
-      const allCategoryIds = categoriesToConnect.map((c) => c.categoryId);
-      if (allCategoryIds.length > 0) {
+      if (categoriesToDisconnect.length > 0) {
+        updateData.productCategories.deleteMany = { OR: categoriesToDisconnect };
+      }
+      if (categoriesToConnect.length > 0) {
+        const allCategoryIds = categoriesToConnect.map((c) => c.categoryId);
         const existingCategories = await this.prisma.productCategory.findMany({
           where: {
             id: { in: allCategoryIds },
@@ -226,20 +291,10 @@ export class ProductService {
             'One or more product categories not found.',
           );
         }
+        updateData.productCategories.create = categoriesToConnect.map((c) => ({
+          category: { connect: { id: c.categoryId } },
+        }));
       }
-
-      updateData.productCategories = {
-        deleteMany:
-          categoriesToDisconnect.length > 0
-            ? { OR: categoriesToDisconnect }
-            : undefined,
-        create:
-          categoriesToConnect.length > 0
-            ? categoriesToConnect.map((c) => ({
-                category: { connect: { id: c.categoryId } },
-              }))
-            : undefined,
-      };
     }
 
     return await this.prisma.product.update({
