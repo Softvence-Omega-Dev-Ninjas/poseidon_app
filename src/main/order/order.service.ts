@@ -1,14 +1,37 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { FindAllOrdersDto } from './dto/find-all-orders.dto';
+import { sendResponse } from 'src/common/utils/send-response.util';
 
 @Injectable()
 export class OrderService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createOrderDto: CreateOrderDto) {
-    return this.prisma.order.create({ data: createOrderDto });
+  async create(createOrderDto: CreateOrderDto,userId:string) {
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+     if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    // const payment = await this.prisma.payment.findUnique({
+    //   where: { id: paymentId },
+    // });
+    // if (!payment) throw new NotFoundException('Payment not found');
+
+    
+    const product = await this.prisma.product.findUnique({
+      where: { id: createOrderDto.productId },
+    });
+    if (!product) throw new NotFoundException('Product not found');
+
+   const order = await this.prisma.order.create({
+        data: { ...createOrderDto, userId },
+      });
+
+      return sendResponse('Order created successfully', order, 201);
   }
 
   async findAll(query: FindAllOrdersDto) {
@@ -51,16 +74,23 @@ export class OrderService {
     ]);
 
     const totalPages = Math.ceil(total / parsedLimit);
-
-    return {
+    
+    const data = {
       orders,
+      total,
       currentPage: parsedPage,
       limit: parsedLimit,
       totalPages,
     };
+
+    return  sendResponse('Orders retrieved successfully', data, 200);
   }
 
-  findOne(id: string) {
-    return this.prisma.order.findUnique({ where: { id } });
+ async findOne(id: string) {
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    if (!order) {
+      throw new NotFoundException(`Order with id ${id} not found`);
+    }
+    return sendResponse('Order retrieved successfully', order, 200);
   }
 }
