@@ -9,6 +9,9 @@ import {
   Req,
   UseInterceptors,
   UploadedFiles,
+  BadRequestException,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProductService } from './product.service';
@@ -32,40 +35,19 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
   @Roles(Role.Admin, Role.Supporter, Role.User)
   @Post()
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('images'))
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        description: { type: 'string' },
-        price: { type: 'number' },
-        draft: { type: 'boolean' },
-        shopId: { type: 'string' },
-        categoryIds: { type: 'array', items: { type: 'string' } },
-        color: { type: 'array', items: { type: 'string' } },
-        features: { type: 'array', items: { type: 'string' } },
-        offerPrice: { type: 'number' },
-        successPage: {
-          type: 'string',
-          enum: ['message', 'redirect'],
-        },
-        successPagefield: { type: 'string' },
-        images: {
-          type: 'array',
-          items: {
-            type: 'string',
-            format: 'binary',
-          },
-        },
-      },
-    },
-  })
+  
   create(
     @Body() createProductDto: CreateProductDto,
     @UploadedFiles() files?: Array<Express.Multer.File>,
   ) {
+     console.log('Files received:', createProductDto);
+     if(createProductDto.categoryIds && createProductDto.categoryIds.length === 0) {
+       throw new BadRequestException('At least one categoryId must be provided.');
+     }
+     const { categoryIds, ...restOfProductData } = createProductDto;
     return this.productService.create(createProductDto, files);
   }
 

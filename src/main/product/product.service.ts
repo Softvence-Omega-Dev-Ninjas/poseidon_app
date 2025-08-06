@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -7,6 +7,7 @@ import {
   Action,
   StructuredArrayItemDto,
 } from 'src/common/dto/structured-array.dto';
+import { sendResponse } from 'src/common/utils/send-response.util';
 
 @Injectable()
 export class ProductService {
@@ -20,6 +21,18 @@ export class ProductService {
     files?: Array<Express.Multer.File>,
   ) {
     const { categoryIds, ...restOfProductData } = createProductDto;
+    
+    const shop = await this.prisma.shop.findFirst({
+      where: { id: createProductDto.shopId },
+    });
+
+    if (!shop) {
+      throw new NotFoundException('Shop not found');
+    }
+
+    if (!categoryIds || categoryIds.length === 0) {
+    throw new BadRequestException('At least one categoryId must be provided.');
+  }
 
     const mediaIds: string[] = [];
     if (files && files.length > 0) {
@@ -43,7 +56,9 @@ export class ProductService {
       }
     }
 
-    return await this.prisma.product.create({
+
+   
+    const  product = await this.prisma.product.create({
       data: {
         ...restOfProductData,
         images: mediaIds,
@@ -65,6 +80,7 @@ export class ProductService {
         },
       },
     });
+    return sendResponse('Product created successfully', product, 201);
   }
 
   async findAll(
@@ -106,26 +122,35 @@ export class ProductService {
 
     const totalPages = Math.ceil(total / limit);
 
-    return {
+    const data = {
+      total,
       products,
       currentPage: page,
       limit,
       totalPages,
     };
+
+    return sendResponse('Products retrieved successfully', data, 200); 
   }
 
   async findOne(id: string) {
-    return await this.prisma.product.findUnique({
-      where: { id },
-      include: {
-        productCategories: {
-          include: {
-            category: true,
-          },
+  const product = await this.prisma.product.findUnique({
+    where: { id },
+    include: {
+      productCategories: {
+        include: {
+          category: true,
         },
       },
-    });
+    },
+  });
+
+  if (!product) {
+    throw new NotFoundException(`Product with ID ${id} not found`);
   }
+
+  return sendResponse('Product retrieved successfully', product, 200);
+}
 
   async update(id: string, updateProductDto: UpdateProductDto) {
     const { categoryIds, images, color, features, ...productData } =
