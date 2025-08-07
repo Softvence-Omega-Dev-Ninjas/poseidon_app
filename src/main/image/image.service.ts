@@ -17,9 +17,16 @@ import { HttpStatus } from 'src/common/utils/http-status.enum';
 
 @Injectable()
 export class ImageService {
-  constructor(private prisma: PrismaService, private cloudinaryService: CloudinaryService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
-  async create(createImageDto: CreateImageDto, userId: string, file: Express.Multer.File): Promise<any> {
+  async create(
+    createImageDto: CreateImageDto,
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<any> {
     try {
       let mediaId: string;
 
@@ -57,14 +64,17 @@ export class ImageService {
     }
   }
 
-  async findAll(
-    query: FindAllImagesDto,
-    userId?: string,
-  ): Promise<any> {
+  async findAll(query: FindAllImagesDto, userId?: string): Promise<any> {
     try {
-      const { page = 1, limit = 10, sortBy = ImageSortBy.NEWEST, visibility } = query;
+      const {
+        page = 1,
+        limit = 10,
+        sortBy = ImageSortBy.NEWEST,
+        visibility,
+      } = query;
       const pageNumber = typeof page === 'string' ? parseInt(page, 10) : page;
-      const limitNumber = typeof limit === 'string' ? parseInt(limit, 10) : limit;
+      const limitNumber =
+        typeof limit === 'string' ? parseInt(limit, 10) : limit;
       const offset = (pageNumber - 1) * limitNumber;
 
       let orderBy: Prisma.ImageOrderByWithRelationInput;
@@ -158,54 +168,63 @@ export class ImageService {
     }
   }
 
-async update(id: string, updateImageDto: UpdateImageDto, newImage: Express.Multer.File, userId: string): Promise<any> {
-  try {
-    const image = await this.prisma.image.findUnique({ where: { id } });
+  async update(
+    id: string,
+    updateImageDto: UpdateImageDto,
+    newImage: Express.Multer.File,
+    userId: string,
+  ): Promise<any> {
+    try {
+      const image = await this.prisma.image.findUnique({ where: { id } });
 
-    if (!image) {
-      throw new NotFoundException('Image not found');
-    }
-
-    if (image.userId !== userId) {
-      throw new ForbiddenException('You are not authorized to update this image.');
-    }
-
-    let updatedMediaId = image.mediaId;
-
-    // Handle new image to upload
-    if (newImage) {
-      const media = await this.prisma.media.findUnique({ where: { id: image.mediaId } });
-      if (media) {
-        await this.cloudinaryService.deleteFile(media.publicId);
-        await this.prisma.media.delete({ where: { id: media.id } });
+      if (!image) {
+        throw new NotFoundException('Image not found');
       }
-      const uploadRes = await this.cloudinaryService.imageUpload(newImage);
-      updatedMediaId = uploadRes.mediaId;
+
+      if (image.userId !== userId) {
+        throw new ForbiddenException(
+          'You are not authorized to update this image.',
+        );
+      }
+
+      let updatedMediaId = image.mediaId;
+
+      // Handle new image to upload
+      if (newImage) {
+        const media = await this.prisma.media.findUnique({
+          where: { id: image.mediaId },
+        });
+        if (media) {
+          await this.cloudinaryService.deleteFile(media.publicId);
+          await this.prisma.media.delete({ where: { id: media.id } });
+        }
+        const uploadRes = await this.cloudinaryService.imageUpload(newImage);
+        updatedMediaId = uploadRes.mediaId;
+      }
+
+      const updatedImage = await this.prisma.image.update({
+        where: { id },
+        data: {
+          ...updateImageDto,
+          mediaId: updatedMediaId,
+        },
+      });
+
+      return sendResponse(
+        'Image updated successfully.',
+        updatedImage,
+        HttpStatus.OK,
+      );
+    } catch (error) {
+      return sendResponse(
+        'Failed to update image.',
+        null,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        null,
+        error.message,
+      );
     }
-
-    const updatedImage = await this.prisma.image.update({
-      where: { id },
-      data: {
-        ...updateImageDto,
-        mediaId: updatedMediaId,
-      },
-    });
-
-    return sendResponse(
-      'Image updated successfully.',
-      updatedImage,
-      HttpStatus.OK,
-    );
-  } catch (error) {
-    return sendResponse(
-      'Failed to update image.',
-      null,
-      HttpStatus.INTERNAL_SERVER_ERROR,
-      null,
-      error.message,
-    );
   }
-}
 
   async remove(id: string, userId: string): Promise<any> {
     try {
@@ -216,11 +235,15 @@ async update(id: string, updateImageDto: UpdateImageDto, newImage: Express.Multe
         throw new NotFoundException(`Image with ID ${id} not found`);
       }
       if (image.userId !== userId) {
-        throw new ForbiddenException('You are not authorized to delete this image.');
+        throw new ForbiddenException(
+          'You are not authorized to delete this image.',
+        );
       }
 
       // Delete associated media from Cloudinary and database
-      const media = await this.prisma.media.findUnique({ where: { id: image.mediaId } });
+      const media = await this.prisma.media.findUnique({
+        where: { id: image.mediaId },
+      });
       if (media) {
         await this.cloudinaryService.deleteFile(media.publicId);
         await this.prisma.media.delete({ where: { id: media.id } });
@@ -320,7 +343,11 @@ async update(id: string, updateImageDto: UpdateImageDto, newImage: Express.Multe
     }
   }
 
-  async createComment(imageId: string, createImageCommentDto: CreateImageCommentDto, userId: string): Promise<any> {
+  async createComment(
+    imageId: string,
+    createImageCommentDto: CreateImageCommentDto,
+    userId: string,
+  ): Promise<any> {
     try {
       const newImageComment = await this.prisma.$transaction(async (prisma) => {
         const comment = await prisma.imageComment.create({
@@ -349,18 +376,26 @@ async update(id: string, updateImageDto: UpdateImageDto, newImage: Express.Multe
     }
   }
 
-  async deleteComment(imageId: string, commentId: string, userId: string): Promise<any> {
+  async deleteComment(
+    imageId: string,
+    commentId: string,
+    userId: string,
+  ): Promise<any> {
     try {
       const imageComment = await this.prisma.imageComment.findUnique({
         where: { id: commentId },
       });
 
       if (!imageComment) {
-        throw new NotFoundException(`Image comment with ID ${commentId} not found`);
+        throw new NotFoundException(
+          `Image comment with ID ${commentId} not found`,
+        );
       }
 
       if (imageComment.userId !== userId) {
-        throw new ForbiddenException('You are not authorized to delete this comment.');
+        throw new ForbiddenException(
+          'You are not authorized to delete this comment.',
+        );
       }
 
       await this.prisma.$transaction(async (prisma) => {
@@ -396,7 +431,8 @@ async update(id: string, updateImageDto: UpdateImageDto, newImage: Express.Multe
     try {
       const { page = 1, limit = 10 } = query;
       const pageNumber = typeof page === 'string' ? parseInt(page, 10) : page;
-      const limitNumber = typeof limit === 'string' ? parseInt(limit, 10) : limit;
+      const limitNumber =
+        typeof limit === 'string' ? parseInt(limit, 10) : limit;
       const offset = (pageNumber - 1) * limitNumber;
 
       const [comments, total] = await this.prisma.$transaction([
@@ -441,7 +477,9 @@ async update(id: string, updateImageDto: UpdateImageDto, newImage: Express.Multe
       });
 
       if (!comment) {
-        throw new NotFoundException(`Image comment with ID ${commentId} not found`);
+        throw new NotFoundException(
+          `Image comment with ID ${commentId} not found`,
+        );
       }
 
       return sendResponse(
@@ -482,7 +520,10 @@ async update(id: string, updateImageDto: UpdateImageDto, newImage: Express.Multe
     }
   }
 
-  async getImagesByVisibility(visibility: Visibility, userId?: string): Promise<any> {
+  async getImagesByVisibility(
+    visibility: Visibility,
+    userId?: string,
+  ): Promise<any> {
     try {
       const images = await this.prisma.image.findMany({
         where: { visibility },

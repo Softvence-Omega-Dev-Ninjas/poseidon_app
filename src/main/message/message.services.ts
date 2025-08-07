@@ -7,7 +7,10 @@ export class RedisService implements OnModuleInit {
   private redis: Redis;
 
   onModuleInit() {
-    this.redis = new Redis(process.env.REDIS_CONNECTION_URL|| "redis://red-d108i315pdvs73988kn0:6379" );
+    this.redis = new Redis(
+      process.env.REDIS_CONNECTION_URL ||
+        'redis://red-d108i315pdvs73988kn0:6379',
+    );
   }
 
   async set(key: string, value: string) {

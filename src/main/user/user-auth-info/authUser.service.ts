@@ -37,7 +37,7 @@ export class AuthUserService {
           redirect_url: 'http://localhost:3000/signin',
           error: null,
           data: null,
-          stutas: false,
+          success: false,
         },
         HttpStatus.CONFLICT,
       );
@@ -79,7 +79,7 @@ export class AuthUserService {
       redirect_url: 'http://localhost:3000/signin',
       error: null,
       data: { name: newUser.profile?.name },
-      stutas: true,
+      success: true,
     };
   }
 
@@ -113,6 +113,11 @@ export class AuthUserService {
           select: {
             name: true,
             image: true,
+          },
+        },
+        shop: {
+          select: {
+            id: true,
           },
         },
       },

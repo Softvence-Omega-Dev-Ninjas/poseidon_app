@@ -7,8 +7,6 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { HttpExceptionFiller } from './common/fillters/http-exception.fillter';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
-import { PostModule } from './main/post/post.module';
-import { ImageModule } from './main/image/image.module';
 
 import { PrismaClientModule } from './prisma-client/prisma-client.module';
 
@@ -29,9 +27,6 @@ import { PrismaClientModule } from './prisma-client/prisma-client.module';
         signOptions: { expiresIn: '1h' },
       }),
     }),
-    PostModule,
-    ImageModule,
- 
   ],
   controllers: [AppController],
   providers: [

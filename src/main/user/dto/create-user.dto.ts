@@ -15,6 +15,18 @@ export class CreateUserProfileDto {
 
   @ApiProperty({
     required: false,
+    example: 'user description',
+  })
+  description?: string;
+
+  @ApiProperty({
+    required: false,
+    example: 'user cover_image with view page',
+  })
+  cover_image?: string;
+
+  @ApiProperty({
+    required: false,
     example: 'user address',
   })
   address?: string;
@@ -62,6 +74,8 @@ export class CreateUserDto {
     example: {
       name: 'John Doe',
       image: 'iamge url',
+      description: 'A brief description about the user',
+      cover_image: 'cover image url',
       address: '123 Main Street',
       state: 'California',
       city: 'Los Angeles',

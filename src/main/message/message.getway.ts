@@ -12,6 +12,10 @@ import { Server, Socket } from 'socket.io';
 import { Injectable } from '@nestjs/common';
 import { RedisService } from './message.services';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
+import * as jwt from 'jsonwebtoken';
+import { PayloadType } from 'src/auth/guard/jwtPayloadType';
+import { Role } from 'src/auth/guard/role.enum';
+import { read } from 'fs';
 
 type MessagePayload = {
   text: string;
@@ -31,8 +35,52 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
 
   async handleConnection(client: Socket) {
-    console.log(`Socket connected: ${client.id}`);
+    let token = client.handshake.auth?.token ||
+        client.handshake.headers?.authorization;
+    if (!token) {
+      client.emit('error', { message: 'Authentication token is required' });
+      client.disconnect();
+      return;
+    }
+    if (!process.env.AUTHSECRET) {
+      throw new Error('AUTHSECRET is not defined');
+    }
+    if (token.startsWith('Bearer ')) {
+    token = token.replace('Bearer ', '');
   }
+    try {
+      
+      const decoded = jwt.verify(token, process.env.AUTHSECRET) as PayloadType;
+      const userId = decoded.id;
+
+   
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+       console.log('User found:', user);
+      if (!user) {
+        client.emit('error', { message: 'User not found.' });
+        client.disconnect();
+        return;
+      }
+
+   
+   
+      await this.redisService.hSet('userSocketMap', userId, client.id);
+
+      client.emit('connectionSuccess', {
+        message: 'User connected and authenticated successfully.',
+        userId,
+        socketId: client.id,
+      });
+    
+  } catch (error) {
+    console.error('Authentication error:', error);
+    client.emit('error', { message: 'Invalid or expired token' });
+    client.disconnect();
+  }
+}
 
   async handleDisconnect(client: Socket) {
     const userSocketMap = await this.redisService.hGetAll('userSocketMap');
@@ -43,18 +91,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (userId) {
       await this.redisService.hDel('userSocketMap', userId);
       await this.redisService.hDel('userActiveChatMap', userId);
-      console.log(`User ${userId} disconnected and removed`);
+     
     }
   }
 
-  @SubscribeMessage('register')
-  async handleRegister(
-    @MessageBody() data: { userId: string },
-    @ConnectedSocket() client: Socket,
-  ) {
-    await this.redisService.hSet('userSocketMap', data.userId, client.id);
-    console.log(`User ${data.userId} registered with socket ${client.id}`);
-  }
 
 @SubscribeMessage('sendMessage')
 async handleSendMessage(
@@ -68,28 +108,59 @@ async handleSendMessage(
     where: { user1Id, user2Id },
   });
 
-  // Create conversation if not exists
+  const receiverActiveWith = await this.redisService.hGet(
+    'userActiveChatMap',
+    receiver,
+  );
+
+  let savedMessage;
+
+  // If no conversation, create it and send newConversation events
   if (!conversation) {
     conversation = await this.prisma.conversation.create({
       data: { user1Id, user2Id },
     });
 
+    // Create first message immediately
+    savedMessage = await this.prisma.message.create({
+      data: {
+        text,
+        senderId: sender,
+        receiverId: receiver,
+        conversationId: conversation.id,
+        isRead: receiverActiveWith === sender,
+      },
+    });
+
+    // Update last message time
+    await this.prisma.conversation.update({
+      where: { id: conversation.id },
+      data: { lastMessageAt: new Date() },
+    });
+
     const [senderUser, receiverUser] = await Promise.all([
-      this.prisma.user.findUnique({ where: { id: sender } }),
-      this.prisma.user.findUnique({ where: { id: receiver } }),
+      this.prisma.user.findUnique({ where: { id: sender }, include: { profile: true } }),
+      this.prisma.user.findUnique({ where: { id: receiver }, include: { profile: true } }),
     ]);
 
     const newChatUserForReceiver = {
       id: senderUser?.id,
-     
-      hasGoogleAccount: true,
       unreadCount: 1,
+      lastMessage: savedMessage,
+      profile: senderUser?.profile?.image,
+      name: senderUser?.profile?.name,
+      role: senderUser?.role,
+      conversationId: conversation.id,
     };
 
     const newChatUserForSender = {
       id: receiverUser?.id,
-      hasGoogleAccount: true,
       unreadCount: 0,
+      lastMessage: savedMessage,
+      profile: receiverUser?.profile?.image,
+      role: receiverUser?.role,
+      name: receiverUser?.profile?.name,
+      conversationId: conversation.id,
     };
 
     const [receiverSocketId, senderSocketId] = await Promise.all([
@@ -98,46 +169,48 @@ async handleSendMessage(
     ]);
 
     if (receiverSocketId) {
-      this.server.to(receiverSocketId).emit('newConversation', newChatUserForReceiver);
+      this.server
+        .to(receiverSocketId)
+        .emit('newConversation', newChatUserForReceiver);
     }
 
     if (senderSocketId) {
-      this.server.to(senderSocketId).emit('newConversation', newChatUserForSender);
+      this.server
+        .to(senderSocketId)
+        .emit('newConversation', newChatUserForSender);
     }
+  } else {
+    // If conversation exists, create message normally
+    savedMessage = await this.prisma.message.create({
+      data: {
+        text,
+        senderId: sender,
+        receiverId: receiver,
+        conversationId: conversation.id,
+        isRead: receiverActiveWith === sender,
+      },
+    });
+
+    // Update last message time
+    await this.prisma.conversation.update({
+      where: { id: conversation.id },
+      data: { lastMessageAt: new Date() },
+    });
   }
 
-  const receiverActiveWith = await this.redisService.hGet(
-    'userActiveChatMap',
-    receiver,
-  );
-
-  const savedMessage = await this.prisma.message.create({
-    data: {
-      text,
-      senderId: sender,
-      receiverId: receiver,
-      conversationId: conversation.id,
-      isRead: receiverActiveWith === sender,
-    },
-  });
-
-  await this.prisma.conversation.update({
-    where: { id: conversation.id },
-    data: { lastMessageAt: new Date() },
-  });
-
+  // Emit message to receiver
   const receiverSocketId = await this.redisService.hGet(
     'userSocketMap',
     receiver,
   );
 
-  // Emit to receiver
   if (receiverSocketId) {
     this.server.to(receiverSocketId).emit('newChatItem', {
       type: 'message',
       ...savedMessage,
     });
 
+    // If not active chat, send unread count
     if (receiverActiveWith !== sender) {
       const unreadCount = await this.prisma.message.count({
         where: {
@@ -155,96 +228,95 @@ async handleSendMessage(
     }
   }
 
-  // Emit to sender
+  // Emit message to sender
   client.emit('newChatItem', {
     type: 'message',
     ...savedMessage,
   });
 
- client.emit('sendSuccessfully', {
-  type: 'message',
-  ...savedMessage,
-});
+  client.emit('sendSuccessfully', {
+    type: 'message',
+    ...savedMessage,
+  });
 }
 
 
+  // @SubscribeMessage('loadMessages')
+  // async handleLoadMessages(
+  //   @MessageBody() data: { userId1: string; userId2: string },
+  //   @ConnectedSocket() client: Socket,
+  // ) {
+  //   const [user1Id, user2Id] = [data.userId1, data.userId2].sort();
 
-// @SubscribeMessage('loadMessages')
-// async handleLoadMessages(
-//   @MessageBody() data: { userId1: string; userId2: string },
-//   @ConnectedSocket() client: Socket,
-// ) {
-//   const [user1Id, user2Id] = [data.userId1, data.userId2].sort();
+  //   const conversation = await this.prisma.conversation.findFirst({
+  //     where: { user1Id, user2Id },
+  //   });
 
-//   const conversation = await this.prisma.conversation.findFirst({
-//     where: { user1Id, user2Id },
-//   });
+  //   if (!conversation) {
+  //     client.emit('conversationItems', []);
+  //     return;
+  //   }
 
-//   if (!conversation) {
-//     client.emit('conversationItems', []);
-//     return;
-//   }
+  //   // Mark messages as read
+  //   await this.prisma.message.updateMany({
+  //     where: {
+  //       conversationId: conversation.id,
+  //       receiverId: data.userId1,
+  //       isRead: false,
+  //     },
+  //     data: { isRead: true },
+  //   });
 
-//   // Mark messages as read
-//   await this.prisma.message.updateMany({
-//     where: {
-//       conversationId: conversation.id,
-//       receiverId: data.userId1,
-//       isRead: false,
-//     },
-//     data: { isRead: true },
-//   });
+  //   await this.redisService.hSet(
+  //     'userActiveChatMap',
+  //     data.userId1,
+  //     data.userId2,
+  //   );
 
-//   await this.redisService.hSet(
-//     'userActiveChatMap',
-//     data.userId1,
-//     data.userId2,
-//   );
+  //   // Fetch both messages and offers
+  //   const [messages, offers] = await Promise.all([
+  //     this.prisma.message.findMany({
+  //       where: { conversationId: conversation.id },
+  //       orderBy: { createdAt: 'asc' },
+  //     }),
+  //     this.prisma.offer.findMany({
+  //       where: { conversationId: conversation.id },
+  //       orderBy: { createdAt: 'asc' },
+  //     }),
+  //   ]);
 
-//   // Fetch both messages and offers
-//   const [messages, offers] = await Promise.all([
-//     this.prisma.message.findMany({
-//       where: { conversationId: conversation.id },
-//       orderBy: { createdAt: 'asc' },
-//     }),
-//     this.prisma.offer.findMany({
-//       where: { conversationId: conversation.id },
-//       orderBy: { createdAt: 'asc' },
-//     }),
-//   ]);
+  //   // Merge into one array with type tags
+  //   const merged = [
+  //     ...messages.map((m) => ({
+  //       type: 'message',
+  //       id: m.id,
+  //       text: m.text,
+  //       senderId: m.senderId,
+  //       receiverId: m.receiverId,
+  //       createdAt: m.createdAt,
+  //     })),
+  //     ...offers.map((o) => ({
+  //       type: 'offer',
+  //       id: o.id,
+  //       message: o.message,
+  //       price: o.price,
+  //       senderId: o.senderId,
+  //       receiverId: o.receiverId,
+  //       status: o.status,
+  //       createdAt: o.createdAt,
+  //     })),
+  //   ].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
-//   // Merge into one array with type tags
-//   const merged = [
-//     ...messages.map((m) => ({
-//       type: 'message',
-//       id: m.id,
-//       text: m.text,
-//       senderId: m.senderId,
-//       receiverId: m.receiverId,
-//       createdAt: m.createdAt,
-//     })),
-//     ...offers.map((o) => ({
-//       type: 'offer',
-//       id: o.id,
-//       message: o.message,
-//       price: o.price,
-//       senderId: o.senderId,
-//       receiverId: o.receiverId,
-//       status: o.status,
-//       createdAt: o.createdAt,
-//     })),
-//   ].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  //   this.server.to(client.id).emit('conversationItems', merged);
 
-//   this.server.to(client.id).emit('conversationItems', merged);
+  //   this.server.to(client.id).emit('unreadCountUpdate', {
+  //     conversationId: conversation.id,
+  //     count: 0,
+  //     from: data.userId2,
+  //   });
+  // }
 
-//   this.server.to(client.id).emit('unreadCountUpdate', {
-//     conversationId: conversation.id,
-//     count: 0,
-//     from: data.userId2,
-//   });
-// }
-
-@SubscribeMessage('loadMessages')
+  @SubscribeMessage('loadMessages')
 async handleLoadMessages(
   @MessageBody() data: { userId1: string; userId2: string },
   @ConnectedSocket() client: Socket,
@@ -261,7 +333,7 @@ async handleLoadMessages(
       return;
     }
 
-    // Mark unread messages as read for userId1
+    
     await this.prisma.message.updateMany({
       where: {
         conversationId: conversation.id,
@@ -271,49 +343,32 @@ async handleLoadMessages(
       data: { isRead: true },
     });
 
-    // Update Redis active chat map
-    await this.redisService.hSet('userActiveChatMap', data.userId1, data.userId2);
-
-    // Fetch messages and offers
-    const [messages, offers] = await Promise.all([
-      this.prisma.message.findMany({
-        where: { conversationId: conversation.id },
-        orderBy: { createdAt: 'asc' },
-      }),
-      this.prisma.offer.findMany({
-        where: { conversationId: conversation.id },
-        orderBy: { createdAt: 'asc' },
-      }),
-    ]);
-
-    // Merge and sort by createdAt timestamp ascending
-    const merged = [
-      ...messages.map((m) => ({
-        type: 'message' as const,
-        id: m.id,
-        text: m.text,
-        senderId: m.senderId,
-        receiverId: m.receiverId,
-        createdAt: m.createdAt.toISOString(),
-      })),
-      ...offers.map((o) => ({
-        type: 'offer' as const,
-        id: o.id,
-        message: o.message,
-        price: o.price,
-        senderId: o.senderId,
-        receiverId: o.receiverId,
-        status: o.status,
-        createdAt: o.createdAt.toISOString(),
-      })),
-    ].sort(
-      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    
+    await this.redisService.hSet(
+      'userActiveChatMap',
+      data.userId1,
+      data.userId2,
     );
 
-    // Send merged conversation items to client socket only
-    this.server.to(client.id).emit('conversationItems', merged);
+   
+    const messages = await this.prisma.message.findMany({
+      where: { conversationId: conversation.id },
+      orderBy: { createdAt: 'asc' },
+    });
 
-    // Reset unread count UI for this conversation on client
+   
+    const formattedMessages = messages.map((m) => ({
+      type: 'message' as const,
+      id: m.id,
+      text: m.text,
+      senderId: m.senderId,
+      receiverId: m.receiverId,
+      createdAt: m.createdAt.toISOString(),
+    }));
+
+   
+    this.server.to(client.id).emit('conversationItems', formattedMessages);
+
     this.server.to(client.id).emit('unreadCountUpdate', {
       conversationId: conversation.id,
       count: 0,
@@ -326,184 +381,89 @@ async handleLoadMessages(
 }
 
 
-
-
   @SubscribeMessage('getConversations')
-  async handleGetConversations(
-    @MessageBody() data: { userId: string },
-    @ConnectedSocket() client: Socket,
-  ) {
-    const { userId } = data;
+async handleGetConversations(
+  @MessageBody() data: { userId: string; receiverRole?: Role },
+  @ConnectedSocket() client: Socket,
+) {
+  const { userId, receiverRole } = data;
 
-    const conversations = await this.prisma.conversation.findMany({
-      where: {
-        OR: [{ user1Id: userId }, { user2Id: userId }],
-      },
-      orderBy: {
-        lastMessageAt: 'desc',
-      },
-    });
+  const conversations = await this.prisma.conversation.findMany({
+    where: {
+      OR: [{ user1Id: userId }, { user2Id: userId }],
+    },
+    orderBy: {
+      lastMessageAt: 'desc',
+    },
+  });
+
   if (!conversations) {
     client.emit('conversationsLoaded', []);
     return;
   }
 
-    const userIds = conversations.map((c) =>
-      c.user1Id === userId ? c.user2Id : c.user1Id,
-    );
+  // Determine conversation partners
+  const userIds = conversations.map((c) =>
+    c.user1Id === userId ? c.user2Id : c.user1Id,
+  );
 
-    const users = await this.prisma.user.findMany({
-      where: { id: { in: userIds } },
-    });
-
-    const unreadCounts = await this.prisma.message.groupBy({
-      by: ['senderId'],
-      where: {
-        receiverId: userId,
-        isRead: false,
-      },
-      _count: { _all: true },
-    });
-
-    const chatUsers = users.map((u) => {
-      const countObj = unreadCounts.find((x) => x.senderId === u.id);
-      return {
-        id: u.id,
-        hasGoogleAccount: true,
-        unreadCount: countObj?._count._all || 0,
-      };
-    });
-
-    client.emit('conversationsLoaded', chatUsers);
-  }
-
-
-@SubscribeMessage('createOffer')
-async handleCreateOffer(
-  @MessageBody()
-  data: {
-    senderId: string;
-    receiverId: string;
-    message: string;
-    price: number;
-  },
-  @ConnectedSocket() client: Socket,
-) {
-  const { senderId, receiverId, message, price } = data;
-  const [user1Id, user2Id] = [senderId, receiverId].sort(); // maintain order
-
-  // Step 1: Find or create conversation
-  let conversation = await this.prisma.conversation.findFirst({
-    where: { user1Id, user2Id },
-  });
-
-  if (!conversation) {
-    conversation = await this.prisma.conversation.create({
-      data: {
-        user1: { connect: { id: user1Id } },
-        user2: { connect: { id: user2Id } },
-      },
-    });
-  }
-
-  // Step 2: Create offer
-  const offer = await this.prisma.offer.create({
-    data: {
-      conversationId: conversation.id,
-      senderId,
-      receiverId,
-      message,
-      price,
+  // Fetch users with optional role filter
+  const users = await this.prisma.user.findMany({
+    where: {
+      id: { in: userIds },
+      ...(receiverRole && { role: receiverRole }),
     },
   });
 
-  // Step 3: Emit to receiver and sender
-  const [receiverSocketId, senderSocketId] = await Promise.all([
-    this.redisService.hGet('userSocketMap', receiverId),
-    this.redisService.hGet('userSocketMap', senderId),
-  ]);
+  // Group unread messages by sender
+  const unreadCounts = await this.prisma.message.groupBy({
+    by: ['senderId'],
+    where: {
+      receiverId: userId,
+      isRead: false,
+    },
+    _count: { _all: true },
+  });
 
-  const offerPayload = {
-    type: 'offer',
-    ...offer,
-  };
+  // Build chat user response
+  const chatUsers = users.map((u) => {
+    const countObj = unreadCounts.find((x) => x.senderId === u.id);
+    return {
+      id: u.id,
+      hasGoogleAccount: true,
+      unreadCount: countObj?._count._all || 0,
+    };
+  });
 
-  if (receiverSocketId) {
-    this.server.to(receiverSocketId).emit('newChatItem', offerPayload);
-  }
-
-  if (senderSocketId) {
-    this.server.to(senderSocketId).emit('newChatItem', offerPayload);
-  }
-
-  // Optional: send acknowledgment to sender socket
- client.emit('offerCreated', {
-  type: 'offer',
-  ...offer,
-});
-
+  client.emit('conversationsLoaded', chatUsers);
 }
 
-
-
-
-@SubscribeMessage('updateOffer')
-async handleUpdateOffer(
-  @MessageBody()
-  data: {
-    offerId: string;
-    userId: string;
-    message?: string;
-    price?: number;
-    action?: 'ACCEPTED' | 'REJECTED' | 'CANCELLED';
-  },
+@SubscribeMessage('markConversationRead')
+async handleMarkConversationRead(
+  @MessageBody() data: { userId: string; conversationId: string },
   @ConnectedSocket() client: Socket,
 ) {
-  const offer = await this.prisma.offer.findUnique({
-    where: { id: data.offerId },
+  const { userId, conversationId } = data;
+
+  // Step 1: Mark all unread messages as read
+  await this.prisma.message.updateMany({
+    where: {
+      conversationId,
+      receiverId: userId,
+      isRead: false,
+    },
+    data: { isRead: true },
   });
 
-  if (!offer) return;
+  
+  await this.redisService.hDel('userActiveChatMap', userId);
 
-  // Prevent editing ACCEPTED or REJECTED offers
-  if (['ACCEPTED', 'REJECTED'].includes(offer.status)) return;
-
-  const isSender = offer.senderId === data.userId;
-  const isReceiver = offer.receiverId === data.userId;
-
-  // Rules
-  if (data.action === 'CANCELLED' && !isSender) return;
-  if (['ACCEPTED', 'REJECTED'].includes(data.action || '') && !isReceiver) return;
-  if ((data.message || data.price !== undefined) && !isSender) return;
-
-  // Prepare fields to update
-  const updatePayload: any = {};
-  if (data.action) updatePayload.status = data.action;
-  if (data.message) updatePayload.message = data.message;
-  if (data.price !== undefined) updatePayload.price = data.price;
-
-  const updatedOffer = await this.prisma.offer.update({
-    where: { id: data.offerId },
-    data: updatePayload,
+  // Step 3: Emit updated unread count (0)
+  client.emit('unreadCountUpdate', {
+    conversationId,
+    count: 0,
+    from: null, 
   });
-
-  const [senderSocketId, receiverSocketId] = await Promise.all([
-    this.redisService.hGet('userSocketMap', offer.senderId),
-    this.redisService.hGet('userSocketMap', offer.receiverId),
-  ]);
-
-  const payload = {
-    type: 'offer',
-    ...updatedOffer,
-  };
-
-  if (senderSocketId) {
-    this.server.to(senderSocketId).emit('newChatItem', payload);
-  }
-
-  if (receiverSocketId) {
-    this.server.to(receiverSocketId).emit('newChatItem', payload);
-  }
 }
 
 
