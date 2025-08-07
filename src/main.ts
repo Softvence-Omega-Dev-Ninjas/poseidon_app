@@ -9,6 +9,8 @@ async function bootstrap() {
 
   // const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  console.log('Server is running on port:', process.env.CLOUDINARY_API_KEY);
+
   // app.useStaticAssets(join(process.cwd(), 'public'), {
   //   // Optionally set prefix if you want URL like /static/sharif.txt
   //   // prefix: '/static',
