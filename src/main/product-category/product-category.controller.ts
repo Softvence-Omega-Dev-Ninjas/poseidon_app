@@ -7,12 +7,17 @@ import {
   Param,
   Delete,
   Query,
+  UsePipes,
+  ValidationPipe,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProductCategoryService } from './product-category.service';
 import { CreateProductCategoryDto } from './dto/create-product-category.dto';
 import { UpdateProductCategoryDto } from './dto/update-product-category.dto';
 import { FindAllProductCategoriesDto } from './dto/find-all-product-categories.dto';
-import { ApiTags, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
 
 import { UseGuards } from '@nestjs/common';
 import { Roles } from 'src/auth/guard/roles.decorator';
@@ -32,6 +37,7 @@ export class ProductCategoryController {
 
   @Roles(Role.Supporter, Role.User)
   @Get()
+  @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(@Query() query: FindAllProductCategoriesDto) {
     const result = await this.productCategoryService.findAll(query);
     return {
@@ -56,11 +62,27 @@ export class ProductCategoryController {
 
   @Roles(Role.Supporter, Role.User)
   @Patch(':id')
+  @UseInterceptors(FilesInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'Updated Category Name' },
+        image: { type: 'string', format: 'binary' },
+      },
+    },
+  })
   update(
     @Param('id') id: string,
-    @Body() updateProductCategoryDto: UpdateProductCategoryDto,
+    @Body() body: any,
+    @UploadedFiles() files?: Array<Express.Multer.File>,
   ) {
-    return this.productCategoryService.update(id, updateProductCategoryDto);
+    const updateProductCategoryDto = new UpdateProductCategoryDto();
+    if (body.name) {
+      updateProductCategoryDto.name = body.name;
+    }
+    return this.productCategoryService.update(id, updateProductCategoryDto, files);
   }
 
   @Roles(Role.Supporter, Role.User)
