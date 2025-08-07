@@ -1,8 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerSetting } from './config/swagger';
+import * as dotenv from 'dotenv';
 // import { NestExpressApplication } from '@nestjs/platform-express';
 // import { join } from 'path';
+
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
