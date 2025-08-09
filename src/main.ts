@@ -4,6 +4,8 @@ import { SwaggerSetting } from './config/swagger';
 // import { NestExpressApplication } from '@nestjs/platform-express';
 // import { join } from 'path';
 
+// dotenv.config();
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 

@@ -8,6 +8,7 @@ import { PostModule } from './post/post.module';
 import { ImageModule } from './image/image.module';
 import { SupporterProfileModule } from './supporter-profile/supporter-profile.module';
 import { MembershipModule } from './membership/membership.module';
+import { ChatModule } from './message/message.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MembershipModule } from './membership/membership.module';
     PostModule,
     ImageModule,
     SupporterProfileModule,
+    ChatModule,
   ],
   controllers: [],
   providers: [],
