@@ -5,23 +5,23 @@ import { OrderModule } from './order/order.module';
 import { ProductModule } from './product/product.module';
 import { ProductCategoryModule } from './product-category/product-category.module';
 import { PostModule } from './post/post.module';
-import { CommentModule } from './comment/comment.module';
-import { LikeModule } from './like/like.module';
 import { ImageModule } from './image/image.module';
 import { SupporterProfileModule } from './supporter-profile/supporter-profile.module';
+import { MembershipModule } from './membership/membership.module';
+import { ChatModule } from './message/message.module';
 
 @Module({
   imports: [
     UserModule,
-    SupporterProfileModule,
     SupporterModule,
+    MembershipModule,
     OrderModule,
     ProductModule,
     ProductCategoryModule,
     PostModule,
-    CommentModule,
-    LikeModule,
     ImageModule,
+    SupporterProfileModule,
+    ChatModule,
   ],
   controllers: [],
   providers: [],

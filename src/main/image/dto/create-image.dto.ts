@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Visibility } from 'generated/prisma';
 
@@ -19,8 +19,4 @@ export class CreateImageDto {
   @IsEnum(Visibility)
   @IsNotEmpty()
   visibility: Visibility;
-
-  @ApiProperty({ type: 'string', format: 'binary', required: false })
-  @IsOptional()
-  file?: Express.Multer.File;
 }

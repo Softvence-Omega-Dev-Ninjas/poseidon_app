@@ -5,35 +5,58 @@ import {
 } from '@nestjs/common';
 import { Cloudinary } from './cloudinaryConfig.types';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
+import * as streamifier from 'streamifier';
 
 @Injectable()
 export class CloudinaryService {
-  constructor(@Inject('CLOUDINARY') private cloudinary: Cloudinary, private readonly prisma: PrismaService) {}
-  async imageUpload(file?: Express.Multer.File): Promise<{ imageUrl: string; publicId: string }> {
+  constructor(
+    @Inject('CLOUDINARY') private cloudinary: Cloudinary,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  // Upload image using in-memory buffer
+  async imageUpload(file?: Express.Multer.File): Promise<{ mediaId: string }> {
     try {
-      if (file) {
-        const uploadRes = await this.cloudinary.uploader.upload(file.path, {
-          public_id: file.originalname,
-        });
-        return {
+      if (!file) return { mediaId: '' };
+
+      
+
+      const uploadRes = await new Promise<any>((resolve, reject) => {
+        const uploadStream = this.cloudinary.uploader.upload_stream(
+          {
+            public_id: file.originalname,
+            resource_type: 'image',
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          },
+        );
+
+        streamifier.createReadStream(file.buffer).pipe(uploadStream);
+      });
+
+      const media = await this.prisma.media.create({
+        data: {
           imageUrl: uploadRes.secure_url,
           publicId: uploadRes.public_id,
-        };
-      }
-      return { imageUrl: '', publicId: '' }; // Return empty strings if no file
+        },
+      });
+
+      return {
+        mediaId: media.id,
+      };
     } catch (err) {
-      console.error('Error uploading quote:', err);
+      console.error('Error uploading image:', err);
       throw new InternalServerErrorException('Failed to upload Image');
     }
   }
 
-  // remove file with cloudinary
+  // Delete image from Cloudinary using its public ID
   async deleteFile(publicId: string) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const result = await this.cloudinary.uploader.destroy(publicId, {});
-      console.log('Deleted:', result);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      const result = await this.cloudinary.uploader.destroy(publicId);
+     
       return result;
     } catch (error) {
       console.error('Cloudinary deletion error:', error);

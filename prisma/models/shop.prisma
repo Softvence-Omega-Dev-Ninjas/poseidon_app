@@ -8,46 +8,44 @@ model Shop {
 }
 
 model Product {
-  id                     String                      @id @default(uuid())
-  name                   String
-  description            String?
-  draft                  Boolean                    @default(false)
-  price                  Float
-  images              String[]
-  createdAt              DateTime                    @default(now())
-  updatedAt              DateTime                    @updatedAt
-  shopId                 String
-  totalSales             Int                         @default(0)
-  color                  String[]
-  features               String[]
-  offerPrice             Float?
-  successPage            SuccessPage
-  successPagefield       String
-  orders                 Order[]
-  shop                   Shop                        @relation(fields: [shopId], references: [id])
-  productCategories      ProductCategoryOnProduct[] 
+  id                String                     @id @default(uuid())
+  name              String
+  description       String?
+  draft             Boolean                    @default(false)
+  price             Float
+  images            String[]
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+  shopId            String
+  totalSales        Int                        @default(0)
+  color             String[]
+  features          String[]
+  offerPrice        Float?
+  successPage       SuccessPage
+  successPagefield  String
+  orders            Order[]
+  shop              Shop                       @relation(fields: [shopId], references: [id])
+  productCategories ProductCategoryOnProduct[]
 }
 
 model ProductCategory {
-  id                     String                      @id @default(uuid())
-  name                   String
-  image                  String?
-  createdAt              DateTime                    @default(now())
-  updatedAt              DateTime                    @updatedAt
-  productCategories      ProductCategoryOnProduct[]  
+  id                String                     @id @default(uuid())
+  name              String
+  image             String?
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+  productCategories ProductCategoryOnProduct[]
 }
 
 model ProductCategoryOnProduct {
-  productId              String
-  categoryId             String
-  assignedAt             DateTime                    @default(now()) // optional metadata
-
-  product                Product                     @relation(fields: [productId], references: [id])
-  category               ProductCategory             @relation(fields: [categoryId], references: [id])
+  productId  String
+  categoryId String
+  assignedAt DateTime        @default(now())
+  category   ProductCategory @relation(fields: [categoryId], references: [id])
+  product    Product         @relation(fields: [productId], references: [id])
 
   @@id([productId, categoryId])
 }
-
 
 model Order {
   id               String   @id @default(uuid())

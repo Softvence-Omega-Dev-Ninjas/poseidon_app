@@ -6,36 +6,50 @@ import { Public } from 'src/auth/guard/public.decorator';
 import { Request } from 'express';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
+import { GetShopDataService } from './getShopData.service';
+import { GetPostDataService } from './getPostData.service';
+import { resData } from 'src/common/utils/sup-profile.resData';
+// import { ProductService } from '../product/product.service';
 
 @Public()
 @Controller('supporter-profile')
 export class SupporterProfileController {
   constructor(
     private readonly supporterProfileService: SupporterProfileService,
+    private readonly getShopDataService: GetShopDataService,
+    private readonly getPostDataService: GetPostDataService,
   ) {}
 
   @Public()
-  @Roles(Role.Supporter)
+  @Roles(Role.User, Role.Supporter)
   @Get(':profile_id')
   async getSupportCart(
     @Param('profile_id') profile_id: string,
     @Req() res: Request,
   ) {
-    console.log(
-      profile_id,
-      '===',
-      res['sub'],
-      '>>>>',
-      profile_id == res['sub'],
-    );
     const hPageData =
       await this.supporterProfileService.profilePage(profile_id);
-    return {
-      message: 'successfull',
-      error: null,
-      data: hPageData,
-      success: true,
-      editing: profile_id == res['sub'],
-    };
+    return resData({ data: hPageData, editing: profile_id == res['sub'] });
+  }
+
+  // shop data
+  @Public()
+  @Roles(Role.User, Role.Supporter)
+  @Get('shop/:shop_id')
+  shop(@Param('shop_id') shop_id: string) {
+    return this.getShopDataService.getAllShopData(shop_id);
+  }
+
+  @Get('shop/products-details/:id')
+  productsDetails(@Param('id') id: string) {
+    return this.getShopDataService.getFindOne(id);
+  }
+
+  // post data
+  @Public()
+  @Roles(Role.User, Role.Supporter)
+  @Get('posts/:userid')
+  getAllPost(@Param('userid') user_id: string) {
+    return this.getPostDataService.getAllPost(user_id);
   }
 }

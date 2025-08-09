@@ -9,6 +9,7 @@ export interface PayloadType {
   email: string;
   role: string;
   profile?: profileDto;
+  shop_id?: string;
   iat: number;
   exp: number;
 }

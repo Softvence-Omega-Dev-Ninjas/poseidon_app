@@ -1,6 +1,6 @@
 import { Controller, Get, Req } from '@nestjs/common';
-import { Roles } from './auth/guard/roles.decorator';
-import { Role } from './auth/guard/role.enum';
+import { Roles } from 'src/auth/guard/roles.decorator';
+import { Role } from 'src/auth/guard/role.enum';
 import { Request } from 'express';
 // import { Public } from './auth/guard/public.decorator';
 // import { Response } from 'express';
@@ -14,7 +14,7 @@ export class AppController {
   @Roles(Role.Admin, Role.Supporter, Role.User)
   // @Public()
   getHello(@Req() res: Request): string {
-    console.log(res['sub']);
+   
     return 'welcome to poseidon project';
   }
 

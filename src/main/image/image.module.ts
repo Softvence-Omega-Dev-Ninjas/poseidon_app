@@ -6,8 +6,7 @@ import { CloudinaryModule } from 'src/utils/cloudinary/cloudinary.module';
 
 @Module({
   imports: [PrismaClientModule, CloudinaryModule],
-  providers: [ImageService],
   controllers: [ImageController],
-  exports: [ImageService],
+  providers: [ImageService],
 })
 export class ImageModule {}
