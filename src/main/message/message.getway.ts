@@ -36,49 +36,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
 
   async handleConnection(client: Socket) {
-    let token =
-      client.handshake.auth?.token || client.handshake.headers?.authorization;
-    if (!token) {
-      client.emit('error', { message: 'Authentication token is required' });
-      client.disconnect();
-      return;
-    }
-    if (!process.env.AUTHSECRET) {
-      throw new Error('AUTHSECRET is not defined');
-    }
-    if (token.startsWith('Bearer ')) {
-      token = token.replace('Bearer ', '');
-    }
-    try {
-      // const decoded = jwt.verify(token, process.env.AUTHSECRET) as PayloadType;
-      // const userId = decoded.id;
-      const decoded = await this.jwtService.verifyAsync<PayloadType>(token, {
-        secret: process.env.AUTHSECRET,
-      });
-      const userId = decoded.id;
-
-      const user = await this.prisma.user.findUnique({
-        where: { id: userId },
-      });
-      console.log('User found:', user);
-      if (!user) {
-        client.emit('error', { message: 'User not found.' });
-        client.disconnect();
-        return;
-      }
-
-      await this.redisService.hSet('userSocketMap', userId, client.id);
-
-      client.emit('connectionSuccess', {
-        message: 'User connected and authenticated successfully.',
-        userId,
-        socketId: client.id,
-      });
-    } catch (error) {
-      console.error('Authentication error:', error);
-      client.emit('error', { message: 'Invalid or expired token' });
-      client.disconnect();
-    }
+   
   }
 
   async handleDisconnect(client: Socket) {
@@ -91,6 +49,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       await this.redisService.hDel('userSocketMap', userId);
       await this.redisService.hDel('userActiveChatMap', userId);
     }
+  }
+
+  @SubscribeMessage('register')
+  async handleRegister(
+    @MessageBody() data: { userId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    await this.redisService.hSet('userSocketMap', data.userId, client.id);
+    
   }
 
   @SubscribeMessage('sendMessage')
