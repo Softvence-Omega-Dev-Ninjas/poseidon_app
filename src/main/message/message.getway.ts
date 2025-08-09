@@ -15,12 +15,12 @@ import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { PayloadType } from 'src/auth/guard/jwtPayloadType';
 import { Role } from 'src/auth/guard/role.enum';
 import { JwtService } from '@nestjs/jwt';
+import { IsString, IsUUID } from 'class-validator';
+import { SendMessageDto } from './message.dto';
 
-type MessagePayload = {
-  text: string;
-  sender: string;
-  receiver: string;
-};
+
+
+
 
 @WebSocketGateway({ cors: { origin: '*' } })
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -94,12 +94,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('sendMessage')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async handleSendMessage(
-    @MessageBody() data: MessagePayload,
+    @MessageBody() data: SendMessageDto,
     @ConnectedSocket() client: Socket,
   ) {
     const { sender, receiver, text } = data;
     const [user1Id, user2Id] = [sender, receiver].sort();
+    console.log('Received message:', { sender, receiver, text });
 
     let conversation = await this.prisma.conversation.findFirst({
       where: { user1Id, user2Id },
