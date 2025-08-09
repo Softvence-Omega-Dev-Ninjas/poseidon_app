@@ -18,7 +18,6 @@ import { SupporterProfileModule } from './supporter-profile/supporter-profile.mo
     ProductModule,
     ProductCategoryModule,
     PostModule,
-
     ShopModule,
     ImageModule,
     SupporterProfileModule,
