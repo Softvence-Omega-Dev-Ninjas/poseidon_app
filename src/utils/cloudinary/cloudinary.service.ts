@@ -19,7 +19,7 @@ export class CloudinaryService {
     try {
       if (!file) return { mediaId: '' };
 
-      console.log('Uploading file:', file.originalname);
+      
 
       const uploadRes = await new Promise<any>((resolve, reject) => {
         const uploadStream = this.cloudinary.uploader.upload_stream(
@@ -56,7 +56,7 @@ export class CloudinaryService {
   async deleteFile(publicId: string) {
     try {
       const result = await this.cloudinary.uploader.destroy(publicId);
-      console.log('Deleted:', result);
+     
       return result;
     } catch (error) {
       console.error('Cloudinary deletion error:', error);

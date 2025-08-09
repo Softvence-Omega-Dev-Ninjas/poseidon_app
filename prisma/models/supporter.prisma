@@ -26,8 +26,6 @@ model oder_package_name {
   supporter_pay    SupporterPay @relation(fields: [supporter_pay_id], references: [id])
 }
 
-
-// support cart to user in
 model SupportCartLayout {
   id                       String                     @unique @default(uuid())
   author_id                String                     @unique
