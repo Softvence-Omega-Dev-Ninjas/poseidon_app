@@ -24,7 +24,7 @@ import { PrismaClientModule } from './prisma-client/prisma-client.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('AUTHSECRET'),
-        signOptions: { expiresIn: '1h' },
+        signOptions: { expiresIn: '1d' },
       }),
     }),
   ],

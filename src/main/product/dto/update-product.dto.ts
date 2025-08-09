@@ -24,6 +24,11 @@ export class UpdateProductDto {
   description?: string;
 
   @ApiProperty({ required: false })
+  @IsBoolean()
+  @IsOptional()
+  draft?: boolean;
+
+  @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
   @Transform(({ value }) =>

@@ -1,7 +1,82 @@
+enum Duration {
+    ONE_MONTH
+    ONE_YEAR
+}
+
 model Membership_owner {
-    id        String   @id @default(uuid())
-    ownerId   String   @unique
-    owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    id                          String                        @id @default(uuid())
+    ownerId                     String                        @unique
+    owner                       User                          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    createdAt                   DateTime                      @default(now())
+    updatedAt                   DateTime                      @updatedAt
+    Membership_levels           Membership_levels[]
+    MembershipAccessToVideoCall MembershipAccessToVideoCall[] @relation("MembershipAccessToVideoCall")
+    MembershipAccessToGallery   MembershipAccessToGallery[]   @relation("AccessToGallery")
+    MembershipAccessToPosts     MembershipAccessToPosts[]     @relation("AccessToPosts")
+}
+
+model Membership_levels {
+    id               String           @id @default(uuid())
+    membershipId     String
+    membership       Membership_owner @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+    levelName        String
+    levelDescription String?
+
+    levelBenefits              String[]
+    createdAt                  DateTime                     @default(now())
+    updatedAt                  DateTime                     @updatedAt
+    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
+}
+
+model MembershipSubscriptionPlan {
+    id                String            @id @default(uuid())
+    membershipLevelId String
+    membershipLevel   Membership_levels @relation(fields: [membershipLevelId], references: [id], onDelete: Cascade)
+
+    duration Duration // ONE_MONTH or ONE_YEAR
+    price    Float // e.g., 5 or 50
+
+    // Access controls:
+    membershipAccessToVideoCallId String?
+    callLimitAccess               MembershipAccessToVideoCall? @relation(fields: [membershipAccessToVideoCallId], references: [id])
+    membershipAccessGalleryId     String?
+    galleryAccess                 MembershipAccessToGallery?   @relation(fields: [membershipAccessGalleryId], references: [id])
+    membershipAccessToPostsId     String?
+    MembershipAccessToPosts       MembershipAccessToPosts?     @relation(fields: [membershipAccessToPostsId], references: [id])
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@unique([membershipLevelId, duration]) // one plan per level+duration
+}
+
+// access models video call / gallery / post / message
+model MembershipAccessToVideoCall {
+    id                         String                       @id @default(uuid())
+    membership_ownerId         String
+    Membership_owner           Membership_owner             @relation("MembershipAccessToVideoCall", fields: [membership_ownerId], references: [id])
+    title                      String                       @default("Video Call Access")
+    description                String?                      @default("Access to video calls with the owner")
+    totalVideoCalls            Int                          @default(0) // total number of video calls allowed
+    unlimitedVideoCalls        Boolean                      @default(false) // if true, totalVideoCalls is ignored
+    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
+}
+
+model MembershipAccessToGallery {
+    id                         String                       @id @default(uuid())
+    membership_ownerId         String
+    Membership_owner           Membership_owner             @relation("AccessToGallery", fields: [membership_ownerId], references: [id])
+    title                      String                       @default("Gallery Access")
+    description                String                       @default("Access to the gallery with the owner")
+    AccessToPosts              Boolean                      @default(true) // if true, access to posts is granted
+    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
+}
+
+model MembershipAccessToPosts {
+    id                         String                       @id @default(uuid())
+    membership_ownerId         String
+    Membership_owner           Membership_owner             @relation("AccessToPosts", fields: [membership_ownerId], references: [id])
+    title                      String                       @default("Posts Access")
+    description                String                       @default("Access to the posts with the owner")
+    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
 }
