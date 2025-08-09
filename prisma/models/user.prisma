@@ -7,27 +7,28 @@ model User {
   varify              Boolean            @default(false)
   deactivate          Boolean            @default(false)
   role                Roles              @default(user)
+  comments            Comment[]
+  images              Image[]
+  imagescomments      ImageComment[]
+  imageslikes         ImageLike[]
+  likes               Like[]
   orders              Order[]
+  posts               Post[]
   profile             Profile?
   shop                Shop?
   support_cart_layout SupportCartLayout?
   author_supportor    SupporterPay[]     @relation("author_supportor")
   supporter           SupporterPay[]
-  posts               Post[]
-  comments            Comment[]
-  likes               Like[]
-  images              Image[]
-  imageslikes         ImageLike[]
-  imagescomments      ImageComment[]
 
-  //messages
+  // Memberships
+  memberships_owner   Membership_owner?
+
+  // messages system
   conversations1   Conversation[] @relation("User1Conversations")
   conversations2   Conversation[] @relation("User2Conversations")
 
   sentMessages     Message[]   @relation("SentMessages")
   receivedMessages Message[]   @relation("ReceivedMessages")
-   sentOffers     Offer[] @relation("OfferSender")
-  receivedOffers Offer[] @relation("OfferReceiver")
 }
 
 model Profile {
@@ -35,12 +36,13 @@ model Profile {
   userid      String  @unique
   name        String
   image       String
-  cover_image String?
   address     String?
   state       String?
   city        String?
   country     String?
   postcode    String?
+  cover_image String?
+  description String?
   user        User    @relation(fields: [userid], references: [id], onDelete: Cascade)
 }
 

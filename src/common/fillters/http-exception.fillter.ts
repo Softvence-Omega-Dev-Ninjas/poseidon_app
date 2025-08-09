@@ -19,7 +19,7 @@ export class HttpExceptionFiller implements ExceptionFilter {
         ? exception.getResponse()
         : 'Internal server error';
 
-    console.log('Global HttpException - message ', message);
+    
 
     // response.status(status).json({ ...message });
 

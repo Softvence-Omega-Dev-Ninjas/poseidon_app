@@ -110,7 +110,11 @@ export class ImageController {
   @ApiOperation({ summary: 'Get a single image by ID' })
   @ApiResponse({ status: 200, description: 'Returns the image.' })
   @ApiResponse({ status: 404, description: 'Image not found.' })
-  @ApiParam({ name: 'id', description: 'The ID of the image', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the image',
+    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
+  })
   findOne(@Param('id') id: string, @Req() req) {
     return this.imageService.findOne(id, req.user?.sub);
   }
@@ -119,7 +123,11 @@ export class ImageController {
   @UseInterceptors(FileInterceptor('newImage'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Update an image by ID' })
-  @ApiParam({ name: 'id', description: 'The ID of the image', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the image',
+    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -131,7 +139,7 @@ export class ImageController {
         },
         newImage: {
           type: 'string',
-          format: 'binary'
+          format: 'binary',
         },
       },
     },
@@ -153,7 +161,11 @@ export class ImageController {
     description: 'The image has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Image not found.' })
-  @ApiParam({ name: 'id', description: 'The ID of the image', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the image',
+    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
+  })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   remove(@Param('id') id: string, @Req() req) {
     return this.imageService.remove(id, req.sub);
@@ -169,7 +181,11 @@ export class ImageController {
     status: 409,
     description: 'User has already liked this image.',
   })
-  @ApiParam({ name: 'imageId', description: 'The ID of the image', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @ApiParam({
+    name: 'imageId',
+    description: 'The ID of the image',
+    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
+  })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   createLike(@Param('imageId') imageId: string, @Req() req) {
     return this.imageService.createLike(imageId, req.sub);
@@ -182,7 +198,11 @@ export class ImageController {
     description: 'The like has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Like not found.' })
-  @ApiParam({ name: 'imageId', description: 'The ID of the image', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @ApiParam({
+    name: 'imageId',
+    description: 'The ID of the image',
+    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
+  })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   deleteLike(@Param('imageId') imageId: string, @Req() req) {
     return this.imageService.deleteLike(imageId, req.sub);
@@ -194,14 +214,26 @@ export class ImageController {
     status: 201,
     description: 'The comment has been successfully created.',
   })
-  @ApiParam({ name: 'imageId', description: 'The ID of the image', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @ApiParam({
+    name: 'imageId',
+    description: 'The ID of the image',
+    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
+  })
   @ApiBody({
     type: CreateImageCommentDto,
     description: 'Comment content and optional parentId',
   })
   @Roles(Role.Admin, Role.Supporter, Role.User)
-  createComment(@Param('imageId') imageId: string, @Body() createImageCommentDto: CreateImageCommentDto, @Req() req) {
-    return this.imageService.createComment(imageId, createImageCommentDto, req.sub);
+  createComment(
+    @Param('imageId') imageId: string,
+    @Body() createImageCommentDto: CreateImageCommentDto,
+    @Req() req,
+  ) {
+    return this.imageService.createComment(
+      imageId,
+      createImageCommentDto,
+      req.sub,
+    );
   }
 
   @Delete(':imageId/comments/:commentId')
@@ -211,20 +243,49 @@ export class ImageController {
     description: 'The comment has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Comment not found.' })
-  @ApiParam({ name: 'imageId', description: 'The ID of the image', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
-  @ApiParam({ name: 'commentId', description: 'The ID of the comment', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @ApiParam({
+    name: 'imageId',
+    description: 'The ID of the image',
+    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
+  })
+  @ApiParam({
+    name: 'commentId',
+    description: 'The ID of the comment',
+    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
+  })
   @Roles(Role.Admin, Role.Supporter, Role.User)
-  deleteComment(@Param('imageId') imageId: string, @Param('commentId') commentId: string, @Req() req) {
+  deleteComment(
+    @Param('imageId') imageId: string,
+    @Param('commentId') commentId: string,
+    @Req() req,
+  ) {
     return this.imageService.deleteComment(imageId, commentId, req.sub);
   }
 
   @Get(':imageId/comments')
   @ApiOperation({ summary: 'Get all comments for an image' })
   @ApiResponse({ status: 200, description: 'Returns a list of comments.' })
-  @ApiParam({ name: 'imageId', description: 'The ID of the image', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
-  findAllComments(@Param('imageId') imageId: string, @Query() query: FindAllImageCommentsDto) {
+  @ApiParam({
+    name: 'imageId',
+    description: 'The ID of the image',
+    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  findAllComments(
+    @Param('imageId') imageId: string,
+    @Query() query: FindAllImageCommentsDto,
+  ) {
     return this.imageService.findAllComments(imageId, query);
   }
 
@@ -232,7 +293,11 @@ export class ImageController {
   @ApiOperation({ summary: 'Get a single comment by ID' })
   @ApiResponse({ status: 200, description: 'Returns the comment.' })
   @ApiResponse({ status: 404, description: 'Comment not found.' })
-  @ApiParam({ name: 'commentId', description: 'The ID of the comment', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @ApiParam({
+    name: 'commentId',
+    description: 'The ID of the comment',
+    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
+  })
   findCommentById(@Param('commentId') commentId: string) {
     return this.imageService.findCommentById(commentId);
   }
@@ -241,16 +306,30 @@ export class ImageController {
   @ApiOperation({ summary: 'Increment image view count' })
   @ApiResponse({ status: 200, description: 'Image view count incremented.' })
   @ApiResponse({ status: 404, description: 'Image not found.' })
-  @ApiParam({ name: 'id', description: 'The ID of the image', example: '5857257a-7610-470e-ae2f-29a3ca9c06d5' })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the image',
+    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
+  })
   incrementViewCount(@Param('id') id: string) {
     return this.imageService.incrementViewCount(id);
   }
 
   @Get('visibility/:visibility')
   @ApiOperation({ summary: 'Get images by visibility' })
-  @ApiResponse({ status: 200, description: 'Returns a list of images filtered by visibility.' })
-  @ApiParam({ name: 'visibility', enum: ['PUBLIC', 'SUPPORTERS'], description: 'Visibility status' })
-  getImagesByVisibility(@Param('visibility') visibility: Visibility, @Req() req) {
+  @ApiResponse({
+    status: 200,
+    description: 'Returns a list of images filtered by visibility.',
+  })
+  @ApiParam({
+    name: 'visibility',
+    enum: ['PUBLIC', 'SUPPORTERS'],
+    description: 'Visibility status',
+  })
+  getImagesByVisibility(
+    @Param('visibility') visibility: Visibility,
+    @Req() req,
+  ) {
     return this.imageService.getImagesByVisibility(visibility, req.user?.sub);
   }
 }

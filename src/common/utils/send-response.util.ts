@@ -4,6 +4,7 @@ export const sendResponse = (
   statusCode: number = 200,
   redirect_url: string | null = null,
   error: string | null = null,
+  success: boolean = true,
 ) => {
   return {
     message,
@@ -11,6 +12,6 @@ export const sendResponse = (
     statusCode,
     redirect_url,
     error,
-    success: statusCode >= 200 && statusCode < 300,
+    success,
   };
 };

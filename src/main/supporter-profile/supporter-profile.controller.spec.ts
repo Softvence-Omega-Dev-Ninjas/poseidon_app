@@ -11,7 +11,9 @@ describe('SupporterProfileController', () => {
       providers: [SupporterProfileService],
     }).compile();
 
-    controller = module.get<SupporterProfileController>(SupporterProfileController);
+    controller = module.get<SupporterProfileController>(
+      SupporterProfileController,
+    );
   });
 
   it('should be defined', () => {

@@ -33,7 +33,9 @@ export class UpdatePostDto {
     required: false,
   })
   @IsOptional()
-  @Transform(({ value }) => (Array.isArray(value) ? value : [value].filter(Boolean)))
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value : [value].filter(Boolean),
+  )
   @IsArray()
   @IsString({ each: true })
   images?: string[];

@@ -7,8 +7,6 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { HttpExceptionFiller } from './common/fillters/http-exception.fillter';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
-import { PostModule } from './main/post/post.module';
-import { ImageModule } from './main/image/image.module';
 
 import { PrismaClientModule } from './prisma-client/prisma-client.module';
 
@@ -26,12 +24,9 @@ import { PrismaClientModule } from './prisma-client/prisma-client.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('AUTHSECRET'),
-        signOptions: { expiresIn: '1h' },
+        signOptions: { expiresIn: '1d' },
       }),
     }),
-    PostModule,
-    ImageModule,
- 
   ],
   controllers: [AppController],
   providers: [

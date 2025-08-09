@@ -4,7 +4,6 @@ import {
   IsNumber,
   IsOptional,
   IsArray,
-  IsEnum,
   IsBoolean,
   IsIn,
 } from 'class-validator';
@@ -34,7 +33,7 @@ export class CreateProductDto {
   })
   @IsBoolean()
   @IsNotEmpty()
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ value }) => value === 'true' || value === true)
   draft: boolean;
 
   @ApiProperty()
@@ -42,24 +41,58 @@ export class CreateProductDto {
   @IsNotEmpty()
   shopId: string;
 
-  @ApiProperty()
   @ApiProperty({ type: [String] })
   @IsArray()
-  @IsString({ each: true })
-  @IsNotEmpty({ each: true })
-  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : value))
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+      try {
+        // Try to parse as JSON array
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [value];
+      } catch {
+        // If not JSON, split by comma
+        return value.split(',').map(item => item.trim()).filter(item => item);
+      }
+    }
+    return [];
+  })
   categoryIds: string[];
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, type: [String] })
   @IsArray()
   @IsOptional()
-  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : value))
+  @Transform(({ value }) => {
+    if (!value) return undefined;
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [value];
+      } catch {
+        return value.split(',').map(item => item.trim()).filter(item => item);
+      }
+    }
+    return [];
+  })
   color?: string[];
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, type: [String] })
   @IsArray()
   @IsOptional()
-  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : value))
+  @Transform(({ value }) => {
+    if (!value) return undefined;
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [value];
+      } catch {
+        return value.split(',').map(item => item.trim()).filter(item => item);
+      }
+    }
+    return [];
+  })
   features?: string[];
 
   @ApiProperty()
@@ -77,4 +110,14 @@ export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   successPagefield: string;
+
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'string',
+      format: 'binary',
+    },
+    required: false,
+  })
+  images?: Express.Multer.File[];
 }

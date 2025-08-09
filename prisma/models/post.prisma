@@ -1,58 +1,47 @@
+model Post {
+  id           String    @id @default(uuid())
+  drafted      Boolean   @default(false)
+  images       String[]
+  description  String
+  whoCanSee    WhoCanSee @default(PUBLIC)
+  likeCount    Int       @default(0)
+  commentCount Int       @default(0)
+  view         Int       @default(0)
+  userId       String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  comments     Comment[]
+  likes        Like[]
+  user         User      @relation(fields: [userId], references: [id])
+}
 
+model Comment {
+  id        String    @id @default(uuid())
+  content   String
+  userId    String
+  postId    String
+  parentId  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+  post      Post      @relation(fields: [postId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, postId])
+}
 
 enum WhoCanSee {
   PUBLIC
   ONLY_SUPPORTERS
   ONLY_MEMBERS
-}
-
-model Post {
-  id            String      @id @default(uuid())
-  drafted       Boolean     @default(false)
-  images        String[]  
-  description   String
-  whoCanSee     WhoCanSee   @default(PUBLIC)
-  likeCount     Int         @default(0)
-  commentCount  Int         @default(0)
-  view          Int         @default(0)
-
-  userId        String
-  user          User        @relation(fields: [userId], references: [id])
-
-  comments      Comment[]
-  likes         Like[]
-
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-}
-
-model Comment {
-  id          String     @id @default(uuid())
-  content     String
-
-  userId      String
-  postId      String
-  parentId    String?  
-
-  user        User       @relation(fields: [userId], references: [id])
-  post        Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
-  parent      Comment?   @relation("CommentReplies", fields: [parentId], references: [id])
-  replies     Comment[]  @relation("CommentReplies") 
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-}
-
-
-model Like {
-  id        String   @id @default(uuid())
-
-  userId    String
-  postId    String
-
-  user      User     @relation(fields: [userId], references: [id])
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@unique([userId, postId]) // Prevent duplicate likes
 }

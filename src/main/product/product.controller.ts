@@ -9,11 +9,15 @@ import {
   Req,
   UseInterceptors,
   UploadedFiles,
+  BadRequestException,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { Action } from 'src/common/dto/structured-array.dto';
 import {
   ApiTags,
   ApiQuery,
@@ -21,12 +25,11 @@ import {
   ApiBody,
   ApiResponse,
   ApiOperation,
+  ApiParam,
 } from '@nestjs/swagger';
 
-import { UseGuards } from '@nestjs/common';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
-
 
 @ApiTags('Product')
 @Controller('product')
@@ -34,44 +37,23 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
   @Roles(Role.Admin, Role.Supporter, Role.User)
   @Post()
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('images'))
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        description: { type: 'string' },
-        price: { type: 'number' },
-        draft: { type: 'boolean' },
-        shopId: { type: 'string' },
-        categoryIds: { type: 'array', items: { type: 'string' } },
-        color: { type: 'array', items: { type: 'string' } },
-        features: { type: 'array', items: { type: 'string' } },
-        offerPrice: { type: 'number' },
-       successPage: {
-        type: 'string',
-        enum: ['message', 'redirect'],
-      },
-        successPagefield: { type: 'string' },
-        images: {
-          type: 'array',
-          items: {
-            type: 'string',
-            format: 'binary',
-          },
-        },
-      },
-    },
-  })
+  
   create(
     @Body() createProductDto: CreateProductDto,
     @UploadedFiles() files?: Array<Express.Multer.File>,
   ) {
+     console.log('Files received:', createProductDto);
+     if(createProductDto.categoryIds && createProductDto.categoryIds.length === 0) {
+       throw new BadRequestException('At least one categoryId must be provided.');
+     }
+     const { categoryIds, ...restOfProductData } = createProductDto;
     return this.productService.create(createProductDto, files);
   }
 
-  @Roles( Role.Supporter, Role.User)
+  @Roles(Role.Supporter, Role.User)
   @Get()
   @ApiQuery({
     name: 'page',
@@ -106,157 +88,105 @@ export class ProductController {
     return this.productService.findAll(+page, +limit, categoryId, draft);
   }
 
-  @Roles( Role.Supporter, Role.User)
+  @Roles(Role.Supporter, Role.User)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productService.findOne(id);
   }
 
-   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FilesInterceptor('images'))
-  @ApiBody({
-  schema: {
-    type: 'object',
-    properties: {
-      name: { type: 'string', nullable: true },
-      description: { type: 'string', nullable: true },
-      price: { type: 'number', nullable: true },
-      offerPrice: { type: 'number', nullable: true },
-      draft: { type: 'boolean', nullable: true },
-      shopId: { type: 'string', nullable: true },
-      successPage: {
-        type: 'string',
-        enum: ['message', 'redirect'],
-        nullable: true,
-      },
-      successPagefield: { type: 'string', nullable: true },
-
-      // Arrays of objects with value and action
-      images: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            value: { type: 'string' }, // Could be a media URL or ID
-            action: { type: 'string', enum: ['add', 'remove'] },
-          },
-        },
-        nullable: true,
-      },
-      categoryIds: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            value: { type: 'string' },
-            action: { type: 'string', enum: ['add', 'remove'] },
-          },
-        },
-        nullable: true,
-      },
-      color: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            value: { type: 'string' },
-            action: { type: 'string', enum: ['add', 'remove'] },
-          },
-        },
-        nullable: true,
-      },
-      features: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            value: { type: 'string' },
-            action: { type: 'string', enum: ['add', 'remove'] },
-          },
-        },
-        nullable: true,
-      },
-    },
-  },
-})
-
-@Patch(':id')
   @Roles(Role.Supporter, Role.User)
-  @ApiOperation({ summary: 'Update a product' })
-  @ApiResponse({
-    status: 200,
-    description: 'Product updated successfully.',
+  @Patch(':id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseInterceptors(FilesInterceptor('newImages'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Update a product by ID' })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the product',
+    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
   })
-  @ApiResponse({ status: 400, description: 'Invalid input.' })
-  @ApiResponse({ status: 404, description: 'Product not found.' })
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        name: { type: 'string', nullable: true },
-        description: { type: 'string', nullable: true },
-        price: { type: 'number', nullable: true },
-        offerPrice: { type: 'number', nullable: true },
-        draft: { type: 'boolean', nullable: true },
-        shopId: { type: 'string', nullable: true },
-        successPage: {
-          type: 'string',
-          enum: ['message', 'redirect'],
-          nullable: true,
-        },
-        successPagefield: { type: 'string', nullable: true },
-
-        images: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              value: { type: 'string' },
-              action: { type: 'string', enum: ['add', 'remove'] },
-            },
-          },
-          nullable: true,
-        },
+        name: { type: 'string', example: 'Updated Product' },
+        description: { type: 'string', example: 'Updated description' },
+        price: { type: 'number', example: 19.99 },
+        draft: { type: 'boolean', example: true },
         categoryIds: {
           type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              value: { type: 'string' },
-              action: { type: 'string', enum: ['add', 'remove'] },
-            },
-          },
-          nullable: true,
+          items: { type: 'string', example: 'category-id:add' },
         },
         color: {
           type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              value: { type: 'string' },
-              action: { type: 'string', enum: ['add', 'remove'] },
-            },
-          },
-          nullable: true,
+          items: { type: 'string', example: 'Red:add' },
         },
         features: {
           type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              value: { type: 'string' },
-              action: { type: 'string', enum: ['add', 'remove'] },
-            },
-          },
-          nullable: true,
+          items: { type: 'string', example: 'Feature 1:add' },
+        },
+        offerPrice: { type: 'number', example: 15.99 },
+        successPage: { type: 'string', enum: ['message', 'redirect'] },
+        successPagefield: { type: 'string' },
+        images: {
+          type: 'array',
+          items: { type: 'string', example: 'media-id:remove' },
+          description: 'Image string format: value:action',
+        },
+        newImages: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
         },
       },
     },
   })
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(id, updateProductDto);
+  update(
+  @Param('id') id: string,
+  @Body() body: any,
+  @UploadedFiles() newImages: Express.Multer.File[],
+) {
+  const updateProductDto = new UpdateProductDto();
+  for (const key in body) {
+    if (Object.prototype.hasOwnProperty.call(body, key)) {
+      if (['images', 'categoryIds', 'color', 'features'].includes(key)) {
+          let itemsToProcess: string[] = [];
+          if (Array.isArray(body[key])) {
+            itemsToProcess = body[key];
+          } else if (typeof body[key] === 'string') {
+            // Handle comma-separated values, then space-hyphen separated, then single item
+            if (body[key].includes(',')) {
+              itemsToProcess = body[key].split(',').map((s: string) => s.trim());
+            } else if (body[key].includes(' - ')) {
+              itemsToProcess = body[key].split(' - ').map((s: string) => s.trim());
+            } else {
+              itemsToProcess = [body[key].trim()];
+            }
+          }
+
+          updateProductDto[key] = itemsToProcess
+            .filter((item) => item !== '') // Filter out empty strings
+            .map((item: string) => {
+              const [value, actionString] = item.split(':');
+              console.log(`Parsing item: ${item}, Value: ${value}, ActionString: ${actionString}`);
+              const action = actionString === 'add' ? Action.ADD : Action.DELETE;
+              return { value, action };
+            });
+        } else if (key === 'price' || key === 'offerPrice') {
+          updateProductDto[key] = body[key] === '' ? undefined : parseFloat(body[key]);
+        } else if (key === 'draft') {
+          updateProductDto[key] = body[key] === 'true';
+        } else if (key === 'successPage' || key === 'successPagefield') {
+          updateProductDto[key] = body[key] === '' ? undefined : body[key];
+        } else {
+          updateProductDto[key] = body[key];
+        }
+      }
+    }
+    
+    return this.productService.update(id, updateProductDto, newImages);
   }
- @Roles( Role.Supporter, Role.User)
+
+  @Roles(Role.Supporter, Role.User)
   @Get('shop/:shopId')
   @ApiQuery({
     name: 'page',

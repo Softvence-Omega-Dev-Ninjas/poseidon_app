@@ -1,26 +1,71 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSupporterProfileDto } from './dto/create-supporter-profile.dto';
-import { UpdateSupporterProfileDto } from './dto/update-supporter-profile.dto';
+import { PrismaService } from 'src/prisma-client/prisma-client.service';
+// import { GetShopDataService } from './getShopData.service';
 
 @Injectable()
 export class SupporterProfileService {
-  create(createSupporterProfileDto: CreateSupporterProfileDto) {
-    return 'This action adds a new supporterProfile';
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    // private readonly getShopDataService: GetShopDataService,
+  ) {}
 
-  findAll() {
-    return `This action returns all supporterProfile`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} supporterProfile`;
-  }
-
-  update(id: number, updateSupporterProfileDto: UpdateSupporterProfileDto) {
-    return `This action updates a #${id} supporterProfile`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} supporterProfile`;
+  async profilePage(userid: string) {
+    return await this.prisma.$transaction(async (tx) => {
+      const profileInfo = await tx.profile.findUnique({
+        where: {
+          userid: userid,
+          user: {
+            role: 'supporter',
+          },
+        },
+        select: {
+          cover_image: true,
+          name: true,
+          image: true,
+          description: true,
+        },
+      });
+      const supporte_card = await tx.supportCartLayout.findFirst({
+        where: {
+          author_id: userid,
+          author: {
+            role: 'supporter',
+          },
+        },
+      });
+      // shop id
+      const shopid = await tx.shop.findFirst({
+        where: {
+          userId: userid,
+          user: {
+            role: 'supporter',
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+      // const membership_card = await tx. TODO
+      const posts = await tx.post.findMany({
+        where: {
+          userId: userid,
+          whoCanSee: 'PUBLIC',
+          user: {
+            role: 'supporter',
+          },
+        },
+        select: {
+          images: true,
+          description: true,
+          createdAt: true,
+        },
+      });
+      return {
+        profileInfo,
+        supporte_card,
+        shopid: shopid ? shopid.id : null,
+        posts,
+      };
+    });
   }
 }

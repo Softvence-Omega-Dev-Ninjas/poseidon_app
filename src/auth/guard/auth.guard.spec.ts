@@ -5,6 +5,8 @@ import { ConfigService } from '@nestjs/config';
 
 describe('AuthGuard', () => {
   it('should be defined', () => {
-    expect(new AuthGuard(new Reflector(), new JwtService({}), new ConfigService())).toBeDefined();
+    expect(
+      new AuthGuard(new Reflector(), new JwtService({}), new ConfigService()),
+    ).toBeDefined();
   });
 });

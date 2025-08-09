@@ -15,9 +15,16 @@ import { FindAllCommentsDto } from './dto/find-all-comments.dto';
 
 @Injectable()
 export class PostService {
-  constructor(private prisma: PrismaService, private cloudinaryService: CloudinaryService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
-  async create(createPostDto: CreatePostDto, userId: string, files?: Array<Express.Multer.File>): Promise<any> {
+  async create(
+    createPostDto: CreatePostDto,
+    userId: string,
+    files?: Array<Express.Multer.File>,
+  ): Promise<any> {
     try {
       const mediaIds: string[] = [];
 
@@ -53,14 +60,17 @@ export class PostService {
     }
   }
 
-  async findAll(
-    query: FindAllPostsDto,
-    userId?: string,
-  ): Promise<any> {
+  async findAll(query: FindAllPostsDto, userId?: string): Promise<any> {
     try {
-      const { page = 1, limit = 10, sortBy = PostSortBy.NEWEST, whoCanSee } = query;
+      const {
+        page = 1,
+        limit = 10,
+        sortBy = PostSortBy.NEWEST,
+        whoCanSee,
+      } = query;
       const pageNumber = typeof page === 'string' ? parseInt(page, 10) : page;
-      const limitNumber = typeof limit === 'string' ? parseInt(limit, 10) : limit;
+      const limitNumber =
+        typeof limit === 'string' ? parseInt(limit, 10) : limit;
       const offset = (pageNumber - 1) * limitNumber;
 
       let orderBy: Prisma.PostOrderByWithRelationInput;
@@ -164,81 +174,88 @@ export class PostService {
     }
   }
 
-async update(id: string, updatePostDto: UpdatePostDto, newImages: Express.Multer.File[], userId: string): Promise<any> {
-  try {
-    const post = await this.prisma.post.findUnique({ where: { id } });
+  async update(
+    id: string,
+    updatePostDto: UpdatePostDto,
+    newImages: Express.Multer.File[],
+    userId: string,
+  ): Promise<any> {
+    try {
+      const post = await this.prisma.post.findUnique({ where: { id } });
 
-    if (!post) {
-      return {
-        message: 'Post not found',
-        redirect_url: null,
-        error: 'NotFound',
-        data: null,
-        success: false,
-      };
-    }
+      if (!post) {
+        return {
+          message: 'Post not found',
+          redirect_url: null,
+          error: 'NotFound',
+          data: null,
+          success: false,
+        };
+      }
 
-    if (post.userId !== userId) {
-      return {
-        message: 'You are not authorized to update this post.',
-        redirect_url: null,
-        error: 'Forbidden',
-        data: null,
-        success: false,
-      };
-    }
+      if (post.userId !== userId) {
+        return {
+          message: 'You are not authorized to update this post.',
+          redirect_url: null,
+          error: 'Forbidden',
+          data: null,
+          success: false,
+        };
+      }
 
-    const currentImages = post.images || [];
-    let updatedImages = [...currentImages];
+      const currentImages = post.images || [];
+      let updatedImages = [...currentImages];
 
-    // Handle images to remove
-    if (updatePostDto.images && updatePostDto.images.length > 0) {
-      for (const mediaId of updatePostDto.images) {
-        const media = await this.prisma.media.findUnique({ where: { id: mediaId } });
-        if (media) {
-          await this.cloudinaryService.deleteFile(media.publicId);
-          await this.prisma.media.delete({ where: { id: media.id } });
-          updatedImages = updatedImages.filter((img) => img !== mediaId);
+      // Handle images to remove
+      if (updatePostDto.images && updatePostDto.images.length > 0) {
+        for (const mediaId of updatePostDto.images) {
+          const media = await this.prisma.media.findUnique({
+            where: { id: mediaId },
+          });
+          if (media) {
+            await this.cloudinaryService.deleteFile(media.publicId);
+            await this.prisma.media.delete({ where: { id: media.id } });
+            updatedImages = updatedImages.filter((img) => img !== mediaId);
+          }
         }
       }
-    }
 
-    // Handle new images to upload
-    if (newImages && newImages.length > 0) {
-      for (const file of newImages) {
-        const uploadRes = await this.cloudinaryService.imageUpload(file);
-        updatedImages.push(uploadRes.mediaId);
+      // Handle new images to upload
+      if (newImages && newImages.length > 0) {
+        for (const file of newImages) {
+          const uploadRes = await this.cloudinaryService.imageUpload(file);
+          updatedImages.push(uploadRes.mediaId);
+        }
       }
+
+      // Create a new object for the update data, excluding the 'images' field from the DTO
+      const { images, ...updateData } = updatePostDto;
+
+      const updatedPost = await this.prisma.post.update({
+        where: { id },
+        data: {
+          ...updateData,
+          images: updatedImages,
+        },
+      });
+
+      return {
+        message: 'Post updated successfully.',
+        redirect_url: null,
+        error: null,
+        data: updatedPost,
+        success: true,
+      };
+    } catch (error) {
+      return {
+        message: 'Failed to update post.',
+        redirect_url: null,
+        error: error.message,
+        data: null,
+        success: false,
+      };
     }
-
-    // Create a new object for the update data, excluding the 'images' field from the DTO
-    const { images, ...updateData } = updatePostDto;
-
-    const updatedPost = await this.prisma.post.update({
-      where: { id },
-      data: {
-        ...updateData,
-        images: updatedImages,
-      },
-    });
-
-    return {
-      message: 'Post updated successfully.',
-      redirect_url: null,
-      error: null,
-      data: updatedPost,
-      success: true,
-    };
-  } catch (error) {
-    return {
-      message: 'Failed to update post.',
-      redirect_url: null,
-      error: error.message,
-      data: null,
-      success: false,
-    };
   }
-}
 
   async remove(id: string, userId: string): Promise<any> {
     try {
@@ -266,7 +283,9 @@ async update(id: string, updatePostDto: UpdatePostDto, newImages: Express.Multer
 
       // Delete associated media from Cloudinary and database
       for (const mediaId of post.images) {
-        const media = await this.prisma.media.findUnique({ where: { id: mediaId } });
+        const media = await this.prisma.media.findUnique({
+          where: { id: mediaId },
+        });
         if (media) {
           await this.cloudinaryService.deleteFile(media.publicId);
           await this.prisma.media.delete({ where: { id: media.id } });
@@ -385,7 +404,11 @@ async update(id: string, updatePostDto: UpdatePostDto, newImages: Express.Multer
     }
   }
 
-  async createComment(postId: string, createCommentDto: CreateCommentDto, userId: string): Promise<any> {
+  async createComment(
+    postId: string,
+    createCommentDto: CreateCommentDto,
+    userId: string,
+  ): Promise<any> {
     try {
       const newComment = await this.prisma.$transaction(async (prisma) => {
         const comment = await prisma.comment.create({
@@ -477,7 +500,8 @@ async update(id: string, updatePostDto: UpdatePostDto, newImages: Express.Multer
     try {
       const { page = 1, limit = 10 } = query;
       const pageNumber = typeof page === 'string' ? parseInt(page, 10) : page;
-      const limitNumber = typeof limit === 'string' ? parseInt(limit, 10) : limit;
+      const limitNumber =
+        typeof limit === 'string' ? parseInt(limit, 10) : limit;
       const offset = (pageNumber - 1) * limitNumber;
 
       const [comments, total] = await this.prisma.$transaction([
