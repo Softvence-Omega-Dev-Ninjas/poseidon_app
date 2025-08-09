@@ -9,7 +9,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
 import { RedisService } from './message.services';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { PayloadType } from 'src/auth/guard/jwtPayloadType';
@@ -23,6 +23,7 @@ type MessagePayload = {
 };
 
 @WebSocketGateway({ cors: { origin: '*' } })
+  @UsePipes(new ValidationPipe({ transform: true }))
 @Injectable()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
