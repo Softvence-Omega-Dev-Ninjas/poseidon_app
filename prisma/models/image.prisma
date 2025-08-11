@@ -1,27 +1,36 @@
-model Image {
-  id           String         @id @default(uuid())
-  title        String
-  visibility   Visibility     @default(PUBLIC)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  userId       String
-  commentCount Int            @default(0)
-  likeCount    Int            @default(0)
-  mediaId      String         @unique
-  view         Int            @default(0)
-  media        Media          @relation(fields: [mediaId], references: [id])
-  user         User           @relation(fields: [userId], references: [id])
-  comments     ImageComment[]
-  likes        ImageLike[]
+enum Visibility {
+  PUBLIC
+  SUPPORTERS
 }
+
+model Image {
+  id          String     @id @default(uuid())
+  mediaId     String   @unique
+  media       Media    @relation(fields: [mediaId], references: [id])
+  title       String
+  visibility  Visibility @default(PUBLIC)
+  likeCount   Int        @default(0)
+  commentCount Int        @default(0)
+  view        Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  likes         ImageLike[]
+  comments    ImageComment[]
+}
+
+
 
 model ImageLike {
   id        String   @id @default(uuid())
   userId    String
   imageId   String
   createdAt DateTime @default(now())
-  image     Image    @relation(fields: [imageId], references: [id])
+
   user      User     @relation(fields: [userId], references: [id])
+  image     Image    @relation(fields: [imageId], references: [id])
 
   @@unique([userId, imageId])
 }
@@ -32,11 +41,7 @@ model ImageComment {
   userId    String
   imageId   String
   createdAt DateTime @default(now())
-  image     Image    @relation(fields: [imageId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
-}
 
-enum Visibility {
-  PUBLIC
-  SUPPORTERS
+  user      User     @relation(fields: [userId], references: [id])
+  image     Image    @relation(fields: [imageId], references: [id])
 }
