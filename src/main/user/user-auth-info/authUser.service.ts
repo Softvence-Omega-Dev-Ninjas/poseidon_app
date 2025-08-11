@@ -1,6 +1,9 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
+import { CredentialsSignInInfo } from 'src/auth/dto/create-auth.dto';
+import * as argon2 from 'argon2';
+// import { UserInfoType } from './response.type';
 // import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -10,9 +13,10 @@ export class AuthUserService {
 
   // chack user db isExestUser - yes or not
   private async isExestUser(email: string) {
-    return await this.prisma.user.findFirst({
+    const result = await this.prisma.user.findFirst({
       where: {
         email: email,
+        deactivate: false,
       },
       select: {
         id: true,
@@ -20,55 +24,98 @@ export class AuthUserService {
         deactivate: true,
       },
     });
+    return !!result;
   }
 
+  // credentials register system
   async createUser(createUserDto: CreateUserDto) {
-    try {
-      // const newUser = await this.prisma.user.create({
-      //   data: {
-      //     email: createUserDto.email,
-      //     password: createUserDto.password,
-      //     profile: {
-      //       create: {
-      //         ...createUserDto.profile,
-      //       },
-      //     },
-      //     // support_cart_layout: {
-      //     //   create: {},
-      //     // },
-      //   },
-      // });
-      return await this.isExestUser(createUserDto.email);
-    } catch (err) {
-      throw new InternalServerErrorException({
-        massage: 'user created fail',
-        error: err instanceof Error ? err : String(err),
-        data: null,
-        status: false,
-      });
+    const userIsExest = await this.isExestUser(createUserDto.email);
+    if (userIsExest) {
+      throw new HttpException(
+        {
+          message: 'Your Have all ready register please login',
+          redirect_url: 'http://localhost:3000/signin',
+          error: null,
+          data: null,
+          stutas: false,
+        },
+        HttpStatus.CONFLICT,
+      );
     }
-  }
-
-  async findAll() {
-    const allUser = await this.prisma.user.findMany({
+    // create a hash password
+    const hashedPassword = await argon2.hash(createUserDto.password);
+    // let hashedPassword = '';
+    // hashedPassword = await argon2.hash(createUserDto.password);
+    const newUser = await this.prisma.user.create({
+      data: {
+        email: createUserDto.email,
+        password: hashedPassword,
+        profile: {
+          create: {
+            ...createUserDto.profile,
+          },
+        },
+        support_cart_layout: {
+          create: {},
+        },
+        shop: {
+          create: {},
+        },
+      },
       select: {
         id: true,
         email: true,
+        provider: true,
+        profile: {
+          select: {
+            name: true,
+            image: true,
+          },
+        },
       },
     });
-    return allUser;
+    return {
+      message: 'Your Have SignUp Successful',
+      redirect_url: 'http://localhost:3000/signin',
+      error: null,
+      data: { name: newUser.profile?.name },
+      stutas: true,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  async deleteUserId(id: string) {
-    const dltUser = await this.prisma.user.delete({
+  // credentials login system
+  async loginUser(loginUserDto: CredentialsSignInInfo) {
+    const userIsExest = await this.isExestUser(loginUserDto.email);
+    if (!userIsExest) {
+      throw new HttpException(
+        {
+          message:
+            'You don’t have an account. Please register first to continue.',
+          redirect_url: 'http://localhost:3000/signup',
+          error: null,
+          data: null,
+          success: false,
+        },
+        HttpStatus.CONFLICT,
+      );
+    }
+    return await this.prisma.user.findFirst({
       where: {
-        id,
+        AND: [{ email: loginUserDto.email }, { deactivate: false }],
+      },
+      select: {
+        id: true,
+        provider: true,
+        email: true,
+        password: true,
+        role: true,
+        profile: {
+          select: {
+            name: true,
+            image: true,
+          },
+        },
       },
     });
-    return dltUser;
   }
 }

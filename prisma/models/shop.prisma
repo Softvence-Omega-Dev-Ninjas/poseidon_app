@@ -1,53 +1,51 @@
-
-enum SuccessPage {
-  message
-  redirect
-
-}
-
 model Shop {
-  id          String     @id @default(uuid())
-   userId    String     @unique 
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
- user      User       @relation(fields: [userId], references: [id])
-  products    Product[]
-  
+  id        String    @id @default(uuid())
+  userId    String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+  user      User      @relation(fields: [userId], references: [id])
 }
 
 model Product {
-  id              String           @id @default(uuid())
-  name            String
-  description     String?
-  price           Float
-  imageUrl        String?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  shopId          String
-  categoryId      String
-  totalSales      Int              @default(0)
-  color          String[]
-  features       String[]
-  offerPrice     String
-  successPage    SuccessPage
-  successPagefield String
-
-  shop            Shop             @relation(fields: [shopId], references: [id])
-  category        ProductCategory  @relation(fields: [categoryId], references: [id])
-   orders      Order[]
-  
-  
+  id                     String                      @id @default(uuid())
+  name                   String
+  description            String?
+  draft                  Boolean                    @default(false)
+  price                  Float
+  images              String[]
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+  shopId                 String
+  totalSales             Int                         @default(0)
+  color                  String[]
+  features               String[]
+  offerPrice             Float?
+  successPage            SuccessPage
+  successPagefield       String
+  orders                 Order[]
+  shop                   Shop                        @relation(fields: [shopId], references: [id])
+  productCategories      ProductCategoryOnProduct[] 
 }
 
 model ProductCategory {
-  id        String    @id @default(uuid())
-  name      String
-  image     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id                     String                      @id @default(uuid())
+  name                   String
+  image                  String?
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+  productCategories      ProductCategoryOnProduct[]  
+}
 
-  products  Product[]
+model ProductCategoryOnProduct {
+  productId              String
+  categoryId             String
+  assignedAt             DateTime                    @default(now()) // optional metadata
+
+  product                Product                     @relation(fields: [productId], references: [id])
+  category               ProductCategory             @relation(fields: [categoryId], references: [id])
+
+  @@id([productId, categoryId])
 }
 
 
@@ -60,14 +58,16 @@ model Order {
   postCode         String?
   apartmentOrHouse String
   phoneNumber      String
-
+  paymentId        String?
+  userId           String?
   productId        String
-  product          Product  @relation(fields: [productId], references: [id])
-
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  product          Product  @relation(fields: [productId], references: [id])
+  user             User?    @relation(fields: [userId], references: [id])
 }
 
-
-
-
+enum SuccessPage {
+  message
+  redirect
+}

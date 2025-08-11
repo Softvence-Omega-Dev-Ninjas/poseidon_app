@@ -1,35 +1,52 @@
 model User {
-    id         String   @id @unique @default(uuid())
-    provider   String   @default("credentials") // credentials, google, facebook
-    email      String
-    password   String?
-    otp        String?
-    varify     Boolean  @default(false)
-    deactivate Boolean  @default(false)
-    profile    Profile?
-    role       Role     @default(user)
+  id                  String             @id @unique @default(uuid())
+  provider            String             @default("credentials")
+  email               String
+  password            String?
+  otp                 String?
+  varify              Boolean            @default(false)
+  deactivate          Boolean            @default(false)
+  role                Roles              @default(user)
+  orders              Order[]
+  profile             Profile?
+  shop                Shop?
+  support_cart_layout SupportCartLayout?
+  author_supportor    SupporterPay[]     @relation("author_supportor")
+  supporter           SupporterPay[]
+  posts               Post[]
+  comments            Comment[]
+  likes               Like[]
+  images              Image[]
+  imageslikes         ImageLike[]
+  imagescomments      ImageComment[]
 
-    // supporters
-    supporter           SupporterPay[] // user buy support info
-    author_supportor    SupporterPay[]     @relation("author_supportor") // author access
-    support_cart_layout SupportCartLayout?
-    shop      Shop?
+  //messages
+  conversations1   Conversation[] @relation("User1Conversations")
+  conversations2   Conversation[] @relation("User2Conversations")
+
+  sentMessages     Message[]   @relation("SentMessages")
+  receivedMessages Message[]   @relation("ReceivedMessages")
+   sentOffers     Offer[] @relation("OfferSender")
+  receivedOffers Offer[] @relation("OfferReceiver")
 }
 
 model Profile {
-    id       String  @default(uuid())
-    userid   String  @unique
-    user     User    @relation(fields: [userid], references: [id], onDelete: Cascade)
-    name     String
-    address  String?
-    state    String?
-    city     String?
-    country  String?
-    postcode String?
+  id          String  @default(uuid())
+  userid      String  @unique
+  name        String
+  image       String
+  description String?
+  cover_image String?
+  address     String?
+  state       String?
+  city        String?
+  country     String?
+  postcode    String?
+  user        User    @relation(fields: [userid], references: [id], onDelete: Cascade)
 }
 
-enum Role {
-    admin
-    supporter
-    user
+enum Roles {
+  admin
+  supporter
+  user
 }

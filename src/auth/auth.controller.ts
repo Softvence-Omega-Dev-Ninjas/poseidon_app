@@ -1,8 +1,10 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Res, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CredentialsSignInInfo } from './dto/create-auth.dto';
 import { CreateUserDto } from 'src/main/user/dto/create-user.dto';
 import { AuthUserService } from 'src/main/user/user-auth-info/authUser.service';
+import { Response } from 'express';
+import { Public } from './guard/public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -11,12 +13,24 @@ export class AuthController {
     private readonly authUserService: AuthUserService,
   ) {}
 
+  @Public()
   @Post('signup')
   signup(@Body() createAuthDto: CreateUserDto) {
     return this.authUserService.createUser(createAuthDto);
   }
+
+  @Public()
   @Post('signin')
-  signin(@Body() createAuthDto: CredentialsSignInInfo) {
-    return createAuthDto;
+  async signin(
+    @Body() createAuthDto: CredentialsSignInInfo,
+    @Res() res: Response,
+  ) {
+    const userDto = await this.authUserService.loginUser(createAuthDto);
+    const varifyUser = await this.authService.userCredentialsAuthentication(
+      userDto,
+      createAuthDto.password,
+    );
+    res.cookie('accessToken', varifyUser.access_token);
+    return res.status(HttpStatus.OK).json(varifyUser);
   }
 }
