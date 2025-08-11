@@ -4,24 +4,22 @@ enum Visibility {
 }
 
 model Image {
-  id          String     @id @default(uuid())
-  mediaId     String   @unique
-  media       Media    @relation(fields: [mediaId], references: [id])
-  title       String
-  visibility  Visibility @default(PUBLIC)
-  likeCount   Int        @default(0)
+  id           String     @id @default(uuid())
+  mediaId      String     @unique
+  media        Media      @relation(fields: [mediaId], references: [id])
+  title        String
+  visibility   Visibility @default(PUBLIC)
+  likeCount    Int        @default(0)
   commentCount Int        @default(0)
-  view        Int        @default(0)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  view         Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
-  userId      String
-  user        User       @relation(fields: [userId], references: [id])
-  likes         ImageLike[]
-  comments    ImageComment[]
+  userId   String
+  user     User           @relation(fields: [userId], references: [id])
+  likes    ImageLike[]
+  comments ImageComment[]
 }
-
-
 
 model ImageLike {
   id        String   @id @default(uuid())
@@ -29,8 +27,8 @@ model ImageLike {
   imageId   String
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
-  image     Image    @relation(fields: [imageId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+  image Image @relation(fields: [imageId], references: [id])
 
   @@unique([userId, imageId])
 }
@@ -42,6 +40,6 @@ model ImageComment {
   imageId   String
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
-  image     Image    @relation(fields: [imageId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+  image Image @relation(fields: [imageId], references: [id])
 }
