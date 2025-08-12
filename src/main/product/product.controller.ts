@@ -40,16 +40,20 @@ export class ProductController {
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('images'))
-  
   create(
     @Body() createProductDto: CreateProductDto,
     @UploadedFiles() files?: Array<Express.Multer.File>,
   ) {
-     console.log('Files received:', createProductDto);
-     if(createProductDto.categoryIds && createProductDto.categoryIds.length === 0) {
-       throw new BadRequestException('At least one categoryId must be provided.');
-     }
-     const { categoryIds, ...restOfProductData } = createProductDto;
+    console.log('Files received:', createProductDto);
+    if (
+      createProductDto.categoryIds &&
+      createProductDto.categoryIds.length === 0
+    ) {
+      throw new BadRequestException(
+        'At least one categoryId must be provided.',
+      );
+    }
+    const { categoryIds, ...restOfProductData } = createProductDto;
     return this.productService.create(createProductDto, files);
   }
 
@@ -141,23 +145,27 @@ export class ProductController {
     },
   })
   update(
-  @Param('id') id: string,
-  @Body() body: any,
-  @UploadedFiles() newImages: Express.Multer.File[],
-) {
-  const updateProductDto = new UpdateProductDto();
-  for (const key in body) {
-    if (Object.prototype.hasOwnProperty.call(body, key)) {
-      if (['images', 'categoryIds', 'color', 'features'].includes(key)) {
+    @Param('id') id: string,
+    @Body() body: any,
+    @UploadedFiles() newImages: Express.Multer.File[],
+  ) {
+    const updateProductDto = new UpdateProductDto();
+    for (const key in body) {
+      if (Object.prototype.hasOwnProperty.call(body, key)) {
+        if (['images', 'categoryIds', 'color', 'features'].includes(key)) {
           let itemsToProcess: string[] = [];
           if (Array.isArray(body[key])) {
             itemsToProcess = body[key];
           } else if (typeof body[key] === 'string') {
             // Handle comma-separated values, then space-hyphen separated, then single item
             if (body[key].includes(',')) {
-              itemsToProcess = body[key].split(',').map((s: string) => s.trim());
+              itemsToProcess = body[key]
+                .split(',')
+                .map((s: string) => s.trim());
             } else if (body[key].includes(' - ')) {
-              itemsToProcess = body[key].split(' - ').map((s: string) => s.trim());
+              itemsToProcess = body[key]
+                .split(' - ')
+                .map((s: string) => s.trim());
             } else {
               itemsToProcess = [body[key].trim()];
             }
@@ -167,12 +175,16 @@ export class ProductController {
             .filter((item) => item !== '') // Filter out empty strings
             .map((item: string) => {
               const [value, actionString] = item.split(':');
-              console.log(`Parsing item: ${item}, Value: ${value}, ActionString: ${actionString}`);
-              const action = actionString === 'add' ? Action.ADD : Action.DELETE;
+              console.log(
+                `Parsing item: ${item}, Value: ${value}, ActionString: ${actionString}`,
+              );
+              const action =
+                actionString === 'add' ? Action.ADD : Action.DELETE;
               return { value, action };
             });
         } else if (key === 'price' || key === 'offerPrice') {
-          updateProductDto[key] = body[key] === '' ? undefined : parseFloat(body[key]);
+          updateProductDto[key] =
+            body[key] === '' ? undefined : parseFloat(body[key]);
         } else if (key === 'draft') {
           updateProductDto[key] = body[key] === 'true';
         } else if (key === 'successPage' || key === 'successPagefield') {
@@ -182,7 +194,7 @@ export class ProductController {
         }
       }
     }
-    
+
     return this.productService.update(id, updateProductDto, newImages);
   }
 

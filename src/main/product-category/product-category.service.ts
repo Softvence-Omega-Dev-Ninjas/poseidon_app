@@ -78,7 +78,9 @@ export class ProductCategoryService {
     updateProductCategoryDto: UpdateProductCategoryDto,
     files?: Array<Express.Multer.File>,
   ) {
-    const category = await this.prisma.productCategory.findUnique({ where: { id } });
+    const category = await this.prisma.productCategory.findUnique({
+      where: { id },
+    });
     if (!category) {
       throw new NotFoundException(`Product category with ID ${id} not found`);
     }
@@ -92,7 +94,9 @@ export class ProductCategoryService {
 
       // Delete old image if it exists and is different from the new one
       if (category.image && category.image !== imageUrl) {
-        const oldMedia = await this.prisma.media.findUnique({ where: { id: category.image } });
+        const oldMedia = await this.prisma.media.findUnique({
+          where: { id: category.image },
+        });
         if (oldMedia) {
           await this.cloudinaryService.deleteFile(oldMedia.publicId);
           await this.prisma.media.delete({ where: { id: oldMedia.id } });
@@ -101,7 +105,9 @@ export class ProductCategoryService {
     } else if (updateProductCategoryDto.image === null) {
       // If image is explicitly set to null, delete the old image
       if (category.image) {
-        const oldMedia = await this.prisma.media.findUnique({ where: { id: category.image } });
+        const oldMedia = await this.prisma.media.findUnique({
+          where: { id: category.image },
+        });
         if (oldMedia) {
           await this.cloudinaryService.deleteFile(oldMedia.publicId);
           await this.prisma.media.delete({ where: { id: oldMedia.id } });

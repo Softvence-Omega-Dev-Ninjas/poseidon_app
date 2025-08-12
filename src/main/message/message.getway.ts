@@ -18,12 +18,8 @@ import { JwtService } from '@nestjs/jwt';
 import { IsString, IsUUID } from 'class-validator';
 import { SendMessageDto } from './message.dto';
 
-
-
-
-
 @WebSocketGateway({ cors: { origin: '*' } })
-  @UsePipes(new ValidationPipe({ transform: true }))
+@UsePipes(new ValidationPipe({ transform: true }))
 @Injectable()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
@@ -35,9 +31,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwtService: JwtService,
   ) {}
 
-  async handleConnection(client: Socket) {
-   
-  }
+  async handleConnection(client: Socket) {}
 
   async handleDisconnect(client: Socket) {
     const userSocketMap = await this.redisService.hGetAll('userSocketMap');
@@ -57,7 +51,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     await this.redisService.hSet('userSocketMap', data.userId, client.id);
-    
   }
 
   @SubscribeMessage('sendMessage')
