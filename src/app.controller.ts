@@ -14,7 +14,6 @@ export class AppController {
   @Roles(Role.Admin, Role.Supporter, Role.User)
   // @Public()
   getHello(@Req() res: Request): string {
-   
     return 'welcome to poseidon project';
   }
 

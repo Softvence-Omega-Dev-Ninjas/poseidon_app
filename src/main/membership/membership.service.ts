@@ -1,11 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMembershipDto } from './dto/create-membership.dto';
-import { UpdateMembershipDto } from './dto/update-membership.dto';
+import { PrismaService } from 'src/prisma-client/prisma-client.service';
+// import { CreateMembershipDto } from './dto/create-membership.dto';
+// import { UpdateMembershipDto } from './dto/update-membership.dto';
 
 @Injectable()
 export class MembershipService {
-  create(createMembershipDto: CreateMembershipDto) {
-    return 'This action adds a new membership';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async enableMembership(userId: string) {
+    const enableMembership = await this.prisma.membership_owner.create({
+      data: {
+        ownerId: userId,
+        MembershipAccessToVideoCall: {
+          create: {},
+        },
+        MembershipAccessToMessages: {
+          create: {},
+        },
+        MembershipAccessToGallery: {
+          create: {},
+        },
+        MembershipAccessToPosts: {
+          create: {},
+        },
+      },
+    });
+    return enableMembership;
   }
 
   findAll() {
@@ -16,9 +36,9 @@ export class MembershipService {
     return `This action returns a #${id} membership`;
   }
 
-  update(id: number, updateMembershipDto: UpdateMembershipDto) {
-    return `This action updates a #${id} membership`;
-  }
+  // update(id: number, updateMembershipDto: UpdateMembershipDto) {
+  //   return `This action updates a #${id} membership`;
+  // }
 
   remove(id: number) {
     return `This action removes a #${id} membership`;
