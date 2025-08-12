@@ -1,4 +1,10 @@
-import { IsBoolean, IsEnum, IsOptional, IsString, IsUUID } from "class-validator";
+import {
+  IsBoolean,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 import { Role } from 'src/auth/guard/role.enum';
 
 export class SendMessageDto {

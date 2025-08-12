@@ -18,10 +18,6 @@ import { JwtService } from '@nestjs/jwt';
 import { IsString, IsUUID } from 'class-validator';
 import { GetConversationsDto, SendMessageDto } from './message.dto';
 
-
-
-
-
 @WebSocketGateway({ cors: { origin: '*' } })
 @Injectable()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -99,7 +95,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const { sender, receiver, text } = data;
     const [user1Id, user2Id] = [sender, receiver].sort();
-  
 
     let conversation = await this.prisma.conversation.findFirst({
       where: { user1Id, user2Id },
@@ -378,164 +373,161 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  //   @SubscribeMessage('getConversations')
+  // @UsePipes(new ValidationPipe({ transform: true }))
+  // async handleGetConversations(
+  //   @MessageBody() data: { userId: string; receiverRole?: Role },
+  //   @ConnectedSocket() client: Socket,
+  // ) {
+  //   const { userId, receiverRole } = data;
 
-//   @SubscribeMessage('getConversations')
-// @UsePipes(new ValidationPipe({ transform: true }))
-// async handleGetConversations(
-//   @MessageBody() data: { userId: string; receiverRole?: Role },
-//   @ConnectedSocket() client: Socket,
-// ) {
-//   const { userId, receiverRole } = data;
+  //   const conversations = await this.prisma.conversation.findMany({
+  //     where: {
+  //       OR: [{ user1Id: userId }, { user2Id: userId }],
+  //     },
+  //     orderBy: {
+  //       lastMessageAt: 'desc',
+  //     },
+  //   });
 
-//   const conversations = await this.prisma.conversation.findMany({
-//     where: {
-//       OR: [{ user1Id: userId }, { user2Id: userId }],
-//     },
-//     orderBy: {
-//       lastMessageAt: 'desc',
-//     },
-//   });
+  //   if (!conversations.length) {
+  //     client.emit('conversationsLoaded', []);
+  //     return;
+  //   }
 
-//   if (!conversations.length) {
-//     client.emit('conversationsLoaded', []);
-//     return;
-//   }
+  //   // Group unread messages by conversation
+  //   const unreadCounts = await this.prisma.message.groupBy({
+  //     by: ['conversationId'],
+  //     where: {
+  //       receiverId: userId,
+  //       isRead: false,
+  //     },
+  //     _count: { _all: true },
+  //   });
 
-//   // Group unread messages by conversation
-//   const unreadCounts = await this.prisma.message.groupBy({
-//     by: ['conversationId'],
-//     where: {
-//       receiverId: userId,
-//       isRead: false,
-//     },
-//     _count: { _all: true },
-//   });
+  //   const chatUsers = await Promise.all(
+  //     conversations.map(async (conv) => {
+  //       const receiverId = conv.user1Id === userId ? conv.user2Id : conv.user1Id;
 
-//   const chatUsers = await Promise.all(
-//     conversations.map(async (conv) => {
-//       const receiverId = conv.user1Id === userId ? conv.user2Id : conv.user1Id;
+  //       // Fetch receiver user with profile
+  //       const receiverUser = await this.prisma.user.findUnique({
+  //         where: { id: receiverId, ...(receiverRole && { role: receiverRole }) },
+  //         include: { profile: true },
+  //       });
+  //       if (!receiverUser) return null;
 
-//       // Fetch receiver user with profile
-//       const receiverUser = await this.prisma.user.findUnique({
-//         where: { id: receiverId, ...(receiverRole && { role: receiverRole }) },
-//         include: { profile: true },
-//       });
-//       if (!receiverUser) return null;
+  //       // Get last message in this conversation
+  //       const lastMessage = await this.prisma.message.findFirst({
+  //         where: { conversationId: conv.id },
+  //         orderBy: { createdAt: 'desc' },
+  //       });
 
-//       // Get last message in this conversation
-//       const lastMessage = await this.prisma.message.findFirst({
-//         where: { conversationId: conv.id },
-//         orderBy: { createdAt: 'desc' },
-//       });
+  //       // Find unread count for this conversation
+  //       const unreadObj = unreadCounts.find(
+  //         (x) => x.conversationId === conv.id,
+  //       );
 
-//       // Find unread count for this conversation
-//       const unreadObj = unreadCounts.find(
-//         (x) => x.conversationId === conv.id,
-//       );
+  //       return {
+  //         id: receiverUser.id,
+  //         unreadCount: unreadObj?._count._all || 0,
+  //         lastMessage,
+  //         profile: receiverUser.profile?.image,
+  //         role: receiverUser.role,
+  //         name: receiverUser.profile?.name,
+  //         conversationId: conv.id,
+  //       };
+  //     }),
+  //   );
 
-//       return {
-//         id: receiverUser.id,
-//         unreadCount: unreadObj?._count._all || 0,
-//         lastMessage,
-//         profile: receiverUser.profile?.image,
-//         role: receiverUser.role,
-//         name: receiverUser.profile?.name,
-//         conversationId: conv.id,
-//       };
-//     }),
-//   );
+  //   client.emit(
+  //     'conversationsLoaded',
+  //     chatUsers.filter(Boolean),
+  //   );
+  // }
 
-//   client.emit(
-//     'conversationsLoaded',
-//     chatUsers.filter(Boolean), 
-//   );
-// }
+  @SubscribeMessage('getConversations')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async handleGetConversations(
+    @MessageBody()
+    data: GetConversationsDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { userId, receiverRole, onlyUnread } = data;
 
+    const conversations = await this.prisma.conversation.findMany({
+      where: {
+        OR: [{ user1Id: userId }, { user2Id: userId }],
+      },
+      orderBy: {
+        lastMessageAt: 'desc',
+      },
+    });
 
-@SubscribeMessage('getConversations')
-@UsePipes(new ValidationPipe({ transform: true }))
-async handleGetConversations(
-  @MessageBody()
-  data:GetConversationsDto,
-  @ConnectedSocket() client: Socket,
-) {
-  const { userId, receiverRole, onlyUnread } = data;
+    if (!conversations.length) {
+      client.emit('conversationsLoaded', []);
+      return;
+    }
 
-  const conversations = await this.prisma.conversation.findMany({
-    where: {
-      OR: [{ user1Id: userId }, { user2Id: userId }],
-    },
-    orderBy: {
-      lastMessageAt: 'desc',
-    },
-  });
+    // Group unread messages by conversation
+    const unreadCounts = await this.prisma.message.groupBy({
+      by: ['conversationId'],
+      where: {
+        receiverId: userId,
+        isRead: false,
+      },
+      _count: { _all: true },
+    });
 
-  if (!conversations.length) {
-    client.emit('conversationsLoaded', []);
-    return;
-  }
+    let filteredConversations = conversations;
 
-  // Group unread messages by conversation
-  const unreadCounts = await this.prisma.message.groupBy({
-    by: ['conversationId'],
-    where: {
-      receiverId: userId,
-      isRead: false,
-    },
-    _count: { _all: true },
-  });
-
-  let filteredConversations = conversations;
-
-  // If onlyUnread is true, keep only conversations with unread messages
-  if (onlyUnread) {
-    const unreadConversationIds = unreadCounts.map((u) => u.conversationId);
-    filteredConversations = filteredConversations.filter((c) =>
-      unreadConversationIds.includes(c.id),
-    );
-  }
-
-  const chatUsers = await Promise.all(
-    filteredConversations.map(async (conv) => {
-      const receiverId = conv.user1Id === userId ? conv.user2Id : conv.user1Id;
-
-      // Fetch receiver user with profile
-      const receiverUser = await this.prisma.user.findUnique({
-        where: { id: receiverId, ...(receiverRole && { role: receiverRole }) },
-        include: { profile: true },
-      });
-      if (!receiverUser) return null;
-
-      // Get last message in this conversation
-      const lastMessage = await this.prisma.message.findFirst({
-        where: { conversationId: conv.id },
-        orderBy: { createdAt: 'desc' },
-      });
-
-      // Find unread count for this conversation
-      const unreadObj = unreadCounts.find(
-        (x) => x.conversationId === conv.id,
+    // If onlyUnread is true, keep only conversations with unread messages
+    if (onlyUnread) {
+      const unreadConversationIds = unreadCounts.map((u) => u.conversationId);
+      filteredConversations = filteredConversations.filter((c) =>
+        unreadConversationIds.includes(c.id),
       );
+    }
 
-      return {
-        id: receiverUser.id,
-        unreadCount: unreadObj?._count._all || 0,
-        lastMessage,
-        profile: receiverUser.profile?.image,
-        role: receiverUser.role,
-        name: receiverUser.profile?.name,
-        conversationId: conv.id,
-      };
-    }),
-  );
+    const chatUsers = await Promise.all(
+      filteredConversations.map(async (conv) => {
+        const receiverId =
+          conv.user1Id === userId ? conv.user2Id : conv.user1Id;
 
-  client.emit(
-    'conversationsLoaded',
-    chatUsers.filter(Boolean),
-  );
-}
+        // Fetch receiver user with profile
+        const receiverUser = await this.prisma.user.findUnique({
+          where: {
+            id: receiverId,
+            ...(receiverRole && { role: receiverRole }),
+          },
+          include: { profile: true },
+        });
+        if (!receiverUser) return null;
 
+        // Get last message in this conversation
+        const lastMessage = await this.prisma.message.findFirst({
+          where: { conversationId: conv.id },
+          orderBy: { createdAt: 'desc' },
+        });
 
+        // Find unread count for this conversation
+        const unreadObj = unreadCounts.find(
+          (x) => x.conversationId === conv.id,
+        );
+
+        return {
+          id: receiverUser.id,
+          unreadCount: unreadObj?._count._all || 0,
+          lastMessage,
+          profile: receiverUser.profile?.image,
+          role: receiverUser.role,
+          name: receiverUser.profile?.name,
+          conversationId: conv.id,
+        };
+      }),
+    );
+
+    client.emit('conversationsLoaded', chatUsers.filter(Boolean));
+  }
 
   @SubscribeMessage('markConversationRead')
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -565,20 +557,21 @@ async handleGetConversations(
     });
   }
 
-
   @SubscribeMessage('focusChat')
-async handleFocusChat(
-  @MessageBody() data: { userId: string; activeChatWith: string },
-) {
-  // userId is focusing on chat with activeChatWith
-  await this.redisService.hSet('userActiveChatMap', data.userId, data.activeChatWith);
-}
+  async handleFocusChat(
+    @MessageBody() data: { userId: string; activeChatWith: string },
+  ) {
+    // userId is focusing on chat with activeChatWith
+    await this.redisService.hSet(
+      'userActiveChatMap',
+      data.userId,
+      data.activeChatWith,
+    );
+  }
 
-@SubscribeMessage('blurChat')
-async handleBlurChat(@MessageBody() data: { userId: string }) {
-  // userId left the active chat view
-  await this.redisService.hDel('userActiveChatMap', data.userId);
-}
-
-  
+  @SubscribeMessage('blurChat')
+  async handleBlurChat(@MessageBody() data: { userId: string }) {
+    // userId left the active chat view
+    await this.redisService.hDel('userActiveChatMap', data.userId);
+  }
 }
