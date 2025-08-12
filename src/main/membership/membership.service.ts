@@ -7,6 +7,7 @@ import { PrismaService } from 'src/prisma-client/prisma-client.service';
 export class MembershipService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // Enable membership for a specific supporter user
   async enableMembership(userId: string) {
     const enableMembership = await this.prisma.membership_owner.create({
       data: {
