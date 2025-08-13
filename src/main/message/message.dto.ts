@@ -1,5 +1,4 @@
-import { IsBoolean, IsEnum, IsOptional, IsString, IsUUID } from "class-validator";
-import { Role } from 'src/auth/guard/role.enum';
+import { IsString, IsUUID } from "class-validator";
 
 export class SendMessageDto {
   @IsUUID()
@@ -10,19 +9,4 @@ export class SendMessageDto {
 
   @IsString()
   text: string;
-}
-
-export class GetConversationsDto {
-  @IsString()
-  userId: string;
-
-  @IsOptional()
-  @IsEnum(Role, {
-    message: `receiverRole must be one of: ${Object.values(Role).join(', ')}`,
-  })
-  receiverRole?: Role;
-
-  @IsOptional()
-  @IsBoolean({ message: 'onlyUnread must be true or false' })
-  onlyUnread?: boolean;
 }
