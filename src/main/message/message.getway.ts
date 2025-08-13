@@ -561,7 +561,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleFocusChat(
     @MessageBody() data: { userId: string; activeChatWith: string },
   ) {
-    // userId is focusing on chat with activeChatWith
     await this.redisService.hSet(
       'userActiveChatMap',
       data.userId,
