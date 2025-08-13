@@ -16,9 +16,10 @@ export class MembershipController {
   }
 
   @Roles(Role.Supporter)
-  @Post('levels')
+  @Post('create-levels')
   createMembershipLevel() {
-    return 'This action creates a new membership level';
+    // @Body() createMembershipLevelDto: CreateMembershipLevelDto,
+    return this.membershipService.createMembershipLevel();
   }
 
   @Get()

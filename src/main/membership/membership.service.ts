@@ -50,6 +50,8 @@ export class MembershipService {
     return cResponseData(enableMembership);
   }
 
+  async createMembershipLevel() {}
+
   findAll() {
     return `This action returns all membership`;
   }
