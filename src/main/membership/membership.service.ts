@@ -28,16 +28,16 @@ export class MembershipService {
         data: {
           ownerId: userId,
           MembershipAccessToVideoCall: {
-            create: {},
+            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
           },
           MembershipAccessToMessages: {
-            create: {},
+            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
           },
           MembershipAccessToGallery: {
-            create: {},
+            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
           },
           MembershipAccessToPosts: {
-            create: {},
+            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
           },
         },
       });

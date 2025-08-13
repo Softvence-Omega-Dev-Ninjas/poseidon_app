@@ -5,9 +5,11 @@ import {
   IsBoolean,
   Min,
   ValidateNested,
+  IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { Duration } from './create-membership.dto';
 
 export class CreateVideoCallRewardDto {
   @ApiProperty({
@@ -17,6 +19,14 @@ export class CreateVideoCallRewardDto {
   })
   @IsString()
   membership_ownerId: string;
+
+  @ApiProperty({
+    description: 'Duration of the subscription',
+    enum: Duration,
+    example: Duration.ONE_MONTH,
+  })
+  @IsEnum(Duration)
+  duration: Duration;
 
   @ApiProperty({
     required: false,
@@ -67,6 +77,14 @@ export class CreateMembershipAccessToMessagesDto {
   membership_ownerId: string;
 
   @ApiProperty({
+    description: 'Duration of the subscription',
+    enum: Duration,
+    example: Duration.ONE_MONTH,
+  })
+  @IsEnum(Duration)
+  duration: Duration;
+
+  @ApiProperty({
     required: false,
     example: 'Premium Messages Access',
     description: 'Title of the messages access reward',
@@ -115,6 +133,14 @@ export class CreateMembershipAccessToGalleryDto {
   membership_ownerId: string;
 
   @ApiProperty({
+    description: 'Duration of the subscription',
+    enum: Duration,
+    example: Duration.ONE_MONTH,
+  })
+  @IsEnum(Duration)
+  duration: Duration;
+
+  @ApiProperty({
     required: false,
     example: 'Premium Gallery Access',
     description: 'Title of the gallery access reward',
@@ -150,6 +176,14 @@ export class CreateMembershipAccessToPostsDto {
   })
   @IsString()
   membership_ownerId: string;
+
+  @ApiProperty({
+    description: 'Duration of the subscription',
+    enum: Duration,
+    example: Duration.ONE_MONTH,
+  })
+  @IsEnum(Duration)
+  duration: Duration;
 
   @ApiProperty({
     required: false,
