@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 // import { CreateMembershipDto } from './dto/create-membership.dto';
 // import { UpdateMembershipDto } from './dto/update-membership.dto';
@@ -9,25 +10,47 @@ export class MembershipService {
 
   // Enable membership for a specific supporter user
   async enableMembership(userId: string) {
-    const enableMembership = await this.prisma.membership_owner.create({
-      data: {
-        ownerId: userId,
-        MembershipAccessToVideoCall: {
-          create: {},
+    const enableMembership = await this.prisma.$transaction(async (tx) => {
+      const existingMembership = await tx.membership_owner.findFirst({
+        where: {
+          ownerId: userId,
         },
-        MembershipAccessToMessages: {
-          create: {},
+      });
+      if (existingMembership && existingMembership.id) {
+        return {
+          message: 'Membership already exists',
+          error: 'Membership conflict',
+          data: null,
+          success: false,
+        };
+      }
+      const newMembership = await tx.membership_owner.create({
+        data: {
+          ownerId: userId,
+          MembershipAccessToVideoCall: {
+            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+          },
+          MembershipAccessToMessages: {
+            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+          },
+          MembershipAccessToGallery: {
+            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+          },
+          MembershipAccessToPosts: {
+            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+          },
         },
-        MembershipAccessToGallery: {
-          create: {},
-        },
-        MembershipAccessToPosts: {
-          create: {},
-        },
-      },
+      });
+      return {
+        message: 'Membership enabled successfully',
+        data: newMembership.id,
+        success: true,
+      };
     });
-    return enableMembership;
+    return cResponseData(enableMembership);
   }
+
+  async createMembershipLevel() {}
 
   findAll() {
     return `This action returns all membership`;

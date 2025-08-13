@@ -62,6 +62,7 @@ model MembershipAccessToVideoCall {
     id                         String                       @id @default(uuid())
     membership_ownerId         String
     Membership_owner           Membership_owner             @relation("MembershipAccessToVideoCall", fields: [membership_ownerId], references: [id])
+    duration                   Duration
     title                      String                       @default("Video Call Access")
     description                String?                      @default("Access to video calls with the owner")
     totalVideoCalls            Int                          @default(0) // total number of video calls allowed
@@ -73,6 +74,7 @@ model MembershipAccessToMessages {
     id                         String                       @id @default(uuid())
     membership_ownerId         String
     Membership_owner           Membership_owner             @relation("AccessToMessages", fields: [membership_ownerId], references: [id])
+    duration                   Duration
     title                      String                       @default("Messages Access")
     description                String?                      @default("Access to messages with the owner")
     totalMessages              Int                          @default(0) // total number of messages allowed
@@ -84,6 +86,7 @@ model MembershipAccessToGallery {
     id                         String                       @id @default(uuid())
     membership_ownerId         String
     Membership_owner           Membership_owner             @relation("AccessToGallery", fields: [membership_ownerId], references: [id])
+    duration                   Duration
     title                      String                       @default("Gallery Access")
     description                String                       @default("Access to the gallery with the owner")
     AccessToGallery            Boolean                      @default(true) // if true, access to gallery is granted
@@ -94,6 +97,7 @@ model MembershipAccessToPosts {
     id                         String                       @id @default(uuid())
     membership_ownerId         String
     Membership_owner           Membership_owner             @relation("AccessToPosts", fields: [membership_ownerId], references: [id])
+    duration                   Duration
     title                      String                       @default("Posts Access")
     description                String                       @default("Access to the posts with the owner")
     AccessToPosts              Boolean                      @default(true) // if true, access to posts is granted

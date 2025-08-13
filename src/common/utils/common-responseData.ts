@@ -1,7 +1,7 @@
 interface ResDataOptions {
   message?: string | undefined | null;
   error?: string | undefined | null;
-  data?: any[] | null | undefined | object | string;
+  data?: any[] | null | undefined | object | string | number | boolean;
   success?: boolean | undefined | null;
   optional?: any;
 }
