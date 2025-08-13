@@ -60,6 +60,7 @@ export class AuthGuard implements CanActivate {
       request['sub'] = payload.id;
       request['shop_id'] = payload.shop_id;
       if (isPublic) return true;
+      console.log(payload.role, requiredRoles);
       return requiredRoles.some((role) => payload.role?.includes(role));
     } catch {
       if (isPublicCatchBlock.isPublic) return true;

@@ -16,14 +16,10 @@ import { PayloadType } from 'src/auth/guard/jwtPayloadType';
 import { Role } from 'src/auth/guard/role.enum';
 import { JwtService } from '@nestjs/jwt';
 import { IsString, IsUUID } from 'class-validator';
-import { SendMessageDto } from './message.dto';
 
-
-
-
-
+import { GetConversationsDto, SendMessageDto } from './message.dto';
 @WebSocketGateway({ cors: { origin: '*' } })
-  @UsePipes(new ValidationPipe({ transform: true }))
+
 @Injectable()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
@@ -35,8 +31,50 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwtService: JwtService,
   ) {}
 
+
   async handleConnection(client: Socket) {
-   
+    let token =
+      client.handshake.auth?.token || client.handshake.headers?.authorization;
+    if (!token) {
+      client.emit('error', { message: 'Authentication token is required' });
+      client.disconnect();
+      return;
+    }
+    if (!process.env.AUTHSECRET) {
+      throw new Error('AUTHSECRET is not defined');
+    }
+    if (token.startsWith('Bearer ')) {
+      token = token.replace('Bearer ', '');
+    }
+    try {
+      // const decoded = jwt.verify(token, process.env.AUTHSECRET) as PayloadType;
+      // const userId = decoded.id;
+      const decoded = await this.jwtService.verifyAsync<PayloadType>(token, {
+        secret: process.env.AUTHSECRET,
+      });
+      const userId = decoded.id;
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+      if (!user) {
+        client.emit('error', { message: 'User not found.' });
+        client.disconnect();
+        return;
+      }
+
+      await this.redisService.hSet('userSocketMap', userId, client.id);
+
+      client.emit('connectionSuccess', {
+        message: 'User connected and authenticated successfully.',
+        userId,
+        socketId: client.id,
+      });
+    } catch (error) {
+      console.error('Authentication error:', error);
+      client.emit('error', { message: 'Invalid or expired token' });
+      client.disconnect();
+    }
   }
 
   async handleDisconnect(client: Socket) {
@@ -51,15 +89,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  @SubscribeMessage('register')
-  async handleRegister(
-    @MessageBody() data: { userId: string },
-    @ConnectedSocket() client: Socket,
-  ) {
-    await this.redisService.hSet('userSocketMap', data.userId, client.id);
-    
-  }
-
   @SubscribeMessage('sendMessage')
   @UsePipes(new ValidationPipe({ transform: true }))
   async handleSendMessage(
@@ -68,7 +97,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const { sender, receiver, text } = data;
     const [user1Id, user2Id] = [sender, receiver].sort();
-    console.log('Received message:', { sender, receiver, text });
 
     let conversation = await this.prisma.conversation.findFirst({
       where: { user1Id, user2Id },
@@ -288,6 +316,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // }
 
   @SubscribeMessage('loadMessages')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async handleLoadMessages(
     @MessageBody() data: { userId1: string; userId2: string },
     @ConnectedSocket() client: Socket,
@@ -346,12 +375,86 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  //   @SubscribeMessage('getConversations')
+  // @UsePipes(new ValidationPipe({ transform: true }))
+  // async handleGetConversations(
+  //   @MessageBody() data: { userId: string; receiverRole?: Role },
+  //   @ConnectedSocket() client: Socket,
+  // ) {
+  //   const { userId, receiverRole } = data;
+
+  //   const conversations = await this.prisma.conversation.findMany({
+  //     where: {
+  //       OR: [{ user1Id: userId }, { user2Id: userId }],
+  //     },
+  //     orderBy: {
+  //       lastMessageAt: 'desc',
+  //     },
+  //   });
+
+  //   if (!conversations.length) {
+  //     client.emit('conversationsLoaded', []);
+  //     return;
+  //   }
+
+  //   // Group unread messages by conversation
+  //   const unreadCounts = await this.prisma.message.groupBy({
+  //     by: ['conversationId'],
+  //     where: {
+  //       receiverId: userId,
+  //       isRead: false,
+  //     },
+  //     _count: { _all: true },
+  //   });
+
+  //   const chatUsers = await Promise.all(
+  //     conversations.map(async (conv) => {
+  //       const receiverId = conv.user1Id === userId ? conv.user2Id : conv.user1Id;
+
+  //       // Fetch receiver user with profile
+  //       const receiverUser = await this.prisma.user.findUnique({
+  //         where: { id: receiverId, ...(receiverRole && { role: receiverRole }) },
+  //         include: { profile: true },
+  //       });
+  //       if (!receiverUser) return null;
+
+  //       // Get last message in this conversation
+  //       const lastMessage = await this.prisma.message.findFirst({
+  //         where: { conversationId: conv.id },
+  //         orderBy: { createdAt: 'desc' },
+  //       });
+
+  //       // Find unread count for this conversation
+  //       const unreadObj = unreadCounts.find(
+  //         (x) => x.conversationId === conv.id,
+  //       );
+
+  //       return {
+  //         id: receiverUser.id,
+  //         unreadCount: unreadObj?._count._all || 0,
+  //         lastMessage,
+  //         profile: receiverUser.profile?.image,
+  //         role: receiverUser.role,
+  //         name: receiverUser.profile?.name,
+  //         conversationId: conv.id,
+  //       };
+  //     }),
+  //   );
+
+  //   client.emit(
+  //     'conversationsLoaded',
+  //     chatUsers.filter(Boolean),
+  //   );
+  // }
+
   @SubscribeMessage('getConversations')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async handleGetConversations(
-    @MessageBody() data: { userId: string; receiverRole?: Role },
+    @MessageBody()
+    data: GetConversationsDto,
     @ConnectedSocket() client: Socket,
   ) {
-    const { userId, receiverRole } = data;
+    const { userId, receiverRole, onlyUnread } = data;
 
     const conversations = await this.prisma.conversation.findMany({
       where: {
@@ -362,27 +465,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       },
     });
 
-    if (!conversations) {
+    if (!conversations.length) {
       client.emit('conversationsLoaded', []);
       return;
     }
 
-    // Determine conversation partners
-    const userIds = conversations.map((c) =>
-      c.user1Id === userId ? c.user2Id : c.user1Id,
-    );
-
-    // Fetch users with optional role filter
-    const users = await this.prisma.user.findMany({
-      where: {
-        id: { in: userIds },
-        ...(receiverRole && { role: receiverRole }),
-      },
-    });
-
-    // Group unread messages by sender
+    // Group unread messages by conversation
     const unreadCounts = await this.prisma.message.groupBy({
-      by: ['senderId'],
+      by: ['conversationId'],
       where: {
         receiverId: userId,
         isRead: false,
@@ -390,20 +480,59 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       _count: { _all: true },
     });
 
-    // Build chat user response
-    const chatUsers = users.map((u) => {
-      const countObj = unreadCounts.find((x) => x.senderId === u.id);
-      return {
-        id: u.id,
-        hasGoogleAccount: true,
-        unreadCount: countObj?._count._all || 0,
-      };
-    });
+    let filteredConversations = conversations;
 
-    client.emit('conversationsLoaded', chatUsers);
+    // If onlyUnread is true, keep only conversations with unread messages
+    if (onlyUnread) {
+      const unreadConversationIds = unreadCounts.map((u) => u.conversationId);
+      filteredConversations = filteredConversations.filter((c) =>
+        unreadConversationIds.includes(c.id),
+      );
+    }
+
+    const chatUsers = await Promise.all(
+      filteredConversations.map(async (conv) => {
+        const receiverId =
+          conv.user1Id === userId ? conv.user2Id : conv.user1Id;
+
+        // Fetch receiver user with profile
+        const receiverUser = await this.prisma.user.findUnique({
+          where: {
+            id: receiverId,
+            ...(receiverRole && { role: receiverRole }),
+          },
+          include: { profile: true },
+        });
+        if (!receiverUser) return null;
+
+        // Get last message in this conversation
+        const lastMessage = await this.prisma.message.findFirst({
+          where: { conversationId: conv.id },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        // Find unread count for this conversation
+        const unreadObj = unreadCounts.find(
+          (x) => x.conversationId === conv.id,
+        );
+
+        return {
+          id: receiverUser.id,
+          unreadCount: unreadObj?._count._all || 0,
+          lastMessage,
+          profile: receiverUser.profile?.image,
+          role: receiverUser.role,
+          name: receiverUser.profile?.name,
+          conversationId: conv.id,
+        };
+      }),
+    );
+
+    client.emit('conversationsLoaded', chatUsers.filter(Boolean));
   }
 
   @SubscribeMessage('markConversationRead')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async handleMarkConversationRead(
     @MessageBody() data: { userId: string; conversationId: string },
     @ConnectedSocket() client: Socket,
@@ -428,5 +557,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       count: 0,
       from: null,
     });
+  }
+
+  @SubscribeMessage('focusChat')
+  async handleFocusChat(
+    @MessageBody() data: { userId: string; activeChatWith: string },
+  ) {
+    await this.redisService.hSet(
+      'userActiveChatMap',
+      data.userId,
+      data.activeChatWith,
+    );
+  }
+
+  @SubscribeMessage('blurChat')
+  async handleBlurChat(@MessageBody() data: { userId: string }) {
+    // userId left the active chat view
+    await this.redisService.hDel('userActiveChatMap', data.userId);
   }
 }

@@ -82,7 +82,11 @@ export class ProductCategoryController {
     if (body.name) {
       updateProductCategoryDto.name = body.name;
     }
-    return this.productCategoryService.update(id, updateProductCategoryDto, files);
+    return this.productCategoryService.update(
+      id,
+      updateProductCategoryDto,
+      files,
+    );
   }
 
   @Roles(Role.Supporter, Role.User)

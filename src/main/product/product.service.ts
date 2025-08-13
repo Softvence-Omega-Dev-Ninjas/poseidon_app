@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -21,7 +25,7 @@ export class ProductService {
     files?: Array<Express.Multer.File>,
   ) {
     const { categoryIds, ...restOfProductData } = createProductDto;
-    
+
     const shop = await this.prisma.shop.findFirst({
       where: { id: createProductDto.shopId },
     });
@@ -31,8 +35,10 @@ export class ProductService {
     }
 
     if (!categoryIds || categoryIds.length === 0) {
-    throw new BadRequestException('At least one categoryId must be provided.');
-  }
+      throw new BadRequestException(
+        'At least one categoryId must be provided.',
+      );
+    }
 
     const mediaIds: string[] = [];
     if (files && files.length > 0) {
@@ -56,9 +62,7 @@ export class ProductService {
       }
     }
 
-
-   
-    const  product = await this.prisma.product.create({
+    const product = await this.prisma.product.create({
       data: {
         ...restOfProductData,
         images: mediaIds,
@@ -130,27 +134,27 @@ export class ProductService {
       totalPages,
     };
 
-    return sendResponse('Products retrieved successfully', data, 200); 
+    return sendResponse('Products retrieved successfully', data, 200);
   }
 
   async findOne(id: string) {
-  const product = await this.prisma.product.findUnique({
-    where: { id },
-    include: {
-      productCategories: {
-        include: {
-          category: true,
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      include: {
+        productCategories: {
+          include: {
+            category: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  if (!product) {
-    throw new NotFoundException(`Product with ID ${id} not found`);
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    return sendResponse('Product retrieved successfully', product, 200);
   }
-
-  return sendResponse('Product retrieved successfully', product, 200);
-}
 
   async update(
     id: string,
@@ -168,14 +172,8 @@ export class ProductService {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
-    const {
-      categoryIds,
-      images,
-      color,
-      features,
-      draft,
-      ...productData
-    } = updateProductDto;
+    const { categoryIds, images, color, features, draft, ...productData } =
+      updateProductDto;
 
     const updateData: any = {};
 
@@ -183,36 +181,56 @@ export class ProductService {
     if (productData.name !== null && productData.name !== undefined) {
       updateData.name = productData.name;
     }
-    if (productData.description !== null && productData.description !== undefined) {
+    if (
+      productData.description !== null &&
+      productData.description !== undefined
+    ) {
       updateData.description = productData.description;
     }
-    if (productData.price !== null && productData.price !== undefined && !isNaN(productData.price)) {
+    if (
+      productData.price !== null &&
+      productData.price !== undefined &&
+      !isNaN(productData.price)
+    ) {
       updateData.price = productData.price;
     }
-    if (productData.offerPrice !== null && productData.offerPrice !== undefined && !isNaN(productData.offerPrice)) {
+    if (
+      productData.offerPrice !== null &&
+      productData.offerPrice !== undefined &&
+      !isNaN(productData.offerPrice)
+    ) {
       updateData.offerPrice = productData.offerPrice;
     }
-     if (draft !== null && draft !== undefined) {
+    if (draft !== null && draft !== undefined) {
       updateData.draft = draft;
     }
-    if (productData.successPage !== null && productData.successPage !== undefined) {
+    if (
+      productData.successPage !== null &&
+      productData.successPage !== undefined
+    ) {
       updateData.successPage = productData.successPage;
     }
-    if (productData.successPagefield !== null && productData.successPagefield !== undefined) {
+    if (
+      productData.successPagefield !== null &&
+      productData.successPagefield !== undefined
+    ) {
       updateData.successPagefield = productData.successPagefield;
     }
-
 
     // Handle images
     let updatedImages = [...(product.images || [])];
     if (images) {
       for (const item of images) {
         if (item.action === Action.DELETE) {
-          const media = await this.prisma.media.findUnique({ where: { id: item.value } });
+          const media = await this.prisma.media.findUnique({
+            where: { id: item.value },
+          });
           if (media) {
             await this.cloudinaryService.deleteFile(media.publicId);
             await this.prisma.media.delete({ where: { id: media.id } });
-            updatedImages = updatedImages.filter(imgId => imgId !== item.value);
+            updatedImages = updatedImages.filter(
+              (imgId) => imgId !== item.value,
+            );
           }
         }
       }
@@ -224,7 +242,6 @@ export class ProductService {
       }
     }
     updateData.images = updatedImages;
-
 
     // Handle color
     if (color) {
@@ -242,7 +259,7 @@ export class ProductService {
       );
       updateData.features = newFeatures;
     }
-   
+
     // Handle categoryIds
     if (categoryIds) {
       const categoriesToConnect: { categoryId: string }[] = [];
@@ -276,7 +293,9 @@ export class ProductService {
       }
 
       if (categoriesToDisconnect.length > 0) {
-        updateData.productCategories.deleteMany = { OR: categoriesToDisconnect };
+        updateData.productCategories.deleteMany = {
+          OR: categoriesToDisconnect,
+        };
       }
       if (categoriesToConnect.length > 0) {
         const allCategoryIds = categoriesToConnect.map((c) => c.categoryId);

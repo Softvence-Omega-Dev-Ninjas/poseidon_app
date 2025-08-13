@@ -19,8 +19,6 @@ export class HttpExceptionFiller implements ExceptionFilter {
         ? exception.getResponse()
         : 'Internal server error';
 
-    
-
     // response.status(status).json({ ...message });
 
     if (typeof message === 'object' && message !== null) {

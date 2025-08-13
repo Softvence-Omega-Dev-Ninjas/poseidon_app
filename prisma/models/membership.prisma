@@ -24,11 +24,11 @@ model Membership_levels {
     membership       Membership_owner @relation(fields: [membershipId], references: [id], onDelete: Cascade)
     levelName        String
     levelDescription String?
+    levelImage       String
 
-    levelBenefits              String[]
+    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
     createdAt                  DateTime                     @default(now())
     updatedAt                  DateTime                     @updatedAt
-    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
 }
 
 // 2 type subscription plans with duration and price connect to membership and membership_levels - create only supporter
@@ -47,11 +47,11 @@ model MembershipSubscriptionPlan {
     galleryAccess                 MembershipAccessToGallery?   @relation(fields: [membershipAccessGalleryId], references: [id])
     membershipAccessToPostsId     String?
     MembershipAccessToPosts       MembershipAccessToPosts?     @relation(fields: [membershipAccessToPostsId], references: [id])
+    membershipAccessToMessagesId  String?
+    MembershipAccessToMessages    MembershipAccessToMessages?  @relation(fields: [membershipAccessToMessagesId], references: [id])
 
-    createdAt                    DateTime                    @default(now())
-    updatedAt                    DateTime                    @updatedAt
-    MembershipAccessToMessages   MembershipAccessToMessages? @relation(fields: [membershipAccessToMessagesId], references: [id])
-    membershipAccessToMessagesId String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@unique([membershipLevelId, duration]) // one plan per level+duration
 }
