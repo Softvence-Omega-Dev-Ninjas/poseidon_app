@@ -19,7 +19,6 @@ import { IsString, IsUUID } from 'class-validator';
 
 import { GetConversationsDto, SendMessageDto } from './message.dto';
 @WebSocketGateway({ cors: { origin: '*' } })
-
 @Injectable()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
@@ -30,7 +29,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private redisService: RedisService,
     private readonly jwtService: JwtService,
   ) {}
-
 
   async handleConnection(client: Socket) {
     let token =
@@ -65,11 +63,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       await this.redisService.hSet('userSocketMap', userId, client.id);
 
-     //
+      //
       this.server.emit('isUserActiveResponse', {
-      userId,
-      active: true,
-    }); 
+        userId,
+        active: true,
+      });
 
       client.emit('connectionSuccess', {
         message: 'User connected and authenticated successfully.',
@@ -92,10 +90,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (userId) {
       await this.redisService.hDel('userSocketMap', userId);
       await this.redisService.hDel('userActiveChatMap', userId);
-       this.server.emit('isUserActiveResponse', {
-      userId,
-      active: false,
-    });
+      this.server.emit('isUserActiveResponse', {
+        userId,
+        active: false,
+      });
     }
   }
 
@@ -193,7 +191,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
     } else {
       // If conversation exists, create message normally
-      
+
       savedMessage = await this.prisma.message.create({
         data: {
           text,
@@ -469,8 +467,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const { userId, receiverRole, onlyUnread } = data;
 
- 
-
     const conversations = await this.prisma.conversation.findMany({
       where: {
         OR: [{ user1Id: userId }, { user2Id: userId }],
@@ -575,39 +571,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('focusChat')
-  async handleFocusChat(
-    @MessageBody() data: { userId: string;},
-  ) {
-      
-   await this.redisService.hSet(
-      'userActiveChatMap',
-      data.userId,
-      data.userId,
-    );
-    
-    
+  async handleFocusChat(@MessageBody() data: { userId: string }) {
+    await this.redisService.hSet('userActiveChatMap', data.userId, data.userId);
   }
 
   @SubscribeMessage('blurChat')
   async handleBlurChat(@MessageBody() data: { userId: string }) {
     // userId left the active chat view
     await this.redisService.hDel('userActiveChatMap', data.userId);
-     console.log("hite here successfully blurchat")
+    console.log('hite here successfully blurchat');
   }
 
-@SubscribeMessage('isUserActive')
-async isUserActive(
-  @MessageBody() data: { userId: string },
-  @ConnectedSocket() client: Socket,
-) {
-  const socketId = await this.redisService.hGet('userSocketMap', data.userId);
-  const isActive = !!socketId;
-  client.emit('isUserActiveResponse', {
-    userId: data.userId,
-    active: isActive,
-  });
-}
-
-
-  
+  @SubscribeMessage('isUserActive')
+  async isUserActive(
+    @MessageBody() data: { userId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const socketId = await this.redisService.hGet('userSocketMap', data.userId);
+    const isActive = !!socketId;
+    client.emit('isUserActiveResponse', {
+      userId: data.userId,
+      active: isActive,
+    });
+  }
 }

@@ -8,25 +8,8 @@ export class MembershipService {
   constructor(private readonly prisma: PrismaService) {}
 
   // Enable membership for a specific supporter user
-  async enableMembership(userId: string) {
-    const enableMembership = await this.prisma.membership_owner.create({
-      data: {
-        ownerId: userId,
-        MembershipAccessToVideoCall: {
-          create: {},
-        },
-        MembershipAccessToMessages: {
-          create: {},
-        },
-        MembershipAccessToGallery: {
-          create: {},
-        },
-        MembershipAccessToPosts: {
-          create: {},
-        },
-      },
-    });
-    return enableMembership;
+  enableMembership(userId: string) {
+    return userId;
   }
 
   findAll() {
