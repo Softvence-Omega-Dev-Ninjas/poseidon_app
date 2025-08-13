@@ -1,14 +1,5 @@
-import {
-  Controller,
-  Get,
-  // Body,
-  // Patch,
-  Param,
-  Delete,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Delete, Req } from '@nestjs/common';
 import { MembershipService } from './membership.service';
-// import { CreateMembershipDto } from './dto/create-membership.dto';
 // import { UpdateMembershipDto } from './dto/update-membership.dto';
 import { Request } from 'express';
 import { Roles } from 'src/auth/guard/roles.decorator';
@@ -20,8 +11,14 @@ export class MembershipController {
 
   @Roles(Role.Supporter)
   @Get('enable-membership')
-  create(@Req() req: Request) {
+  enableMembership(@Req() req: Request) {
     return this.membershipService.enableMembership(req['sub'] as string);
+  }
+
+  @Roles(Role.Supporter)
+  @Post('levels')
+  createMembershipLevel() {
+    return 'This action creates a new membership level';
   }
 
   @Get()
