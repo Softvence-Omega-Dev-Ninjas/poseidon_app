@@ -10,7 +10,7 @@ export class MembershipRewardController {
   ) {}
 
   @Roles(Role.Supporter)
-  @Post('create_video_call')
+  @Post('video_call')
   createVideoCallReward() {
     return 'This action creates a new video call reward';
   }

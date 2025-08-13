@@ -24,3 +24,9 @@ export class CreateVideoCallRewardDto {
   @IsBoolean()
   unlimitedVideoCalls?: boolean;
 }
+
+// membership_ownerId
+// title
+// description
+// totalVideoCalls
+// unlimitedVideoCalls
