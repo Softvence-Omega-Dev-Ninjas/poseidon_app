@@ -12,28 +12,32 @@ import { Duration } from './create-membership.dto';
 
 export class CreateMembershipSubscriptionPlanDto {
   @ApiProperty({
+    required: false,
     description: 'ID of the membership level',
     example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
   })
   @IsString()
-  @IsNotEmpty()
   @IsUUID()
-  membershipLevelId: string;
+  membershipLevelId?: string;
 
   @ApiProperty({
+    required: true,
     description: 'Duration of the subscription',
     enum: Duration,
     example: Duration.ONE_MONTH,
   })
   @IsEnum(Duration)
+  @IsNotEmpty()
   duration: Duration;
 
   @ApiProperty({
+    required: true,
     description: 'Price of the subscription plan',
     minimum: 0,
     example: 29.99,
   })
   @IsNumber()
+  @IsNotEmpty()
   @Min(0)
   price: number;
 
