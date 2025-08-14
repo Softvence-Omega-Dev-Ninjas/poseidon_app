@@ -48,8 +48,7 @@ export class ImageController {
     status: 201,
     description: 'The image has been successfully created.',
   })
-
-  @Roles( Role.Supporter)
+  @Roles(Role.Supporter)
   create(
     @Body() createImageDto: CreateImageDto,
     @Req() req,
@@ -89,7 +88,6 @@ export class ImageController {
     return this.imageService.findAll(query, req.user?.sub);
   }
 
-
   @Get(':id')
   @ApiOperation({ summary: 'Get a single image by ID' })
   @ApiResponse({ status: 200, description: 'Returns the image.' })
@@ -112,14 +110,19 @@ export class ImageController {
     description: 'The ID of the image',
     example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
   })
-  @Roles( Role.Supporter,)
+  @Roles(Role.Supporter)
   update(
     @Param('id') id: string,
     @Body() updateImageDto: UpdateImageDto,
     @UploadedFile() newImage: Express.Multer.File,
     @Req() req,
   ) {
-    return this.imageService.update(id, updateImageDto, newImage, req.user?.sub);
+    return this.imageService.update(
+      id,
+      updateImageDto,
+      newImage,
+      req.user?.sub,
+    );
   }
 
   @Delete(':id')
@@ -129,9 +132,9 @@ export class ImageController {
     description: 'The ID of the image',
     example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
   })
-  @Roles( Role.Supporter,)
+  @Roles(Role.Supporter)
   remove(@Param('id') id: string, @Req() req) {
-    return this.imageService.remove(id,req.user?.sub);
+    return this.imageService.remove(id, req.user?.sub);
   }
 
   @Post(':imageId/likes')
@@ -145,7 +148,6 @@ export class ImageController {
   createLike(@Param('imageId') imageId: string, @Req() req) {
     return this.imageService.createLike(imageId, req.sub);
   }
-
 
   @Delete(':imageId/likes')
   @ApiOperation({ summary: 'Delete a like for an image' })
@@ -174,7 +176,7 @@ export class ImageController {
     return this.imageService.createComment(
       imageId,
       createImageCommentDto,
-      req.user?.sub
+      req.user?.sub,
     );
   }
 
@@ -196,10 +198,8 @@ export class ImageController {
     @Param('commentId') commentId: string,
     @Req() req,
   ) {
-    return this.imageService.deleteComment(imageId, commentId,req.user?.sub);
+    return this.imageService.deleteComment(imageId, commentId, req.user?.sub);
   }
-
-
 
   @Get(':imageId/comments')
   @ApiOperation({ summary: 'Get all comments for an image' })
