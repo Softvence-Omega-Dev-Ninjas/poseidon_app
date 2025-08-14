@@ -9,11 +9,12 @@ import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { FindAllImagesDto, ImageSortBy } from './dto/find-all-images.dto';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
-import { Image, Prisma, Visibility } from '../../../generated/prisma';
+import { Image, Prisma, Roles, Roles as Visibility } from '../../../generated/prisma';
 import { CreateImageCommentDto } from './dto/create-image-comment.dto';
 import { FindAllImageCommentsDto } from './dto/find-all-image-comments.dto';
 import { sendResponse } from 'src/common/utils/send-response.util';
 import { HttpStatus } from 'src/common/utils/http-status.enum';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Injectable()
 export class ImageService {
@@ -34,12 +35,16 @@ export class ImageService {
         const uploadRes = await this.cloudinaryService.imageUpload(file);
         mediaId = uploadRes.mediaId;
       } else {
-        return sendResponse(
-          'Image file is required.',
-          null,
-          HttpStatus.BAD_REQUEST,
+         
+        return cResponseData(
+          {
+            message:'Image file is required.',
+            success:false,
+          }
         );
       }
+
+
 
       const newImage = await this.prisma.image.create({
         data: {
@@ -48,18 +53,20 @@ export class ImageService {
           mediaId,
         },
       });
-      return sendResponse(
-        'Image created successfully.',
-        newImage,
-        HttpStatus.CREATED,
+      return cResponseData(
+        {
+          message:'Image created successfully.',
+          data: newImage,
+          success:true,
+        }
       );
     } catch (error) {
-      return sendResponse(
-        'Failed to create image.',
-        null,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        null,
-        error.message,
+      console.log(error)
+      return cResponseData({
+        message:'Failed to create image.',
+        error:error,
+        success:false
+      }
       );
     }
   }
@@ -109,29 +116,38 @@ export class ImageService {
 
       const imagesWithIsLiked = images.map((image) => {
         const { likes, ...rest } = image;
-        return { ...rest, isLiked: likes.length > 0 };
+         const data  = { ...rest, isLiked: likes.length > 0 };
+        return cResponseData(
+        {
+          data,
+          
+        }
+      );
+         
       });
 
       const totalPages = Math.ceil(total / limitNumber);
-
-      return sendResponse(
-        'Images retrieved successfully.',
-        {
+      const data = {
           data: imagesWithIsLiked,
           total,
           currentPage: pageNumber,
           limit: limitNumber,
           totalPages,
-        },
-        HttpStatus.OK,
-      );
+        }
+
+      return cResponseData({
+        message:'Images retrieved successfully.',
+        data,
+        success:true
+      });
     } catch (error) {
-      return sendResponse(
-        'Failed to retrieve images.',
-        null,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        null,
-        error.message,
+      return  cResponseData(
+       {
+        message: error?.message || 'Failed to retrieve images.',
+        error:error,
+        success:false,
+       }
+        
       );
     }
   }
@@ -152,18 +168,18 @@ export class ImageService {
       });
 
       const { likes, ...rest } = image;
-      return sendResponse(
-        'Image retrieved successfully.',
-        { ...rest, isLiked: likes.length > 0 },
-        HttpStatus.OK,
+      return cResponseData({
+        message:'Image retrieved successfully.',
+        data:   { ...rest, isLiked: likes.length > 0 },
+        success:true,
+      }
       );
     } catch (error) {
-      return sendResponse(
-        'Failed to retrieve image.',
-        null,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        null,
-        error.message,
+      return cResponseData({
+        message: error.message || 'Failed to retrieve image.',
+        error:error,
+        success:false,
+      }
       );
     }
   }
@@ -210,18 +226,18 @@ export class ImageService {
         },
       });
 
-      return sendResponse(
-        'Image updated successfully.',
-        updatedImage,
-        HttpStatus.OK,
+      return cResponseData({
+        message:'Image updated successfully.',
+        data:updatedImage,
+        success:true,
+      }
       );
     } catch (error) {
-      return sendResponse(
-        'Failed to update image.',
-        null,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        null,
-        error.message,
+      return cResponseData({
+        message: error.message || 'Failed to update image.',
+        success:false,
+        error,
+      }
       );
     }
   }
