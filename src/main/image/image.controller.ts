@@ -32,7 +32,7 @@ import { Role } from 'src/auth/guard/role.enum';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { CreateImageCommentDto } from './dto/create-image-comment.dto';
 import { FindAllImageCommentsDto } from './dto/find-all-image-comments.dto';
-import { Visibility } from '../../../generated/prisma';
+import { Roles as Visibility } from '../../../generated/prisma';
 
 @ApiTags('images')
 @Roles(Role.Admin, Role.Supporter, Role.User)
@@ -48,25 +48,7 @@ export class ImageController {
     status: 201,
     description: 'The image has been successfully created.',
   })
-  @ApiBody({
-    description: 'Form data for creating an image',
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', example: 'My Awesome Image' },
-        visibility: {
-          type: 'string',
-          enum: ['PUBLIC', 'SUPPORTERS'],
-        },
-        image: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-      required: ['title', 'visibility', 'image'],
-    },
-  })
-  @Roles(Role.Admin, Role.Supporter, Role.User)
+  @Roles(Role.Supporter)
   create(
     @Body() createImageDto: CreateImageDto,
     @Req() req,
@@ -99,7 +81,7 @@ export class ImageController {
   @ApiQuery({
     name: 'visibility',
     required: false,
-    enum: [Visibility.PUBLIC, Visibility.SUPPORTERS],
+    enum: [Visibility.admin, Visibility.user, Visibility.supporter],
     description: 'Filter by visibility',
   })
   findAll(@Query() query: FindAllImagesDto, @Req() req) {
@@ -128,59 +110,35 @@ export class ImageController {
     description: 'The ID of the image',
     example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
   })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', example: 'Updated Image Title' },
-        visibility: {
-          type: 'string',
-          enum: ['PUBLIC', 'SUPPORTERS'],
-        },
-        newImage: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  @Roles(Role.Admin, Role.Supporter, Role.User)
+  @Roles(Role.Supporter)
   update(
     @Param('id') id: string,
     @Body() updateImageDto: UpdateImageDto,
     @UploadedFile() newImage: Express.Multer.File,
     @Req() req,
   ) {
-    return this.imageService.update(id, updateImageDto, newImage, req.sub);
+    return this.imageService.update(
+      id,
+      updateImageDto,
+      newImage,
+      req.user?.sub,
+    );
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete an image by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'The image has been successfully deleted.',
-  })
-  @ApiResponse({ status: 404, description: 'Image not found.' })
   @ApiParam({
     name: 'id',
     description: 'The ID of the image',
     example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
   })
-  @Roles(Role.Admin, Role.Supporter, Role.User)
+  @Roles(Role.Supporter)
   remove(@Param('id') id: string, @Req() req) {
-    return this.imageService.remove(id, req.sub);
+    return this.imageService.remove(id, req.user?.sub);
   }
 
   @Post(':imageId/likes')
   @ApiOperation({ summary: 'Create a new like for an image' })
-  @ApiResponse({
-    status: 201,
-    description: 'The like has been successfully created.',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'User has already liked this image.',
-  })
   @ApiParam({
     name: 'imageId',
     description: 'The ID of the image',
@@ -193,11 +151,6 @@ export class ImageController {
 
   @Delete(':imageId/likes')
   @ApiOperation({ summary: 'Delete a like for an image' })
-  @ApiResponse({
-    status: 204,
-    description: 'The like has been successfully deleted.',
-  })
-  @ApiResponse({ status: 404, description: 'Like not found.' })
   @ApiParam({
     name: 'imageId',
     description: 'The ID of the image',
@@ -205,20 +158,11 @@ export class ImageController {
   })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   deleteLike(@Param('imageId') imageId: string, @Req() req) {
-    return this.imageService.deleteLike(imageId, req.sub);
+    return this.imageService.deleteLike(imageId, req.user?.sub);
   }
 
   @Post(':imageId/comments')
   @ApiOperation({ summary: 'Create a new comment for an image' })
-  @ApiResponse({
-    status: 201,
-    description: 'The comment has been successfully created.',
-  })
-  @ApiParam({
-    name: 'imageId',
-    description: 'The ID of the image',
-    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
-  })
   @ApiBody({
     type: CreateImageCommentDto,
     description: 'Comment content and optional parentId',
@@ -232,17 +176,12 @@ export class ImageController {
     return this.imageService.createComment(
       imageId,
       createImageCommentDto,
-      req.sub,
+      req.user?.sub,
     );
   }
 
   @Delete(':imageId/comments/:commentId')
   @ApiOperation({ summary: 'Delete a comment for an image' })
-  @ApiResponse({
-    status: 204,
-    description: 'The comment has been successfully deleted.',
-  })
-  @ApiResponse({ status: 404, description: 'Comment not found.' })
   @ApiParam({
     name: 'imageId',
     description: 'The ID of the image',
@@ -259,7 +198,7 @@ export class ImageController {
     @Param('commentId') commentId: string,
     @Req() req,
   ) {
-    return this.imageService.deleteComment(imageId, commentId, req.sub);
+    return this.imageService.deleteComment(imageId, commentId, req.user?.sub);
   }
 
   @Get(':imageId/comments')

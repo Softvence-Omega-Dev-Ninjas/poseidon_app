@@ -1,14 +1,11 @@
-enum Visibility {
-  PUBLIC
-  SUPPORTERS
-}
+
 
 model Image {
   id          String     @id @default(uuid())
   mediaId     String   @unique
   media       Media    @relation(fields: [mediaId], references: [id])
   title       String
-  visibility  Visibility @default(PUBLIC)
+  visibility  Roles @default(supporter)
   likeCount   Int        @default(0)
   commentCount Int        @default(0)
   view        Int        @default(0)
