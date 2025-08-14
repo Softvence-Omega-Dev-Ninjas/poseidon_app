@@ -361,7 +361,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const messages = await this.prisma.message.findMany({
         where: { conversationId: conversation.id },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { createdAt: 'desc' },
       });
 
       const formattedMessages = messages.map((m) => ({
@@ -594,4 +594,51 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       active: isActive,
     });
   }
+
+
+  @SubscribeMessage('clearMessageHistory')
+ @UsePipes(new ValidationPipe({ transform: true }))
+ async handleClearMessageHistory(
+  @MessageBody() data: { userId: string; conversationId: string },
+  @ConnectedSocket() client: Socket,
+) {
+  const { userId, conversationId } = data;
+
+  // 1. Verify conversation exists and user is a participant
+  const conversation = await this.prisma.conversation.findUnique({
+    where: { id: conversationId },
+  });
+
+  if (!conversation || (conversation.user1Id !== userId && conversation.user2Id !== userId)) {
+    client.emit('error', { message: 'You are not part of this conversation' });
+    return;
+  }
+
+  // 2. Delete all messages sent by this user in this conversation
+  await this.prisma.message.deleteMany({
+    where: {
+      conversationId,
+      senderId: userId,
+    },
+  });
+
+  // 3. Notify both participants to update UI
+  const [user1SocketId, user2SocketId] = await Promise.all([
+    this.redisService.hGet('userSocketMap', conversation.user1Id),
+    this.redisService.hGet('userSocketMap', conversation.user2Id),
+  ]);
+
+  const payload = {
+    conversationId,
+    clearedBy: userId,
+    message: 'Message history cleared by the sender',
+  };
+
+  if (user1SocketId) this.server.to(user1SocketId).emit('historyCleared', payload);
+  if (user2SocketId) this.server.to(user2SocketId).emit('historyCleared', payload);
+
+  // 4. Confirmation for se  nder
+  client.emit('clearHistorySuccess', payload);
+}
+
 }
