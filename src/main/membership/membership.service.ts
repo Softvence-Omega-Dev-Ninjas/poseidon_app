@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
+import { CreateMembershipLevelDto } from './dto/create-membership-level.dto';
 // import { CreateMembershipDto } from './dto/create-membership.dto';
 // import { UpdateMembershipDto } from './dto/update-membership.dto';
 
@@ -50,7 +51,7 @@ export class MembershipService {
     return cResponseData(enableMembership);
   }
 
-  async createMembershipLevel() {}
+  async createMembershipLevel(createMembershipLevelDto: CreateMembershipLevelDto) {}
 
   findAll() {
     return `This action returns all membership`;
