@@ -42,7 +42,6 @@ export class CreateMembershipLevelDto {
   levelDescription: string;
 
   @ApiProperty({
-    type: String,
     required: true,
     format: 'binary',
     description: 'URL or path to the level image',
@@ -50,7 +49,7 @@ export class CreateMembershipLevelDto {
   })
   @IsString()
   @IsNotEmpty()
-  levelImage: Express.Multer.File;
+  levelImage: Express.Multer.File | string;
 
   @ApiProperty({
     required: true,

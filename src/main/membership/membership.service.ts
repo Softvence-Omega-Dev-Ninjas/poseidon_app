@@ -54,20 +54,4 @@ export class MembershipService {
   async createMembershipLevel(
     createMembershipLevelDto: CreateMembershipLevelDto,
   ) {}
-
-  findAll() {
-    return `This action returns all membership`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} membership`;
-  }
-
-  // update(id: number, updateMembershipDto: UpdateMembershipDto) {
-  //   return `This action updates a #${id} membership`;
-  // }
-
-  remove(id: number) {
-    return `This action removes a #${id} membership`;
-  }
 }
