@@ -12,8 +12,6 @@ import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { Image, Prisma, Roles, Roles as Visibility } from '../../../generated/prisma';
 import { CreateImageCommentDto } from './dto/create-image-comment.dto';
 import { FindAllImageCommentsDto } from './dto/find-all-image-comments.dto';
-import { sendResponse } from 'src/common/utils/send-response.util';
-import { HttpStatus } from 'src/common/utils/http-status.enum';
 import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Injectable()
@@ -35,16 +33,11 @@ export class ImageService {
         const uploadRes = await this.cloudinaryService.imageUpload(file);
         mediaId = uploadRes.mediaId;
       } else {
-         
-        return cResponseData(
-          {
-            message:'Image file is required.',
-            success:false,
-          }
-        );
+        return cResponseData({
+          message: 'Image file is required.',
+          success: false,
+        });
       }
-
-
 
       const newImage = await this.prisma.image.create({
         data: {
@@ -53,21 +46,18 @@ export class ImageService {
           mediaId,
         },
       });
-      return cResponseData(
-        {
-          message:'Image created successfully.',
-          data: newImage,
-          success:true,
-        }
-      );
-    } catch (error) {
-      console.log(error)
       return cResponseData({
-        message:'Failed to create image.',
-        error:error,
-        success:false
-      }
-      );
+        message: 'Image created successfully.',
+        data: newImage,
+        success: true,
+      });
+    } catch (error) {
+      console.log(error);
+      return cResponseData({
+        message: 'Failed to create image.',
+        error: error,
+        success: false,
+      });
     }
   }
 
@@ -116,39 +106,29 @@ export class ImageService {
 
       const imagesWithIsLiked = images.map((image) => {
         const { likes, ...rest } = image;
-         const data  = { ...rest, isLiked: likes.length > 0 };
-        return cResponseData(
-        {
-          data,
-          
-        }
-      );
-         
+        return { ...rest, isLiked: likes.length > 0 };
       });
 
       const totalPages = Math.ceil(total / limitNumber);
       const data = {
-          data: imagesWithIsLiked,
-          total,
-          currentPage: pageNumber,
-          limit: limitNumber,
-          totalPages,
-        }
+        data: imagesWithIsLiked,
+        total,
+        currentPage: pageNumber,
+        limit: limitNumber,
+        totalPages,
+      };
 
       return cResponseData({
-        message:'Images retrieved successfully.',
+        message: 'Images retrieved successfully.',
         data,
-        success:true
+        success: true,
       });
     } catch (error) {
-      return  cResponseData(
-       {
+      return cResponseData({
         message: error?.message || 'Failed to retrieve images.',
-        error:error,
-        success:false,
-       }
-        
-      );
+        error: error,
+        success: false,
+      });
     }
   }
 
@@ -169,18 +149,16 @@ export class ImageService {
 
       const { likes, ...rest } = image;
       return cResponseData({
-        message:'Image retrieved successfully.',
-        data:   { ...rest, isLiked: likes.length > 0 },
-        success:true,
-      }
-      );
+        message: 'Image retrieved successfully.',
+        data: { ...rest, isLiked: likes.length > 0 },
+        success: true,
+      });
     } catch (error) {
       return cResponseData({
         message: error.message || 'Failed to retrieve image.',
-        error:error,
-        success:false,
-      }
-      );
+        error: error,
+        success: false,
+      });
     }
   }
 
@@ -227,18 +205,16 @@ export class ImageService {
       });
 
       return cResponseData({
-        message:'Image updated successfully.',
-        data:updatedImage,
-        success:true,
-      }
-      );
+        message: 'Image updated successfully.',
+        data: updatedImage,
+        success: true,
+      });
     } catch (error) {
       return cResponseData({
         message: error.message || 'Failed to update image.',
-        success:false,
+        success: false,
         error,
-      }
-      );
+      });
     }
   }
 
@@ -269,19 +245,17 @@ export class ImageService {
         where: { id },
       });
 
-      return sendResponse(
-        'Image deleted successfully.',
-        deletedImage,
-        HttpStatus.OK,
-      );
+      return cResponseData({
+        message: 'Image deleted successfully.',
+        data: deletedImage,
+        success: true,
+      });
     } catch (error) {
-      return sendResponse(
-        'Failed to delete image.',
-        null,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        null,
-        error.message,
-      );
+      return cResponseData({
+        message: 'Failed to delete image.',
+        error: error,
+        success: false,
+      });
     }
   }
 
@@ -298,11 +272,11 @@ export class ImageService {
         });
         return like;
       });
-      return sendResponse(
-        'Image liked successfully.',
-        newImageLike,
-        HttpStatus.CREATED,
-      );
+      return cResponseData({
+        message: 'Image liked successfully.',
+        data: newImageLike,
+        success: true,
+      });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -310,13 +284,11 @@ export class ImageService {
       ) {
         throw new ConflictException('User has already liked this image.');
       }
-      return sendResponse(
-        'Failed to like image.',
-        null,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        null,
-        error.message,
-      );
+      return cResponseData({
+        message: 'Failed to like image.',
+        error: error,
+        success: false,
+      });
     }
   }
 
@@ -337,11 +309,10 @@ export class ImageService {
           data: { likeCount: { decrement: 1 } },
         });
       });
-      return sendResponse(
-        'Image like deleted successfully.',
-        null,
-        HttpStatus.NO_CONTENT,
-      );
+      return cResponseData({
+        message: 'Image like deleted successfully.',
+        success: true,
+      });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -349,13 +320,11 @@ export class ImageService {
       ) {
         throw new NotFoundException('Image like not found.');
       }
-      return sendResponse(
-        'Failed to delete image like.',
-        null,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        null,
-        error.message,
-      );
+      return cResponseData({
+        message: 'Failed to delete image like.',
+        error: error,
+        success: false,
+      });
     }
   }
 
@@ -376,19 +345,17 @@ export class ImageService {
         });
         return comment;
       });
-      return sendResponse(
-        'Image comment created successfully.',
-        newImageComment,
-        HttpStatus.CREATED,
-      );
+      return cResponseData({
+        message: 'Image comment created successfully.',
+        data: newImageComment,
+        success: true,
+      });
     } catch (error) {
-      return sendResponse(
-        'Failed to create image comment.',
-        null,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        null,
-        error.message,
-      );
+      return cResponseData({
+        message: 'Failed to create image comment.',
+        error: error,
+        success: false,
+      });
     }
   }
 
@@ -424,19 +391,16 @@ export class ImageService {
           data: { commentCount: { decrement: 1 } },
         });
       });
-      return sendResponse(
-        'Image comment deleted successfully.',
-        null,
-        HttpStatus.NO_CONTENT,
-      );
+      return cResponseData({
+        message: 'Image comment deleted successfully.',
+        success: true,
+      });
     } catch (error) {
-      return sendResponse(
-        'Failed to delete image comment.',
-        null,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        null,
-        error.message,
-      );
+      return cResponseData({
+        message: 'Failed to delete image comment.',
+        error: error,
+        success: false,
+      });
     }
   }
 
@@ -463,25 +427,23 @@ export class ImageService {
 
       const totalPages = Math.ceil(total / limitNumber);
 
-      return sendResponse(
-        'Image comments retrieved successfully.',
-        {
+      return cResponseData({
+        message: 'Image comments retrieved successfully.',
+        data: {
           data: comments,
           total,
           currentPage: pageNumber,
           limit: limitNumber,
           totalPages,
         },
-        HttpStatus.OK,
-      );
+        success: true,
+      });
     } catch (error) {
-      return sendResponse(
-        'Failed to retrieve image comments.',
-        null,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        null,
-        error.message,
-      );
+      return cResponseData({
+        message: 'Failed to retrieve image comments.',
+        error: error,
+        success: false,
+      });
     }
   }
 
@@ -498,19 +460,17 @@ export class ImageService {
         );
       }
 
-      return sendResponse(
-        'Image comment retrieved successfully.',
-        comment,
-        HttpStatus.OK,
-      );
+      return cResponseData({
+        message: 'Image comment retrieved successfully.',
+        data: comment,
+        success: true,
+      });
     } catch (error) {
-      return sendResponse(
-        'Failed to retrieve image comment.',
-        null,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        null,
-        error.message,
-      );
+      return cResponseData({
+        message: 'Failed to retrieve image comment.',
+        error: error,
+        success: false,
+      });
     }
   }
 
@@ -520,19 +480,17 @@ export class ImageService {
         where: { id },
         data: { view: { increment: 1 } },
       });
-      return sendResponse(
-        'Image view count incremented successfully.',
-        image,
-        HttpStatus.OK,
-      );
+      return cResponseData({
+        message: 'Image view count incremented successfully.',
+        data: image,
+        success: true,
+      });
     } catch (error) {
-      return sendResponse(
-        'Failed to increment image view count.',
-        null,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        null,
-        error.message,
-      );
+      return cResponseData({
+        message: 'Failed to increment image view count.',
+        error: error,
+        success: false,
+      });
     }
   }
 
@@ -551,19 +509,17 @@ export class ImageService {
         return { ...rest, isLiked: likes.length > 0 };
       });
 
-      return sendResponse(
-        `Images with visibility ${visibility} retrieved successfully.`,
-        imagesWithIsLiked,
-        HttpStatus.OK,
-      );
+      return cResponseData({
+        message: `Images with visibility ${visibility} retrieved successfully.`,
+        data: imagesWithIsLiked,
+        success: true,
+      });
     } catch (error) {
-      return sendResponse(
-        `Failed to retrieve images with visibility ${visibility}.`,
-        null,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        null,
-        error.message,
-      );
+      return cResponseData({
+        message: `Failed to retrieve images with visibility ${visibility}.`,
+        error: error,
+        success: false,
+      });
     }
   }
 }

@@ -21,13 +21,4 @@ export class UpdateImageDto extends PartialType(CreateImageDto) {
   @IsOptional()
   @IsEnum(Visibility)
   visibility?: Visibility;
-
-  @ApiProperty({
-    type: 'string',
-    format: 'binary',
-    description: 'Optional new image file to upload',
-    required: false,
-  })
-  @IsOptional()
-  newImage?: Express.Multer.File
 }
