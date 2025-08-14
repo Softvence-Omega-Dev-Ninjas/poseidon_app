@@ -51,7 +51,9 @@ export class MembershipService {
     return cResponseData(enableMembership);
   }
 
-  async createMembershipLevel(createMembershipLevelDto: CreateMembershipLevelDto) {}
+  async createMembershipLevel(
+    createMembershipLevelDto: CreateMembershipLevelDto,
+  ) {}
 
   findAll() {
     return `This action returns all membership`;
