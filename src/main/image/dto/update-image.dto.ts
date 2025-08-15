@@ -1,5 +1,6 @@
 import { PartialType, ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsEnum, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { CreateImageDto } from './create-image.dto';
 import { Roles as Visibility } from 'generated/prisma';
 
@@ -18,7 +19,20 @@ export class UpdateImageDto extends PartialType(CreateImageDto) {
     enum: Visibility,
     required: false,
   })
+@IsOptional()
+@IsEnum(Visibility)
+@Transform(({ value }) => {
+  if (!value || value === '--') return undefined; 
+  return value.toLowerCase();
+})
+visibility?: Visibility;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'Optional image file to upload',
+    required: false,
+  })
   @IsOptional()
-  @IsEnum(Visibility)
-  visibility?: Visibility;
+  image?: Express.Multer.File;
 }
