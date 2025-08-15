@@ -51,7 +51,36 @@ export class MembershipService {
     return cResponseData(enableMembership);
   }
 
-  async createMembershipLevel(
-    createMembershipLevelDto: CreateMembershipLevelDto,
-  ) {}
+  createMembershipLevel(createMembershipLevelDto: CreateMembershipLevelDto) {
+    console.log(
+      'subscriptionPlans with out json',
+      createMembershipLevelDto.subscriptionPlans,
+    );
+    console.log(
+      'subscriptionPlans',
+      JSON.parse(createMembershipLevelDto.subscriptionPlans as any),
+    );
+
+    return cResponseData({
+      message: 'Membership level created successfully',
+      data: { ...createMembershipLevelDto, levelImage: 'levelImage' },
+      success: true,
+    });
+
+    // const {
+    //   membershipId,
+    //   levelName,
+    //   levelDescription,
+    //   levelImage,
+    //   subscriptionPlans,
+    // } = createMembershipLevelDto;
+    // const newMembershipLevel = await this.prisma.membership_levels.create({
+    //   data: {
+    //     membershipId,
+    //     levelName,
+    //     levelDescription,
+    //     levelImage,
+    //   },
+    // });
+  }
 }

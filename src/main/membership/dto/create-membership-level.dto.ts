@@ -41,19 +41,14 @@ export class CreateMembershipLevelDto {
   @IsNotEmpty()
   levelDescription: string;
 
-  @ApiProperty({
-    required: true,
-    format: 'binary',
-    description: 'URL or path to the level image',
-    example: '/images/gold-level.png',
-  })
+  @ApiProperty({ type: 'string', format: 'binary' })
   @IsString()
   @IsNotEmpty()
-  levelImage: Express.Multer.File | string;
+  levelImage: Express.Multer.File;
 
   @ApiProperty({
     required: true,
-    type: [CreateMembershipSubscriptionPlanDto],
+    // type: [CreateMembershipSubscriptionPlanDto],
     description: 'List of subscription plans for this membership level',
   })
   @IsArray()

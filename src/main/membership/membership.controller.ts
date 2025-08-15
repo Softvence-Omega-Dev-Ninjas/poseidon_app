@@ -36,6 +36,13 @@ export class MembershipController {
     @Body() createMembershipLevelDto: CreateMembershipLevelDto,
     @UploadedFile(new ImageValidationPipe()) levelImage: Express.Multer.File,
   ) {
+    console.log('createMembershipLevel', {
+      ...createMembershipLevelDto,
+      levelImage,
+    });
+
+    // return cResponseData({ data: 'hello' });
+
     return this.membershipService.createMembershipLevel({
       ...createMembershipLevelDto,
       levelImage,
