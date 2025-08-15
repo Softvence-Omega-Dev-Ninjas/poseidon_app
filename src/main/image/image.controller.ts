@@ -10,6 +10,8 @@ import {
   Req,
   UseInterceptors,
   UploadedFile,
+  ValidationPipe,
+  UsePipes,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageService } from './image.service';
@@ -25,8 +27,6 @@ import {
   ApiBody,
   ApiParam,
 } from '@nestjs/swagger';
-
-import { UseGuards } from '@nestjs/common';
 
 import { Role } from 'src/auth/guard/role.enum';
 import { Roles } from 'src/auth/guard/roles.decorator';
@@ -102,13 +102,14 @@ export class ImageController {
   }
 
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('newImage'))
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @ApiOperation({ summary: 'Update an image by ID' })
   @ApiParam({
     name: 'id',
     description: 'The ID of the image',
-    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
+    example: '6741f481-db9d-4ae9-9bae-e7d694f8dd6d',
   })
   @Roles(Role.Supporter)
   update(
@@ -117,12 +118,9 @@ export class ImageController {
     @UploadedFile() newImage: Express.Multer.File,
     @Req() req,
   ) {
-    return this.imageService.update(
-      id,
-      updateImageDto,
-      newImage,
-      req.user?.sub,
-    );
+    console.log(updateImageDto);
+    console.log(newImage);
+    return this.imageService.update(id, updateImageDto, newImage, req.sub);
   }
 
   @Delete(':id')
@@ -134,7 +132,7 @@ export class ImageController {
   })
   @Roles(Role.Supporter)
   remove(@Param('id') id: string, @Req() req) {
-    return this.imageService.remove(id, req.user?.sub);
+    return this.imageService.remove(id, req.sub);
   }
 
   @Post(':imageId/likes')
@@ -158,7 +156,7 @@ export class ImageController {
   })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   deleteLike(@Param('imageId') imageId: string, @Req() req) {
-    return this.imageService.deleteLike(imageId, req.user?.sub);
+    return this.imageService.deleteLike(imageId, req.sub);
   }
 
   @Post(':imageId/comments')
@@ -176,7 +174,8 @@ export class ImageController {
     return this.imageService.createComment(
       imageId,
       createImageCommentDto,
-      req.user?.sub,
+
+      req.sub,
     );
   }
 
@@ -198,7 +197,7 @@ export class ImageController {
     @Param('commentId') commentId: string,
     @Req() req,
   ) {
-    return this.imageService.deleteComment(imageId, commentId, req.user?.sub);
+    return this.imageService.deleteComment(imageId, commentId, req.sub);
   }
 
   @Get(':imageId/comments')
@@ -254,21 +253,21 @@ export class ImageController {
     return this.imageService.incrementViewCount(id);
   }
 
-  @Get('visibility/:visibility')
-  @ApiOperation({ summary: 'Get images by visibility' })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns a list of images filtered by visibility.',
-  })
-  @ApiParam({
-    name: 'visibility',
-    enum: ['PUBLIC', 'SUPPORTERS'],
-    description: 'Visibility status',
-  })
-  getImagesByVisibility(
-    @Param('visibility') visibility: Visibility,
-    @Req() req,
-  ) {
-    return this.imageService.getImagesByVisibility(visibility, req.user?.sub);
-  }
+  // @Get('visibility/:visibility')
+  // @ApiOperation({ summary: 'Get images by visibility' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Returns a list of images filtered by visibility.',
+  // })
+  // @ApiParam({
+  //   name: 'visibility',
+  //   enum: ['PUBLIC', 'SUPPORTERS'],
+  //   description: 'Visibility status',
+  // })
+  // getImagesByVisibility(
+  //   @Param('visibility') visibility: Visibility,
+  //   @Req() req,
+  // ) {
+  //   return this.imageService.getImagesByVisibility(visibility, req.user?.sub);
+  // }
 }

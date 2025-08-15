@@ -173,6 +173,10 @@ export class ImageService {
     newImage: Express.Multer.File,
     userId: string,
   ): Promise<any> {
+    console.log('id', id);
+    console.log('updatemageDto', updateImageDto);
+    console.log('newImage', newImage);
+    console.log('userId', userId);
     try {
       const image = await this.prisma.image.findUnique({ where: { id } });
 
@@ -187,6 +191,7 @@ export class ImageService {
       }
 
       let updatedMediaId = image.mediaId;
+      let oldMedia;
 
       // Handle new image to upload
       if (newImage) {
@@ -195,7 +200,7 @@ export class ImageService {
         });
         if (media) {
           await this.cloudinaryService.deleteFile(media.publicId);
-          await this.prisma.media.delete({ where: { id: media.id } });
+          oldMedia = media;
         }
         const uploadRes = await this.cloudinaryService.imageUpload(newImage);
         updatedMediaId = uploadRes.mediaId;
@@ -208,6 +213,10 @@ export class ImageService {
           mediaId: updatedMediaId,
         },
       });
+
+      if (oldMedia) {
+        await this.prisma.media.delete({ where: { id: oldMedia.id } });
+      }
 
       return cResponseData({
         message: 'Image updated successfully.',
@@ -237,22 +246,35 @@ export class ImageService {
         );
       }
 
+      await this.prisma.imageLike.deleteMany({
+        where: { imageId: id },
+      });
+
+      // Delete associated comments
+      await this.prisma.imageComment.deleteMany({
+        where: { imageId: id },
+      });
+      let oldmedia;
       // Delete associated media from Cloudinary and database
       const media = await this.prisma.media.findUnique({
         where: { id: image.mediaId },
       });
       if (media) {
         await this.cloudinaryService.deleteFile(media.publicId);
-        await this.prisma.media.delete({ where: { id: media.id } });
+        oldmedia = media;
       }
 
       const deletedImage = await this.prisma.image.delete({
         where: { id },
       });
 
+      if (oldmedia) {
+        await this.prisma.media.delete({ where: { id: oldmedia.id } });
+      }
+
       return cResponseData({
         message: 'Image deleted successfully.',
-        data: deletedImage,
+        // data: deletedImage,
         success: true,
       });
     } catch (error) {
