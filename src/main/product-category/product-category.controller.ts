@@ -11,8 +11,9 @@ import {
   ValidationPipe,
   UseInterceptors,
   UploadedFiles,
+  UploadedFile,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProductCategoryService } from './product-category.service';
 import { CreateProductCategoryDto } from './dto/create-product-category.dto';
 import { UpdateProductCategoryDto } from './dto/update-product-category.dto';
@@ -22,6 +23,7 @@ import { ApiTags, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { UseGuards } from '@nestjs/common';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @ApiTags('ProductCategory')
 @Controller('product-category')
@@ -29,30 +31,43 @@ export class ProductCategoryController {
   constructor(
     private readonly productCategoryService: ProductCategoryService,
   ) {}
-  @Roles(Role.Supporter, Role.User)
+
+
+
+
+
+
+ @Roles(Role.Supporter, Role.User)
   @Post()
-  create(@Body() createProductCategoryDto: CreateProductCategoryDto) {
-    return this.productCategoryService.create(createProductCategoryDto);
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateProductCategoryDto })
+  create(
+    @Body() createProductCategoryDto: CreateProductCategoryDto,
+    @UploadedFile() image?: Express.Multer.File,
+  ) {
+    return this.productCategoryService.create(createProductCategoryDto, image);
   }
+
 
   @Roles(Role.Supporter, Role.User)
   @Get()
   @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(@Query() query: FindAllProductCategoriesDto) {
     const result = await this.productCategoryService.findAll(query);
-    return {
-      message: 'Product categories retrieved successfully.',
-      data: result.data,
-      total: result.total,
-      currentPage: result.currentPage,
-      limit: result.limit,
-      totalPages: result.totalPages,
-      statusCode: 200,
-      redirect_url: null,
+    return   cResponseData({
+      message: 'Product categories fetched successfully.',
       error: null,
       success: true,
-    };
+      data:  {...result},
+    });
   }
+
+
+
+
+
+
 
   @Roles(Role.Supporter, Role.User)
   @Get(':id')
@@ -73,6 +88,9 @@ export class ProductCategoryController {
       },
     },
   })
+
+
+
   update(
     @Param('id') id: string,
     @Body() body: any,

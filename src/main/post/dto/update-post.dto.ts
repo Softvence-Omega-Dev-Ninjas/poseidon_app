@@ -5,7 +5,7 @@ import {
   IsEnum,
   IsOptional,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { WhoCanSee } from 'generated/prisma';
 
@@ -39,4 +39,14 @@ export class UpdatePostDto {
   @IsArray()
   @IsString({ each: true })
   images?: string[];
+
+   @ApiPropertyOptional({
+    type: 'array',
+    items: { type: 'string', format: 'binary' },
+    description: 'New images to upload',
+    required:false,
+  })
+  @IsOptional()
+  newImages?: Express.Multer.File[];
+  
 }
