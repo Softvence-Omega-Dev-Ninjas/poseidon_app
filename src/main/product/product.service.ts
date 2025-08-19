@@ -12,6 +12,7 @@ import {
   StructuredArrayItemDto,
 } from 'src/common/dto/structured-array.dto';
 import { sendResponse } from 'src/common/utils/send-response.util';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Injectable()
 export class ProductService {
@@ -84,7 +85,12 @@ export class ProductService {
         },
       },
     });
-    return sendResponse('Product created successfully', product, 201);
+    return   cResponseData({
+    message: 'Product created successfully.',
+    error: null,
+    success: true,
+    data: product,
+  });
   }
 
   async findAll(
@@ -134,7 +140,12 @@ export class ProductService {
       totalPages,
     };
 
-    return sendResponse('Products retrieved successfully', data, 200);
+    return cResponseData({
+      message: 'Products retrieved successfully.',
+      error: null,
+      success: true,
+      data:data,
+    });
   }
 
   async findOne(id: string) {
@@ -153,7 +164,12 @@ export class ProductService {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
-    return sendResponse('Product retrieved successfully', product, 200);
+    return  cResponseData({
+       message: 'Products retrieved successfully.',
+      error: null,
+      success: true,
+      data:product
+    })
   }
 
   async update(
@@ -315,8 +331,7 @@ export class ProductService {
         }));
       }
     }
-
-    return await this.prisma.product.update({
+     const data = await this.prisma.product.update({
       where: { id },
       data: updateData,
       include: {
@@ -327,6 +342,12 @@ export class ProductService {
         },
       },
     });
+    return cResponseData({
+       message: 'Products update successfully.',
+      error: null,
+      success: true,
+      data:data
+    })
   }
 
   private processStructuredArray(
@@ -347,13 +368,33 @@ export class ProductService {
     return newArray;
   }
 
-  async remove(id: string) {
-    return await this.prisma.product.delete({ where: { id } });
+async remove(id: string) {
+  try {
+    const deleted = await this.prisma.product.delete({
+      where: { id },
+    });
+
+    return cResponseData({
+      message: 'Product deleted successfully.',
+      error: null,
+      success: true,
+      data: deleted,
+    });
+  } catch (error) {
+    return cResponseData({
+      message: 'Failed to delete product.',
+      error: error.message,
+      success: false,
+      data: null,
+    });
   }
+}
+
 
   async findByShopId(shopId: string, page: number, limit: number) {
     const skip = (page - 1) * limit;
-    return await this.prisma.product.findMany({
+
+     const data = await this.prisma.product.findMany({
       where: { shopId },
       skip,
       take: limit,
@@ -365,5 +406,11 @@ export class ProductService {
         },
       },
     });
-  }
+      return  cResponseData({
+        message: 'Product deleted successfully.',
+      error: null,
+      success: true,
+      data: data
+      })
+}
 }

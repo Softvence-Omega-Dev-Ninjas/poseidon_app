@@ -35,6 +35,11 @@ import { Role } from 'src/auth/guard/role.enum';
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
+
+
+
+
+
   @Roles(Role.Admin, Role.Supporter, Role.User)
   @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -56,6 +61,13 @@ export class ProductController {
     const { categoryIds, ...restOfProductData } = createProductDto;
     return this.productService.create(createProductDto, files);
   }
+
+
+
+
+
+
+
 
   @Roles(Role.Supporter, Role.User)
   @Get()
@@ -92,11 +104,24 @@ export class ProductController {
     return this.productService.findAll(+page, +limit, categoryId, draft);
   }
 
+
+
+
+
+
+
+
+
+
   @Roles(Role.Supporter, Role.User)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productService.findOne(id);
   }
+
+
+
+
 
   @Roles(Role.Supporter, Role.User)
   @Patch(':id')
@@ -197,6 +222,17 @@ export class ProductController {
 
     return this.productService.update(id, updateProductDto, newImages);
   }
+
+
+
+
+
+
+
+
+
+
+  
 
   @Roles(Role.Supporter, Role.User)
   @Get('shop/:shopId')
