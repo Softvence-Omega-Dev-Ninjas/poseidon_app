@@ -60,12 +60,6 @@ export class PostController {
     return this.postService.create(createPostDto, req.sub, files);
   }
 
-
-
-
-
-
-
   @Get()
   @ApiOperation({ summary: 'Get all posts with pagination and sorting' })
   @ApiResponse({ status: 200, description: 'Returns a list of posts.' })
@@ -88,15 +82,9 @@ export class PostController {
     description: 'Sort order',
   })
   findAll(@Query() query: FindAllPostsDto, @Req() req) {
-    console.log(req.sub)
+    console.log(req.sub);
     return this.postService.findAll(query, req?.sub);
   }
-
-
-
-
-
-
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a single post by ID' })
@@ -111,11 +99,6 @@ export class PostController {
     return this.postService.findOne(id, req?.sub);
   }
 
-
-
-
-
-
   @Patch(':id')
   @UsePipes(new ValidationPipe({ transform: true }))
   @UseInterceptors(FilesInterceptor('newImages'))
@@ -126,7 +109,6 @@ export class PostController {
     description: 'The ID of the post',
     example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
   })
-
   @Roles(Role.Admin, Role.Supporter, Role.User)
   update(
     @Param('id') id: string,
@@ -136,10 +118,6 @@ export class PostController {
   ) {
     return this.postService.update(id, updatePostDto, newImages, req?.sub);
   }
-
-
-
-
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a post by ID' })
@@ -155,15 +133,8 @@ export class PostController {
   })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   remove(@Param('id') id: string, @Req() req: Request) {
-    
     return this.postService.remove(id, req['sub'] as string);
   }
-
-
-
-
-
-
 
   @Post(':postId/likes')
   @ApiOperation({ summary: 'Create a new like for a post' })
@@ -185,10 +156,6 @@ export class PostController {
     return this.postService.createLike(postId, req?.sub);
   }
 
-
-
-
-
   @Delete(':postId/likes')
   @ApiOperation({ summary: 'Delete a like for a post' })
   @ApiResponse({
@@ -205,12 +172,6 @@ export class PostController {
   deleteLike(@Param('postId') postId: string, @Req() req) {
     return this.postService.deleteLike(postId, req?.sub);
   }
-
-
-
-
-
-
 
   @Post(':postId/comments')
   @ApiOperation({ summary: 'Create a new comment for a post' })
@@ -232,12 +193,6 @@ export class PostController {
     return this.postService.createComment(postId, createCommentDto, req?.sub);
   }
 
-
-
-
-
-
-
   @Delete('comments/:commentId')
   @ApiOperation({ summary: 'Delete a comment for a post' })
   @ApiResponse({
@@ -254,13 +209,6 @@ export class PostController {
   deleteComment(@Param('commentId') commentId: string, @Req() req) {
     return this.postService.deleteComment(commentId, req?.sub);
   }
-
-
-
-
-
-
-
 
   @Get(':postId/comments')
   @ApiOperation({ summary: 'Get all comments for a post' })
@@ -288,9 +236,6 @@ export class PostController {
   ) {
     return this.postService.findAllComments(postId, query);
   }
-
-  
-
 
   @Get('comments/:commentId')
   @ApiOperation({ summary: 'Get a single comment by ID' })

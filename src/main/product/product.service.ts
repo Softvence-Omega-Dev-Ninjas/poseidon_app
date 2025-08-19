@@ -85,12 +85,12 @@ export class ProductService {
         },
       },
     });
-    return   cResponseData({
-    message: 'Product created successfully.',
-    error: null,
-    success: true,
-    data: product,
-  });
+    return cResponseData({
+      message: 'Product created successfully.',
+      error: null,
+      success: true,
+      data: product,
+    });
   }
 
   async findAll(
@@ -144,7 +144,7 @@ export class ProductService {
       message: 'Products retrieved successfully.',
       error: null,
       success: true,
-      data:data,
+      data: data,
     });
   }
 
@@ -164,12 +164,12 @@ export class ProductService {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
-    return  cResponseData({
-       message: 'Products retrieved successfully.',
+    return cResponseData({
+      message: 'Products retrieved successfully.',
       error: null,
       success: true,
-      data:product
-    })
+      data: product,
+    });
   }
 
   async update(
@@ -331,7 +331,7 @@ export class ProductService {
         }));
       }
     }
-     const data = await this.prisma.product.update({
+    const data = await this.prisma.product.update({
       where: { id },
       data: updateData,
       include: {
@@ -343,11 +343,11 @@ export class ProductService {
       },
     });
     return cResponseData({
-       message: 'Products update successfully.',
+      message: 'Products update successfully.',
       error: null,
       success: true,
-      data:data
-    })
+      data: data,
+    });
   }
 
   private processStructuredArray(
@@ -368,78 +368,74 @@ export class ProductService {
     return newArray;
   }
 
-async remove(id: string) {
-  try {
-    const product = await this.prisma.product.findUnique({ where: { id } });
-    if (!product) {
+  async remove(id: string) {
+    try {
+      const product = await this.prisma.product.findUnique({ where: { id } });
+      if (!product) {
+        return cResponseData({
+          message: `Product with ID ${id} not found`,
+          error: 'NotFound',
+          success: false,
+          data: null,
+        });
+      }
+
+      const deleted = await this.prisma.product.delete({
+        where: { id },
+      });
+
       return cResponseData({
-        message: `Product with ID ${id} not found`,
-        error: 'NotFound',
+        message: 'Product deleted successfully.',
+        error: null,
+        success: true,
+        data: deleted,
+      });
+    } catch (error) {
+      return cResponseData({
+        message: 'Failed to delete product.',
+        error: error.message,
         success: false,
         data: null,
       });
     }
-
-    const deleted = await this.prisma.product.delete({
-      where: { id },
-    });
-
-    return cResponseData({
-      message: 'Product deleted successfully.',
-      error: null,
-      success: true,
-      data: deleted,
-    });
-  } catch (error) {
-    return cResponseData({
-      message: 'Failed to delete product.',
-      error: error.message,
-      success: false,
-      data: null,
-    });
   }
-}
 
+  async findByShopId(shopId: string, page: number, limit: number) {
+    const skip = (page - 1) * limit;
 
-
-async findByShopId(shopId: string, page: number, limit: number) {
-  const skip = (page - 1) * limit;
-
-  const [products, total] = await this.prisma.$transaction([
-    this.prisma.product.findMany({
-      where: { shopId },
-      skip,
-      take: limit,
-      include: {
-        productCategories: {
-          include: {
-            category: true,
+    const [products, total] = await this.prisma.$transaction([
+      this.prisma.product.findMany({
+        where: { shopId },
+        skip,
+        take: limit,
+        include: {
+          productCategories: {
+            include: {
+              category: true,
+            },
           },
         },
-      },
-    }),
-    this.prisma.product.count({
-      where: { shopId },
-    }),
-  ]);
+      }),
+      this.prisma.product.count({
+        where: { shopId },
+      }),
+    ]);
 
-  const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / limit);
 
-  const data = {
-    total,
-    products,
-    currentPage: page,
-    limit,
-    totalPages,
-  };
+    const data = {
+      total,
+      products,
+      currentPage: page,
+      limit,
+      totalPages,
+    };
 
-  return cResponseData({
-    message: 'Products retrieved successfully.',
-    error: null,
-    success: true,
-    data,
-  });
-}
-
-
+    return cResponseData({
+      message: 'Products retrieved successfully.',
+      error: null,
+      success: true,
+      data,
+    });
+  }
 }
