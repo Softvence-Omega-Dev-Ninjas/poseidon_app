@@ -12,6 +12,7 @@ import {
   BadRequestException,
   UsePipes,
   ValidationPipe,
+  Delete,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProductService } from './product.service';
@@ -255,4 +256,15 @@ export class ProductController {
   ) {
     return this.productService.findByShopId(shopId, +page, +limit);
   }
+
+
+   @Delete(':id')
+  @ApiOperation({ summary: 'Delete a product by ID' })
+  @ApiResponse({ status: 200, description: 'Product deleted successfully.' })
+  @ApiResponse({ status: 404, description: 'Product not found.' })
+  async remove(@Param('id') id: string) {
+    return this.productService.remove(id);
+  }
+
+
 }

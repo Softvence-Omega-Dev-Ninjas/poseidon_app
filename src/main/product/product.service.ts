@@ -370,6 +370,16 @@ export class ProductService {
 
 async remove(id: string) {
   try {
+    const product = await this.prisma.product.findUnique({ where: { id } });
+    if (!product) {
+      return cResponseData({
+        message: `Product with ID ${id} not found`,
+        error: 'NotFound',
+        success: false,
+        data: null,
+      });
+    }
+
     const deleted = await this.prisma.product.delete({
       where: { id },
     });
@@ -391,10 +401,12 @@ async remove(id: string) {
 }
 
 
-  async findByShopId(shopId: string, page: number, limit: number) {
-    const skip = (page - 1) * limit;
 
-     const data = await this.prisma.product.findMany({
+async findByShopId(shopId: string, page: number, limit: number) {
+  const skip = (page - 1) * limit;
+
+  const [products, total] = await this.prisma.$transaction([
+    this.prisma.product.findMany({
       where: { shopId },
       skip,
       take: limit,
@@ -405,12 +417,29 @@ async remove(id: string) {
           },
         },
       },
-    });
-      return  cResponseData({
-        message: 'Product deleted successfully.',
-      error: null,
-      success: true,
-      data: data
-      })
+    }),
+    this.prisma.product.count({
+      where: { shopId },
+    }),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  const data = {
+    total,
+    products,
+    currentPage: page,
+    limit,
+    totalPages,
+  };
+
+  return cResponseData({
+    message: 'Products retrieved successfully.',
+    error: null,
+    success: true,
+    data,
+  });
 }
+
+
 }
