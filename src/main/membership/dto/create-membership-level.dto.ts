@@ -47,9 +47,7 @@ export class CreateMembershipLevelDto {
   levelImage: Express.Multer.File;
 
   @ApiProperty({
-    required: true,
     type: [CreateMembershipSubscriptionPlanDto],
-    description: 'List of subscription plans for this membership level',
   })
   @IsArray()
   @ValidateNested({ each: true })

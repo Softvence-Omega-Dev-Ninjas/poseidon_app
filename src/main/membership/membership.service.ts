@@ -69,17 +69,23 @@ export class MembershipService {
     //   success: true,
     // });
 
-    const { membershipId, levelName, levelDescription, subscriptionPlans } =
-      createMembershipLevelDto;
+    const { subscriptionPlans, ...data } = createMembershipLevelDto;
+
+    // console.log({...createMembershipLevelDto, subscriptionPlans});
+
+    console.log(data);
+    console.log(JSON.parse(subscriptionPlans as any));
+
+    // createMembershipLevelDto.subscriptionPlans.map((plan) => {
+    //   console.log(plan);
+    // });
     const newMembershipLevel = await this.prisma.membership_levels.create({
       data: {
-        membershipId,
-        levelName,
-        levelDescription,
+        ...data,
         levelImage: mediaId,
         MembershipSubscriptionPlan: {
           createMany: {
-            data: subscriptionPlans,
+            data: JSON.parse(subscriptionPlans as any),
           },
         },
       },

@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Post,
   Req,
   UploadedFile,
@@ -17,6 +16,7 @@ import { CreateMembershipLevelDto } from './dto/create-membership-level.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
+import { Public } from 'src/auth/guard/public.decorator';
 
 @Controller('membership')
 export class MembershipController {
@@ -28,7 +28,8 @@ export class MembershipController {
     return this.membershipService.enableMembership(req['sub'] as string);
   }
 
-  @Roles(Role.Supporter)
+  // @Roles(Role.Supporter)
+  @Public()
   @Post('create-levels')
   @UseInterceptors(FileInterceptor('levelImage'))
   @ApiConsumes('multipart/form-data')
