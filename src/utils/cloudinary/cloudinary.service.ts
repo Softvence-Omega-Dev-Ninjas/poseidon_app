@@ -53,7 +53,7 @@ export class CloudinaryService {
   // this function only for use profile image upload
   async profileImageUpload(
     file?: Express.Multer.File,
-  ): Promise<{ imageUrl: string, publicId: string }> {
+  ): Promise<{ imageUrl: string; publicId: string }> {
     try {
       if (!file) return { imageUrl: '', publicId: '' };
 
