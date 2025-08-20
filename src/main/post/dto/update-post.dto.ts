@@ -40,13 +40,12 @@ export class UpdatePostDto {
   @IsString({ each: true })
   images?: string[];
 
-   @ApiPropertyOptional({
+  @ApiPropertyOptional({
     type: 'array',
     items: { type: 'string', format: 'binary' },
     description: 'New images to upload',
-    required:false,
+    required: false,
   })
   @IsOptional()
   newImages?: Express.Multer.File[];
-  
 }

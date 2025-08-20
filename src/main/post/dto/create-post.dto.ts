@@ -22,14 +22,13 @@ export class CreatePostDto {
   @IsString()
   description: string;
 
-@ApiProperty({
+  @ApiProperty({
     type: 'array',
     items: { type: 'string', format: 'binary' },
     required: false,
     description: 'Optional images to upload',
   })
   images?: Express.Multer.File[];
-
 
   @ApiProperty({
     example: WhoCanSee.PUBLIC,

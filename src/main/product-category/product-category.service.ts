@@ -17,8 +17,7 @@ export class ProductCategoryService {
     private cloudinaryService: CloudinaryService,
   ) {}
 
-
-async create(
+  async create(
     createProductCategoryDto: CreateProductCategoryDto,
     file?: Express.Multer.File,
   ): Promise<any> {
@@ -28,7 +27,7 @@ async create(
       // Upload image if provided
       if (file) {
         const uploadRes = await this.cloudinaryService.imageUpload(file);
-        imageUrl = uploadRes.mediaId
+        imageUrl = uploadRes.mediaId;
       }
 
       // Save category to DB
@@ -90,12 +89,12 @@ async create(
     const data = await this.prisma.productCategory.findUnique({
       where: { id: id.toString() },
     });
-    return  cResponseData({
+    return cResponseData({
       message: 'gest single productgetory',
       error: null,
       data: data,
       success: true,
-    })
+    });
   }
 
   async update(
@@ -155,7 +154,7 @@ async create(
       error: null,
       data: data,
       success: true,
-    })
+    });
   }
 
   async remove(id: string) {
@@ -167,6 +166,6 @@ async create(
       error: null,
       data: data,
       success: true,
-    })
+    });
   }
 }
