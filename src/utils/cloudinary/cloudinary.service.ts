@@ -50,6 +50,37 @@ export class CloudinaryService {
     }
   }
 
+  // this function only for use profile image upload
+  async profileImageUpload(
+    file?: Express.Multer.File,
+  ): Promise<{ imageUrl: string, publicId: string }> {
+    try {
+      if (!file) return { imageUrl: '', publicId: '' };
+
+      const uploadRes = await new Promise<any>((resolve, reject) => {
+        const uploadStream = this.cloudinary.uploader.upload_stream(
+          {
+            public_id: file.originalname,
+            resource_type: 'image',
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          },
+        );
+        streamifier.createReadStream(file.buffer).pipe(uploadStream);
+      });
+
+      return {
+        imageUrl: uploadRes.secure_url,
+        publicId: uploadRes.public_id,
+      };
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      throw new InternalServerErrorException('Failed to upload Image');
+    }
+  }
+
   // Delete image from Cloudinary using its public ID
   async deleteFile(publicId: string) {
     try {

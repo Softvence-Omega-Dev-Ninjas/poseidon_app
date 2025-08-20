@@ -1,16 +1,29 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
 
-export class SignupUserProfileDto {
+export class SignUpUserDto {
+  @ApiProperty({
+    required: true,
+    example: 'user@gmail.com',
+  })
+  email: string;
+  @ApiProperty({
+    required: true,
+    example: 'User345@#$',
+  })
+  password: string;
+
+  /// profile
+
   @ApiProperty({
     required: true,
     example: 'user name',
   })
   name: string;
 
-  @ApiProperty({
-    required: true,
-    example: 'user image',
-  })
+  @ApiProperty({ type: 'string', format: 'binary' })
+  @IsString()
+  @IsNotEmpty()
   image: Express.Multer.File;
 
   @ApiProperty({
@@ -18,12 +31,6 @@ export class SignupUserProfileDto {
     example: 'user description',
   })
   description?: string;
-
-  //   @ApiProperty({
-  //     required: false,
-  //     example: 'user cover_image with view page',
-  //   })
-  //   cover_image?: string;
 
   @ApiProperty({
     required: false,
@@ -54,34 +61,4 @@ export class SignupUserProfileDto {
     example: 'user post code',
   })
   postcode?: string;
-}
-
-export class SignUpUserDto {
-  @ApiProperty({
-    required: true,
-    example: 'user@gmail.com',
-  })
-  email: string;
-  @ApiProperty({
-    required: true,
-    example: 'User345@#$',
-  })
-  password: string;
-
-  @ApiProperty({
-    required: false,
-    type: () => SignupUserProfileDto,
-    example: {
-      name: 'John Doe',
-      image: 'iamge url',
-      description: 'A brief description about the user',
-      cover_image: 'cover image url',
-      address: '123 Main Street',
-      state: 'California',
-      city: 'Los Angeles',
-      country: 'USA',
-      postcode: '90001',
-    },
-  })
-  profile: SignupUserProfileDto;
 }
