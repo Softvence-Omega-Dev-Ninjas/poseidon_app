@@ -48,7 +48,7 @@ export class CreateMembershipLevelDto {
 
   @ApiProperty({
     required: true,
-    // type: [CreateMembershipSubscriptionPlanDto],
+    type: [CreateMembershipSubscriptionPlanDto],
     description: 'List of subscription plans for this membership level',
   })
   @IsArray()

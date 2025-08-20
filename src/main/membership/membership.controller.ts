@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Req,
   UploadedFile,
@@ -36,16 +37,18 @@ export class MembershipController {
     @Body() createMembershipLevelDto: CreateMembershipLevelDto,
     @UploadedFile(new ImageValidationPipe()) levelImage: Express.Multer.File,
   ) {
-    console.log('createMembershipLevel', {
-      ...createMembershipLevelDto,
-      levelImage,
-    });
-
-    // return cResponseData({ data: 'hello' });
+    // levelImage upload
+    // const { mediaId } = await this.cloudinaryService.imageUpload(levelImage);
 
     return this.membershipService.createMembershipLevel({
       ...createMembershipLevelDto,
       levelImage,
     });
   }
+
+  // @Roles(Role.Supporter)
+  // @Get('get-levels/:membershipId')
+  // getMembershipLevels(@Param('membershipId') membershipId: string) {
+  //   return this.membershipService.getMembershipLevels(membershipId);
+  // }
 }
