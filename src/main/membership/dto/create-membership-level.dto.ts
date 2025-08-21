@@ -4,6 +4,7 @@ import {
   IsUUID,
   IsArray,
   ValidateNested,
+  IsOptional,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -53,4 +54,13 @@ export class CreateMembershipLevelDto {
   @ValidateNested({ each: true })
   @Type(() => CreateMembershipSubscriptionPlanDto)
   subscriptionPlans: CreateMembershipSubscriptionPlanDto[];
+
+  @ApiProperty({
+    type: String,
+    description: 'user notification buy membership then show wellcome_note',
+    example: 'wellcome_note',
+  })
+  @IsOptional()
+  @IsString()
+  wellcome_note?: string;
 }
