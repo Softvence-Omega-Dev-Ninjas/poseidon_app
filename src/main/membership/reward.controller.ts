@@ -17,7 +17,6 @@ import {
   CreateMembershipAccessToPostsDto,
   CreateAllRewardsDto,
 } from './dto/create-all-reward.dto';
-import { Public } from 'src/auth/guard/public.decorator';
 import {
   UpdateGalleryRewardDto,
   UpdateMessagesRewardDto,
@@ -115,7 +114,8 @@ export class MembershipRewardController {
     );
   }
 
-  @Public()
+  // delete Reward Apis
+  @Roles(Role.Supporter)
   @Delete('delete/:params')
   deleteReward(@Param('params') params: string) {
     const objKeys = [
