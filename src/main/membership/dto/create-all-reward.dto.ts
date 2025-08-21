@@ -4,11 +4,9 @@ import {
   IsNumber,
   IsBoolean,
   Min,
-  ValidateNested,
   IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 import { Duration } from './create-membership.dto';
 
 export class CreateVideoCallRewardDto {
@@ -213,44 +211,69 @@ export class CreateMembershipAccessToPostsDto {
   AccessToPosts?: boolean;
 }
 
-export class CreateAllRewardsDto {
-  @ApiProperty({
-    required: false,
-    description: 'Video call reward configuration',
-    type: CreateVideoCallRewardDto,
-  })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => CreateVideoCallRewardDto)
-  videoCallReward?: CreateVideoCallRewardDto;
+// export class CreateAllRewardsDto {
+//   @ApiProperty({
+//     required: false,
+//     description: 'Video call reward configuration',
+//     type: CreateVideoCallRewardDto,
+//   })
+//   @IsOptional()
+//   @ValidateNested()
+//   @Type(() => CreateVideoCallRewardDto)
+//   videoCallReward?: CreateVideoCallRewardDto;
 
-  @ApiProperty({
-    required: false,
-    description: 'Messages access reward configuration',
-    type: CreateMembershipAccessToMessagesDto,
-  })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => CreateMembershipAccessToMessagesDto)
-  messagesReward?: CreateMembershipAccessToMessagesDto;
+//   @ApiProperty({
+//     required: false,
+//     description: 'Messages access reward configuration',
+//     type: CreateMembershipAccessToMessagesDto,
+//   })
+//   @IsOptional()
+//   @ValidateNested()
+//   @Type(() => CreateMembershipAccessToMessagesDto)
+//   messagesReward?: CreateMembershipAccessToMessagesDto;
 
-  @ApiProperty({
-    required: false,
-    description: 'Gallery access reward configuration',
-    type: CreateMembershipAccessToGalleryDto,
-  })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => CreateMembershipAccessToGalleryDto)
-  galleryReward?: CreateMembershipAccessToGalleryDto;
+//   @ApiProperty({
+//     required: false,
+//     description: 'Gallery access reward configuration',
+//     type: CreateMembershipAccessToGalleryDto,
+//   })
+//   @IsOptional()
+//   @ValidateNested()
+//   @Type(() => CreateMembershipAccessToGalleryDto)
+//   galleryReward?: CreateMembershipAccessToGalleryDto;
 
-  @ApiProperty({
-    required: false,
-    description: 'Posts access reward configuration',
-    type: CreateMembershipAccessToPostsDto,
-  })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => CreateMembershipAccessToPostsDto)
-  postsReward?: CreateMembershipAccessToPostsDto;
-}
+//   @ApiProperty({
+//     required: false,
+//     description: 'Posts access reward configuration',
+//     type: CreateMembershipAccessToPostsDto,
+//   })
+//   @IsOptional()
+//   @ValidateNested()
+//   @Type(() => CreateMembershipAccessToPostsDto)
+//   postsReward?: CreateMembershipAccessToPostsDto;
+// }
+
+// export class WhoCreateReward {
+//   @ApiProperty({
+//     required: true,
+//     example: 'url params',
+//   })
+//   @IsNotEmpty()
+//   @IsString()
+//   WhoCreateReward: string;
+
+//   @ApiProperty({
+//     required: true,
+//     description: 'Posts access reward configuration',
+//     type:
+//       CreateVideoCallRewardDto ||
+//       CreateMembershipAccessToMessagesDto ||
+//       CreateMembershipAccessToGalleryDto ||
+//       CreateMembershipAccessToPostsDto,
+//   })
+//   rewardData:
+//     | CreateVideoCallRewardDto
+//     | CreateMembershipAccessToMessagesDto
+//     | CreateMembershipAccessToGalleryDto
+//     | CreateMembershipAccessToPostsDto;
+// }

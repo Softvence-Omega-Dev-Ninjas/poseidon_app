@@ -7,6 +7,12 @@ import {
   CreateMembershipAccessToPostsDto,
 } from './dto/create-all-reward.dto';
 import { cResponseData } from 'src/common/utils/common-responseData';
+import {
+  UpdateGalleryRewardDto,
+  UpdateMessagesRewardDto,
+  UpdatePostsRewardDto,
+  UpdateVideoCallRewardDto,
+} from './dto/update-reward.dto';
 
 @Injectable()
 export class MembershipRewardService {
@@ -23,7 +29,23 @@ export class MembershipRewardService {
       data: newData,
     });
   }
+  async updateVideoCallReward(
+    id: string,
+    updateVideoCallRewardDto: UpdateVideoCallRewardDto,
+  ) {
+    const newData = await this.prisma.membershipAccessToVideoCall.update({
+      where: {
+        id,
+      },
+      data: updateVideoCallRewardDto,
+    });
+    return cResponseData({
+      message: 'Video access reward updated successfully',
+      data: newData,
+    });
+  }
 
+  // Messages reward
   async createMessagesAccessReward(
     createMessagesAccessDto: CreateMembershipAccessToMessagesDto,
   ) {
@@ -35,7 +57,23 @@ export class MembershipRewardService {
       data: newData,
     });
   }
+  async updateMessagesReward(
+    id: string,
+    updateMessagesRewardDto: UpdateMessagesRewardDto,
+  ) {
+    const newData = await this.prisma.membershipAccessToMessages.update({
+      where: {
+        id,
+      },
+      data: updateMessagesRewardDto,
+    });
+    return cResponseData({
+      message: 'Messages access reward updated successfully',
+      data: newData,
+    });
+  }
 
+  // Gallery reward
   async createGalleryAccessReward(
     createGalleryAccessDto: CreateMembershipAccessToGalleryDto,
   ) {
@@ -47,7 +85,23 @@ export class MembershipRewardService {
       data: newData,
     });
   }
+  async updateGalleryReward(
+    id: string,
+    updateGalleryRewardDto: UpdateGalleryRewardDto,
+  ) {
+    const newData = await this.prisma.membershipAccessToGallery.update({
+      where: {
+        id,
+      },
+      data: updateGalleryRewardDto,
+    });
+    return cResponseData({
+      message: 'Gallery access reward updated successfully',
+      data: newData,
+    });
+  }
 
+  // Posts api
   async createPostsAccessReward(
     createPostsAccessDto: CreateMembershipAccessToPostsDto,
   ) {
@@ -56,6 +110,21 @@ export class MembershipRewardService {
     });
     return cResponseData({
       message: 'Posts access reward created successfully',
+      data: newData,
+    });
+  }
+  async updatePostsReward(
+    id: string,
+    updatePostsRewardDto: UpdatePostsRewardDto,
+  ) {
+    const newData = await this.prisma.membershipAccessToPosts.update({
+      where: {
+        id,
+      },
+      data: updatePostsRewardDto,
+    });
+    return cResponseData({
+      message: 'Posts access reward updated successfully',
       data: newData,
     });
   }
