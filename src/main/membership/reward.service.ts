@@ -18,6 +18,7 @@ import {
 export class MembershipRewardService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // vedio call reward
   async createVideoCallReward(
     createVideoCallRewardDto: CreateVideoCallRewardDto,
   ) {
@@ -129,6 +130,7 @@ export class MembershipRewardService {
     });
   }
 
+  // gest all reward by membership id
   async getAllReward(membershipId: string) {
     return await this.prisma.$transaction(async (tx) => {
       const videoCallReward = await tx.membershipAccessToVideoCall.findMany({
@@ -166,6 +168,55 @@ export class MembershipRewardService {
           postsReward,
         },
       });
+    });
+  }
+
+  // delete apis this area
+  async deleteVideoCallReward(id: string) {
+    const newData = await this.prisma.membershipAccessToVideoCall.delete({
+      where: {
+        id,
+      },
+    });
+    return cResponseData({
+      message: 'Video access reward deleted successfully',
+      data: newData,
+    });
+  }
+
+  async deleteMessagesAccessReward(id: string) {
+    const newData = await this.prisma.membershipAccessToMessages.delete({
+      where: {
+        id,
+      },
+    });
+    return cResponseData({
+      message: 'Messages access reward deleted successfully',
+      data: newData,
+    });
+  }
+
+  async deleteGalleryAccessReward(id: string) {
+    const newData = await this.prisma.membershipAccessToGallery.delete({
+      where: {
+        id,
+      },
+    });
+    return cResponseData({
+      message: 'Gallery access reward deleted successfully',
+      data: newData,
+    });
+  }
+
+  async deletePostsAccessReward(id: string) {
+    const newData = await this.prisma.membershipAccessToPosts.delete({
+      where: {
+        id,
+      },
+    });
+    return cResponseData({
+      message: 'Posts access reward deleted successfully',
+      data: newData,
     });
   }
 }

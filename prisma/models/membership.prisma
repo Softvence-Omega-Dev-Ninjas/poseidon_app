@@ -67,6 +67,7 @@ model MembershipAccessToVideoCall {
     description                String?                      @default("Access to video calls with the owner")
     totalVideoCalls            Int                          @default(0) // total number of video calls allowed
     unlimitedVideoCalls        Boolean                      @default(false) // if true, totalVideoCalls is ignored
+    updateUrl                  String                       @default("video_call_update")
     MembershipSubscriptionPlan MembershipSubscriptionPlan[]
 }
 
@@ -79,6 +80,7 @@ model MembershipAccessToMessages {
     description                String?                      @default("Access to messages with the owner")
     totalMessages              Int                          @default(0) // total number of messages allowed
     unlimitedMessages          Boolean                      @default(false) // if true, totalMessages is ignored
+    updateUrl                  String                       @default("messages_update")
     MembershipSubscriptionPlan MembershipSubscriptionPlan[]
 }
 
@@ -90,6 +92,7 @@ model MembershipAccessToGallery {
     title                      String                       @default("Gallery Access")
     description                String                       @default("Access to the gallery with the owner")
     AccessToGallery            Boolean                      @default(true) // if true, access to gallery is granted
+    updateUrl                  String                       @default("gallery_update")
     MembershipSubscriptionPlan MembershipSubscriptionPlan[]
 }
 
@@ -101,5 +104,6 @@ model MembershipAccessToPosts {
     title                      String                       @default("Posts Access")
     description                String                       @default("Access to the posts with the owner")
     AccessToPosts              Boolean                      @default(true) // if true, access to posts is granted
+    updateUrl                  String                       @default("posts_update")
     MembershipSubscriptionPlan MembershipSubscriptionPlan[]
 }

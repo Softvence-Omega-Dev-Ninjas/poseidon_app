@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Get, Param, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import { MembershipRewardService } from './reward.service';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
@@ -16,6 +24,7 @@ import {
   UpdatePostsRewardDto,
   UpdateVideoCallRewardDto,
 } from './dto/update-reward.dto';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Controller('membership-levels-reward')
 export class MembershipRewardController {
@@ -23,11 +32,11 @@ export class MembershipRewardController {
     private readonly membershipRewardService: MembershipRewardService,
   ) {}
 
+  // create a reward with all tb
   @Roles(Role.Supporter)
   @Post('createReward')
   createReward(@Body() createAllRewardsDto: CreateAllRewardsDto) {
     const objKeys = Object.keys(createAllRewardsDto);
-    console.log(objKeys);
     if (objKeys.includes('videoCallReward'))
       return this.membershipRewardService.createVideoCallReward(
         createAllRewardsDto.videoCallReward as CreateVideoCallRewardDto,
@@ -44,6 +53,18 @@ export class MembershipRewardController {
       return this.membershipRewardService.createPostsAccessReward(
         createAllRewardsDto.postsReward as CreateMembershipAccessToPostsDto,
       );
+    else
+      return cResponseData({
+        message: 'Invalid type Url',
+        data: null,
+      });
+  }
+
+  // get All Rewards
+  @Roles(Role.Supporter)
+  @Get('all/:membershipLevelId')
+  async getAllRewards(@Param('membershipLevelId') membershipLevelId: string) {
+    return await this.membershipRewardService.getAllReward(membershipLevelId);
   }
 
   @Roles(Role.Supporter)
@@ -94,24 +115,28 @@ export class MembershipRewardController {
     );
   }
 
-  // get All Rewards
-  // @Roles(Role.Supporter)
   @Public()
-  @Get('all/:membershipLevelId')
-  async getAllRewards(@Param('membershipLevelId') membershipLevelId: string) {
-    return await this.membershipRewardService.getAllReward(membershipLevelId);
-  }
-
-  // @Roles(Role.Supporter)
-  @Public()
-  @Patch('video_call-update/:id')
-  updateVideoCallReward(
-    @Param('id') id: string,
-    @Body() updateVideoCallRewardDto: UpdateVideoCallRewardDto,
-  ) {
-    return this.membershipRewardService.updateVideoCallReward(
-      id,
-      updateVideoCallRewardDto,
-    );
+  @Delete('delete/:params')
+  deleteReward(@Param('params') params: string) {
+    const objKeys = [
+      'videoCallReward',
+      'messagesReward',
+      'galleryReward',
+      'postsReward',
+    ];
+    const [type, id] = params.split('/');
+    if (objKeys.includes(type))
+      return this.membershipRewardService.deleteVideoCallReward(id);
+    if (objKeys.includes(type))
+      return this.membershipRewardService.deleteMessagesAccessReward(id);
+    if (objKeys.includes(type))
+      return this.membershipRewardService.deleteGalleryAccessReward(id);
+    if (objKeys.includes(type))
+      return this.membershipRewardService.deletePostsAccessReward(id);
+    else
+      return cResponseData({
+        message: 'Invalid type Url',
+        data: null,
+      });
   }
 }
