@@ -7,6 +7,7 @@ import {
   CreateMembershipAccessToMessagesDto,
   CreateMembershipAccessToGalleryDto,
   CreateMembershipAccessToPostsDto,
+  CreateAllRewardsDto,
 } from './dto/create-all-reward.dto';
 import { Public } from 'src/auth/guard/public.decorator';
 import {
@@ -22,24 +23,29 @@ export class MembershipRewardController {
     private readonly membershipRewardService: MembershipRewardService,
   ) {}
 
-  // @Roles(Role.Supporter)
-  // @Post('createReward')
-  // createReward(@Body() createVideoCallRewardDto: WhoCreateReward) {
-  //   return this.membershipRewardService.createVideoCallReward(
-  //     createVideoCallRewardDto.rewardData,
-  //   );
-  // }
-
-  // video call apis
   @Roles(Role.Supporter)
-  @Post('video_call')
-  async createVideoCallReward(
-    @Body() createVideoCallRewardDto: CreateVideoCallRewardDto,
-  ) {
-    return this.membershipRewardService.createVideoCallReward(
-      createVideoCallRewardDto,
-    );
+  @Post('createReward')
+  createReward(@Body() createAllRewardsDto: CreateAllRewardsDto) {
+    const objKeys = Object.keys(createAllRewardsDto);
+    console.log(objKeys);
+    if (objKeys.includes('videoCallReward'))
+      return this.membershipRewardService.createVideoCallReward(
+        createAllRewardsDto.videoCallReward as CreateVideoCallRewardDto,
+      );
+    if (objKeys.includes('messagesReward'))
+      return this.membershipRewardService.createMessagesAccessReward(
+        createAllRewardsDto.messagesReward as CreateMembershipAccessToMessagesDto,
+      );
+    if (objKeys.includes('galleryReward'))
+      return this.membershipRewardService.createGalleryAccessReward(
+        createAllRewardsDto.galleryReward as CreateMembershipAccessToGalleryDto,
+      );
+    if (objKeys.includes('postsReward'))
+      return this.membershipRewardService.createPostsAccessReward(
+        createAllRewardsDto.postsReward as CreateMembershipAccessToPostsDto,
+      );
   }
+
   @Roles(Role.Supporter)
   @Patch('video_call_update/:id')
   updateVideoCallRewardById(
@@ -52,16 +58,6 @@ export class MembershipRewardController {
     );
   }
 
-  // messages api
-  @Roles(Role.Supporter)
-  @Post('messages')
-  async createMessagesAccessReward(
-    @Body() createMessagesAccessDto: CreateMembershipAccessToMessagesDto,
-  ) {
-    return this.membershipRewardService.createMessagesAccessReward(
-      createMessagesAccessDto,
-    );
-  }
   @Roles(Role.Supporter)
   @Patch('messages_update/:id')
   updateMessagesRewardById(
@@ -74,16 +70,6 @@ export class MembershipRewardController {
     );
   }
 
-  // gallery api
-  @Roles(Role.Supporter)
-  @Post('gallery')
-  async createGalleryAccessReward(
-    @Body() createGalleryAccessDto: CreateMembershipAccessToGalleryDto,
-  ) {
-    return this.membershipRewardService.createGalleryAccessReward(
-      createGalleryAccessDto,
-    );
-  }
   @Roles(Role.Supporter)
   @Patch('gallery_update/:id')
   updateGalleryRewardById(
@@ -96,16 +82,6 @@ export class MembershipRewardController {
     );
   }
 
-  // Posts api
-  @Roles(Role.Supporter)
-  @Post('posts')
-  async createPostsAccessReward(
-    @Body() createPostsAccessDto: CreateMembershipAccessToPostsDto,
-  ) {
-    return this.membershipRewardService.createPostsAccessReward(
-      createPostsAccessDto,
-    );
-  }
   @Roles(Role.Supporter)
   @Patch('posts_update/:id')
   updatePostsRewardById(
