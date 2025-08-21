@@ -55,6 +55,7 @@ export class MembershipService {
     return cResponseData(enableMembership);
   }
 
+  // create a membership levels
   async createMembershipLevel(
     createMembershipLevelDto: CreateMembershipLevelDto,
   ) {
@@ -62,23 +63,7 @@ export class MembershipService {
     const { mediaId } = await this.cloudinaryService.imageUpload(
       createMembershipLevelDto.levelImage,
     );
-
-    // return cResponseData({
-    //   message: 'Membership level created successfully',
-    //   data: { ...createMembershipLevelDto, levelImage: 'levelImage' },
-    //   success: true,
-    // });
-
     const { subscriptionPlans, ...data } = createMembershipLevelDto;
-
-    // console.log({...createMembershipLevelDto, subscriptionPlans});
-
-    console.log(data);
-    console.log(JSON.parse(subscriptionPlans as any));
-
-    // createMembershipLevelDto.subscriptionPlans.map((plan) => {
-    //   console.log(plan);
-    // });
     const newMembershipLevel = await this.prisma.membership_levels.create({
       data: {
         ...data,
@@ -94,6 +79,58 @@ export class MembershipService {
       message: 'Membership level created successfully',
       data: newMembershipLevel,
       success: true,
+    });
+  }
+
+  // get all membership levels
+  async getMembershipLevels(mId: string) {
+    return await this.prisma.$transaction(async (tx) => {
+      const allLevels = await tx.membership_levels.findMany({
+        where: {
+          membershipId: mId,
+        },
+        select: {
+          id: true,
+          membershipId: true,
+          levelName: true,
+          levelImage: true,
+          levelDescription: true,
+          MembershipSubscriptionPlan: {
+            select: {
+              id: true,
+              duration: true,
+              price: true,
+              callLimitAccess: true,
+              MembershipAccessToMessages: true,
+              MembershipAccessToPosts: true,
+              galleryAccess: true,
+            },
+          },
+        },
+      });
+      const imageIds = allLevels.map((level) => level.levelImage);
+      // call media tb
+      const imageurl = await tx.media.findMany({
+        where: {
+          id: {
+            in: imageIds,
+          },
+        },
+      });
+      return cResponseData({
+        message: 'Membership level created successfully',
+        data:
+          allLevels.map((level) => {
+            const levelImage = imageurl.find(
+              (image) => image.id === level.levelImage,
+            );
+            return {
+              ...level,
+              levelImage: levelImage ? levelImage : null,
+            };
+          }) || [],
+        success: true,
+      });
     });
   }
 }

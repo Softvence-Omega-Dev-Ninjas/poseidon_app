@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch } from '@nestjs/common';
 import { MembershipRewardService } from './reward.service';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
@@ -8,6 +8,7 @@ import {
   CreateMembershipAccessToGalleryDto,
   CreateMembershipAccessToPostsDto,
 } from './dto/create-all-reward.dto';
+import { Public } from 'src/auth/guard/public.decorator';
 
 @Controller('membership-levels-reward')
 export class MembershipRewardController {
@@ -23,6 +24,18 @@ export class MembershipRewardController {
     return this.membershipRewardService.createVideoCallReward(
       createVideoCallRewardDto,
     );
+  }
+  @Roles(Role.Supporter)
+  @Patch('video_call/:id')
+  updateVideoCallReward(
+    @Param('id') id: string,
+    @Body() updateVideoCallRewardDto: CreateVideoCallRewardDto,
+  ) {
+    // return this.membershipRewardService.updateVideoCallReward(
+    //   id,
+    //   updateVideoCallRewardDto,
+    // );
+    return 'yes';
   }
 
   @Roles(Role.Supporter)
@@ -53,5 +66,13 @@ export class MembershipRewardController {
     return this.membershipRewardService.createPostsAccessReward(
       createPostsAccessDto,
     );
+  }
+
+  // get All Rewards
+  // @Roles(Role.Supporter)
+  @Public()
+  @Get('all/:membershipLevelId')
+  async getAllRewards(@Param('membershipLevelId') membershipLevelId: string) {
+    return await this.membershipRewardService.getAllReward(membershipLevelId);
   }
 }

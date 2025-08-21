@@ -59,4 +59,44 @@ export class MembershipRewardService {
       data: newData,
     });
   }
+
+  async getAllReward(membershipId: string) {
+    return await this.prisma.$transaction(async (tx) => {
+      const videoCallReward = await tx.membershipAccessToVideoCall.findMany({
+        where: {
+          membership_ownerId: membershipId,
+        },
+      });
+
+      const messagesAccessReward = await tx.membershipAccessToMessages.findMany(
+        {
+          where: {
+            membership_ownerId: membershipId,
+          },
+        },
+      );
+
+      const galleryReward = await tx.membershipAccessToGallery.findMany({
+        where: {
+          membership_ownerId: membershipId,
+        },
+      });
+
+      const postsReward = await tx.membershipAccessToPosts.findMany({
+        where: {
+          membership_ownerId: membershipId,
+        },
+      });
+
+      return cResponseData({
+        message: 'All rewards fetched successfully',
+        data: {
+          videoCallReward,
+          messagesAccessReward,
+          galleryReward,
+          postsReward,
+        },
+      });
+    });
+  }
 }

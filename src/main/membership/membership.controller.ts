@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Req,
   UploadedFile,
@@ -28,8 +29,7 @@ export class MembershipController {
     return this.membershipService.enableMembership(req['sub'] as string);
   }
 
-  // @Roles(Role.Supporter)
-  @Public()
+  @Roles(Role.Supporter)
   @Post('create-levels')
   @UseInterceptors(FileInterceptor('levelImage'))
   @ApiConsumes('multipart/form-data')
@@ -38,9 +38,6 @@ export class MembershipController {
     @Body() createMembershipLevelDto: CreateMembershipLevelDto,
     @UploadedFile(new ImageValidationPipe()) levelImage: Express.Multer.File,
   ) {
-    // levelImage upload
-    // const { mediaId } = await this.cloudinaryService.imageUpload(levelImage);
-
     return this.membershipService.createMembershipLevel({
       ...createMembershipLevelDto,
       levelImage,
@@ -48,8 +45,9 @@ export class MembershipController {
   }
 
   // @Roles(Role.Supporter)
-  // @Get('get-levels/:membershipId')
-  // getMembershipLevels(@Param('membershipId') membershipId: string) {
-  //   return this.membershipService.getMembershipLevels(membershipId);
-  // }
+  @Public()
+  @Get('get-levels/:membershipId')
+  getMembershipLevels(@Param('membershipId') membershipId: string) {
+    return this.membershipService.getMembershipLevels(membershipId);
+  }
 }
