@@ -54,27 +54,49 @@ export class MembershipService {
   }
 
   // create a membership levels
-  createMembershipLevel(createMembershipLevelDto: CreateMembershipLevelDto) {
+  async createMembershipLevel(
+    createMembershipLevelDto: CreateMembershipLevelDto,
+  ) {
     // levelImage upload
-    // const { mediaId } = await this.cloudinaryService.imageUpload(
-    //   createMembershipLevelDto.levelImage,
-    // );
-    // const { subscriptionPlans, ...data } = createMembershipLevelDto;
-    // const newMembershipLevel = await this.prisma.membership_levels.create({
-    //   data: {
-    //     ...data,
-    //     levelImage: mediaId,
-    //     MembershipSubscriptionPlan: {
-    //       createMany: {
-    //         data: JSON.parse(subscriptionPlans as any),
-    //       },
-    //     },
-    //   },
-    // });
-    console.log(createMembershipLevelDto);
+    const { mediaId } = await this.cloudinaryService.imageUpload(
+      createMembershipLevelDto.levelImage,
+    );
+    const { MembershipSubscriptionPlan, ...data } = createMembershipLevelDto;
+    const newMembershipLevel = await this.prisma.membership_levels.create({
+      data: {
+        ...data,
+        Wellcome_note: createMembershipLevelDto.wellcome_note || null,
+        levelImage: mediaId,
+        MembershipSubscriptionPlan: {
+          create: MembershipSubscriptionPlan.map((plan) => ({
+            ...plan,
+            CalligSubscriptionPlan: plan.CalligSubscriptionPlan
+              ? {
+                  create: plan.CalligSubscriptionPlan,
+                }
+              : undefined,
+            MessagesSubscriptionPlan: plan.MessagesSubscriptionPlan
+              ? {
+                  create: plan.MessagesSubscriptionPlan,
+                }
+              : undefined,
+            GallerySubscriptionPlan: plan.GallerySubscriptionPlan
+              ? {
+                  create: plan.GallerySubscriptionPlan,
+                }
+              : undefined,
+            PostsSubscriptionPlan: plan.PostsSubscriptionPlan
+              ? {
+                  create: plan.PostsSubscriptionPlan,
+                }
+              : undefined,
+          })),
+        },
+      },
+    });
     return cResponseData({
       message: 'Membership level created successfully',
-      data: createMembershipLevelDto,
+      data: newMembershipLevel,
       success: true,
     });
   }

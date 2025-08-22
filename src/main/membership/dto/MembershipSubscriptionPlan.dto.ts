@@ -130,7 +130,7 @@ export class MembershipSubscriptionPlan {
   @ValidateNested()
   @Type(() => CalligSubscriptionPlanDto)
   @IsOptional()
-  calligSubscriptionPlan?: CalligSubscriptionPlanDto;
+  CalligSubscriptionPlan?: CalligSubscriptionPlanDto;
 
   @ApiPropertyOptional({
     type: () => MessagesSubscriptionPlanDto,
@@ -139,7 +139,7 @@ export class MembershipSubscriptionPlan {
   @ValidateNested()
   @Type(() => MessagesSubscriptionPlanDto)
   @IsOptional()
-  messagesSubscriptionPlan?: MessagesSubscriptionPlanDto;
+  MessagesSubscriptionPlan?: MessagesSubscriptionPlanDto;
 
   @ApiPropertyOptional({
     type: () => GallerySubscriptionPlanDto,
@@ -148,7 +148,7 @@ export class MembershipSubscriptionPlan {
   @ValidateNested()
   @Type(() => GallerySubscriptionPlanDto)
   @IsOptional()
-  gallerySubscriptionPlan?: GallerySubscriptionPlanDto;
+  GallerySubscriptionPlan?: GallerySubscriptionPlanDto;
 
   @ApiPropertyOptional({
     type: () => PostsSubscriptionPlanDto,
@@ -157,7 +157,7 @@ export class MembershipSubscriptionPlan {
   @ValidateNested()
   @Type(() => PostsSubscriptionPlanDto)
   @IsOptional()
-  postsSubscriptionPlan?: PostsSubscriptionPlanDto;
+  PostsSubscriptionPlan?: PostsSubscriptionPlanDto;
 }
 
 // MessagesSubscriptionPlan
