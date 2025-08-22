@@ -9,7 +9,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Duration } from './create-membership-plan-details.dto';
+import { Duration } from './create-membership-Access-plan-details.dto';
 import { Type } from 'class-transformer';
 
 export class CreateVideoCallRewardDto {

@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
-import { CreateMembershipLevelDto } from './dto/create-membership-level.dto';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
-// import { CreateMembershipDto } from './dto/create-membership.dto';
-// import { UpdateMembershipDto } from './dto/update-membership.dto';
+import { CreateMembershipLevelDto } from './dto/create-membership-level.dto';
 
 @Injectable()
 export class MembershipService {
@@ -56,9 +54,7 @@ export class MembershipService {
   }
 
   // create a membership levels
-  async createMembershipLevel(
-    createMembershipLevelDto: CreateMembershipLevelDto,
-  ) {
+  createMembershipLevel(createMembershipLevelDto: CreateMembershipLevelDto) {
     // levelImage upload
     // const { mediaId } = await this.cloudinaryService.imageUpload(
     //   createMembershipLevelDto.levelImage,
@@ -75,9 +71,10 @@ export class MembershipService {
     //     },
     //   },
     // });
+    console.log(createMembershipLevelDto);
     return cResponseData({
       message: 'Membership level created successfully',
-      data: null,
+      data: createMembershipLevelDto,
       success: true,
     });
   }

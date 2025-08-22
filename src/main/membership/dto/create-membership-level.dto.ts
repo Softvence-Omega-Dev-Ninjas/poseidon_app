@@ -1,6 +1,13 @@
-import { IsString, IsNotEmpty, IsUUID, IsOptional } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-// import { CreateMembershipSubscriptionPlanDto } from './create-membership.dto';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
+import { MembershipSubscriptionPlan } from './MembershipSubscriptionPlan.dto';
+import { Type } from 'class-transformer';
 
 export class CreateMembershipLevelDto {
   @ApiProperty({
@@ -47,9 +54,12 @@ export class CreateMembershipLevelDto {
   @IsOptional()
   @IsString()
   wellcome_note?: string;
-}
 
-// CalligSubscriptionPlan
-// MessagesSubscriptionPlan
-// GallerySubscriptionPlan
-// PostsSubscriptionPlan
+  @ApiProperty({
+    type: () => [MembershipSubscriptionPlan],
+    description: 'Subscription plans under this membership level',
+  })
+  @ValidateNested({ each: true })
+  @Type(() => MembershipSubscriptionPlan)
+  MembershipSubscriptionPlan: MembershipSubscriptionPlan[];
+}

@@ -4,7 +4,7 @@ import {
   CreateMembershipAccessToGalleryDto,
   CreateMembershipAccessToMessagesDto,
   CreateMembershipAccessToPostsDto,
-} from './create-membership-plan-details.dto';
+} from './create-membership-Access-plan-details.dto';
 
 export class UpdateVideoCallRewardDto extends PartialType(
   CreateVideoCallRewardDto,
