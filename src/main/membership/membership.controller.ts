@@ -31,6 +31,7 @@ export class MembershipController {
     return this.membershipService.enableMembership(req['sub'] as string);
   }
 
+  // createMembershipLevel
   @Roles(Role.Supporter)
   @Post('create-levels')
   @UseInterceptors(FileInterceptor('levelImage'))
