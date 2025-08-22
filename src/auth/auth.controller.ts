@@ -60,7 +60,7 @@ export class AuthController {
       userDto,
       createAuthDto.password,
     );
-    res.cookie('accessToken', varifyUser.access_token);
+    // res.cookie('accessToken', varifyUser.access_token);
     return res.status(HttpStatus.OK).json(varifyUser);
   }
 }

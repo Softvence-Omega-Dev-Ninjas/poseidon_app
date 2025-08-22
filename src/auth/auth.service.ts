@@ -31,12 +31,14 @@ export class AuthService {
       role: user?.role,
       profile: user?.profile,
       shop_id: user?.shop?.id || '',
+      memberships_owner_id: user?.memberships_owner?.id ?? '',
     };
     const access_token = await this.jwtService.signAsync({
       id: user?.id,
       ...payload,
     });
 
+    // return payload;
     return {
       access_token: `Bearer ${access_token}`,
       user: payload,

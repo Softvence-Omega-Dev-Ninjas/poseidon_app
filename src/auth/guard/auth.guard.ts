@@ -49,6 +49,7 @@ export class AuthGuard implements CanActivate {
       const token = this.extractBearerToken(request);
       if (token === '' && isPublic) {
         request['sub'] = '';
+        request['memberships_owner_id'] = '';
         return true;
       }
       // token checking
@@ -59,6 +60,7 @@ export class AuthGuard implements CanActivate {
 
       request['sub'] = payload.id;
       request['shop_id'] = payload.shop_id;
+      request['memberships_owner_id'] = payload.memberships_owner_id;
       if (isPublic) return true;
       console.log(payload.role, requiredRoles);
       return requiredRoles.some((role) => payload.role?.includes(role));
