@@ -6,6 +6,8 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFile,
+  Get,
+  Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CredentialsSignInInfo } from './dto/create-auth.dto';
@@ -62,5 +64,11 @@ export class AuthController {
     );
     // res.cookie('accessToken', varifyUser.access_token);
     return res.status(HttpStatus.OK).json(varifyUser);
+  }
+
+  @Public()
+  @Get('check-jwt/:token')
+  async checkJwt(@Param('token') token: string) {
+    return this.authService.checkJwt(token);
   }
 }

@@ -52,10 +52,21 @@ export class MembershipController {
     });
   }
 
-  // @Roles(Role.Supporter)
-  @Public()
-  @Get('get-levels/:membershipId')
-  getMembershipLevels(@Param('membershipId') membershipId: string) {
-    return this.membershipService.getMembershipLevels(membershipId);
+  @Roles(Role.Supporter)
+  // @Public()
+  @Get('get-levels')
+  getMembershipLevels(
+    // @Param('membershipId') membershipId: string,
+    @Req() req: Request,
+  ) {
+    console.log(
+      'membershipId - jwt ============== >',
+      req['memberships_owner_id'] as string,
+      'user id - jwt ============== >',
+      req['sub'] as string,
+    );
+    return this.membershipService.getMembershipLevels(
+      req['memberships_owner_id'] as string,
+    );
   }
 }
