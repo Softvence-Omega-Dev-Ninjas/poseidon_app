@@ -42,14 +42,10 @@ model MembershipSubscriptionPlan {
     price    Float // e.g., 5 or 50
 
     // Access controls:
-    membershipAccessToVideoCallId String?
-    callLimitAccess               MembershipAccessToVideoCall? @relation(fields: [membershipAccessToVideoCallId], references: [id])
-    membershipAccessGalleryId     String?
-    galleryAccess                 MembershipAccessToGallery?   @relation(fields: [membershipAccessGalleryId], references: [id])
-    membershipAccessToPostsId     String?
-    MembershipAccessToPosts       MembershipAccessToPosts?     @relation(fields: [membershipAccessToPostsId], references: [id])
-    membershipAccessToMessagesId  String?
-    MembershipAccessToMessages    MembershipAccessToMessages?  @relation(fields: [membershipAccessToMessagesId], references: [id])
+    CalligSubscriptionPlan   CalligSubscriptionPlan?
+    MessagesSubscriptionPlan MessagesSubscriptionPlan?
+    GallerySubscriptionPlan  GallerySubscriptionPlan?
+    PostsSubscriptionPlan    PostsSubscriptionPlan?
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -57,7 +53,49 @@ model MembershipSubscriptionPlan {
     @@unique([membershipLevelId, duration]) // one plan per level+duration
 }
 
+// Access details
+model CalligSubscriptionPlan {
+    id                           String                     @id @unique @default(uuid())
+    membershipSubscriptionPlanId String                     @unique
+    MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id])
+    // data
+    duration                     Duration
+    title                        String                     
+    description                  String
+    totalVideoCalls              Int                        @default(0)
+    unlimitedVideoCalls          Boolean                    @default(false)
+}
 
-model CallSubscriptionPlan {
-    
+model MessagesSubscriptionPlan {
+    id                           String                     @id @unique @default(uuid())
+    membershipSubscriptionPlanId String                     @unique
+    MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id])
+    // data
+    duration                     Duration
+    title                        String
+    description                  String
+    totalMessages                Int                        @default(0) // total number of messages allowed
+    unlimitedMessages            Boolean                    @default(false) // if true, totalMessages is ignored
+}
+
+model GallerySubscriptionPlan {
+    id                           String                     @id @unique @default(uuid())
+    membershipSubscriptionPlanId String                     @unique
+    MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id])
+    // data
+    duration                     Duration
+    title                        String
+    description                  String
+    AccessToGallery              Boolean                    @default(true) // if true, access to gallery is granted
+}
+
+model PostsSubscriptionPlan {
+    id                           String                     @id @unique @default(uuid())
+    membershipSubscriptionPlanId String                     @unique
+    MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id])
+    // data
+    duration                   Duration
+    title                      String
+    description                String
+    AccessToPosts              Boolean                      @default(true) // if true, access to posts is granted
 }

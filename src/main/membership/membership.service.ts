@@ -60,24 +60,24 @@ export class MembershipService {
     createMembershipLevelDto: CreateMembershipLevelDto,
   ) {
     // levelImage upload
-    const { mediaId } = await this.cloudinaryService.imageUpload(
-      createMembershipLevelDto.levelImage,
-    );
-    const { subscriptionPlans, ...data } = createMembershipLevelDto;
-    const newMembershipLevel = await this.prisma.membership_levels.create({
-      data: {
-        ...data,
-        levelImage: mediaId,
-        MembershipSubscriptionPlan: {
-          createMany: {
-            data: JSON.parse(subscriptionPlans as any),
-          },
-        },
-      },
-    });
+    // const { mediaId } = await this.cloudinaryService.imageUpload(
+    //   createMembershipLevelDto.levelImage,
+    // );
+    // const { subscriptionPlans, ...data } = createMembershipLevelDto;
+    // const newMembershipLevel = await this.prisma.membership_levels.create({
+    //   data: {
+    //     ...data,
+    //     levelImage: mediaId,
+    //     MembershipSubscriptionPlan: {
+    //       createMany: {
+    //         data: JSON.parse(subscriptionPlans as any),
+    //       },
+    //     },
+    //   },
+    // });
     return cResponseData({
       message: 'Membership level created successfully',
-      data: newMembershipLevel,
+      data: null,
       success: true,
     });
   }
@@ -100,10 +100,10 @@ export class MembershipService {
               id: true,
               duration: true,
               price: true,
-              callLimitAccess: true,
-              MembershipAccessToMessages: true,
-              MembershipAccessToPosts: true,
-              galleryAccess: true,
+              CalligSubscriptionPlan: true,
+              MessagesSubscriptionPlan: true,
+              GallerySubscriptionPlan: true,
+              PostsSubscriptionPlan: true,
             },
           },
         },
