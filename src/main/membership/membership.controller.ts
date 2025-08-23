@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Post,
   Req,
   UploadedFile,
@@ -16,7 +15,6 @@ import { Role } from 'src/auth/guard/role.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
-import { Public } from 'src/auth/guard/public.decorator';
 import { CreateMembershipLevelDto } from './dto/create-membership-level.dto';
 import { MembershipSubscriptionPlanPipe } from './pipeline/membershipSubscriptionPlan.pipe';
 import { MembershipSubscriptionPlan } from './dto/MembershipSubscriptionPlan.dto';
