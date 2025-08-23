@@ -82,7 +82,7 @@ export class CloudinaryService {
   }
 
   // Delete image from Cloudinary using its public ID
-  async deleteFile(publicId: string) {
+  async deleteFile(publicId: string): Promise<any> {
     try {
       const result = await this.cloudinary.uploader.destroy(publicId);
 

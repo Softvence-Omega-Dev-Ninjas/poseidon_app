@@ -5,5 +5,16 @@ export class CreateMediafileDto {
   @ApiProperty({ type: 'string', format: 'binary' })
   @IsString()
   @IsNotEmpty()
-  levelImage: Express.Multer.File;
+  image: Express.Multer.File;
+}
+
+export class DeleteMediaFfileDto {
+  @ApiProperty({
+    type: String,
+    description: 'The ID of the media file to delete',
+    example: 'dfhsdf',
+  })
+  @IsString()
+  @IsNotEmpty()
+  mid: string;
 }
