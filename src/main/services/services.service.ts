@@ -1,9 +1,16 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 
 import { cResponseData } from 'src/common/utils/common-responseData';
-import { Action, StructuredArrayItemDto } from 'src/common/dto/structured-array.dto';
+import {
+  Action,
+  StructuredArrayItemDto,
+} from 'src/common/dto/structured-array.dto';
 import { CreateServiceOrderDto } from './dto/create-serviesorder';
 import { CreateServicesDto } from './dto/create-services';
 import { UpdateservicesDto } from './dto/update-serviecs';
@@ -15,7 +22,11 @@ export class ServiceService {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async create(createServiceDto: CreateServicesDto,userId:string, files?: Express.Multer.File[],) {
+  async create(
+    createServiceDto: CreateServicesDto,
+    userId: string,
+    files?: Express.Multer.File[],
+  ) {
     const mediaIds: string[] = [];
     if (files && files.length > 0) {
       for (const file of files) {
@@ -23,8 +34,6 @@ export class ServiceService {
         mediaIds.push(uploadRes.mediaId);
       }
     }
-
-    
 
     const service = await this.prisma.service.create({
       data: {
@@ -40,7 +49,6 @@ export class ServiceService {
       success: true,
       data: service,
     });
-   
   }
 
   async findAll(page = 1, limit = 10, draft?: boolean) {
@@ -53,10 +61,6 @@ export class ServiceService {
       this.prisma.service.count({ where }),
     ]);
 
-    
-
-    
-
     const totalPages = Math.ceil(total / limit);
     return cResponseData({
       message: 'Services retrieved successfully.',
@@ -66,13 +70,13 @@ export class ServiceService {
     });
   }
 
-  async findAllUser(userid:string,page = 1, limit = 10, draft?: boolean) {
+  async findAllUser(userid: string, page = 1, limit = 10, draft?: boolean) {
     const skip = (page - 1) * limit;
     const where: any = { userId: userid };
     if (draft !== undefined) where.draft = draft;
 
     const [services, total] = await this.prisma.$transaction([
-      this.prisma.service.findMany({ where, skip, take: limit, }),
+      this.prisma.service.findMany({ where, skip, take: limit }),
       this.prisma.service.count({ where }),
     ]);
 
@@ -97,7 +101,11 @@ export class ServiceService {
     });
   }
 
-  async update(id: string, dto: UpdateservicesDto, newFiles?: Express.Multer.File[]) {
+  async update(
+    id: string,
+    dto: UpdateservicesDto,
+    newFiles?: Express.Multer.File[],
+  ) {
     const service = await this.prisma.service.findUnique({ where: { id } });
     if (!service) throw new NotFoundException(`Service ${id} not found`);
 
@@ -132,7 +140,12 @@ export class ServiceService {
   async remove(id: string) {
     const service = await this.prisma.service.findUnique({ where: { id } });
     if (!service)
-      return cResponseData({ message: 'Service not found', error: 'NotFound', success: false, data: null });
+      return cResponseData({
+        message: 'Service not found',
+        error: 'NotFound',
+        success: false,
+        data: null,
+      });
 
     await this.prisma.service.delete({ where: { id } });
     return cResponseData({
@@ -143,8 +156,7 @@ export class ServiceService {
     });
   }
 
-
-   async createOrder(dto:CreateServiceOrderDto ) {
+  async createOrder(dto: CreateServiceOrderDto) {
     return this.prisma.serviceOrder.create({
       data: {
         paymentId: dto.paymentId,
@@ -159,7 +171,7 @@ export class ServiceService {
   }
 
   /** Get all service orders with optional pagination */
-  async findAllOrder(options?:{ skip?: number; take?: number;}) {
+  async findAllOrder(options?: { skip?: number; take?: number }) {
     const { skip = 0, take = 10 } = options || {};
 
     const [orders, total] = await this.prisma.$transaction([
@@ -190,7 +202,8 @@ export class ServiceService {
       },
     });
 
-    if (!order) throw new NotFoundException(`ServiceOrder with id ${id} not found`);
+    if (!order)
+      throw new NotFoundException(`ServiceOrder with id ${id} not found`);
     return order;
   }
 }

@@ -14,7 +14,7 @@ export class CreateServicesDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  serviceName : string;
+  serviceName: string;
 
   @ApiProperty({ required: true })
   @IsString()
@@ -35,9 +35,6 @@ export class CreateServicesDto {
   @IsNotEmpty()
   @Transform(({ value }) => value === 'true' || value === true)
   draft: boolean;
-
-
-
 
   @ApiProperty({ enum: ['message', 'redirect'] })
   @IsIn(['message', 'redirect'])

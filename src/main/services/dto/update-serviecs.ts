@@ -16,7 +16,7 @@ export class UpdateservicesDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
-   serviceName?: string;
+  serviceName?: string;
 
   @ApiProperty({ required: false })
   @IsString()
@@ -45,10 +45,6 @@ export class UpdateservicesDto {
   @IsOptional()
   images?: StructuredArrayItemDto[];
 
-  
-
-
-
   @ApiProperty({ required: false, enum: SuccessPage })
   @IsEnum(SuccessPage)
   @IsOptional()
@@ -64,5 +60,5 @@ export class UpdateservicesDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
-    successPage?: string;
+  successPage?: string;
 }
