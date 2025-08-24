@@ -30,10 +30,17 @@ model User {
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
 
+  //services
+  serviceOrders ServiceOrder[] @relation("UserServiceOrders")
+
+  //
+
+  services  Service[]
+
 }
 
 model Profile {
-  id          String  @id @default(uuid())
+  id          String  @id @unique @default(uuid())
   userid      String  @unique
   name        String
   image       String

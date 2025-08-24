@@ -10,6 +10,7 @@ import { SupporterProfileModule } from './supporter-profile/supporter-profile.mo
 import { MembershipModule } from './membership/membership.module';
 import { ChatModule } from './message/message.module';
 import { MediafileModule } from './mediafile/mediafile.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { MediafileModule } from './mediafile/mediafile.module';
     ImageModule,
     SupporterProfileModule,
     ChatModule,
+    ServicesModule,
   ],
   controllers: [],
   providers: [],
