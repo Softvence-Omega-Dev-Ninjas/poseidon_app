@@ -8,11 +8,9 @@ import {
   UploadedFile,
   Req,
   HttpException,
+  Get,
 } from '@nestjs/common';
-import {
-  CreateMediafileDto,
-  DeleteMediaFfileDto,
-} from './dto/create-mediafile.dto';
+import { CreateMediafileDto } from './dto/create-mediafile.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
@@ -32,6 +30,11 @@ export class MediafileController {
     private readonly mediafileService: MediafileService,
   ) {}
 
+  @Get()
+  findMediabyId(@Param('id') id: string) {
+    return this.mediafileService.findByMedia(id);
+  }
+
   @Post()
   @UseInterceptors(FileInterceptor('image'))
   @ApiConsumes('multipart/form-data')
@@ -42,11 +45,6 @@ export class MediafileController {
     image: Express.Multer.File,
     @Req() req: Request,
   ) {
-    const fileName = image.originalname.split('.');
-    const extentionName = fileName.pop();
-    const updateName =
-      fileName.join('') + new Date().toISOString() + '.' + extentionName;
-    image.originalname = updateName;
     const uploadData = this.cloudinaryService.uploadFileFullTbData(image);
     return uploadData;
   }

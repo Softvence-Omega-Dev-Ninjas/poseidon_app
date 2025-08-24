@@ -99,6 +99,12 @@ export class CloudinaryService {
     try {
       if (!file) return { mediaId: '' };
 
+      const fileName = file.originalname.split('.');
+      const extentionName = fileName.pop();
+      const updateName =
+        fileName.join('') + new Date().toISOString() + '.' + extentionName;
+      file.originalname = updateName;
+
       const uploadRes = await new Promise<any>((resolve, reject) => {
         const uploadStream = this.cloudinary.uploader.upload_stream(
           {
