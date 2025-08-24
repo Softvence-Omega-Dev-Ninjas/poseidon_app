@@ -30,6 +30,9 @@ model User {
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
 
+  //services
+  serviceOrders ServiceOrder[]
+
 }
 
 model Profile {
