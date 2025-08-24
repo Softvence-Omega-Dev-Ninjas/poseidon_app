@@ -94,4 +94,37 @@ export class CloudinaryService {
       );
     }
   }
+
+  async uploadFileFullTbData(file?: Express.Multer.File) {
+    try {
+      if (!file) return { mediaId: '' };
+
+      const uploadRes = await new Promise<any>((resolve, reject) => {
+        const uploadStream = this.cloudinary.uploader.upload_stream(
+          {
+            public_id: file.originalname,
+            resource_type: 'image',
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          },
+        );
+
+        streamifier.createReadStream(file.buffer).pipe(uploadStream);
+      });
+
+      const media = await this.prisma.media.create({
+        data: {
+          imageUrl: uploadRes.secure_url,
+          publicId: uploadRes.public_id,
+        },
+      });
+
+      return media;
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      throw new InternalServerErrorException('Failed to upload Image');
+    }
+  }
 }

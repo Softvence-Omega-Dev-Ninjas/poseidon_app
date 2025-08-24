@@ -42,7 +42,12 @@ export class MediafileController {
     image: Express.Multer.File,
     @Req() req: Request,
   ) {
-    const uploadData = this.cloudinaryService.imageUpload(image);
+    const fileName = image.originalname.split('.');
+    const extentionName = fileName.pop();
+    const updateName =
+      fileName.join('') + new Date().toISOString() + '.' + extentionName;
+    image.originalname = updateName;
+    const uploadData = this.cloudinaryService.uploadFileFullTbData(image);
     return uploadData;
   }
 
@@ -61,9 +66,22 @@ export class MediafileController {
       );
     const deletecloudinary: { result: string } =
       await this.cloudinaryService.deleteFile(mediaData?.publicId as string);
-    // if (deletecloudinary.result == 'ok') {
-
-    // }
-    return deletecloudinary;
+    if (deletecloudinary.result == 'ok') {
+      const dltFile = await this.mediafileService.deleteFile(mediaData.id);
+      if (dltFile && dltFile.id) {
+        return cResponseData({
+          message: 'File deleted successfully',
+          data: id,
+        });
+      }
+      return cResponseData({
+        message: 'Something went wrong',
+        data: null,
+      });
+    }
+    return cResponseData({
+      message: 'Something went wrong',
+      data: null,
+    });
   }
 }
