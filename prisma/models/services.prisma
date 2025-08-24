@@ -1,7 +1,7 @@
 
 
 model Service {
-  id           String          @id @default(uuid())
+  id           String          @id @unique @default(uuid())
   serviceName  String
   description  String
   images       String[]       
@@ -19,7 +19,7 @@ model Service {
 }
 
 model ServiceOrder {
-  id        String   @id @default(uuid())
+  id        String   @id @unique @default(uuid())
   paymentId String
   service   Service  @relation(fields: [serviceId], references: [id])
   serviceId String

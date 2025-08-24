@@ -1,11 +1,11 @@
 /*
   Warnings:
 
-  - A unique constraint covering the columns `[id]` on the table `Media` will be added. If there are existing duplicate values, this will fail.
+  - A unique constraint covering the columns `[id]` on the table `Profile` will be added. If there are existing duplicate values, this will fail.
 
 */
--- AlterTable
-ALTER TABLE "Profile" ADD CONSTRAINT "Profile_pkey" PRIMARY KEY ("id");
+-- CreateEnum
+CREATE TYPE "Success" AS ENUM ('message', 'redirect');
 
 -- CreateTable
 CREATE TABLE "Service" (
@@ -14,11 +14,12 @@ CREATE TABLE "Service" (
     "description" TEXT NOT NULL,
     "images" TEXT[],
     "price" DOUBLE PRECISION NOT NULL,
-    "success" BOOLEAN NOT NULL DEFAULT false,
+    "success" "Success" NOT NULL,
     "successPage" TEXT,
     "draft" BOOLEAN NOT NULL DEFAULT true,
     "orderNumber" INTEGER,
     "lastOrderBy" TEXT,
+    "userId" TEXT NOT NULL,
 
     CONSTRAINT "Service_pkey" PRIMARY KEY ("id")
 );
@@ -35,7 +36,16 @@ CREATE TABLE "ServiceOrder" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Media_id_key" ON "Media"("id");
+CREATE UNIQUE INDEX "Service_id_key" ON "Service"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ServiceOrder_id_key" ON "ServiceOrder"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Profile_id_key" ON "Profile"("id");
+
+-- AddForeignKey
+ALTER TABLE "Service" ADD CONSTRAINT "Service_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ServiceOrder" ADD CONSTRAINT "ServiceOrder_serviceId_fkey" FOREIGN KEY ("serviceId") REFERENCES "Service"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
