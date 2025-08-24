@@ -4,9 +4,10 @@ import { MembershipController } from './membership.controller';
 import { PrismaClientModule } from 'src/prisma-client/prisma-client.module';
 import { MembershipRewardService } from './reward.service';
 import { MembershipRewardController } from './reward.controller';
+import { CloudinaryModule } from 'src/utils/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [PrismaClientModule],
+  imports: [PrismaClientModule, CloudinaryModule],
   controllers: [MembershipController, MembershipRewardController],
   providers: [MembershipService, MembershipRewardService],
 })

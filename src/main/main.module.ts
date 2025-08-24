@@ -9,6 +9,7 @@ import { ImageModule } from './image/image.module';
 import { SupporterProfileModule } from './supporter-profile/supporter-profile.module';
 import { MembershipModule } from './membership/membership.module';
 import { ChatModule } from './message/message.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ChatModule } from './message/message.module';
     ImageModule,
     SupporterProfileModule,
     ChatModule,
+    ServicesModule,
   ],
   controllers: [],
   providers: [],

@@ -15,7 +15,7 @@ export class ServiceService {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async create(createServiceDto: CreateServicesDto, files?: Express.Multer.File[]) {
+  async create(createServiceDto: CreateServicesDto,userId:string, files?: Express.Multer.File[],) {
     const mediaIds: string[] = [];
     if (files && files.length > 0) {
       for (const file of files) {
@@ -29,6 +29,7 @@ export class ServiceService {
     const service = await this.prisma.service.create({
       data: {
         ...createServiceDto,
+        userId,
         images: mediaIds,
       },
     });
@@ -39,6 +40,7 @@ export class ServiceService {
       success: true,
       data: service,
     });
+   
   }
 
   async findAll(page = 1, limit = 10, draft?: boolean) {
@@ -48,6 +50,29 @@ export class ServiceService {
 
     const [services, total] = await this.prisma.$transaction([
       this.prisma.service.findMany({ where, skip, take: limit }),
+      this.prisma.service.count({ where }),
+    ]);
+
+    
+
+    
+
+    const totalPages = Math.ceil(total / limit);
+    return cResponseData({
+      message: 'Services retrieved successfully.',
+      error: null,
+      success: true,
+      data: { total, services, currentPage: page, totalPages, limit },
+    });
+  }
+
+  async findAllUser(userid:string,page = 1, limit = 10, draft?: boolean) {
+    const skip = (page - 1) * limit;
+    const where: any = { userId: userid };
+    if (draft !== undefined) where.draft = draft;
+
+    const [services, total] = await this.prisma.$transaction([
+      this.prisma.service.findMany({ where, skip, take: limit, }),
       this.prisma.service.count({ where }),
     ]);
 

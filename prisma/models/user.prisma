@@ -31,7 +31,11 @@ model User {
   receivedMessages Message[] @relation("ReceivedMessages")
 
   //services
-  serviceOrders ServiceOrder[]
+  serviceOrders ServiceOrder[] @relation("UserServiceOrders")
+
+  //
+
+  services  Service[]
 
 }
 

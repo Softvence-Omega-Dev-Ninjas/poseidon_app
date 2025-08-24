@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseInterceptors, UploadedFiles, UsePipes, ValidationPipe, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseInterceptors, UploadedFiles, UsePipes, ValidationPipe, BadRequestException, Req } from '@nestjs/common';
 
 
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -9,61 +9,62 @@ import { UpdateservicesDto } from './dto/update-serviecs';
 import { CreateServiceOrderDto } from './dto/create-serviesorder';
 import { ServiceService } from './services.service';
 import { CreateServicesDto } from './dto/create-services';
+import { Public } from 'src/auth/guard/public.decorator';
 
 @ApiTags('Service')
 @Controller('service')
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 
- @Roles( Role.Supporter)
+  @Roles( Role.Supporter)
   @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('images'))
   create(
+    
     @Body() createProductDto: CreateServicesDto,
+     @Req() req,
     @UploadedFiles() files?: Array<Express.Multer.File>,
   ) {
     console.log('Files received:', createProductDto);
    
     const {  ...restOfProductData } = createProductDto;
-    return this.serviceService.create(createProductDto, files);
+    return this.serviceService.create(createProductDto,req.sub, files);
   }
 
   @Get()
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @Public()
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'draft', required: false, type: Boolean })
-  findAll(@Query('page') page?: number, @Query('limit') limit?: number, @Query('draft') draft?: boolean) {
+  findAll( @Query('page') page?: number, @Query('limit') limit?: number, @Query('draft') draft?: boolean) {
     return this.serviceService.findAll(page, limit, draft);
   }
 
-  @Get(':id')
-@ApiOperation({ summary: 'Get a single service by ID' })
-findOne(@Param('id') id: string) {
-  return this.serviceService.findOne(id);
-}
-
-  @Patch(':id')
+  @Roles(Role.Supporter)
+  @Get("getallservices")
   @UsePipes(new ValidationPipe({ transform: true }))
-  @UseInterceptors(FilesInterceptor('newImages'))
-  @ApiConsumes('multipart/form-data')
-  update(@Param('id') id: string, @Body() dto:UpdateservicesDto, @UploadedFiles() newImages?: Express.Multer.File[]) {
-    return this.serviceService.update(id, dto, newImages);
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'draft', required: false, type: Boolean })
+  findAllByUser(@Req() req, @Query('page') page?: number, @Query('limit') limit?: number, @Query('draft') draft?: boolean) {
+    return this.serviceService.findAllUser(req.sub,page, limit, draft);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.serviceService.remove(id);
-  }
 
-  @Post()
+
+
+  @Post("/createOrder")
+  @Roles( Role.Supporter)
   @ApiOperation({ summary: 'Create a new service order' })
   async createOrder(@Body() dto: CreateServiceOrderDto) {
     return this.serviceService.createOrder(dto);
   }
 
-  @Get()
+  @Get("/getallservicesOrder")
+  @Roles( Role.Supporter)
   @ApiOperation({ summary: 'Get all service orders with pagination' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
@@ -77,10 +78,31 @@ findOne(@Param('id') id: string) {
     return this.serviceService.findAllOrder({ skip, take });
   }
 
-  @Get(':id')
+    @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.serviceService.remove(id);
+  }
+
+
+  @Get('/servicesorder:id')
   @ApiOperation({ summary: 'Get a single service order by ID' })
   async findSingle(@Param('id') id: string) {
     return this.serviceService.findSingle(id);
   }
+
+@Get(':id')
+@ApiOperation({ summary: 'Get a single service by ID' })
+findOne(@Param('id') id: string) {
+  return this.serviceService.findOne(id);
+}
+
+  @Patch(':id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseInterceptors(FilesInterceptor('newImages'))
+  @ApiConsumes('multipart/form-data')
+  update(@Param('id') id: string, @Body() dto:UpdateservicesDto, @UploadedFiles() newImages?: Express.Multer.File[]) {
+    return this.serviceService.update(id, dto, newImages);
+  }
+
   
 }

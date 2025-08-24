@@ -1,13 +1,13 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsString,
   IsNotEmpty,
+  IsOptional,
+  IsString,
   IsUUID,
-  IsArray,
   ValidateNested,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { MembershipSubscriptionPlan } from './MembershipSubscriptionPlan.dto';
 import { Type } from 'class-transformer';
-import { CreateMembershipSubscriptionPlanDto } from './create-membership.dto';
 
 export class CreateMembershipLevelDto {
   @ApiProperty({
@@ -47,12 +47,19 @@ export class CreateMembershipLevelDto {
   levelImage: Express.Multer.File;
 
   @ApiProperty({
-    required: true,
-    // type: [CreateMembershipSubscriptionPlanDto],
-    description: 'List of subscription plans for this membership level',
+    type: String,
+    description: 'user notification buy membership then show wellcome_note',
+    example: 'wellcome_note',
   })
-  @IsArray()
+  @IsOptional()
+  @IsString()
+  wellcome_note?: string | null;
+
+  @ApiProperty({
+    type: () => [MembershipSubscriptionPlan],
+    description: 'Subscription plans under this membership level',
+  })
   @ValidateNested({ each: true })
-  @Type(() => CreateMembershipSubscriptionPlanDto)
-  subscriptionPlans: CreateMembershipSubscriptionPlanDto[];
+  @Type(() => MembershipSubscriptionPlan)
+  MembershipSubscriptionPlan: MembershipSubscriptionPlan[];
 }

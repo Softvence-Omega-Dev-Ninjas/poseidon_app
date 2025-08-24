@@ -4,12 +4,13 @@ import {
   IsNumber,
   IsBoolean,
   Min,
-  ValidateNested,
   IsEnum,
+  IsNotEmpty,
+  ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Duration } from './create-membership-Access-plan-details.dto';
 import { Type } from 'class-transformer';
-import { Duration } from './create-membership.dto';
 
 export class CreateVideoCallRewardDto {
   @ApiProperty({
@@ -253,4 +254,29 @@ export class CreateAllRewardsDto {
   @ValidateNested()
   @Type(() => CreateMembershipAccessToPostsDto)
   postsReward?: CreateMembershipAccessToPostsDto;
+}
+
+export class WhoCreateReward {
+  @ApiProperty({
+    required: true,
+    example: 'url params',
+  })
+  @IsNotEmpty()
+  @IsString()
+  WhoCreateReward: string;
+
+  @ApiProperty({
+    required: true,
+    description: 'Posts access reward configuration',
+    type:
+      CreateVideoCallRewardDto ||
+      CreateMembershipAccessToMessagesDto ||
+      CreateMembershipAccessToGalleryDto ||
+      CreateMembershipAccessToPostsDto,
+  })
+  rewardData:
+    | CreateVideoCallRewardDto
+    | CreateMembershipAccessToMessagesDto
+    | CreateMembershipAccessToGalleryDto
+    | CreateMembershipAccessToPostsDto;
 }
