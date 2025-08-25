@@ -60,7 +60,7 @@ export class SupporterProfileService {
           createdAt: true,
         },
       });
-
+      // membershipInfo
       const membershipInfo = await tx.membership_owner.findFirst({
         where: {
           ownerId: userid,
@@ -97,13 +97,26 @@ export class SupporterProfileService {
           },
         },
       });
-
+      // gallery
+      const gallery = await tx.image.findMany({
+        where: {
+          userId: userid,
+        },
+        select: {
+          id: true,
+          media: true,
+          likeCount: true,
+          commentCount: true,
+          createdAt: true,
+        },
+      });
       return {
         profileInfo,
         supporte_card,
         shopid: shopid ? shopid.id : null,
         posts,
         membershipInfo,
+        image: gallery,
       };
     });
   }
