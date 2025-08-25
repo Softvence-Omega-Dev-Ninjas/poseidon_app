@@ -12,9 +12,7 @@ export class CreateServiceOrderDto {
   @ApiProperty({
     description: 'ID of the user placing the order',
   })
-  @IsString()
-  @IsNotEmpty()
-  userId: string;
+
 
   @ApiProperty({
     description: 'Payment ID associated with this order',

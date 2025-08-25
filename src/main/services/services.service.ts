@@ -137,31 +137,44 @@ export class ServiceService {
     });
   }
 
-  async remove(id: string) {
-    const service = await this.prisma.service.findUnique({ where: { id } });
-    if (!service)
-      return cResponseData({
-        message: 'Service not found',
-        error: 'NotFound',
-        success: false,
-        data: null,
-      });
+async remove(id: string) {
+  
+  const service = await this.prisma.service.findUnique({ where: { id } });
 
-    await this.prisma.service.delete({ where: { id } });
+  if (!service) {
     return cResponseData({
-      message: 'Service deleted successfully',
-      error: null,
-      success: true,
+      message: 'Service not found',
+      error: 'NotFound',
+      success: false,
       data: null,
     });
   }
 
-  async createOrder(dto: CreateServiceOrderDto) {
+  
+  await this.prisma.serviceOrder.deleteMany({
+    where: { serviceId: id },
+  });
+
+  
+  await this.prisma.service.delete({
+    where: { id },
+  });
+
+  return cResponseData({
+    message: 'Service and related service orders deleted successfully',
+    error: null,
+    success: true,
+    data: null,
+  });
+}
+
+
+  async createOrder(dto: CreateServiceOrderDto,userId:string) {
     return this.prisma.serviceOrder.create({
       data: {
         paymentId: dto.paymentId,
         serviceId: dto.serviceId,
-        userId: dto.userId,
+        userId,
       },
       include: {
         service: true,
@@ -191,6 +204,45 @@ export class ServiceService {
       data: orders,
     };
   }
+
+
+    /** Get all service orders with optional pagination */
+async findAllOrdeSingleuser(userId: string, options?: { skip?: number; take?: number }) {
+  const { skip = 0, take = 10 } = options || {};
+
+  const [orders, total] = await this.prisma.$transaction([
+    this.prisma.serviceOrder.findMany({
+      where: {
+        service: {
+          userId: userId, 
+        },
+      },
+      include: {
+        service: true,
+        user: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      skip,
+      take,
+    }),
+    this.prisma.serviceOrder.count({
+      where: {
+        service: {
+          userId: userId, 
+        },
+      },
+    }),
+  ]);
+
+  return {
+    total,
+    page: Math.floor(skip / take) + 1,
+    limit: take,
+    data: orders,
+  };
+}
 
   /** Get a single service order by ID */
   async findSingle(id: string) {

@@ -24,21 +24,33 @@ export class UpdateservicesDto {
   description?: string;
 
   @ApiProperty({ required: false })
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   @IsOptional()
   draft?: boolean;
 
   @ApiProperty({ required: false })
-  @IsNumber()
-  @IsOptional()
   @Transform(({ value }) =>
     value === '' || value === null || value === undefined
       ? undefined
       : parseFloat(value),
   )
+  @IsNumber()
+  @IsOptional()
   price?: number;
 
   @ApiProperty({ required: false, type: () => [StructuredArrayItemDto] })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [parsed];
+      } catch {
+        return undefined;
+      }
+    }
+    return value;
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => StructuredArrayItemDto)
@@ -61,4 +73,14 @@ export class UpdateservicesDto {
   @IsString()
   @IsOptional()
   successPage?: string;
+
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'string',
+      format: 'binary',
+    },
+    required: false,
+  })
+  newImages?: Express.Multer.File[];
 }
