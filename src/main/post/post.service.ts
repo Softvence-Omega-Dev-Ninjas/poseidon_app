@@ -12,6 +12,7 @@ import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { Post, Prisma } from '../../../generated/prisma';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { FindAllCommentsDto } from './dto/find-all-comments.dto';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Injectable()
 export class PostService {
@@ -42,21 +43,19 @@ export class PostService {
           images: mediaIds,
         },
       });
-      return {
+      return cResponseData({
         message: 'Post created successfully.',
-        redirect_url: null,
         error: null,
         data: newPost,
         success: true,
-      };
+      });
     } catch (error) {
-      return {
+      return cResponseData({
         message: 'Failed to create post.',
-        redirect_url: null,
         error: error.message,
         data: null,
         success: false,
-      };
+      });
     }
   }
 
@@ -110,9 +109,8 @@ export class PostService {
 
       const totalPages = Math.ceil(total / limitNumber);
 
-      return {
+      return cResponseData({
         message: 'Posts retrieved successfully.',
-        redirect_url: null,
         error: null,
         data: {
           data: postsWithIsLiked,
@@ -122,15 +120,14 @@ export class PostService {
           totalPages,
         },
         success: true,
-      };
+      });
     } catch (error) {
-      return {
+      return cResponseData({
         message: 'Failed to retrieve posts.',
-        redirect_url: null,
         error: error.message,
         data: null,
         success: false,
-      };
+      });
     }
   }
 
@@ -156,21 +153,19 @@ export class PostService {
       });
 
       const { likes, ...rest } = post;
-      return {
+      return cResponseData({
         message: 'Post retrieved successfully.',
-        redirect_url: null,
         error: null,
         data: { ...rest, isLiked: likes.length > 0 },
         success: true,
-      };
+      });
     } catch (error) {
-      return {
+      return cResponseData({
         message: 'Failed to retrieve post.',
-        redirect_url: null,
         error: error.message,
         data: null,
         success: false,
-      };
+      });
     }
   }
 
@@ -184,23 +179,21 @@ export class PostService {
       const post = await this.prisma.post.findUnique({ where: { id } });
 
       if (!post) {
-        return {
+        return cResponseData({
           message: 'Post not found',
-          redirect_url: null,
           error: 'NotFound',
           data: null,
           success: false,
-        };
+        });
       }
 
       if (post.userId !== userId) {
-        return {
+        return cResponseData({
           message: 'You are not authorized to update this post.',
-          redirect_url: null,
           error: 'Forbidden',
           data: null,
           success: false,
-        };
+        });
       }
 
       const currentImages = post.images || [];
@@ -239,49 +232,47 @@ export class PostService {
         },
       });
 
-      return {
+      return cResponseData({
         message: 'Post updated successfully.',
-        redirect_url: null,
         error: null,
         data: updatedPost,
         success: true,
-      };
+      });
     } catch (error) {
-      return {
+      return cResponseData({
         message: 'Failed to update post.',
-        redirect_url: null,
         error: error.message,
         data: null,
         success: false,
-      };
+      });
     }
   }
 
   async remove(id: string, userId: string): Promise<any> {
     try {
+      // 1️⃣ Find the post
       const post = await this.prisma.post.findUnique({
         where: { id },
       });
+
       if (!post) {
-        return {
+        return cResponseData({
           message: `Post with ID ${id} not found`,
-          redirect_url: null,
           error: 'NotFound',
           data: null,
           success: false,
-        };
+        });
       }
+
       if (post.userId !== userId) {
-        return {
+        return cResponseData({
           message: 'You are not authorized to delete this post.',
-          redirect_url: null,
           error: 'Forbidden',
           data: null,
           success: false,
-        };
+        });
       }
 
-      // Delete associated media from Cloudinary and database
       for (const mediaId of post.images) {
         const media = await this.prisma.media.findUnique({
           where: { id: mediaId },
@@ -292,25 +283,47 @@ export class PostService {
         }
       }
 
-      const deletedPost = await this.prisma.post.delete({
-        where: { id },
+      const deleteCommentsRecursively = async (commentId: string) => {
+        const comment = await this.prisma.comment.findUnique({
+          where: { id: commentId },
+          include: { replies: true },
+        });
+
+        if (!comment) return;
+
+        for (const reply of comment.replies) {
+          await deleteCommentsRecursively(reply.id);
+        }
+
+        await this.prisma.comment.delete({ where: { id: comment.id } });
+      };
+
+      const topComments = await this.prisma.comment.findMany({
+        where: { postId: id, parentId: null },
+        include: { replies: true },
       });
 
-      return {
+      for (const comment of topComments) {
+        await deleteCommentsRecursively(comment.id);
+      }
+
+      await this.prisma.like.deleteMany({ where: { postId: id } });
+
+      const deletedPost = await this.prisma.post.delete({ where: { id } });
+
+      return cResponseData({
         message: 'Post deleted successfully.',
-        redirect_url: null,
         error: null,
         data: deletedPost,
         success: true,
-      };
+      });
     } catch (error) {
-      return {
+      return cResponseData({
         message: 'Failed to delete post.',
-        redirect_url: null,
         error: error.message,
         data: null,
         success: false,
-      };
+      });
     }
   }
 
@@ -327,33 +340,30 @@ export class PostService {
         });
         return like;
       });
-      return {
+      return cResponseData({
         message: 'Post liked successfully.',
-        redirect_url: null,
         error: null,
         data: newLike,
         success: true,
-      };
+      });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        return {
+        return cResponseData({
           message: 'User has already liked this post.',
-          redirect_url: null,
           error: 'Conflict',
           data: null,
           success: false,
-        };
+        });
       }
-      return {
+      return cResponseData({
         message: 'Failed to like post.',
-        redirect_url: null,
         error: error.message,
         data: null,
         success: false,
-      };
+      });
     }
   }
 
@@ -374,33 +384,30 @@ export class PostService {
           data: { likeCount: { decrement: 1 } },
         });
       });
-      return {
+      return cResponseData({
         message: 'Like deleted successfully.',
-        redirect_url: null,
         error: null,
         data: null,
         success: true,
-      };
+      });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2025'
       ) {
-        return {
+        return cResponseData({
           message: 'Like not found.',
-          redirect_url: null,
           error: 'NotFound',
           data: null,
           success: false,
-        };
+        });
       }
-      return {
+      return cResponseData({
         message: 'Failed to delete like.',
-        redirect_url: null,
         error: error.message,
         data: null,
         success: false,
-      };
+      });
     }
   }
 
@@ -421,21 +428,19 @@ export class PostService {
         });
         return comment;
       });
-      return {
+      return cResponseData({
         message: 'Comment created successfully.',
-        redirect_url: null,
         error: null,
         data: newComment,
         success: true,
-      };
+      });
     } catch (error) {
-      return {
+      return cResponseData({
         message: 'Failed to create comment.',
-        redirect_url: null,
         error: error.message,
         data: null,
         success: false,
-      };
+      });
     }
   }
 
@@ -446,23 +451,21 @@ export class PostService {
       });
 
       if (!comment) {
-        return {
+        return cResponseData({
           message: `Comment with ID ${commentId} not found`,
-          redirect_url: null,
           error: 'NotFound',
           data: null,
           success: false,
-        };
+        });
       }
 
       if (comment.userId !== userId) {
-        return {
+        return cResponseData({
           message: 'You are not authorized to delete this comment.',
-          redirect_url: null,
           error: 'Forbidden',
           data: null,
           success: false,
-        };
+        });
       }
 
       await this.prisma.$transaction(async (prisma) => {
@@ -475,21 +478,19 @@ export class PostService {
           data: { commentCount: { decrement: 1 } },
         });
       });
-      return {
+      return cResponseData({
         message: 'Comment deleted successfully.',
-        redirect_url: null,
         error: null,
         data: null,
         success: true,
-      };
+      });
     } catch (error) {
-      return {
+      return cResponseData({
         message: 'Failed to delete comment.',
-        redirect_url: null,
         error: error.message,
         data: null,
         success: false,
-      };
+      });
     }
   }
 
@@ -516,9 +517,8 @@ export class PostService {
 
       const totalPages = Math.ceil(total / limitNumber);
 
-      return {
+      return cResponseData({
         message: 'Comments retrieved successfully.',
-        redirect_url: null,
         error: null,
         data: {
           data: comments,
@@ -528,15 +528,14 @@ export class PostService {
           totalPages,
         },
         success: true,
-      };
+      });
     } catch (error) {
-      return {
+      return cResponseData({
         message: 'Failed to retrieve comments.',
-        redirect_url: null,
         error: error.message,
         data: null,
         success: false,
-      };
+      });
     }
   }
 
@@ -548,30 +547,27 @@ export class PostService {
       });
 
       if (!comment) {
-        return {
+        return cResponseData({
           message: `Comment with ID ${commentId} not found`,
-          redirect_url: null,
           error: 'NotFound',
           data: null,
           success: false,
-        };
+        });
       }
 
-      return {
+      return cResponseData({
         message: 'Comment retrieved successfully.',
-        redirect_url: null,
         error: null,
         data: comment,
         success: true,
-      };
+      });
     } catch (error) {
-      return {
+      return cResponseData({
         message: 'Failed to retrieve comment.',
-        redirect_url: null,
         error: error.message,
         data: null,
         success: false,
-      };
+      });
     }
   }
 }

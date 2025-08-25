@@ -8,6 +8,7 @@ import {
 } from './dto/find-all-product-categories.dto';
 import { Prisma } from 'generated/prisma';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Injectable()
 export class ProductCategoryService {
@@ -16,17 +17,41 @@ export class ProductCategoryService {
     private cloudinaryService: CloudinaryService,
   ) {}
 
-  async create(createProductCategoryDto: CreateProductCategoryDto) {
-    const data = await this.prisma.productCategory.create({
-      data: createProductCategoryDto,
-    });
-    return {
-      message: 'create productCategory',
-      redirect_url: null,
-      error: null,
-      data: data,
-      success: true,
-    };
+  async create(
+    createProductCategoryDto: CreateProductCategoryDto,
+    file?: Express.Multer.File,
+  ): Promise<any> {
+    try {
+      let imageUrl: string | null = null;
+
+      // Upload image if provided
+      if (file) {
+        const uploadRes = await this.cloudinaryService.imageUpload(file);
+        imageUrl = uploadRes.mediaId;
+      }
+
+      // Save category to DB
+      const newCategory = await this.prisma.productCategory.create({
+        data: {
+          name: createProductCategoryDto.name,
+          image: imageUrl,
+        },
+      });
+
+      return cResponseData({
+        message: 'Product category created successfully.',
+        error: null,
+        data: newCategory,
+        success: true,
+      });
+    } catch (error) {
+      return cResponseData({
+        message: 'Failed to create product category.',
+        error: error.message,
+        data: null,
+        success: false,
+      });
+    }
   }
 
   async findAll(query: FindAllProductCategoriesDto) {
@@ -64,13 +89,12 @@ export class ProductCategoryService {
     const data = await this.prisma.productCategory.findUnique({
       where: { id: id.toString() },
     });
-    return {
+    return cResponseData({
       message: 'gest single productgetory',
-      redirect_url: null,
       error: null,
       data: data,
       success: true,
-    };
+    });
   }
 
   async update(
@@ -78,7 +102,9 @@ export class ProductCategoryService {
     updateProductCategoryDto: UpdateProductCategoryDto,
     files?: Array<Express.Multer.File>,
   ) {
-    const category = await this.prisma.productCategory.findUnique({ where: { id } });
+    const category = await this.prisma.productCategory.findUnique({
+      where: { id },
+    });
     if (!category) {
       throw new NotFoundException(`Product category with ID ${id} not found`);
     }
@@ -92,7 +118,9 @@ export class ProductCategoryService {
 
       // Delete old image if it exists and is different from the new one
       if (category.image && category.image !== imageUrl) {
-        const oldMedia = await this.prisma.media.findUnique({ where: { id: category.image } });
+        const oldMedia = await this.prisma.media.findUnique({
+          where: { id: category.image },
+        });
         if (oldMedia) {
           await this.cloudinaryService.deleteFile(oldMedia.publicId);
           await this.prisma.media.delete({ where: { id: oldMedia.id } });
@@ -101,7 +129,9 @@ export class ProductCategoryService {
     } else if (updateProductCategoryDto.image === null) {
       // If image is explicitly set to null, delete the old image
       if (category.image) {
-        const oldMedia = await this.prisma.media.findUnique({ where: { id: category.image } });
+        const oldMedia = await this.prisma.media.findUnique({
+          where: { id: category.image },
+        });
         if (oldMedia) {
           await this.cloudinaryService.deleteFile(oldMedia.publicId);
           await this.prisma.media.delete({ where: { id: oldMedia.id } });
@@ -119,25 +149,23 @@ export class ProductCategoryService {
       where: { id: id.toString() },
       data: dataToUpdate,
     });
-    return {
+    return cResponseData({
       message: 'update product-category',
-      redirect_url: null,
       error: null,
       data: data,
       success: true,
-    };
+    });
   }
 
   async remove(id: string) {
     const data = await this.prisma.productCategory.delete({
       where: { id: id.toString() },
     });
-    return {
+    return cResponseData({
       message: 'update product-category',
-      redirect_url: null,
       error: null,
       data: data,
       success: true,
-    };
+    });
   }
 }

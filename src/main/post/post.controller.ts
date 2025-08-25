@@ -10,6 +10,8 @@ import {
   Req,
   UseInterceptors,
   UploadedFiles,
+  ValidationPipe,
+  UsePipes,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { PostService } from './post.service';
@@ -41,37 +43,13 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Post()
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('images'))
   @ApiOperation({ summary: 'Create a new post' })
   @ApiResponse({
     status: 201,
     description: 'The post has been successfully created.',
-  })
-  @ApiBody({
-    description: 'Form data for creating a post',
-    schema: {
-      type: 'object',
-      properties: {
-        drafted: { type: 'boolean', example: true },
-        description: {
-          type: 'string',
-          example: 'This is a great post!',
-        },
-        whoCanSee: {
-          type: 'string',
-          enum: ['PUBLIC', 'ONLY_SUPPORTERS', 'ONLY_MEMBERS"'],
-        },
-        images: {
-          type: 'array',
-          items: {
-            type: 'string',
-            format: 'binary',
-          },
-        },
-      },
-      required: ['description', 'drafted', 'whoCanSee'],
-    },
   })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   create(
@@ -104,7 +82,8 @@ export class PostController {
     description: 'Sort order',
   })
   findAll(@Query() query: FindAllPostsDto, @Req() req) {
-    return this.postService.findAll(query, req.user?.sub);
+    console.log(req.sub);
+    return this.postService.findAll(query, req?.sub);
   }
 
   @Get(':id')
@@ -117,10 +96,11 @@ export class PostController {
     example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
   })
   findOne(@Param('id') id: string, @Req() req) {
-    return this.postService.findOne(id, req.user?.sub);
+    return this.postService.findOne(id, req?.sub);
   }
 
   @Patch(':id')
+  @UsePipes(new ValidationPipe({ transform: true }))
   @UseInterceptors(FilesInterceptor('newImages'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Update a post by ID' })
@@ -129,28 +109,6 @@ export class PostController {
     description: 'The ID of the post',
     example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
   })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        drafted: { type: 'boolean', example: true },
-        description: { type: 'string', example: 'Updated post!' },
-        whoCanSee: {
-          type: 'string',
-          enum: ['PUBLIC', 'ONLY_SUPPORTERS', 'ONLY_MEMBERS"'],
-        },
-        images: {
-          type: 'array',
-          items: { type: 'string', example: 'media id' },
-          description: 'Image string format: value:action',
-        },
-        newImages: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-        },
-      },
-    },
-  })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   update(
     @Param('id') id: string,
@@ -158,7 +116,7 @@ export class PostController {
     @UploadedFiles() newImages: Express.Multer.File[],
     @Req() req,
   ) {
-    return this.postService.update(id, updatePostDto, newImages, req.sub);
+    return this.postService.update(id, updatePostDto, newImages, req?.sub);
   }
 
   @Delete(':id')
@@ -195,7 +153,7 @@ export class PostController {
   })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   createLike(@Param('postId') postId: string, @Req() req) {
-    return this.postService.createLike(postId, req.sub);
+    return this.postService.createLike(postId, req?.sub);
   }
 
   @Delete(':postId/likes')
@@ -212,7 +170,7 @@ export class PostController {
   })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   deleteLike(@Param('postId') postId: string, @Req() req) {
-    return this.postService.deleteLike(postId, req.sub);
+    return this.postService.deleteLike(postId, req?.sub);
   }
 
   @Post(':postId/comments')
@@ -232,7 +190,7 @@ export class PostController {
     @Body() createCommentDto: CreateCommentDto,
     @Req() req,
   ) {
-    return this.postService.createComment(postId, createCommentDto, req.sub);
+    return this.postService.createComment(postId, createCommentDto, req?.sub);
   }
 
   @Delete('comments/:commentId')
@@ -249,7 +207,7 @@ export class PostController {
   })
   @Roles(Role.Admin, Role.Supporter, Role.User)
   deleteComment(@Param('commentId') commentId: string, @Req() req) {
-    return this.postService.deleteComment(commentId, req.sub);
+    return this.postService.deleteComment(commentId, req?.sub);
   }
 
   @Get(':postId/comments')

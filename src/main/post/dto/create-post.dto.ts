@@ -23,25 +23,12 @@ export class CreatePostDto {
   description: string;
 
   @ApiProperty({
-    example: ['url1', 'url2'],
-    description: 'Array of image URLs (optional if uploading files)',
-    type: [String],
+    type: 'array',
+    items: { type: 'string', format: 'binary' },
     required: false,
+    description: 'Optional images to upload',
   })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      try {
-        return JSON.parse(value);
-      } catch {
-        return [value];
-      }
-    }
-    return value;
-  })
-  images?: string[];
+  images?: Express.Multer.File[];
 
   @ApiProperty({
     example: WhoCanSee.PUBLIC,

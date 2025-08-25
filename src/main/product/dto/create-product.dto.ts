@@ -52,7 +52,10 @@ export class CreateProductDto {
         return Array.isArray(parsed) ? parsed : [value];
       } catch {
         // If not JSON, split by comma
-        return value.split(',').map(item => item.trim()).filter(item => item);
+        return value
+          .split(',')
+          .map((item) => item.trim())
+          .filter((item) => item);
       }
     }
     return [];
@@ -70,7 +73,10 @@ export class CreateProductDto {
         const parsed = JSON.parse(value);
         return Array.isArray(parsed) ? parsed : [value];
       } catch {
-        return value.split(',').map(item => item.trim()).filter(item => item);
+        return value
+          .split(',')
+          .map((item) => item.trim())
+          .filter((item) => item);
       }
     }
     return [];
@@ -88,7 +94,10 @@ export class CreateProductDto {
         const parsed = JSON.parse(value);
         return Array.isArray(parsed) ? parsed : [value];
       } catch {
-        return value.split(',').map(item => item.trim()).filter(item => item);
+        return value
+          .split(',')
+          .map((item) => item.trim())
+          .filter((item) => item);
       }
     }
     return [];

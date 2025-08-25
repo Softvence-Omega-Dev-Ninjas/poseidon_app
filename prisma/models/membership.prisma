@@ -24,11 +24,12 @@ model Membership_levels {
     membership       Membership_owner @relation(fields: [membershipId], references: [id], onDelete: Cascade)
     levelName        String
     levelDescription String?
+    levelImage       String
 
-    levelBenefits              String[]
+    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
+    Wellcome_note              String?
     createdAt                  DateTime                     @default(now())
     updatedAt                  DateTime                     @updatedAt
-    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
 }
 
 // 2 type subscription plans with duration and price connect to membership and membership_levels - create only supporter
@@ -41,61 +42,60 @@ model MembershipSubscriptionPlan {
     price    Float // e.g., 5 or 50
 
     // Access controls:
-    membershipAccessToVideoCallId String?
-    callLimitAccess               MembershipAccessToVideoCall? @relation(fields: [membershipAccessToVideoCallId], references: [id])
-    membershipAccessGalleryId     String?
-    galleryAccess                 MembershipAccessToGallery?   @relation(fields: [membershipAccessGalleryId], references: [id])
-    membershipAccessToPostsId     String?
-    MembershipAccessToPosts       MembershipAccessToPosts?     @relation(fields: [membershipAccessToPostsId], references: [id])
+    CalligSubscriptionPlan   CalligSubscriptionPlan?
+    MessagesSubscriptionPlan MessagesSubscriptionPlan?
+    GallerySubscriptionPlan  GallerySubscriptionPlan?
+    PostsSubscriptionPlan    PostsSubscriptionPlan?
 
-    createdAt                    DateTime                    @default(now())
-    updatedAt                    DateTime                    @updatedAt
-    MembershipAccessToMessages   MembershipAccessToMessages? @relation(fields: [membershipAccessToMessagesId], references: [id])
-    membershipAccessToMessagesId String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@unique([membershipLevelId, duration]) // one plan per level+duration
 }
 
-// access models video call / gallery / post / message
-// this schema models the access controls for each membership level - create only supporter
-model MembershipAccessToVideoCall {
-    id                         String                       @id @default(uuid())
-    membership_ownerId         String
-    Membership_owner           Membership_owner             @relation("MembershipAccessToVideoCall", fields: [membership_ownerId], references: [id])
-    title                      String                       @default("Video Call Access")
-    description                String?                      @default("Access to video calls with the owner")
-    totalVideoCalls            Int                          @default(0) // total number of video calls allowed
-    unlimitedVideoCalls        Boolean                      @default(false) // if true, totalVideoCalls is ignored
-    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
+// Access details
+model CalligSubscriptionPlan {
+    id                           String                     @id @unique @default(uuid())
+    membershipSubscriptionPlanId String                     @unique
+    MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id])
+    // data
+    duration                     Duration
+    title                        String                     
+    description                  String
+    totalVideoCalls              Int                        @default(0)
+    unlimitedVideoCalls          Boolean                    @default(false)
 }
 
-model MembershipAccessToMessages {
-    id                         String                       @id @default(uuid())
-    membership_ownerId         String
-    Membership_owner           Membership_owner             @relation("AccessToMessages", fields: [membership_ownerId], references: [id])
-    title                      String                       @default("Messages Access")
-    description                String?                      @default("Access to messages with the owner")
-    totalMessages              Int                          @default(0) // total number of messages allowed
-    unlimitedMessages          Boolean                      @default(false) // if true, totalMessages is ignored
-    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
+model MessagesSubscriptionPlan {
+    id                           String                     @id @unique @default(uuid())
+    membershipSubscriptionPlanId String                     @unique
+    MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id])
+    // data
+    duration                     Duration
+    title                        String
+    description                  String
+    totalMessages                Int                        @default(0) // total number of messages allowed
+    unlimitedMessages            Boolean                    @default(false) // if true, totalMessages is ignored
 }
 
-model MembershipAccessToGallery {
-    id                         String                       @id @default(uuid())
-    membership_ownerId         String
-    Membership_owner           Membership_owner             @relation("AccessToGallery", fields: [membership_ownerId], references: [id])
-    title                      String                       @default("Gallery Access")
-    description                String                       @default("Access to the gallery with the owner")
-    AccessToGallery            Boolean                      @default(true) // if true, access to gallery is granted
-    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
+model GallerySubscriptionPlan {
+    id                           String                     @id @unique @default(uuid())
+    membershipSubscriptionPlanId String                     @unique
+    MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id])
+    // data
+    duration                     Duration
+    title                        String
+    description                  String
+    AccessToGallery              Boolean                    @default(true) // if true, access to gallery is granted
 }
 
-model MembershipAccessToPosts {
-    id                         String                       @id @default(uuid())
-    membership_ownerId         String
-    Membership_owner           Membership_owner             @relation("AccessToPosts", fields: [membership_ownerId], references: [id])
-    title                      String                       @default("Posts Access")
-    description                String                       @default("Access to the posts with the owner")
+model PostsSubscriptionPlan {
+    id                           String                     @id @unique @default(uuid())
+    membershipSubscriptionPlanId String                     @unique
+    MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id])
+    // data
+    duration                   Duration
+    title                      String
+    description                String
     AccessToPosts              Boolean                      @default(true) // if true, access to posts is granted
-    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
 }

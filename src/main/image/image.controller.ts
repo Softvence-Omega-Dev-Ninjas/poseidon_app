@@ -10,6 +10,8 @@ import {
   Req,
   UseInterceptors,
   UploadedFile,
+  ValidationPipe,
+  UsePipes,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageService } from './image.service';
@@ -26,13 +28,11 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 
-import { UseGuards } from '@nestjs/common';
-
 import { Role } from 'src/auth/guard/role.enum';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { CreateImageCommentDto } from './dto/create-image-comment.dto';
 import { FindAllImageCommentsDto } from './dto/find-all-image-comments.dto';
-import { Visibility } from '../../../generated/prisma';
+import { Roles as Visibility } from '../../../generated/prisma';
 
 @ApiTags('images')
 @Roles(Role.Admin, Role.Supporter, Role.User)
@@ -48,25 +48,7 @@ export class ImageController {
     status: 201,
     description: 'The image has been successfully created.',
   })
-  @ApiBody({
-    description: 'Form data for creating an image',
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', example: 'My Awesome Image' },
-        visibility: {
-          type: 'string',
-          enum: ['PUBLIC', 'SUPPORTERS'],
-        },
-        image: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-      required: ['title', 'visibility', 'image'],
-    },
-  })
-  @Roles(Role.Admin, Role.Supporter, Role.User)
+  @Roles(Role.Supporter)
   create(
     @Body() createImageDto: CreateImageDto,
     @Req() req,
@@ -99,7 +81,7 @@ export class ImageController {
   @ApiQuery({
     name: 'visibility',
     required: false,
-    enum: [Visibility.PUBLIC, Visibility.SUPPORTERS],
+    enum: [Visibility.admin, Visibility.user, Visibility.supporter],
     description: 'Filter by visibility',
   })
   findAll(@Query() query: FindAllImagesDto, @Req() req) {
@@ -120,67 +102,41 @@ export class ImageController {
   }
 
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('newImage'))
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @ApiOperation({ summary: 'Update an image by ID' })
   @ApiParam({
     name: 'id',
     description: 'The ID of the image',
-    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
+    example: '6741f481-db9d-4ae9-9bae-e7d694f8dd6d',
   })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', example: 'Updated Image Title' },
-        visibility: {
-          type: 'string',
-          enum: ['PUBLIC', 'SUPPORTERS'],
-        },
-        newImage: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  @Roles(Role.Admin, Role.Supporter, Role.User)
+  @Roles(Role.Supporter)
   update(
     @Param('id') id: string,
     @Body() updateImageDto: UpdateImageDto,
     @UploadedFile() newImage: Express.Multer.File,
     @Req() req,
   ) {
+    console.log(updateImageDto);
+    console.log(newImage);
     return this.imageService.update(id, updateImageDto, newImage, req.sub);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete an image by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'The image has been successfully deleted.',
-  })
-  @ApiResponse({ status: 404, description: 'Image not found.' })
   @ApiParam({
     name: 'id',
     description: 'The ID of the image',
     example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
   })
-  @Roles(Role.Admin, Role.Supporter, Role.User)
+  @Roles(Role.Supporter)
   remove(@Param('id') id: string, @Req() req) {
     return this.imageService.remove(id, req.sub);
   }
 
   @Post(':imageId/likes')
   @ApiOperation({ summary: 'Create a new like for an image' })
-  @ApiResponse({
-    status: 201,
-    description: 'The like has been successfully created.',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'User has already liked this image.',
-  })
   @ApiParam({
     name: 'imageId',
     description: 'The ID of the image',
@@ -193,11 +149,6 @@ export class ImageController {
 
   @Delete(':imageId/likes')
   @ApiOperation({ summary: 'Delete a like for an image' })
-  @ApiResponse({
-    status: 204,
-    description: 'The like has been successfully deleted.',
-  })
-  @ApiResponse({ status: 404, description: 'Like not found.' })
   @ApiParam({
     name: 'imageId',
     description: 'The ID of the image',
@@ -210,15 +161,6 @@ export class ImageController {
 
   @Post(':imageId/comments')
   @ApiOperation({ summary: 'Create a new comment for an image' })
-  @ApiResponse({
-    status: 201,
-    description: 'The comment has been successfully created.',
-  })
-  @ApiParam({
-    name: 'imageId',
-    description: 'The ID of the image',
-    example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
-  })
   @ApiBody({
     type: CreateImageCommentDto,
     description: 'Comment content and optional parentId',
@@ -232,17 +174,13 @@ export class ImageController {
     return this.imageService.createComment(
       imageId,
       createImageCommentDto,
+
       req.sub,
     );
   }
 
   @Delete(':imageId/comments/:commentId')
   @ApiOperation({ summary: 'Delete a comment for an image' })
-  @ApiResponse({
-    status: 204,
-    description: 'The comment has been successfully deleted.',
-  })
-  @ApiResponse({ status: 404, description: 'Comment not found.' })
   @ApiParam({
     name: 'imageId',
     description: 'The ID of the image',
@@ -315,21 +253,21 @@ export class ImageController {
     return this.imageService.incrementViewCount(id);
   }
 
-  @Get('visibility/:visibility')
-  @ApiOperation({ summary: 'Get images by visibility' })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns a list of images filtered by visibility.',
-  })
-  @ApiParam({
-    name: 'visibility',
-    enum: ['PUBLIC', 'SUPPORTERS'],
-    description: 'Visibility status',
-  })
-  getImagesByVisibility(
-    @Param('visibility') visibility: Visibility,
-    @Req() req,
-  ) {
-    return this.imageService.getImagesByVisibility(visibility, req.user?.sub);
-  }
+  // @Get('visibility/:visibility')
+  // @ApiOperation({ summary: 'Get images by visibility' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Returns a list of images filtered by visibility.',
+  // })
+  // @ApiParam({
+  //   name: 'visibility',
+  //   enum: ['PUBLIC', 'SUPPORTERS'],
+  //   description: 'Visibility status',
+  // })
+  // getImagesByVisibility(
+  //   @Param('visibility') visibility: Visibility,
+  //   @Req() req,
+  // ) {
+  //   return this.imageService.getImagesByVisibility(visibility, req.user?.sub);
+  // }
 }

@@ -29,4 +29,5 @@ export class authenticationUserDto {
   role: string;
   profile?: profileDto | null;
   shop?: { id: string } | null;
+  memberships_owner?: { id: string } | null;
 }

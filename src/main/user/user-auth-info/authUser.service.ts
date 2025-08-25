@@ -120,6 +120,9 @@ export class AuthUserService {
             id: true,
           },
         },
+        memberships_owner: {
+          select: { id: true },
+        },
       },
     });
   }

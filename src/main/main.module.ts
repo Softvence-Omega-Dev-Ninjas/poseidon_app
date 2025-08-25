@@ -9,12 +9,15 @@ import { ImageModule } from './image/image.module';
 import { SupporterProfileModule } from './supporter-profile/supporter-profile.module';
 import { MembershipModule } from './membership/membership.module';
 import { ChatModule } from './message/message.module';
+import { MediafileModule } from './mediafile/mediafile.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
     UserModule,
     SupporterModule,
     MembershipModule,
+    MediafileModule,
     OrderModule,
     ProductModule,
     ProductCategoryModule,
@@ -22,6 +25,7 @@ import { ChatModule } from './message/message.module';
     ImageModule,
     SupporterProfileModule,
     ChatModule,
+    ServicesModule,
   ],
   controllers: [],
   providers: [],

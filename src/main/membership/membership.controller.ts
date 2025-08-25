@@ -1,45 +1,87 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
-  Delete,
+  Patch,
+  Post,
+  Req,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { MembershipService } from './membership.service';
-import { CreateMembershipDto } from './dto/create-membership.dto';
-import { UpdateMembershipDto } from './dto/update-membership.dto';
+// import { UpdateMembershipDto } from './dto/update-membership.dto';
+import { Request } from 'express';
+import { Roles } from 'src/auth/guard/roles.decorator';
+import { Role } from 'src/auth/guard/role.enum';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
+import { CreateMembershipLevelDto } from './dto/create-membership-level.dto';
+import { MembershipSubscriptionPlanPipe } from './pipeline/membershipSubscriptionPlan.pipe';
+import { MembershipSubscriptionPlan } from './dto/MembershipSubscriptionPlan.dto';
+import { LevelImageUpdateDto } from './dto/update-membership-level.dto';
 
 @Controller('membership')
 export class MembershipController {
   constructor(private readonly membershipService: MembershipService) {}
 
-  @Post()
-  create(@Body() createMembershipDto: CreateMembershipDto) {
-    return this.membershipService.create(createMembershipDto);
+  @Roles(Role.Supporter)
+  @Get('enable-membership')
+  enableMembership(@Req() req: Request) {
+    return this.membershipService.enableMembership(req['sub'] as string);
   }
 
-  @Get()
-  findAll() {
-    return this.membershipService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.membershipService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateMembershipDto: UpdateMembershipDto,
+  // createMembershipLevel
+  @Roles(Role.Supporter)
+  @Post('create-levels')
+  @UseInterceptors(FileInterceptor('levelImage'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateMembershipLevelDto })
+  createMembershipLevel(
+    @Body('MembershipSubscriptionPlan', MembershipSubscriptionPlanPipe)
+    membershipSubscriptionPlan: MembershipSubscriptionPlan[],
+    @Body() createMembershipLevelDto: CreateMembershipLevelDto,
+    @UploadedFile(new ImageValidationPipe())
+    levelImage: Express.Multer.File,
   ) {
-    return this.membershipService.update(+id, updateMembershipDto);
+    // return JSON.stringify(ghdf);
+    return this.membershipService.createMembershipLevel({
+      ...createMembershipLevelDto,
+      levelImage,
+      MembershipSubscriptionPlan: membershipSubscriptionPlan,
+    });
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.membershipService.remove(+id);
+  @Roles(Role.Supporter)
+  @Patch('update-image/:levelId')
+  @ApiBody({ type: LevelImageUpdateDto })
+  updateMembershipImage(
+    @Param('levelId') levelId: string,
+    @Body() updateLevelImageDto: LevelImageUpdateDto,
+  ) {
+    // return updateLevelImageDto;
+    return this.membershipService.levelImageUpdate(
+      levelId,
+      updateLevelImageDto,
+    );
+  }
+
+  @Roles(Role.Supporter)
+  // @Public()
+  @Get('get-levels')
+  getMembershipLevels(
+    // @Param('membershipId') membershipId: string,
+    @Req() req: Request,
+  ) {
+    console.log(
+      'membershipId - jwt ============== >',
+      req['memberships_owner_id'] as string,
+      'user id - jwt ============== >',
+      req['sub'] as string,
+    );
+    return this.membershipService.getMembershipLevels(
+      req['memberships_owner_id'] as string,
+    );
   }
 }
