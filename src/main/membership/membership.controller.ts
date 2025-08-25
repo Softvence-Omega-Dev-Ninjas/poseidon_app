@@ -21,10 +21,17 @@ import { CreateMembershipLevelDto } from './dto/create-membership-level.dto';
 import { MembershipSubscriptionPlanPipe } from './pipeline/membershipSubscriptionPlan.pipe';
 import { MembershipSubscriptionPlan } from './dto/MembershipSubscriptionPlan.dto';
 import { LevelImageUpdateDto } from './dto/update-membership-level.dto';
+import { Public } from 'src/auth/guard/public.decorator';
 
 @Controller('membership')
 export class MembershipController {
   constructor(private readonly membershipService: MembershipService) {}
+
+  @Public()
+  @Get('levels/:membershipId')
+  getMembership(@Param('membershipId') membershipId: string) {
+    return this.membershipService.getMembershipLevels(membershipId);
+  }
 
   @Roles(Role.Supporter)
   @Get('enable-membership')
