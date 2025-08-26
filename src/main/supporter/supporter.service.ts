@@ -1,18 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSupporterPayDto } from './dto/create-supporter.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
+import { SupportCartLayoutQuantity } from './dto/supportCartLayoutQuantity.dto';
 // import { UpdateSupporterDto } from './dto/update-supporter.dto';
 
 @Injectable()
 export class SupporterService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // async createSupporterCartLayout(data: any) {
-  //   const newSupporterCartLayout = await this.prisma.supportCartLayout.create({
-  //     data: {},
-  //   });
-  //   return 'createSupporterCartLayout';
-  // }
+  async createSuggestQuantity(quantityData: SupportCartLayoutQuantity) {
+    return await this.prisma.supportCartLayoutQuantity.create({
+      data: {
+        ...quantityData,
+      },
+    });
+  }
+
+  async deleteSuggestQuantity(id: string) {
+    return await this.prisma.supportCartLayoutQuantity.delete({
+      where: {
+        id,
+      },
+    });
+  }
 
   async create(createSupporterDto: CreateSupporterPayDto) {
     const { oder_package_name, ...rootData } = createSupporterDto;
