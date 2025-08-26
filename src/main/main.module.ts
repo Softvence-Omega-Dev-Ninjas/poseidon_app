@@ -10,6 +10,7 @@ import { SupporterProfileModule } from './supporter-profile/supporter-profile.mo
 import { MembershipModule } from './membership/membership.module';
 import { ChatModule } from './message/message.module';
 import { ServicesModule } from './services/services.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ServicesModule } from './services/services.module';
     SupporterProfileModule,
     ChatModule,
     ServicesModule,
+     ScheduleModule.forRoot(),
   ],
   controllers: [],
   providers: [],

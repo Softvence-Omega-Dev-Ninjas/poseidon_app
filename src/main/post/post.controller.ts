@@ -60,6 +60,7 @@ export class PostController {
     return this.postService.create(createPostDto, req.sub, files);
   }
 
+  
   @Get()
   @ApiOperation({ summary: 'Get all posts with pagination and sorting' })
   @ApiResponse({ status: 200, description: 'Returns a list of posts.' })
@@ -249,4 +250,6 @@ export class PostController {
   findCommentById(@Param('commentId') commentId: string) {
     return this.postService.findCommentById(commentId);
   }
+
+  
 }

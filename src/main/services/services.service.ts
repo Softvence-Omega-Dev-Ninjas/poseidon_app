@@ -12,7 +12,7 @@ import {
   StructuredArrayItemDto,
 } from 'src/common/dto/structured-array.dto';
 import { CreateServiceOrderDto } from './dto/create-serviesorder';
-import { CreateServicesDto } from './dto/create-services';
+import { CreateServicesDto, UpdateServiceOrderStatusDto } from './dto/create-services';
 import { UpdateservicesDto } from './dto/update-serviecs';
 
 @Injectable()
@@ -257,5 +257,21 @@ async findAllOrdeSingleuser(userId: string, options?: { skip?: number; take?: nu
     if (!order)
       throw new NotFoundException(`ServiceOrder with id ${id} not found`);
     return order;
+  }
+
+
+    async updateOrderStatus(orderId: string, dto: UpdateServiceOrderStatusDto) {
+    const order = await this.prisma.serviceOrder.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    return this.prisma.serviceOrder.update({
+      where: { id: orderId },
+      data: { status: dto.status },
+    });
   }
 }

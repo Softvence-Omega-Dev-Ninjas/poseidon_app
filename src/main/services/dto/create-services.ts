@@ -6,9 +6,11 @@ import {
   IsArray,
   IsBoolean,
   IsIn,
+  IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { ServiceOrderStatus } from 'generated/prisma';
 
 export class CreateServicesDto {
   @ApiProperty()
@@ -55,4 +57,14 @@ export class CreateServicesDto {
     required: false,
   })
   images?: Express.Multer.File[];
+}
+
+export class UpdateServiceOrderStatusDto {
+  @ApiProperty({
+    enum: ServiceOrderStatus,
+    description: 'New status for the service order',
+    example: ServiceOrderStatus.approved,
+  })
+  @IsEnum(ServiceOrderStatus)
+  status: ServiceOrderStatus;
 }

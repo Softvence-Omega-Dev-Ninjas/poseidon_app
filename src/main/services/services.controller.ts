@@ -16,13 +16,13 @@ import {
 } from '@nestjs/common';
 
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiConsumes, ApiQuery, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiConsumes, ApiQuery, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { UpdateservicesDto } from './dto/update-serviecs';
 import { CreateServiceOrderDto } from './dto/create-serviesorder';
 import { ServiceService } from './services.service';
-import { CreateServicesDto } from './dto/create-services';
+import { CreateServicesDto, UpdateServiceOrderStatusDto } from './dto/create-services';
 import { Public } from 'src/auth/guard/public.decorator';
 
 @ApiTags('Service')
@@ -142,6 +142,26 @@ export class ServiceController {
        console.log(newImages)
     return this.serviceService.update(id, dto, newImages);
   }
+  
+   @Roles(Role.Supporter)
+   @Patch('orders/:orderId/status')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @ApiOperation({ summary: 'Update the status of a service order' })
+  @ApiParam({
+    name: 'orderId',
+    description: 'The ID of the service order',
+    example: 'a1b2c3d4-e5f6-7890-abcd-1234567890ef',
+  })
+  @ApiResponse({ status: 200, description: 'Order status updated successfully' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  updateOrderStatus(
+    @Param('orderId') orderId: string,
+    @Body() dto: UpdateServiceOrderStatusDto,
+  ) {
+    return this.serviceService.updateOrderStatus(orderId, dto);
+  }
+
+
 
   
 }
