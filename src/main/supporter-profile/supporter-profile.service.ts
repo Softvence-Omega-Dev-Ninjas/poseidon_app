@@ -52,6 +52,7 @@ export class SupporterProfileService {
         },
         include: {
           cheers_live_package_type: true,
+          SuggestQuantity: true,
         },
       });
       // shop id
