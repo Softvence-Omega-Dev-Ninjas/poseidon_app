@@ -7,12 +7,7 @@ export class OneTimeSchedulerUtil {
 
   constructor(private readonly schedulerRegistry: SchedulerRegistry) {}
 
-
-  scheduleOneTimeJob(
-    jobName: string,
-    executeAt: Date,
-    callback: () => void,
-  ) {
+  scheduleOneTimeJob(jobName: string, executeAt: Date, callback: () => void) {
     const now = new Date();
     const delay = executeAt.getTime() - now.getTime();
 
@@ -38,7 +33,6 @@ export class OneTimeSchedulerUtil {
     );
   }
 
-
   cancelJob(jobName: string) {
     if (this.schedulerRegistry.doesExist('timeout', jobName)) {
       this.schedulerRegistry.deleteTimeout(jobName);
@@ -49,9 +43,7 @@ export class OneTimeSchedulerUtil {
   }
 }
 
-
-
-//how to used that 
+//how to used that
 
 // import { Injectable } from '@nestjs/common';
 // import { OneTimeSchedulerUtil } from 'src/utils/one-time-scheduler.util';

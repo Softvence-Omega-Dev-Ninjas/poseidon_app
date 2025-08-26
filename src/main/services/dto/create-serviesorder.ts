@@ -12,8 +12,6 @@ export class CreateServiceOrderDto {
   @ApiProperty({
     description: 'ID of the user placing the order',
   })
-
-
   @ApiProperty({
     description: 'Payment ID associated with this order',
   })

@@ -27,7 +27,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     SupporterProfileModule,
     ChatModule,
     ServicesModule,
-     ScheduleModule.forRoot(),
+    ScheduleModule.forRoot(),
   ],
   controllers: [],
   providers: [],
