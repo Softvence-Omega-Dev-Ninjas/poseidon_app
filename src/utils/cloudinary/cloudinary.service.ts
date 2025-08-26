@@ -82,7 +82,7 @@ export class CloudinaryService {
   }
 
   // Delete image from Cloudinary using its public ID
-  async deleteFile(publicId: string) {
+  async deleteFile(publicId: string): Promise<any> {
     try {
       const result = await this.cloudinary.uploader.destroy(publicId);
 
@@ -92,6 +92,45 @@ export class CloudinaryService {
       throw new InternalServerErrorException(
         'Failed to delete file from Cloudinary',
       );
+    }
+  }
+
+  async uploadFileFullTbData(file?: Express.Multer.File) {
+    try {
+      if (!file) return { mediaId: '' };
+
+      const fileName = file.originalname.split('.');
+      const extentionName = fileName.pop();
+      const updateName =
+        fileName.join('') + new Date().toISOString() + '.' + extentionName;
+      file.originalname = updateName;
+
+      const uploadRes = await new Promise<any>((resolve, reject) => {
+        const uploadStream = this.cloudinary.uploader.upload_stream(
+          {
+            public_id: file.originalname,
+            resource_type: 'image',
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          },
+        );
+
+        streamifier.createReadStream(file.buffer).pipe(uploadStream);
+      });
+
+      const media = await this.prisma.media.create({
+        data: {
+          imageUrl: uploadRes.secure_url,
+          publicId: uploadRes.public_id,
+        },
+      });
+
+      return media;
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      throw new InternalServerErrorException('Failed to upload Image');
     }
   }
 }

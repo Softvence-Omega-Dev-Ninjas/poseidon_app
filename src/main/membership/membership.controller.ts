@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  Patch,
   Post,
   Req,
   UploadedFile,
@@ -18,6 +20,7 @@ import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
 import { CreateMembershipLevelDto } from './dto/create-membership-level.dto';
 import { MembershipSubscriptionPlanPipe } from './pipeline/membershipSubscriptionPlan.pipe';
 import { MembershipSubscriptionPlan } from './dto/MembershipSubscriptionPlan.dto';
+import { LevelImageUpdateDto } from './dto/update-membership-level.dto';
 
 @Controller('membership')
 export class MembershipController {
@@ -48,6 +51,20 @@ export class MembershipController {
       levelImage,
       MembershipSubscriptionPlan: membershipSubscriptionPlan,
     });
+  }
+
+  @Roles(Role.Supporter)
+  @Patch('update-image/:levelId')
+  @ApiBody({ type: LevelImageUpdateDto })
+  updateMembershipImage(
+    @Param('levelId') levelId: string,
+    @Body() updateLevelImageDto: LevelImageUpdateDto,
+  ) {
+    // return updateLevelImageDto;
+    return this.membershipService.levelImageUpdate(
+      levelId,
+      updateLevelImageDto,
+    );
   }
 
   @Roles(Role.Supporter)
