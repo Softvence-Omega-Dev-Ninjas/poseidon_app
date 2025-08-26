@@ -11,6 +11,7 @@ import { MembershipModule } from './membership/membership.module';
 import { ChatModule } from './message/message.module';
 import { MediafileModule } from './mediafile/mediafile.module';
 import { ServicesModule } from './services/services.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ServicesModule } from './services/services.module';
     ImageModule,
     ChatModule,
     ServicesModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [],
   providers: [],

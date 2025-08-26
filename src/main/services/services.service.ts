@@ -12,7 +12,10 @@ import {
   StructuredArrayItemDto,
 } from 'src/common/dto/structured-array.dto';
 import { CreateServiceOrderDto } from './dto/create-serviesorder';
-import { CreateServicesDto } from './dto/create-services';
+import {
+  CreateServicesDto,
+  UpdateServiceOrderStatusDto,
+} from './dto/create-services';
 import { UpdateservicesDto } from './dto/update-serviecs';
 
 @Injectable()
@@ -139,29 +142,38 @@ export class ServiceService {
 
   async remove(id: string) {
     const service = await this.prisma.service.findUnique({ where: { id } });
-    if (!service)
+
+    if (!service) {
       return cResponseData({
         message: 'Service not found',
         error: 'NotFound',
         success: false,
         data: null,
       });
+    }
 
-    await this.prisma.service.delete({ where: { id } });
+    await this.prisma.serviceOrder.deleteMany({
+      where: { serviceId: id },
+    });
+
+    await this.prisma.service.delete({
+      where: { id },
+    });
+
     return cResponseData({
-      message: 'Service deleted successfully',
+      message: 'Service and related service orders deleted successfully',
       error: null,
       success: true,
       data: null,
     });
   }
 
-  async createOrder(dto: CreateServiceOrderDto) {
+  async createOrder(dto: CreateServiceOrderDto, userId: string) {
     return this.prisma.serviceOrder.create({
       data: {
         paymentId: dto.paymentId,
         serviceId: dto.serviceId,
-        userId: dto.userId,
+        userId,
       },
       include: {
         service: true,
@@ -192,6 +204,47 @@ export class ServiceService {
     };
   }
 
+  /** Get all service orders with optional pagination */
+  async findAllOrdeSingleuser(
+    userId: string,
+    options?: { skip?: number; take?: number },
+  ) {
+    const { skip = 0, take = 10 } = options || {};
+
+    const [orders, total] = await this.prisma.$transaction([
+      this.prisma.serviceOrder.findMany({
+        where: {
+          service: {
+            userId: userId,
+          },
+        },
+        include: {
+          service: true,
+          user: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take,
+      }),
+      this.prisma.serviceOrder.count({
+        where: {
+          service: {
+            userId: userId,
+          },
+        },
+      }),
+    ]);
+
+    return {
+      total,
+      page: Math.floor(skip / take) + 1,
+      limit: take,
+      data: orders,
+    };
+  }
+
   /** Get a single service order by ID */
   async findSingle(id: string) {
     const order = await this.prisma.serviceOrder.findUnique({
@@ -205,5 +258,20 @@ export class ServiceService {
     if (!order)
       throw new NotFoundException(`ServiceOrder with id ${id} not found`);
     return order;
+  }
+
+  async updateOrderStatus(orderId: string, dto: UpdateServiceOrderStatusDto) {
+    const order = await this.prisma.serviceOrder.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    return this.prisma.serviceOrder.update({
+      where: { id: orderId },
+      data: { status: dto.status },
+    });
   }
 }
