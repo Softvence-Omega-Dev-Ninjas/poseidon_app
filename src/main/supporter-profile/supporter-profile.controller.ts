@@ -21,6 +21,12 @@ export class SupporterProfileController {
   ) {}
 
   @Public()
+  @Get()
+  findAll() {
+    return this.supporterProfileService.findAllUsers();
+  }
+
+  @Public()
   @Roles(Role.User, Role.Supporter)
   @Get(':profile_id')
   async getSupportCart(

@@ -15,6 +15,7 @@ import { ServicesModule } from './services/services.module';
 @Module({
   imports: [
     UserModule,
+    SupporterProfileModule,
     SupporterModule,
     MembershipModule,
     MediafileModule,
@@ -23,7 +24,6 @@ import { ServicesModule } from './services/services.module';
     ProductCategoryModule,
     PostModule,
     ImageModule,
-    SupporterProfileModule,
     ChatModule,
     ServicesModule,
   ],
