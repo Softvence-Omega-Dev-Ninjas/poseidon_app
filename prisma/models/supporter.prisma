@@ -1,30 +1,29 @@
 model SupporterPay {
-  id                  String            @id @unique @default(uuid())
-  user_id             String
-  author_id           String
-  transaction_id      String
-  total_price         Float
-  name                String
-  country             String
-  massage             String
-  createAt            DateTime          @default(now())
-  updateAt            DateTime          @updatedAt
-  author              User              @relation("author_supportor", fields: [author_id], references: [id])
-  user                User              @relation(fields: [user_id], references: [id])
-  oder_package_name   oder_package_name @relation(fields: [oder_package_nameId], references: [id])
-  oder_package_nameId String            @unique
+  id                String             @id @unique @default(uuid())
+  user_id           String
+  author_id         String
+  transaction_id    String
+  total_price       Float
+  name              String
+  country           String
+  massage           String
+  createAt          DateTime           @default(now())
+  updateAt          DateTime           @updatedAt
+  author            User               @relation("author_supportor", fields: [author_id], references: [id])
+  user              User               @relation(fields: [user_id], references: [id])
+  oder_package_name oder_package_name?
 }
 
 model oder_package_name {
-  id               String        @id @default(uuid())
-  supporter_pay_id String
-  package_name     String        @db.VarChar(100)
+  id               String       @id @default(uuid())
+  supporter_pay_id String       @unique
+  package_name     String       @db.VarChar(100)
   package_time     Float
   package_price    Float
-  complate         Boolean       @default(false)
-  createAt         DateTime      @default(now())
-  updateAt         DateTime      @updatedAt
-  SupporterPay     SupporterPay?
+  complate         Boolean      @default(false)
+  createAt         DateTime     @default(now())
+  updateAt         DateTime     @updatedAt
+  SupporterPay     SupporterPay @relation(fields: [supporter_pay_id], references: [id])
 }
 
 // root cart details
@@ -53,8 +52,9 @@ enum LayoutType {
 }
 
 model SupportCartLayoutQuantity {
-  id                  String             @id @unique @default(uuid())
-  SupportCartLayout   SupportCartLayout? @relation(fields: [supportCartLayoutId], references: [id])
-  supportCartLayoutId String?
-  choose_layout       LayoutType         @default(suggest)
+  id                  String            @id @unique @default(uuid())
+  SupportCartLayout   SupportCartLayout @relation(fields: [supportCartLayoutId], references: [id])
+  supportCartLayoutId String
+  choose_layout       LayoutType        @default(suggest)
+  Quantity            Int
 }
