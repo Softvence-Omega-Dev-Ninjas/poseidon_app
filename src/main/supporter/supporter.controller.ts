@@ -1,6 +1,7 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Patch } from '@nestjs/common';
 import { SupporterService } from './supporter.service';
 import { CreateSupporterPayDto } from './dto/create-supporter.dto';
+import { UpdateSupporterLayputDto } from './dto/update-supporter.dto';
 
 @Controller('supporter')
 export class SupporterController {
@@ -11,9 +12,10 @@ export class SupporterController {
   //   return this.supporterService.getSupportCart(profile_id);
   // }
 
-  @Post('create-cart')
-  createSupporterCartLayout() {
-    return this.supporterService.createSupporterCartLayout();
+  @Patch('update-cart')
+  createSupporterCartLayout(@Body() data: UpdateSupporterLayputDto) {
+    // return this.supporterService.createSupporterCartLayout();
+    return data;
   }
 
   @Post()
