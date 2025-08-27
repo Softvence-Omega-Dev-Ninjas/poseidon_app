@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateSupporterPayDto } from './dto/create-supporter.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { SupportCartLayoutQuantity } from './dto/supportCartLayoutQuantity.dto';
+import { CheersLivePackageType } from './dto/create-supporter-layout';
+import { cResponseData } from 'src/common/utils/common-responseData';
 // import { UpdateSupporterDto } from './dto/update-supporter.dto';
 
 @Injectable()
@@ -38,5 +40,18 @@ export class SupporterService {
       },
     });
     return newSupporter;
+  }
+
+  async createCheersLivePackageType(id: string, data: CheersLivePackageType) {
+    const createNewData = await this.prisma.cheers_live_package_type.create({
+      data: {
+        ...data,
+        support_cart_layout_id: id,
+      },
+    });
+    return cResponseData({
+      message: 'Create Success',
+      data: createNewData,
+    });
   }
 }

@@ -10,7 +10,7 @@ export class SupporterProfileService {
   ) {}
 
   async findAllUsers() {
-    return await this.prisma.user.findMany({
+    const allUserSupporter = await this.prisma.user.findMany({
       where: {
         role: 'supporter',
       },
@@ -25,6 +25,7 @@ export class SupporterProfileService {
         },
       },
     });
+    return allUserSupporter;
   }
 
   async profilePage(userid: string) {
