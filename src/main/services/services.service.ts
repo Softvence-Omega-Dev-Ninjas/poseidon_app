@@ -169,16 +169,39 @@ export class ServiceService {
   }
 
   async createOrder(dto: CreateServiceOrderDto, userId: string) {
-    return this.prisma.serviceOrder.create({
-      data: {
-        paymentId: dto.paymentId,
-        serviceId: dto.serviceId,
-        userId,
-      },
-      include: {
-        service: true,
-        user: true,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      // Get the current service
+      const service = await tx.service.findUnique({
+        where: { id: dto.serviceId },
+        select: { orderNumber: true },
+      });
+
+      // Increment order number
+      const newOrderNumber = (service?.orderNumber ?? 0) + 1;
+
+      // Update service with new order number and lastOrderBy
+      await tx.service.update({
+        where: { id: dto.serviceId },
+        data: {
+          orderNumber: newOrderNumber,
+          lastOrderBy: userId,
+        },
+      });
+
+      // Create service order
+      const order = await tx.serviceOrder.create({
+        data: {
+          paymentId: dto.paymentId,
+          serviceId: dto.serviceId,
+          userId,
+        },
+        include: {
+          service: true,
+          user: true,
+        },
+      });
+
+      return order;
     });
   }
 
@@ -246,18 +269,37 @@ export class ServiceService {
   }
 
   /** Get a single service order by ID */
-  async findSingle(id: string) {
-    const order = await this.prisma.serviceOrder.findUnique({
-      where: { id },
-      include: {
-        service: true,
-        user: true,
-      },
-    });
+  async findSingle(id: string, options?: { skip?: number; take?: number }) {
+    const { skip = 0, take = 10 } = options || {};
 
-    if (!order)
-      throw new NotFoundException(`ServiceOrder with id ${id} not found`);
-    return order;
+    const [orders, total] = await this.prisma.$transaction([
+      this.prisma.serviceOrder.findMany({
+        where: { serviceId: id },
+        include: {
+          service: true,
+          user: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+      }),
+      this.prisma.serviceOrder.count({
+        where: { serviceId: id },
+      }),
+    ]);
+
+    if (!orders || orders.length === 0) {
+      throw new NotFoundException(
+        `ServiceOrder with serviceId ${id} not found`,
+      );
+    }
+
+    return {
+      total,
+      page: Math.floor(skip / take) + 1,
+      limit: take,
+      data: orders,
+    };
   }
 
   async updateOrderStatus(orderId: string, dto: UpdateServiceOrderStatusDto) {

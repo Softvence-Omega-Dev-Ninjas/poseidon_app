@@ -128,10 +128,27 @@ export class ServiceController {
     return this.serviceService.remove(id);
   }
 
-  @Get('/servicesorder:id')
-  @ApiOperation({ summary: 'Get a single service order by ID' })
-  async findSingle(@Param('id') id: string) {
-    return this.serviceService.findSingle(id);
+  @Get('services/:id')
+  @Public()
+  @ApiOperation({
+    summary: 'Get a single service order by serviceId with pagination',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The serviceId of the service order',
+    example: 'a1b2c3d4-e5f6-7890-abcd-1234567890ef',
+  })
+  @ApiQuery({ name: 'skip', required: false, type: Number, example: 0 })
+  @ApiQuery({ name: 'take', required: false, type: Number, example: 10 })
+  async findSingle(
+    @Param('id') id: string,
+    @Query('skip') skip?: number,
+    @Query('take') take?: number,
+  ) {
+    return this.serviceService.findSingle(id, {
+      skip: skip ? Number(skip) : 0,
+      take: take ? Number(take) : 10,
+    });
   }
 
   @Get(':id')
