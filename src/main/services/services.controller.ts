@@ -128,10 +128,11 @@ export class ServiceController {
     return this.serviceService.remove(id);
   }
 
- 
   @Get('services/:id')
   @Public()
-  @ApiOperation({ summary: 'Get a single service order by serviceId with pagination' })
+  @ApiOperation({
+    summary: 'Get a single service order by serviceId with pagination',
+  })
   @ApiParam({
     name: 'id',
     description: 'The serviceId of the service order',
