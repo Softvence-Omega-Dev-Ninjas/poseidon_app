@@ -6,7 +6,7 @@ services:
     container_name: poseidon_db
     restart: always
     ports:
-      - ":5434:5432"
+      - "5434:5432"
     # or set shared memory limit when deploy via swarm stack
     volumes:
       - /c/Users/Sharif/Documents/docker_volumes/poseidon:/var/lib/postgresql/data
