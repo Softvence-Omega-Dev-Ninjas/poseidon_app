@@ -152,9 +152,15 @@ export class ServiceService {
       });
     }
 
-    await this.prisma.serviceOrder.deleteMany({
+   const orderexite = await this.prisma.serviceOrder.findFirst({
       where: { serviceId: id },
     });
+
+    if (orderexite){
+      throw new BadRequestException(
+        'Cannot delete service with existing orders',
+      );
+    }
 
     await this.prisma.service.delete({
       where: { id },
@@ -201,7 +207,12 @@ export class ServiceService {
         },
       });
 
-      return order;
+      return cResponseData({
+      message: 'Service created successfully.',
+      error: null,
+      success: true,
+      data:  order,
+    });
     });
   }
 
@@ -219,12 +230,19 @@ export class ServiceService {
       this.prisma.serviceOrder.count(),
     ]);
 
-    return {
+  const reuslt= {
       total,
       page: Math.floor(skip / take) + 1,
       limit: take,
       data: orders,
     };
+
+  return  cResponseData({
+      message: 'get all order successfully.',
+      error: null,
+      success: true,
+      data: reuslt,
+    });
   }
 
   /** Get all service orders with optional pagination */
@@ -260,12 +278,19 @@ export class ServiceService {
       }),
     ]);
 
-    return {
+  const  reuslt = {
       total,
       page: Math.floor(skip / take) + 1,
       limit: take,
       data: orders,
     };
+
+   return  cResponseData({
+      message: 'get all order successfully.',
+      error: null,
+      success: true,
+      data: reuslt,
+    });
   }
 
   /** Get a single service order by ID */
@@ -294,12 +319,19 @@ export class ServiceService {
       );
     }
 
-    return {
+  const  result = {
       total,
       page: Math.floor(skip / take) + 1,
       limit: take,
       data: orders,
     };
+    console.log('hit here for single order');
+   return cResponseData({
+      message: ' Get a single service order by ID successfully.',
+      error: null,
+      success: true,
+      data: result,
+    });
   }
 
   async updateOrderStatus(orderId: string, dto: UpdateServiceOrderStatusDto) {
@@ -311,9 +343,15 @@ export class ServiceService {
       throw new NotFoundException('Order not found');
     }
 
-    return this.prisma.serviceOrder.update({
+    const data = await this.prisma.serviceOrder.update({
       where: { id: orderId },
       data: { status: dto.status },
+    });
+  return  cResponseData({
+      message: 'update orderstatus successfully.',
+      error: null,
+      success: true,
+      data,
     });
   }
 }

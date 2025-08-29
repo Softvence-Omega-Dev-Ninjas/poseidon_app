@@ -22,4 +22,4 @@ services:
   #     - 8080:8080
 
 volumes:
- poseidon_db:e
+ poseidon_db:
