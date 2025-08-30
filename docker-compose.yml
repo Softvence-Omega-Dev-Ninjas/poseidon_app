@@ -1,24 +1,24 @@
 # Use postgres/example user/password credentials
 
 services:
-  # app:
-  #   build: .
-  #   image: sharif780/poseidon_app
-  #   platform: linux/amd64
-  #   container_name: poseidon_app
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     DATABASE_URL: postgres://admin:admin@db:5432/poseidon
-  #     AUTHSECRET: kjklsjfdkjksf
-  #     CLOUDINARY_CLOUD_NAME: deskuwdew
-  #     CLOUDINARY_API_KEY: 432538935528244
-  #     CLOUDINARY_API_SECRET: UULVbMCsK_b0uMyWu4EIABgTUm4
-  #     REDIS_CONNECTION_URL: redis://redis:6379
-  #     PORT: 3000
-  #   depends_on:
-  #     - db
-  #     - redis
+  app:
+    build: .
+    image: sharif780/poseidon_app
+    platform: linux/amd64
+    container_name: poseidon_app
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://admin:admin@db:5432/poseidon
+      AUTHSECRET: kjklsjfdkjksf
+      CLOUDINARY_CLOUD_NAME: deskuwdew
+      CLOUDINARY_API_KEY: 432538935528244
+      CLOUDINARY_API_SECRET: UULVbMCsK_b0uMyWu4EIABgTUm4
+      REDIS_CONNECTION_URL: redis://redis:6379
+      PORT: 3000
+    depends_on:
+      - db
+      - redis
 
   db:
     image: postgres
