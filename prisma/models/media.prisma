@@ -1,0 +1,9 @@
+model Media {
+  id        String   @id @unique @default(uuid())
+  imageUrl  String
+  publicId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  imageId   String?  @unique
+  image     Image?
+}

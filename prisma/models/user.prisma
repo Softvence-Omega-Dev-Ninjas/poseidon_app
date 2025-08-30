@@ -1,34 +1,70 @@
 model User {
-    id         String   @id @unique @default(uuid())
-    provider   String   @default("credentials") // credentials, google, facebook
-    email      String   @unique
-    password   String?
-    otp        String?
-    varify     Boolean  @default(false)
-    deactivate Boolean  @default(false)
-    profile    Profile?
-    role       Role     @default(user)
+  id                  String             @id @unique @default(uuid())
+  provider            String             @default("credentials") // Authentication provider credentials, google, facebook, etc.
+  email               String
+  password            String?
+  otp                 String?
+  varify              Boolean            @default(false)
+  deactivate          Boolean            @default(false)
+  role                Roles              @default(user)
+  comments            Comment[]
+  images              Image[]
+  imagescomments      ImageComment[]
+  imageslikes         ImageLike[]
+  likes               Like[]
+  orders              Order[]
+  posts               Post[]
+  profile             Profile?
+  shop                Shop?
+  support_cart_layout SupportCartLayout?
+  author_supportor    SupporterPay[]     @relation("author_supportor")
+  supporter           SupporterPay[]
 
-    // supporters
-    supporter           SupporterPay[] // user buy support info
-    author_supportor    SupporterPay[]     @relation("author_supportor") // author access
-    support_cart_layout SupportCartLayout?
+  // Memberships
+  memberships_owner Membership_owner?
+
+  // messages system
+  conversations1 Conversation[] @relation("User1Conversations")
+  conversations2 Conversation[] @relation("User2Conversations")
+
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  //services
+  serviceOrders ServiceOrder[] @relation("UserServiceOrders")
+
+  //
+
+  services Service[]
+
+  // permission access tb
+  PermissionvideoCallAccessUser      PermissionVideoCallAccess[] @relation("PermissionVideoCallAccessUser")
+  PermissionvideoCallAccessSupporter PermissionVideoCallAccess[] @relation("PermissionVideoCallAccessSupporter")
+  PermissionMessagesAccessUser       PermissionMessagesAccess[]  @relation("PermissionMessagesAccessUser")
+  PermissionMessagesAccessSupporter  PermissionMessagesAccess[]  @relation("PermissionMessagesAccessSupporter")
+  PermissionGalleryAccessUser        PermissionGalleryAccess[]   @relation("PermissionGalleryAccessUser")
+  PermissionGalleryAccessSupporter   PermissionGalleryAccess[]   @relation("PermissionGalleryAccessSupporter")
+  PermissionPostsAccessUser          PermissionPostsAccess[]     @relation("PermissionPostsAccessUser")
+  PermissionPostsAccessSupporter     PermissionPostsAccess[]     @relation("PermissionPostsAccessSupporter")
 }
 
 model Profile {
-    id       String  @default(uuid())
-    userid   String  @unique
-    user     User    @relation(fields: [userid], references: [id], onDelete: Cascade)
-    name     String
-    address  String?
-    state    String?
-    city     String?
-    country  String?
-    postcode String?
+  id          String  @id @unique @default(uuid())
+  userid      String  @unique
+  name        String
+  image       String
+  address     String?
+  state       String?
+  city        String?
+  country     String?
+  postcode    String?
+  cover_image String?
+  description String?
+  user        User    @relation(fields: [userid], references: [id], onDelete: Cascade)
 }
 
-enum Role {
-    admin
-    supporter
-    user
+enum Roles {
+  admin
+  supporter
+  user
 }

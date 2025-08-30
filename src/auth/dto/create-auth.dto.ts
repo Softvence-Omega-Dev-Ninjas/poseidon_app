@@ -15,3 +15,19 @@ export class CredentialsSignInInfo {
   })
   password: string;
 }
+
+type profileDto = {
+  name: string;
+  image: string;
+};
+
+export class authenticationUserDto {
+  id: string;
+  provider: string;
+  email: string;
+  password?: string | null;
+  role: string;
+  profile?: profileDto | null;
+  shop?: { id: string } | null;
+  memberships_owner?: { id: string } | null;
+}

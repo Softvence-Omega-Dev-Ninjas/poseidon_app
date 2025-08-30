@@ -13,6 +13,7 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+docker-compose.yml*
 
 # OS
 .DS_Store
@@ -58,3 +59,8 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 /generated/prisma
+
+#docker
+docker-compose.yml
+
+
