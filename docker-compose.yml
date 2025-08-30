@@ -3,7 +3,7 @@
 services:
   app:
     build: .
-    image: sharif780/poseidon_app
+    image: sharif780/poseidon_app:latest
     platform: linux/amd64
     container_name: poseidon_app
     ports:
