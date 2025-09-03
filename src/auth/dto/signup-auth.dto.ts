@@ -4,6 +4,12 @@ import { IsNotEmpty, IsString } from 'class-validator';
 export class SignUpUserDto {
   @ApiProperty({
     required: true,
+    example: 'user or supporter',
+  })
+  role: string;
+
+  @ApiProperty({
+    required: true,
     example: 'user@gmail.com',
   })
   email: string;
