@@ -9,6 +9,24 @@ export class SupporterProfileService {
     // private readonly getShopDataService: GetShopDataService,
   ) {}
 
+  async findAllUsers() {
+    return await this.prisma.user.findMany({
+      where: {
+        role: 'supporter',
+      },
+      select: {
+        id: true,
+        profile: {
+          select: {
+            name: true,
+            image: true,
+            description: true,
+          },
+        },
+      },
+    });
+  }
+
   async profilePage(userid: string) {
     return await this.prisma.$transaction(async (tx) => {
       const profileInfo = await tx.profile.findUnique({
@@ -31,6 +49,10 @@ export class SupporterProfileService {
           author: {
             role: 'supporter',
           },
+        },
+        include: {
+          cheers_live_package_type: true,
+          SuggestQuantity: true,
         },
       });
       // shop id
@@ -60,11 +82,63 @@ export class SupporterProfileService {
           createdAt: true,
         },
       });
+      // membershipInfo
+      const membershipInfo = await tx.membership_owner.findFirst({
+        where: {
+          ownerId: userid,
+        },
+        select: {
+          id: true,
+          Membership_levels: {
+            take: 3,
+            select: {
+              id: true,
+              levelName: true,
+              levelImage: true,
+              MembershipSubscriptionPlan: {
+                select: {
+                  id: true,
+                  duration: true,
+                  price: true,
+                  CalligSubscriptionPlan: {
+                    select: {
+                      id: true,
+                      title: true,
+                    },
+                  },
+                  MessagesSubscriptionPlan: {
+                    select: { id: true, title: true },
+                  },
+                  GallerySubscriptionPlan: {
+                    select: { id: true, title: true },
+                  },
+                  PostsSubscriptionPlan: { select: { id: true, title: true } },
+                },
+              },
+            },
+          },
+        },
+      });
+      // gallery
+      const gallery = await tx.image.findMany({
+        where: {
+          userId: userid,
+        },
+        select: {
+          id: true,
+          media: true,
+          likeCount: true,
+          commentCount: true,
+          createdAt: true,
+        },
+      });
       return {
         profileInfo,
         supporte_card,
         shopid: shopid ? shopid.id : null,
         posts,
+        membershipInfo,
+        image: gallery,
       };
     });
   }

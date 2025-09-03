@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Delete,
+  Req,
 } from '@nestjs/common';
 import { MembershipRewardService } from './reward.service';
 import { Roles } from 'src/auth/guard/roles.decorator';
@@ -24,6 +25,7 @@ import {
   UpdateVideoCallRewardDto,
 } from './dto/update-reward.dto';
 import { cResponseData } from 'src/common/utils/common-responseData';
+import { Request } from 'express';
 
 @Controller('membership-levels-reward')
 export class MembershipRewardController {
@@ -61,9 +63,11 @@ export class MembershipRewardController {
 
   // get All Rewards
   @Roles(Role.Supporter)
-  @Get('all/:membershipLevelId')
-  async getAllRewards(@Param('membershipLevelId') membershipLevelId: string) {
-    return await this.membershipRewardService.getAllReward(membershipLevelId);
+  @Get('get-all')
+  async getAllRewards(@Req() req: Request) {
+    return await this.membershipRewardService.getAllReward(
+      req['memberships_owner_id'] as string,
+    );
   }
 
   @Roles(Role.Supporter)

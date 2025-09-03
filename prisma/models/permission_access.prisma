@@ -1,0 +1,43 @@
+model PermissionVideoCallAccess {
+    id                  String   @id @unique @default(uuid())
+    user_id             String
+    user                User     @relation("PermissionVideoCallAccessUser", fields: [user_id], references: [id])
+    supporter_id        String
+    supporter           User     @relation("PermissionVideoCallAccessSupporter", fields: [supporter_id], references: [id])
+    totalVideoCalls     Int
+    unlimitedVideoCalls Boolean
+    createAt            DateTime @default(now())
+    endDate             DateTime
+}
+
+model PermissionMessagesAccess {
+    id                String   @id @unique @default(uuid())
+    user_id           String
+    user              User     @relation("PermissionMessagesAccessUser", fields: [user_id], references: [id])
+    supporter_id      String
+    supporter         User     @relation("PermissionMessagesAccessSupporter", fields: [supporter_id], references: [id])
+    totalMessages     Int
+    unlimitedMessages Boolean
+    createAt          DateTime @default(now())
+    endDate           DateTime
+}
+
+model PermissionGalleryAccess {
+    id           String   @id @unique @default(uuid())
+    user_id      String
+    user         User     @relation("PermissionGalleryAccessUser", fields: [user_id], references: [id])
+    supporter_id String
+    supporter    User     @relation("PermissionGalleryAccessSupporter", fields: [supporter_id], references: [id])
+    createAt     DateTime @default(now())
+    endDate      DateTime
+}
+
+model PermissionPostsAccess {
+    id           String   @id @unique @default(uuid())
+    user_id      String
+    user         User     @relation("PermissionPostsAccessUser", fields: [user_id], references: [id])
+    supporter_id String
+    supporter    User     @relation("PermissionPostsAccessSupporter", fields: [supporter_id], references: [id])
+    createAt     DateTime @default(now())
+    endDate      DateTime
+}

@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { CreateMembershipLevelDto } from './dto/create-membership-level.dto';
+import { LevelImageUpdateDto } from './dto/update-membership-level.dto';
 
 @Injectable()
 export class MembershipService {
@@ -98,6 +99,28 @@ export class MembershipService {
       message: 'Membership level created successfully',
       data: newMembershipLevel,
       success: true,
+    });
+  }
+
+  async levelImageUpdate(id: string, levelImage: LevelImageUpdateDto) {
+    const updateLevelImage = await this.prisma.membership_levels.update({
+      where: {
+        id,
+      },
+      data: levelImage,
+    });
+    if (!updateLevelImage || !updateLevelImage?.id)
+      throw new HttpException(
+        cResponseData({
+          message: 'Membership level image update failed',
+          data: null,
+          success: false,
+        }),
+        404,
+      );
+    return cResponseData({
+      message: 'Membership level image updated successfully',
+      data: updateLevelImage,
     });
   }
 

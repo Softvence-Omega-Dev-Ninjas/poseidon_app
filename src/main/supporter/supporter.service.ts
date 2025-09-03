@@ -7,6 +7,13 @@ import { PrismaService } from 'src/prisma-client/prisma-client.service';
 export class SupporterService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // async createSupporterCartLayout(data: any) {
+  //   const newSupporterCartLayout = await this.prisma.supportCartLayout.create({
+  //     data: {},
+  //   });
+  //   return 'createSupporterCartLayout';
+  // }
+
   async create(createSupporterDto: CreateSupporterPayDto) {
     const { oder_package_name, ...rootData } = createSupporterDto;
 

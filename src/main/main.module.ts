@@ -9,19 +9,25 @@ import { ImageModule } from './image/image.module';
 import { SupporterProfileModule } from './supporter-profile/supporter-profile.module';
 import { MembershipModule } from './membership/membership.module';
 import { ChatModule } from './message/message.module';
+import { MediafileModule } from './mediafile/mediafile.module';
+import { ServicesModule } from './services/services.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     UserModule,
+    SupporterProfileModule,
     SupporterModule,
     MembershipModule,
+    MediafileModule,
     OrderModule,
     ProductModule,
     ProductCategoryModule,
     PostModule,
     ImageModule,
-    SupporterProfileModule,
     ChatModule,
+    ServicesModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [],
   providers: [],

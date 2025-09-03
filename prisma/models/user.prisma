@@ -30,10 +30,26 @@ model User {
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
 
+  //services
+  serviceOrders ServiceOrder[] @relation("UserServiceOrders")
+
+  //
+
+  services Service[]
+
+  // permission access tb
+  PermissionvideoCallAccessUser      PermissionVideoCallAccess[] @relation("PermissionVideoCallAccessUser")
+  PermissionvideoCallAccessSupporter PermissionVideoCallAccess[] @relation("PermissionVideoCallAccessSupporter")
+  PermissionMessagesAccessUser       PermissionMessagesAccess[]  @relation("PermissionMessagesAccessUser")
+  PermissionMessagesAccessSupporter  PermissionMessagesAccess[]  @relation("PermissionMessagesAccessSupporter")
+  PermissionGalleryAccessUser        PermissionGalleryAccess[]   @relation("PermissionGalleryAccessUser")
+  PermissionGalleryAccessSupporter   PermissionGalleryAccess[]   @relation("PermissionGalleryAccessSupporter")
+  PermissionPostsAccessUser          PermissionPostsAccess[]     @relation("PermissionPostsAccessUser")
+  PermissionPostsAccessSupporter     PermissionPostsAccess[]     @relation("PermissionPostsAccessSupporter")
 }
 
 model Profile {
-  id          String  @id @default(uuid())
+  id          String  @id @unique @default(uuid())
   userid      String  @unique
   name        String
   image       String
