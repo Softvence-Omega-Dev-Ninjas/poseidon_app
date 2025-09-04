@@ -1,80 +1,55 @@
 import { HttpException, Inject } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
-import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import Stripe from 'stripe';
 
 export class SellerService {
-  constructor(
-    @Inject('STRIPE_CLIENT') private stripe: Stripe,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(@Inject('STRIPE_CLIENT') private stripe: Stripe) {}
 
   // create connected account for seller or supporter
-  async createConnectedAccount(userId: string) {
+  async createConnectedAccount(email: string, userId: string, name: string) {
     try {
-      const user = await this.prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          email: true,
-          stripeAccountId: true,
-          profile: { select: { name: true } },
-        },
-      });
-      if (!user || !user.email || !user.profile)
-        throw new HttpException(
-          cResponseData({
-            message: 'User not found',
-            data: null,
-            error: null,
-            success: false,
-          }),
-          404,
-        );
-      if (user.stripeAccountId)
-        throw new HttpException(
-          cResponseData({
-            message: 'Stripe account already exists',
-            data: { email: user.email },
-            error: null,
-            success: false,
-          }),
-          400,
-        );
-      const profileName: string = user.profile?.name ?? 'Guest User';
       const account = await this.stripe.accounts.create({
         type: 'express',
         country: 'US',
-        email: user.email,
+        email: email,
         metadata: {
-          userId: user.id,
-          name: profileName,
+          userId: userId,
+          name: name,
         },
         capabilities: {
           transfers: { requested: true },
           card_payments: { requested: true },
         },
       });
-
-      // Save Stripe account ID in user
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: { stripeAccountId: account.id },
-      });
-
-      const accountLink = await this.stripe.accountLinks.create({
-        account: account.id,
-        refresh_url: `${process.env.DOMAIN}/stripe/reauth`,
-        return_url: `${process.env.DOMAIN}/login`,
-        type: 'account_onboarding',
-      });
-
-      return accountLink;
+      return account;
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : String(e);
       throw new HttpException(
         cResponseData({
           message: 'Failed to create Stripe account',
+          data: null,
+          error: errorMessage,
+          success: false,
+        }),
+        400,
+      );
+    }
+  }
+
+  async createOnboardingAccountLink(accountId: string) {
+    try {
+      const accountLink = await this.stripe.accountLinks.create({
+        account: accountId,
+        refresh_url: `${process.env.FRONTEND_URL}/reauth`,
+        return_url: `${process.env.FRONTEND_URL}/signin`,
+        type: 'account_onboarding',
+      });
+      return accountLink;
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      throw new HttpException(
+        cResponseData({
+          message: 'Failed to create Stripe account link',
           data: null,
           error: errorMessage,
           success: false,

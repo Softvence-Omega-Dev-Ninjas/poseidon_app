@@ -3,10 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { SellerService } from './seller.service';
 import { StripeService } from './stripe.service';
-import { PrismaClientModule } from 'src/prisma-client/prisma-client.module';
 
 @Module({
-  imports: [ConfigModule, PrismaClientModule],
+  imports: [ConfigModule],
   providers: [
     {
       provide: 'STRIPE_CLIENT',
@@ -18,6 +17,8 @@ import { PrismaClientModule } from 'src/prisma-client/prisma-client.module';
       },
       inject: [ConfigService],
     },
+    SellerService,
+    StripeService,
   ],
   exports: ['STRIPE_CLIENT', SellerService, StripeService],
 })

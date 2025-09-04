@@ -3,13 +3,18 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CredentialsSignInInfo } from 'src/auth/dto/create-auth.dto';
 import * as argon2 from 'argon2';
+import { SellerService } from 'src/utils/stripe/seller.service';
+import { cResponseData } from 'src/common/utils/common-responseData';
 // import { UserInfoType } from './response.type';
 // import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class AuthUserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly stripe: SellerService,
+  ) {}
 
   // chack user db isExestUser - yes or not
   private async isExestUser(email: string) {
@@ -42,49 +47,14 @@ export class AuthUserService {
         HttpStatus.CONFLICT,
       );
     }
-    // create a hash password
-    const hashedPassword = await argon2.hash(createUserDto.password);
+
     // create new supporter
     if (createUserDto.role === 'supporter') {
-      // If the user is a supporter, create a support_cart_layout
-      const newSupporter = await this.prisma.user.create({
-        data: {
-          email: createUserDto.email,
-          password: hashedPassword,
-          role: createUserDto.role as 'supporter',
-          profile: {
-            create: {
-              ...createUserDto.profile,
-            },
-          },
-          support_cart_layout: {
-            create: {},
-          },
-          shop: {
-            create: {},
-          },
-        },
-        select: {
-          id: true,
-          email: true,
-          provider: true,
-          profile: {
-            select: {
-              name: true,
-              image: true,
-            },
-          },
-        },
-      });
-      return {
-        message: 'Your Have SignUp Successful',
-        redirect_url: 'http://localhost:3000/signin',
-        error: null,
-        data: { name: newSupporter.profile?.name },
-        success: true,
-      };
+      return await this.createSupporterAccount(createUserDto);
     }
     // create new user
+    // create a hash password
+    const hashedPassword = await argon2.hash(createUserDto.password);
     const newUser = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
@@ -159,5 +129,86 @@ export class AuthUserService {
         },
       },
     });
+  }
+
+  // create supporter account
+  private async createSupporterAccount(createUserDto: CreateUserDto) {
+    try {
+      // create a hash password
+      const hashedPassword = await argon2.hash(createUserDto.password);
+      // If the user is a supporter, create a support_cart_layout
+      const newSupporter = await this.prisma.user.create({
+        data: {
+          email: createUserDto.email,
+          password: hashedPassword,
+          role: createUserDto.role as 'supporter',
+          profile: {
+            create: {
+              ...createUserDto.profile,
+            },
+          },
+          support_cart_layout: {
+            create: {},
+          },
+          shop: {
+            create: {},
+          },
+        },
+        select: {
+          id: true,
+          email: true,
+          provider: true,
+          profile: {
+            select: {
+              name: true,
+              image: true,
+            },
+          },
+        },
+      });
+      // create stripe connected account for supporter
+      const createAccountStripe = await this.stripe.createConnectedAccount(
+        newSupporter.email,
+        newSupporter.id,
+        newSupporter.profile?.name || 'No name',
+      );
+      if (!createAccountStripe || !createAccountStripe.id) {
+        throw new HttpException(
+          cResponseData({
+            message: 'Failed to create Stripe account',
+            data: null,
+            error: 'Stripe account creation failed',
+            success: false,
+          }),
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      // update user db stripeAccountId field
+      await this.prisma.user.update({
+        where: { id: newSupporter.id },
+        data: { stripeAccountId: createAccountStripe.id },
+      });
+      // create onboarding link for supporter
+      const linkOnboarding = await this.stripe.createOnboardingAccountLink(
+        createAccountStripe.id,
+      );
+      return {
+        message: 'Your Have SignUp Successful',
+        redirect_url: linkOnboarding.url,
+        error: null,
+        data: { name: newSupporter.profile?.name },
+        success: true,
+      };
+    } catch (error) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Failed to create supporter account',
+          data: null,
+          error: error instanceof Error ? error.message : String(error),
+          success: false,
+        }),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }
