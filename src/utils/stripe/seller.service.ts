@@ -3,19 +3,13 @@ import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import Stripe from 'stripe';
 
-interface UserAccountResponse {
-  id: string;
-  email: string;
-  stripeAccountId: string;
-  profile: { name: string };
-}
-
 export class SellerService {
   constructor(
     @Inject('STRIPE_CLIENT') private stripe: Stripe,
     private readonly prisma: PrismaService,
   ) {}
 
+  // create connected account for seller or supporter
   async createConnectedAccount(userId: string) {
     try {
       const user = await this.prisma.user.findUnique({
@@ -47,31 +41,46 @@ export class SellerService {
           }),
           400,
         );
+      const profileName: string = user.profile?.name ?? 'Guest User';
+      const account = await this.stripe.accounts.create({
+        type: 'express',
+        country: 'US',
+        email: user.email,
+        metadata: {
+          userId: user.id,
+          name: profileName,
+        },
+        capabilities: {
+          transfers: { requested: true },
+          card_payments: { requested: true },
+        },
+      });
 
-      //   const account = await this.stripe.accounts.create({
-      //     type: 'express',
-      //     country: 'US',
-      //     email: user.email,
-      //     metadata: { userId: user.id, name: user.profile?.name ?? '' },
-      //     capabilities: {
-      //       transfers: { requested: true },
-      //       card_payments: { requested: true },
-      //       // crypto_transfers: { requested: true },
-      //     },
-      //   });
+      // Save Stripe account ID in user
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { stripeAccountId: account.id },
+      });
 
-      //   console.log('createConnectedAccount', account);
+      const accountLink = await this.stripe.accountLinks.create({
+        account: account.id,
+        refresh_url: `${process.env.DOMAIN}/stripe/reauth`,
+        return_url: `${process.env.DOMAIN}/login`,
+        type: 'account_onboarding',
+      });
 
-      //   // Save Stripe account ID in user
-      //   await this.prisma.user.update({
-      //     where: { id: userId },
-      //     data: { stripeAccountId: account.id },
-      //   });
-
-      //   return account;
-    } catch (e) {
-      console.log('error', e);
-      throw new HttpException(e, e?.statusCode || 500);
+      return accountLink;
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      throw new HttpException(
+        cResponseData({
+          message: 'Failed to create Stripe account',
+          data: null,
+          error: errorMessage,
+          success: false,
+        }),
+        400,
+      );
     }
   }
 }
