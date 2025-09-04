@@ -44,22 +44,56 @@ export class AuthUserService {
     }
     // create a hash password
     const hashedPassword = await argon2.hash(createUserDto.password);
-    // let hashedPassword = '';
-    // hashedPassword = await argon2.hash(createUserDto.password);
+    // create new supporter
+    if (createUserDto.role === 'supporter') {
+      // If the user is a supporter, create a support_cart_layout
+      const newSupporter = await this.prisma.user.create({
+        data: {
+          email: createUserDto.email,
+          password: hashedPassword,
+          role: createUserDto.role as 'supporter',
+          profile: {
+            create: {
+              ...createUserDto.profile,
+            },
+          },
+          support_cart_layout: {
+            create: {},
+          },
+          shop: {
+            create: {},
+          },
+        },
+        select: {
+          id: true,
+          email: true,
+          provider: true,
+          profile: {
+            select: {
+              name: true,
+              image: true,
+            },
+          },
+        },
+      });
+      return {
+        message: 'Your Have SignUp Successful',
+        redirect_url: 'http://localhost:3000/signin',
+        error: null,
+        data: { name: newSupporter.profile?.name },
+        success: true,
+      };
+    }
+    // create new user
     const newUser = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
         password: hashedPassword,
+        role: createUserDto.role as 'user',
         profile: {
           create: {
             ...createUserDto.profile,
           },
-        },
-        support_cart_layout: {
-          create: {},
-        },
-        shop: {
-          create: {},
         },
       },
       select: {

@@ -39,9 +39,10 @@ export class AuthController {
   ) {
     // call cloudinary profile image upload - this area
     const { imageUrl } = await this.cloudinaryService.profileImageUpload(image);
-    const { email, password, ...profile } = createAuthDto;
+    const { role, email, password, ...profile } = createAuthDto;
 
     return this.authUserService.createUser({
+      role,
       email,
       password,
       profile: {
