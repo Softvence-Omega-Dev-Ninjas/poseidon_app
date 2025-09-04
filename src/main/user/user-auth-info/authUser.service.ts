@@ -44,8 +44,6 @@ export class AuthUserService {
     }
     // create a hash password
     const hashedPassword = await argon2.hash(createUserDto.password);
-    // let hashedPassword = '';
-    // hashedPassword = await argon2.hash(createUserDto.password);
     // create new supporter
     if (createUserDto.role === 'supporter') {
       // If the user is a supporter, create a support_cart_layout
