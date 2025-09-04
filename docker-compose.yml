@@ -15,7 +15,10 @@ services:
       CLOUDINARY_API_KEY: 432538935528244
       CLOUDINARY_API_SECRET: UULVbMCsK_b0uMyWu4EIABgTUm4
       REDIS_CONNECTION_URL: redis://redis:6379
+      STRIPE_SECRET_KEY: sk_test_51S14538ZZDvAakDbsGqbQDmg5wXzoTdkk2J1Nyob9EKQdnDBQQvAXA7pXp6ZMEAWapCy5zEbC8uv4sAbXRuWPB8X00nyy8JgHZ
       PORT: 3000
+      FRONTEND_URL: http://localhost:3001
+      BACKEND_URL: https://drinkwithme.click
     depends_on:
       - db
       - redis

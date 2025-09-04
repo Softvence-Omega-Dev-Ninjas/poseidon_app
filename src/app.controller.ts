@@ -12,7 +12,7 @@ export class AppController {
   @Get()
   @Public()
   getHello(@Req() res: Request): string {
-    return 'welcome to poseidon project server';
+    return 'welcome to poseidon project server with docker';
   }
 
   // @Get('sharif.txt')
