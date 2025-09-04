@@ -1,7 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import Stripe from 'stripe';
 
-@Injectable()
-export class StripeService {
+export class SellerService {
   constructor(@Inject('STRIPE_CLIENT') private stripe: Stripe) {}
 }
