@@ -47,14 +47,16 @@ export class AuthUserService {
         HttpStatus.CONFLICT,
       );
     }
-
+    const hashedPassword = await argon2.hash(createUserDto.password);
     // create new supporter
     if (createUserDto.role === 'supporter') {
-      return await this.createSupporterAccount(createUserDto);
+      return await this.createSupporterAccount({
+        ...createUserDto,
+        password: hashedPassword,
+      });
     }
     // create new user
     // create a hash password
-    const hashedPassword = await argon2.hash(createUserDto.password);
     const newUser = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
@@ -134,13 +136,11 @@ export class AuthUserService {
   // create supporter account
   private async createSupporterAccount(createUserDto: CreateUserDto) {
     try {
-      // create a hash password
-      const hashedPassword = await argon2.hash(createUserDto.password);
       // If the user is a supporter, create a support_cart_layout
       const newSupporter = await this.prisma.user.create({
         data: {
           email: createUserDto.email,
-          password: hashedPassword,
+          password: createUserDto.password,
           role: createUserDto.role as 'supporter',
           profile: {
             create: {
@@ -193,7 +193,7 @@ export class AuthUserService {
         createAccountStripe.id,
       );
       return {
-        message: 'Your Have SignUp Successful',
+        message: 'Supporter account created successfully',
         redirect_url: linkOnboarding.url,
         error: null,
         data: { name: newSupporter.profile?.name },
