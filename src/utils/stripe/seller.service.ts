@@ -36,12 +36,14 @@ export class SellerService {
     }
   }
 
-  async createOnboardingAccountLink(accountId: string) {
+  async createOnboardingAccountLink(accountId: string, redirect_url?: string) {
     try {
       const accountLink = await this.stripe.accountLinks.create({
         account: accountId,
-        refresh_url: `${process.env.FRONTEND_URL}/reauth`,
-        return_url: `${process.env.FRONTEND_URL}/signin`,
+        refresh_url: `${process.env.FRONTEND_URL}/notfound`,
+        return_url: redirect_url
+          ? `${process.env.FRONTEND_URL}/${redirect_url}`
+          : `${process.env.FRONTEND_URL}/signin`,
         type: 'account_onboarding',
       });
       return accountLink;
