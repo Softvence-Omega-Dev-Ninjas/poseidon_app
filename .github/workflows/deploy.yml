@@ -41,16 +41,9 @@ jobs:
           username: root
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
-            cd /home/poseidon
-            if command -v docker-compose &> /dev/null; then
-              docker-compose down --remove-orphans
-              docker-compose rm -f
-              docker-compose pull
-              docker-compose up -d
-            else
-              docker compose down --remove-orphans
-              docker compose rm -f
-              docker compose pull
-              docker compose up -d
-            fi
+            cd ../home/poseidon
+            docker-compose down --remove-orphans
+            docker-compose rm -f
+            docker-compose pull
+            docker-compose up -d
             docker image prune -f
