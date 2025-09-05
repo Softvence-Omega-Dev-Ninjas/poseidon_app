@@ -59,8 +59,14 @@ export class AuthGuard implements CanActivate {
       });
 
       request['sub'] = payload.id;
-      request['shop_id'] = payload.shop_id;
-      request['memberships_owner_id'] = payload.memberships_owner_id;
+      request['role'] = payload.role;
+      // attach optional info if available with payload to request supporter
+      // for further use in the request lifecycle
+      if (payload.role === 'supporter') {
+        request['shop_id'] = payload.shop_id ?? null;
+        request['memberships_owner_id'] = payload.memberships_owner_id ?? null;
+        request['stripeAccountId'] = payload.stripeAccountId ?? null;
+      }
       if (isPublic) return true;
       console.log(payload.role, requiredRoles);
       return requiredRoles.some((role) => payload.role?.includes(role));
