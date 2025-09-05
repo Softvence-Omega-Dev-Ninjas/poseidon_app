@@ -152,11 +152,11 @@ export class ServiceService {
       });
     }
 
-   const orderexite = await this.prisma.serviceOrder.findFirst({
+    const orderexite = await this.prisma.serviceOrder.findFirst({
       where: { serviceId: id },
     });
 
-    if (orderexite){
+    if (orderexite) {
       throw new BadRequestException(
         'Cannot delete service with existing orders',
       );
@@ -208,11 +208,11 @@ export class ServiceService {
       });
 
       return cResponseData({
-      message: 'Service created successfully.',
-      error: null,
-      success: true,
-      data:  order,
-    });
+        message: 'Service created successfully.',
+        error: null,
+        success: true,
+        data: order,
+      });
     });
   }
 
@@ -230,14 +230,14 @@ export class ServiceService {
       this.prisma.serviceOrder.count(),
     ]);
 
-  const reuslt= {
+    const reuslt = {
       total,
       page: Math.floor(skip / take) + 1,
       limit: take,
       data: orders,
     };
 
-  return  cResponseData({
+    return cResponseData({
       message: 'get all order successfully.',
       error: null,
       success: true,
@@ -278,14 +278,14 @@ export class ServiceService {
       }),
     ]);
 
-  const  reuslt = {
+    const reuslt = {
       total,
       page: Math.floor(skip / take) + 1,
       limit: take,
       data: orders,
     };
 
-   return  cResponseData({
+    return cResponseData({
       message: 'get all order successfully.',
       error: null,
       success: true,
@@ -319,14 +319,14 @@ export class ServiceService {
       );
     }
 
-  const  result = {
+    const result = {
       total,
       page: Math.floor(skip / take) + 1,
       limit: take,
       data: orders,
     };
     console.log('hit here for single order');
-   return cResponseData({
+    return cResponseData({
       message: ' Get a single service order by ID successfully.',
       error: null,
       success: true,
@@ -347,7 +347,7 @@ export class ServiceService {
       where: { id: orderId },
       data: { status: dto.status },
     });
-  return  cResponseData({
+    return cResponseData({
       message: 'update orderstatus successfully.',
       error: null,
       success: true,

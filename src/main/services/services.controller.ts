@@ -174,9 +174,7 @@ export class ServiceController {
     return this.serviceService.update(id, dto, newImages);
   }
 
-
-
-   @Roles(Role.Supporter)
+  @Roles(Role.Supporter)
   @Patch('orders/:orderId/status')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiOperation({ summary: 'Update the status of a service order' })
@@ -194,7 +192,6 @@ export class ServiceController {
     @Param('orderId') orderId: string,
     @Body() dto: UpdateServiceOrderStatusDto,
   ) {
-     
     return this.serviceService.updateOrderStatus(orderId, dto);
   }
 }
