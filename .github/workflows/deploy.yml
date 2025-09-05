@@ -42,8 +42,8 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
             cd ../home/poseidon
-            docker-compose down --remove-orphans
-            docker-compose rm -f
-            docker-compose pull
-            docker-compose up -d
+            docker compose down --remove-orphans
+            docker compose rm -f
+            docker compose pull
+            docker compose up -d
             docker image prune -f
