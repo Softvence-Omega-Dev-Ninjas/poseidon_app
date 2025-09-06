@@ -528,7 +528,7 @@ export class ImageService {
     try {
       const images = await this.prisma.image.findMany({
         where: { visibility },
-        include: { likes: { where: { userId } } },
+        include: { likes: { where: { userId } }, media: true },
       });
 
       const imagesWithIsLiked = images.map((image) => {
