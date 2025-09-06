@@ -63,7 +63,13 @@ export class AuthController {
       userDto,
       createAuthDto.password,
     );
-    res.cookie('accessToken', varifyUser.access_token);
+    res.cookie('accessToken', varifyUser.access_token, {
+      httpOnly: true, // cannot be accessed via JS
+      secure: false, // set true if using HTTPS
+      sameSite: 'none', // allow cross-site
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
+      // partitioned: true,
+    });
     return res.status(HttpStatus.OK).json(varifyUser);
   }
 
