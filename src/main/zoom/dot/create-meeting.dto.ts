@@ -1,4 +1,10 @@
-import { IsEmail, IsOptional, IsString, IsDateString, IsInt } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsDateString,
+  IsInt,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateZoomUserDto {
@@ -22,11 +28,14 @@ export class CreateMeetingDto {
   @IsString()
   topic: string;
 
-  @ApiProperty({example:'hasanmahadiius22@gmail.com'})
+  @ApiProperty({ example: 'hasanmahadiius22@gmail.com' })
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: '2025-09-05T10:00:00Z', description: 'ISO 8601 date-time' })
+  @ApiProperty({
+    example: '2025-09-05T10:00:00Z',
+    description: 'ISO 8601 date-time',
+  })
   @IsDateString()
   start_time: string;
 

@@ -2,15 +2,14 @@ import { Controller, Post, Param, Body, Patch, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { ZoomService } from './zoom.service';
 import { CreateMeetingDto, CreateZoomUserDto } from './dot/create-meeting.dto';
+import { Public } from 'src/auth/guard/public.decorator';
 
 @ApiTags('Zoom')
 @Controller('providers/:providerId/zoom')
 export class ZoomController {
   constructor(private readonly zoomService: ZoomService) {}
 
-
-
-
+  @Public()
   @Post('account')
   @ApiOperation({ summary: 'Create Zoom account for provider' })
   @ApiBody({ type: CreateZoomUserDto })
@@ -32,7 +31,10 @@ export class ZoomController {
     @Param('providerId') providerId: string,
     @Body() dto: CreateZoomUserDto,
   ) {
-    const account = await this.zoomService.createProviderZoomAccount(providerId, dto);
+    const account = await this.zoomService.createProviderZoomAccount(
+      providerId,
+      dto,
+    );
     return {
       statusCode: 201,
       success: true,
@@ -41,6 +43,7 @@ export class ZoomController {
     };
   }
 
+  @Public()
   @Post('meetings')
   @ApiOperation({ summary: 'Create a Zoom meeting for provider' })
   @ApiBody({ type: CreateMeetingDto })
@@ -59,9 +62,10 @@ export class ZoomController {
     @Param('providerId') providerId: string,
     @Body() dto: CreateMeetingDto,
   ) {
-
-           
-    const meeting = await this.zoomService.createMeetingForBasicUser(providerId, dto);
+    const meeting = await this.zoomService.createMeetingForBasicUser(
+      providerId,
+      dto,
+    );
     return {
       statusCode: 201,
       success: true,
@@ -69,7 +73,4 @@ export class ZoomController {
       data: meeting,
     };
   }
-
-
-  
 }
