@@ -1,4 +1,4 @@
-# Use postgres/example user/password credentials
+version: "3.9"
 
 services:
   db:
@@ -7,19 +7,19 @@ services:
     restart: always
     ports:
       - "5434:5432"
-    # or set shared memory limit when deploy via swarm stack
     volumes:
-      - /d/docker_volumes/poseidon:/var/lib/postgresql/data
+      - poseidon:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: poseidon
 
-  # adminer:
-  #   image: adminer
-  #   restart: always
-  #   ports:
-  #     - 8080:8080
+# Optional adminer
+#  adminer:
+#    image: adminer
+#    restart: always
+#    ports:
+#      - "8080:8080"
 
-  # volumes:
-  #     - /home/md-sharif/docker_volumes/poseidon:/var/lib/postgresql/data
+volumes:
+  poseidon:
