@@ -23,6 +23,9 @@ export class SupporterProfileService {
             description: true,
           },
         },
+        _count: {
+          select: { supporter: true },
+        },
       },
     });
   }
