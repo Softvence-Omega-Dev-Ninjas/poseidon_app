@@ -34,7 +34,7 @@ export class CreateSupporterPayDto {
   author_id: string;
 
   @ApiProperty({
-    required: true,
+    required: false,
     type: () => PackageTypePay,
     example: {
       package_name: 'package name cheers drink',
@@ -42,7 +42,7 @@ export class CreateSupporterPayDto {
       package_price: 20,
     },
   })
-  oder_package_name: PackageTypePay;
+  oder_package_name?: PackageTypePay;
 
   @ApiProperty({
     required: true,

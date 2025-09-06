@@ -51,5 +51,5 @@ export class UpdateSupporterLayputDto extends PartialType(
     ],
   })
   @IsArray()
-  cheers_live_package_type: CheersLivePackageType[];
+  cheers_live_package_type?: CheersLivePackageType[];
 }

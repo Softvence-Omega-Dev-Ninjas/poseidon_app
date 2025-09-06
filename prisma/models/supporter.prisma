@@ -56,5 +56,5 @@ model SupportCartLayoutQuantity {
   SupportCartLayout   SupportCartLayout @relation(fields: [supportCartLayoutId], references: [id])
   supportCartLayoutId String
   choose_layout       LayoutType        @default(suggest)
-  Quantity            Int
+  quantity            Int
 }
