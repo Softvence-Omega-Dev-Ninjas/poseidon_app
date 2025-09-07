@@ -12,7 +12,7 @@ export class MembershipServiceUseToUserOnly {
       where: { id: membershipLevelInfo.membershipLevelId },
       select: {
         id: true,
-        levelName: true,
+        titleName: true,
         membership: {
           select: {
             ownerId: true,

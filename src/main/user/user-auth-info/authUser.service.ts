@@ -167,6 +167,26 @@ export class AuthUserService {
           },
         },
       });
+
+      // create membership
+      await this.prisma.membership_owner.create({
+        data: {
+          ownerId: newSupporter.id,
+          MembershipAccessToVideoCall: {
+            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+          },
+          MembershipAccessToMessages: {
+            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+          },
+          MembershipAccessToGallery: {
+            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+          },
+          MembershipAccessToPosts: {
+            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+          },
+        },
+      });
+
       // create stripe connected account for supporter
       const createAccountStripe = await this.stripe.createConnectedAccount(
         newSupporter.email,
