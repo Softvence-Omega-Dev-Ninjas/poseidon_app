@@ -11,10 +11,13 @@ import { MembershipModule } from './membership/membership.module';
 import { ChatModule } from './message/message.module';
 import { MediafileModule } from './mediafile/mediafile.module';
 import { ServicesModule } from './services/services.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ZoomModule } from './zoom/zoom.module';
 
 @Module({
   imports: [
     UserModule,
+    SupporterProfileModule,
     SupporterModule,
     MembershipModule,
     MediafileModule,
@@ -23,9 +26,10 @@ import { ServicesModule } from './services/services.module';
     ProductCategoryModule,
     PostModule,
     ImageModule,
-    SupporterProfileModule,
     ChatModule,
     ServicesModule,
+    ScheduleModule.forRoot(),
+    ZoomModule,
   ],
   controllers: [],
   providers: [],

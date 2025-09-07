@@ -12,7 +12,10 @@ import {
   StructuredArrayItemDto,
 } from 'src/common/dto/structured-array.dto';
 import { CreateServiceOrderDto } from './dto/create-serviesorder';
-import { CreateServicesDto } from './dto/create-services';
+import {
+  CreateServicesDto,
+  UpdateServiceOrderStatusDto,
+} from './dto/create-services';
 import { UpdateservicesDto } from './dto/update-serviecs';
 
 @Injectable()
@@ -51,43 +54,133 @@ export class ServiceService {
     });
   }
 
+  // async findAll(page = 1, limit = 10, draft?: boolean) {
+  //   const skip = (page - 1) * limit;
+  //   const where: any = {};
+  //   if (draft !== undefined) where.draft = draft;
+
+  //   const [services, total] = await this.prisma.$transaction([
+  //     this.prisma.service.findMany({ where, skip, take: limit }),
+  //     this.prisma.service.count({ where }),
+  //   ]);
+
+  //   const totalPages = Math.ceil(total / limit);
+  //   return cResponseData({
+  //     message: 'Services retrieved successfully.',
+  //     error: null,
+  //     success: true,
+  //     data: { total, services, currentPage: page, totalPages, limit },
+  //   });
+  // }
+
   async findAll(page = 1, limit = 10, draft?: boolean) {
-    const skip = (page - 1) * limit;
-    const where: any = {};
-    if (draft !== undefined) where.draft = draft;
+  const skip = (page - 1) * limit;
+  const where: any = {};
+  if (draft !== undefined) where.draft = draft;
 
-    const [services, total] = await this.prisma.$transaction([
-      this.prisma.service.findMany({ where, skip, take: limit }),
-      this.prisma.service.count({ where }),
-    ]);
+  const [services, total] = await this.prisma.$transaction([
+    this.prisma.service.findMany({
+      where,
+      skip,
+      take: limit,
+    }),
+    this.prisma.service.count({ where }),
+  ]);
 
-    const totalPages = Math.ceil(total / limit);
-    return cResponseData({
-      message: 'Services retrieved successfully.',
-      error: null,
-      success: true,
-      data: { total, services, currentPage: page, totalPages, limit },
-    });
-  }
+  
+  const allMediaIds = services.flatMap((s) => s.images);
 
-  async findAllUser(userid: string, page = 1, limit = 10, draft?: boolean) {
-    const skip = (page - 1) * limit;
-    const where: any = { userId: userid };
-    if (draft !== undefined) where.draft = draft;
+  
+  const medias = await this.prisma.media.findMany({
+    where: { id: { in: allMediaIds } },
+  });
 
-    const [services, total] = await this.prisma.$transaction([
-      this.prisma.service.findMany({ where, skip, take: limit }),
-      this.prisma.service.count({ where }),
-    ]);
+ 
+  const mediaMap = new Map(medias.map((m) => [m.id, m]));
 
-    const totalPages = Math.ceil(total / limit);
-    return cResponseData({
-      message: 'Services retrieved successfully.',
-      error: null,
-      success: true,
-      data: { total, services, currentPage: page, totalPages, limit },
-    });
-  }
+ 
+  const servicesWithMedia = services.map((s) => ({
+    ...s,
+    media: s.images.map((id) => mediaMap.get(id)).filter(Boolean),
+  }));
+
+  const totalPages = Math.ceil(total / limit);
+  return cResponseData({
+    message: 'Services retrieved successfully.',
+    error: null,
+    success: true,
+    data: { 
+      total, 
+      services: servicesWithMedia, 
+      currentPage: page, 
+      totalPages, 
+      limit 
+    },
+  });
+}
+
+
+  // async findAllUser(userid: string, page = 1, limit = 10, draft?: boolean) {
+  //   const skip = (page - 1) * limit;
+  //   const where: any = { userId: userid };
+  //   if (draft !== undefined) where.draft = draft;
+
+  //   const [services, total] = await this.prisma.$transaction([
+  //     this.prisma.service.findMany({ where, skip, take: limit }),
+  //     this.prisma.service.count({ where }),
+  //   ]);
+
+  //   const totalPages = Math.ceil(total / limit);
+  //   return cResponseData({
+  //     message: 'Services retrieved successfully.',
+  //     error: null,
+  //     success: true,
+  //     data: { total, services, currentPage: page, totalPages, limit },
+  //   });
+  // }
+
+  async findAllUser(userId: string, page = 1, limit = 10, draft?: boolean) {
+  const skip = (page - 1) * limit;
+  const where: any = { userId };
+  if (draft !== undefined) where.draft = draft;
+
+  const [services, total] = await this.prisma.$transaction([
+    this.prisma.service.findMany({ where, skip, take: limit }),
+    this.prisma.service.count({ where }),
+  ]);
+
+
+  const allMediaIds = services.flatMap((s) => s.images);
+
+
+  const medias = await this.prisma.media.findMany({
+    where: { id: { in: allMediaIds } },
+  });
+
+
+  const mediaMap = new Map(medias.map((m) => [m.id, m]));
+
+
+  const servicesWithMedia = services.map((s) => ({
+    ...s,
+    media: s.images.map((id) => mediaMap.get(id)).filter(Boolean),
+  }));
+
+  const totalPages = Math.ceil(total / limit);
+  return cResponseData({
+    message: 'Services retrieved successfully.',
+    error: null,
+    success: true,
+    data: { 
+      total, 
+      services: servicesWithMedia, 
+      currentPage: page, 
+      totalPages, 
+      limit 
+    },
+  });
+}
+
 
   async findOne(id: string) {
     const service = await this.prisma.service.findUnique({ where: { id } });
@@ -139,34 +232,77 @@ export class ServiceService {
 
   async remove(id: string) {
     const service = await this.prisma.service.findUnique({ where: { id } });
-    if (!service)
+
+    if (!service) {
       return cResponseData({
         message: 'Service not found',
         error: 'NotFound',
         success: false,
         data: null,
       });
+    }
 
-    await this.prisma.service.delete({ where: { id } });
+    const orderexite = await this.prisma.serviceOrder.findFirst({
+      where: { serviceId: id },
+    });
+
+    if (orderexite) {
+      throw new BadRequestException(
+        'Cannot delete service with existing orders',
+      );
+    }
+
+    await this.prisma.service.delete({
+      where: { id },
+    });
+
     return cResponseData({
-      message: 'Service deleted successfully',
+      message: 'Service and related service orders deleted successfully',
       error: null,
       success: true,
       data: null,
     });
   }
 
-  async createOrder(dto: CreateServiceOrderDto) {
-    return this.prisma.serviceOrder.create({
-      data: {
-        paymentId: dto.paymentId,
-        serviceId: dto.serviceId,
-        userId: dto.userId,
-      },
-      include: {
-        service: true,
-        user: true,
-      },
+  async createOrder(dto: CreateServiceOrderDto, userId: string) {
+    return this.prisma.$transaction(async (tx) => {
+      // Get the current service
+      const service = await tx.service.findUnique({
+        where: { id: dto.serviceId },
+        select: { orderNumber: true },
+      });
+
+      // Increment order number
+      const newOrderNumber = (service?.orderNumber ?? 0) + 1;
+
+      // Update service with new order number and lastOrderBy
+      await tx.service.update({
+        where: { id: dto.serviceId },
+        data: {
+          orderNumber: newOrderNumber,
+          lastOrderBy: userId,
+        },
+      });
+
+      // Create service order
+      const order = await tx.serviceOrder.create({
+        data: {
+          paymentId: dto.paymentId,
+          serviceId: dto.serviceId,
+          userId,
+        },
+        include: {
+          service: true,
+          user: true,
+        },
+      });
+
+      return cResponseData({
+        message: 'Service created successfully.',
+        error: null,
+        success: true,
+        data: order,
+      });
     });
   }
 
@@ -184,26 +320,128 @@ export class ServiceService {
       this.prisma.serviceOrder.count(),
     ]);
 
-    return {
+    const reuslt = {
       total,
       page: Math.floor(skip / take) + 1,
       limit: take,
       data: orders,
     };
+
+    return cResponseData({
+      message: 'get all order successfully.',
+      error: null,
+      success: true,
+      data: reuslt,
+    });
+  }
+
+  /** Get all service orders with optional pagination */
+  async findAllOrdeSingleuser(
+    userId: string,
+    options?: { skip?: number; take?: number },
+  ) {
+    const { skip = 0, take = 10 } = options || {};
+
+    const [orders, total] = await this.prisma.$transaction([
+      this.prisma.serviceOrder.findMany({
+        where: {
+          service: {
+            userId: userId,
+          },
+        },
+        include: {
+          service: true,
+          user: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take,
+      }),
+      this.prisma.serviceOrder.count({
+        where: {
+          service: {
+            userId: userId,
+          },
+        },
+      }),
+    ]);
+
+    const reuslt = {
+      total,
+      page: Math.floor(skip / take) + 1,
+      limit: take,
+      data: orders,
+    };
+
+    return cResponseData({
+      message: 'get all order successfully.',
+      error: null,
+      success: true,
+      data: reuslt,
+    });
   }
 
   /** Get a single service order by ID */
-  async findSingle(id: string) {
+  async findSingle(id: string, options?: { skip?: number; take?: number }) {
+    const { skip = 0, take = 10 } = options || {};
+
+    const [orders, total] = await this.prisma.$transaction([
+      this.prisma.serviceOrder.findMany({
+        where: { serviceId: id },
+        include: {
+          service: true,
+          user: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+      }),
+      this.prisma.serviceOrder.count({
+        where: { serviceId: id },
+      }),
+    ]);
+
+    if (!orders || orders.length === 0) {
+      throw new NotFoundException(
+        `ServiceOrder with serviceId ${id} not found`,
+      );
+    }
+
+    const result = {
+      total,
+      page: Math.floor(skip / take) + 1,
+      limit: take,
+      data: orders,
+    };
+    console.log('hit here for single order');
+    return cResponseData({
+      message: ' Get a single service order by ID successfully.',
+      error: null,
+      success: true,
+      data: result,
+    });
+  }
+
+  async updateOrderStatus(orderId: string, dto: UpdateServiceOrderStatusDto) {
     const order = await this.prisma.serviceOrder.findUnique({
-      where: { id },
-      include: {
-        service: true,
-        user: true,
-      },
+      where: { id: orderId },
     });
 
-    if (!order)
-      throw new NotFoundException(`ServiceOrder with id ${id} not found`);
-    return order;
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    const data = await this.prisma.serviceOrder.update({
+      where: { id: orderId },
+      data: { status: dto.status },
+    });
+    return cResponseData({
+      message: 'update orderstatus successfully.',
+      error: null,
+      success: true,
+      data,
+    });
   }
 }

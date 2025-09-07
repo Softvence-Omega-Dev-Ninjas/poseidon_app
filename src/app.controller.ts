@@ -1,8 +1,7 @@
 import { Controller, Get, Req } from '@nestjs/common';
-import { Roles } from 'src/auth/guard/roles.decorator';
-import { Role } from 'src/auth/guard/role.enum';
+
 import { Request } from 'express';
-// import { Public } from './auth/guard/public.decorator';
+import { Public } from './auth/guard/public.decorator';
 // import { Response } from 'express';
 // import { join } from 'path';
 
@@ -11,10 +10,9 @@ export class AppController {
   constructor() {}
 
   @Get()
-  @Roles(Role.Admin, Role.Supporter, Role.User)
-  // @Public()
+  @Public()
   getHello(@Req() res: Request): string {
-    return 'welcome to poseidon project';
+    return 'welcome to poseidon project server';
   }
 
   // @Get('sharif.txt')

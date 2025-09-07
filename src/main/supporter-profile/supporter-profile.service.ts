@@ -9,6 +9,28 @@ export class SupporterProfileService {
     // private readonly getShopDataService: GetShopDataService,
   ) {}
 
+  async findAllUsers() {
+    const allUserSupporter = await this.prisma.user.findMany({
+      where: {
+        role: 'supporter',
+      },
+      select: {
+        id: true,
+        profile: {
+          select: {
+            name: true,
+            image: true,
+            description: true,
+          },
+        },
+        _count: {
+          select: { supporter: true },
+        },
+      },
+    });
+    return allUserSupporter;
+  }
+
   async profilePage(userid: string) {
     return await this.prisma.$transaction(async (tx) => {
       const profileInfo = await tx.profile.findUnique({
@@ -31,6 +53,10 @@ export class SupporterProfileService {
           author: {
             role: 'supporter',
           },
+        },
+        include: {
+          cheers_live_package_type: true,
+          SuggestQuantity: true,
         },
       });
       // shop id

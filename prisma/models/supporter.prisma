@@ -15,7 +15,7 @@ model SupporterPay {
 }
 
 model oder_package_name {
-  id               String       @id @unique @default(uuid())
+  id               String       @id @default(uuid())
   supporter_pay_id String       @unique
   package_name     String       @db.VarChar(100)
   package_time     Float
@@ -23,16 +23,18 @@ model oder_package_name {
   complate         Boolean      @default(false)
   createAt         DateTime     @default(now())
   updateAt         DateTime     @updatedAt
-  supporter_pay    SupporterPay @relation(fields: [supporter_pay_id], references: [id])
+  SupporterPay     SupporterPay @relation(fields: [supporter_pay_id], references: [id])
 }
 
+// root cart details
 model SupportCartLayout {
-  id                       String                     @unique @default(uuid())
-  author_id                String                     @unique
-  choose_layout            LayoutType                 @default(standard)
-  default_price            Int                        @default(5)
+  id                       String                      @unique @default(uuid())
+  author_id                String                      @unique
+  choose_layout            LayoutType                  @default(standard)
+  default_price            Int                         @default(5)
+  SuggestQuantity          SupportCartLayoutQuantity[]
   cheers_live_package_type Cheers_live_package_type[]
-  author                   User                       @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  author                   User                        @relation(fields: [author_id], references: [id], onDelete: Cascade)
 }
 
 model Cheers_live_package_type {
@@ -47,4 +49,12 @@ model Cheers_live_package_type {
 enum LayoutType {
   standard
   suggest
+}
+
+model SupportCartLayoutQuantity {
+  id                  String            @id @unique @default(uuid())
+  SupportCartLayout   SupportCartLayout @relation(fields: [supportCartLayoutId], references: [id])
+  supportCartLayoutId String
+  choose_layout       LayoutType        @default(suggest)
+  quantity            Int
 }

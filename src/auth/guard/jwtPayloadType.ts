@@ -11,6 +11,7 @@ export interface PayloadType {
   profile?: profileDto;
   shop_id?: string;
   memberships_owner_id?: string;
+  stripeAccountId?: string;
   iat: number;
   exp: number;
 }
