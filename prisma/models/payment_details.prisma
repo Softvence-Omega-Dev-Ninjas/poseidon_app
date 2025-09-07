@@ -1,0 +1,14 @@
+enum ServiceType {
+    membership
+    support
+}
+
+model paymentDetails {
+    id          String      @id @unique @default(uuid())
+    buyerId     String
+    sellerId    String
+    productName String
+    amount      Float
+    serviceType ServiceType
+    serviceId   String
+}
