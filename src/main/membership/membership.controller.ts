@@ -21,18 +21,23 @@ import { CreateMembershipLevelDto } from './dto/create-membership-level.dto';
 import { MembershipSubscriptionPlanPipe } from './pipeline/membershipSubscriptionPlan.pipe';
 import { MembershipSubscriptionPlan } from './dto/MembershipSubscriptionPlan.dto';
 import { LevelImageUpdateDto } from './dto/update-membership-level.dto';
-import { Public } from 'src/auth/guard/public.decorator';
+import { MembershipServiceUseToUserOnly } from './onluUseUserMembershipInfo/useMembershipUser.service';
+// import { Public } from 'src/auth/guard/public.decorator';
 
 @Controller('membership')
 export class MembershipController {
-  constructor(private readonly membershipService: MembershipService) {}
+  constructor(
+    private readonly membershipService: MembershipService,
+    private readonly membershipServiceUser: MembershipServiceUseToUserOnly,
+  ) {}
 
-  @Public()
-  @Get('levels/:membershipId')
-  getMembership(@Param('membershipId') membershipId: string) {
-    return this.membershipService.getMembershipLevels(membershipId);
-  }
+  // @Public()
+  // @Post('buy-membership')
+  // create(@Req() req: Request, @Body() Data: any) {
+  //   return this.membershipService.enableMembership(req['sub'] as string);
+  // }
 
+  // supporter Apis
   @Roles(Role.Supporter)
   @Get('enable-membership')
   enableMembership(@Req() req: Request) {
@@ -81,7 +86,7 @@ export class MembershipController {
     // @Param('membershipId') membershipId: string,
     @Req() req: Request,
   ) {
-    return this.membershipService.getMembershipLevels(
+    return this.membershipServiceUser.getMembershipLevels(
       req['memberships_owner_id'] as string,
     );
   }
