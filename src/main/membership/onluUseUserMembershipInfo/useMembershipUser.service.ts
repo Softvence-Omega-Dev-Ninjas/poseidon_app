@@ -1,12 +1,45 @@
 import { Injectable } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
+import { BuyMembershipDto } from './dto/buyMembership.dto';
 
 @Injectable()
 export class MembershipServiceUseToUserOnly {
   constructor(private readonly prisma: PrismaService) {}
 
-  // get all membership levels
+  async buyMembership(userId: string, membershipLevelInfo: BuyMembershipDto) {
+    const membershipLevel = await this.prisma.membership_levels.findFirst({
+      where: { id: membershipLevelInfo.membershipLevelId },
+      select: {
+        id: true,
+        levelName: true,
+        membership: {
+          select: {
+            ownerId: true,
+          },
+        },
+        MembershipSubscriptionPlan: {
+          where: {
+            duration: membershipLevelInfo.durationType,
+          },
+          include: {
+            CalligSubscriptionPlan: true,
+            MessagesSubscriptionPlan: true,
+            GallerySubscriptionPlan: true,
+            PostsSubscriptionPlan: true,
+          },
+        },
+      },
+    });
+
+    return cResponseData({
+      message: 'Membership bought successfully',
+      data: { userId, membershipLevel },
+      success: true,
+    });
+  }
+
+  // get all membership levels use to user and suupoter
   async getMembershipLevels(mId: string) {
     return await this.prisma.$transaction(async (tx) => {
       const allLevels = await tx.membership_levels.findMany({

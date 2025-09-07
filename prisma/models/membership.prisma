@@ -23,6 +23,7 @@ model Membership_levels {
     membershipId     String
     membership       Membership_owner @relation(fields: [membershipId], references: [id], onDelete: Cascade)
     levelName        String
+    titleName        String
     levelDescription String?
     levelImage       String
 
@@ -60,7 +61,7 @@ model CalligSubscriptionPlan {
     MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id])
     // data
     duration                     Duration
-    title                        String                     
+    title                        String
     description                  String
     totalVideoCalls              Int                        @default(0)
     unlimitedVideoCalls          Boolean                    @default(false)
@@ -94,8 +95,8 @@ model PostsSubscriptionPlan {
     membershipSubscriptionPlanId String                     @unique
     MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id])
     // data
-    duration                   Duration
-    title                      String
-    description                String
-    AccessToPosts              Boolean                      @default(true) // if true, access to posts is granted
+    duration                     Duration
+    title                        String
+    description                  String
+    AccessToPosts                Boolean                    @default(true) // if true, access to posts is granted
 }

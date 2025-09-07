@@ -31,6 +31,16 @@ export class CreateMembershipLevelDto {
   @IsNotEmpty()
   levelName: string;
 
+  @ApiProperty({
+    type: String,
+    required: true,
+    description: 'Name of the membership level',
+    example: 'online chat',
+  })
+  @IsString()
+  @IsNotEmpty()
+  titleName: string;
+
   @ApiPropertyOptional({
     type: String,
     required: true,
