@@ -128,9 +128,6 @@ export class AuthUserService {
           },
         },
         memberships_owner: {
-          where: {
-            enableMembership: true,
-          },
           select: { id: true },
         },
       },
@@ -175,35 +172,35 @@ export class AuthUserService {
         },
       });
 
-      // create stripe connected account for supporter
-      const createAccountStripe = await this.stripe.createConnectedAccount(
-        newSupporter.email,
-        newSupporter.id,
-        newSupporter.profile?.name || 'No name',
-      );
-      if (!createAccountStripe || !createAccountStripe.id) {
-        throw new HttpException(
-          cResponseData({
-            message: 'Failed to create Stripe account',
-            data: null,
-            error: 'Stripe account creation failed',
-            success: false,
-          }),
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      // update user db stripeAccountId field
-      await this.prisma.user.update({
-        where: { id: newSupporter.id },
-        data: { stripeAccountId: createAccountStripe.id },
-      });
-      // create onboarding link for supporter
-      const linkOnboarding = await this.stripe.createOnboardingAccountLink(
-        createAccountStripe.id,
-      );
+      // // create stripe connected account for supporter
+      // const createAccountStripe = await this.stripe.createConnectedAccount(
+      //   newSupporter.email,
+      //   newSupporter.id,
+      //   newSupporter.profile?.name || 'No name',
+      // );
+      // if (!createAccountStripe || !createAccountStripe.id) {
+      //   throw new HttpException(
+      //     cResponseData({
+      //       message: 'Failed to create Stripe account',
+      //       data: null,
+      //       error: 'Stripe account creation failed',
+      //       success: false,
+      //     }),
+      //     HttpStatus.BAD_REQUEST,
+      //   );
+      // }
+      // // update user db stripeAccountId field
+      // await this.prisma.user.update({
+      //   where: { id: newSupporter.id },
+      //   data: { stripeAccountId: createAccountStripe.id },
+      // });
+      // // create onboarding link for supporter
+      // const linkOnboarding = await this.stripe.createOnboardingAccountLink(
+      //   createAccountStripe.id,
+      // );
       return {
         message: 'Supporter account created successfully',
-        redirect_url: linkOnboarding.url,
+        redirect_url: 'redirect_url',
         error: null,
         data: { name: newSupporter.profile?.name },
         success: true,
