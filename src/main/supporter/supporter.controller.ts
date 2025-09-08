@@ -30,11 +30,14 @@ export class SupporterController {
 
   @Roles(Role.Supporter)
   @Patch('update-cart')
-  createSupporterCartLayout(
+  upadteSupporterCardLayout(
     @Body() data: UpdateSupporterLayputDto,
     @Req() req: Request,
   ) {
-    // return this.supporterService.createSupporterCartLayout();
+    return this.supporterService.upadteSupporterCardLayout(
+      req['sub'] as string,
+      data,
+    );
     console.log('=========', req);
     return { user: req['sub'] as string, data };
   }

@@ -6,6 +6,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { SupportCartLayout } from 'generated/prisma';
+// import { SupportCartLayoutQuantity } from './supportCartLayoutQuantity.dto';
 // import { CreateSupporterDto } from './create-supporter.dto';
 
 // export class UpdateSupporterDto extends PartialType(CreateSupporterDto) {}
@@ -52,4 +53,23 @@ export class UpdateSupporterLayputDto extends PartialType(
   })
   @IsArray()
   cheers_live_package_type?: CheersLivePackageType[];
+
+  // @ApiProperty({
+  //   required: false,
+  //   type: () => SupportCartLayoutQuantity,
+  //   example: [
+  //     {
+  //       package_name: 'package name cheers drink',
+  //       package_time: 12,
+  //       package_price: 20,
+  //     },
+  //     {
+  //       package_name: 'package name cheers drink2',
+  //       package_time: 12,
+  //       package_price: 20,
+  //     },
+  //   ],
+  // })
+  // @IsArray()
+  // SuggestQuantity?: SupportCartLayoutQuantity[];
 }

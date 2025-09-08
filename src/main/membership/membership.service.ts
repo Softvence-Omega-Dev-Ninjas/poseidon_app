@@ -13,45 +13,51 @@ export class MembershipService {
   ) {}
 
   // Enable membership for a specific supporter user
-  async enableMembership(userId: string) {
-    const enableMembership = await this.prisma.$transaction(async (tx) => {
-      const existingMembership = await tx.membership_owner.findFirst({
-        where: {
-          ownerId: userId,
-        },
-      });
-      if (existingMembership && existingMembership.id) {
-        return {
-          message: 'Membership already exists',
-          error: 'Membership conflict',
-          data: null,
-          success: false,
-        };
-      }
-      const newMembership = await tx.membership_owner.create({
-        data: {
-          ownerId: userId,
-          MembershipAccessToVideoCall: {
-            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
-          },
-          MembershipAccessToMessages: {
-            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
-          },
-          MembershipAccessToGallery: {
-            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
-          },
-          MembershipAccessToPosts: {
-            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
-          },
-        },
-      });
-      return {
-        message: 'Membership enabled successfully',
-        data: newMembership.id,
-        success: true,
-      };
-    });
-    return cResponseData(enableMembership);
+  enableMembership(userId: string, enable: boolean) {
+    console.log(userId, enable);
+    const bss = false;
+    if (!bss && enable) {
+      return 'yess';
+    }
+    return 'nooo';
+    // const enableMembership = await this.prisma.$transaction(async (tx) => {
+    //   const existingMembership = await tx.membership_owner.findFirst({
+    //     where: {
+    //       ownerId: userId,
+    //     },
+    //   });
+    //   if (existingMembership && existingMembership.id) {
+    //     return {
+    //       message: 'Membership already exists',
+    //       error: 'Membership conflict',
+    //       data: null,
+    //       success: false,
+    //     };
+    //   }
+    //   const newMembership = await tx.membership_owner.create({
+    //     data: {
+    //       ownerId: userId,
+    //       MembershipAccessToVideoCall: {
+    //         create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+    //       },
+    //       MembershipAccessToMessages: {
+    //         create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+    //       },
+    //       MembershipAccessToGallery: {
+    //         create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+    //       },
+    //       MembershipAccessToPosts: {
+    //         create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+    //       },
+    //     },
+    //   });
+    //   return {
+    //     message: 'Membership enabled successfully',
+    //     data: newMembership.id,
+    //     success: true,
+    //   };
+    // });
+    // return cResponseData(enableMembership);
   }
 
   // create a membership levels

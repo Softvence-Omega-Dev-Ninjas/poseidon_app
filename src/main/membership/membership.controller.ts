@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UploadedFile,
   UseInterceptors,
@@ -40,8 +41,11 @@ export class MembershipController {
   // supporter Apis
   @Roles(Role.Supporter)
   @Get('enable-membership')
-  enableMembership(@Req() req: Request) {
-    return this.membershipService.enableMembership(req['sub'] as string);
+  enableMembership(@Req() req: Request, @Query('enable') enable: boolean) {
+    return this.membershipService.enableMembership(
+      req['sub'] as string,
+      enable,
+    );
   }
 
   // createMembershipLevel
