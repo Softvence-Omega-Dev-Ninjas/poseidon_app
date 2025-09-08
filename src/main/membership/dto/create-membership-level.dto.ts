@@ -3,24 +3,12 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
   ValidateNested,
 } from 'class-validator';
 import { MembershipSubscriptionPlan } from './MembershipSubscriptionPlan.dto';
 import { Type } from 'class-transformer';
 
 export class CreateMembershipLevelDto {
-  @ApiProperty({
-    type: String,
-    required: true,
-    description: 'ID of the membership owner',
-    example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-  })
-  @IsString()
-  @IsNotEmpty()
-  @IsUUID()
-  membershipId: string;
-
   @ApiProperty({
     type: String,
     required: true,
