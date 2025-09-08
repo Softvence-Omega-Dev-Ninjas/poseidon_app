@@ -13,51 +13,55 @@ export class MembershipService {
   ) {}
 
   // Enable membership for a specific supporter user
-  enableMembership(userId: string, enable: boolean) {
-    console.log(userId, enable);
-    const bss = false;
-    if (!bss && enable) {
-      return 'yess';
-    }
-    return 'nooo';
-    // const enableMembership = await this.prisma.$transaction(async (tx) => {
-    //   const existingMembership = await tx.membership_owner.findFirst({
-    //     where: {
-    //       ownerId: userId,
-    //     },
-    //   });
-    //   if (existingMembership && existingMembership.id) {
-    //     return {
-    //       message: 'Membership already exists',
-    //       error: 'Membership conflict',
-    //       data: null,
-    //       success: false,
-    //     };
-    //   }
-    //   const newMembership = await tx.membership_owner.create({
-    //     data: {
-    //       ownerId: userId,
-    //       MembershipAccessToVideoCall: {
-    //         create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
-    //       },
-    //       MembershipAccessToMessages: {
-    //         create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
-    //       },
-    //       MembershipAccessToGallery: {
-    //         create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
-    //       },
-    //       MembershipAccessToPosts: {
-    //         create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
-    //       },
-    //     },
-    //   });
+  async enableMembership(userId: string) {
+    const existingMembership = await this.prisma.membership_owner.findFirst({
+      where: {
+        ownerId: userId,
+      },
+    });
+    console.log(existingMembership);
+    return {
+      message: 'Your Membership Enable already',
+      error: 'Membership conflict',
+      data: existingMembership,
+      success: false,
+    };
+    // if (existingMembership?.enableMembership) {
     //   return {
-    //     message: 'Membership enabled successfully',
-    //     data: newMembership.id,
-    //     success: true,
+    //     message: 'Your Membership Enable already',
+    //     error: 'Membership conflict',
+    //     data: null,
+    //     success: false,
     //   };
+    // }
+
+    // const newMembership = await this.prisma.membership_owner.update({
+    //   where: {
+    //     id: existingMembership?.id,
+    //   },
+    //   data: {
+    //     enableMembership: true,
+    //     MembershipAccessToVideoCall: {
+    //       create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+    //     },
+    //     MembershipAccessToMessages: {
+    //       create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+    //     },
+    //     MembershipAccessToGallery: {
+    //       create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+    //     },
+    //     MembershipAccessToPosts: {
+    //       create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+    //     },
+    //   },
+    //   select: { id: true },
     // });
-    // return cResponseData(enableMembership);
+
+    // return cResponseData({
+    //   message: 'Membership enabled successfully',
+    //   data: newMembership.id,
+    //   success: true,
+    // });
   }
 
   // create a membership levels

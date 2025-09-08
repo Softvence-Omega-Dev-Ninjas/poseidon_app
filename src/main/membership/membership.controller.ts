@@ -5,7 +5,6 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   Req,
   UploadedFile,
   UseInterceptors,
@@ -23,7 +22,7 @@ import { MembershipSubscriptionPlanPipe } from './pipeline/membershipSubscriptio
 import { MembershipSubscriptionPlan } from './dto/MembershipSubscriptionPlan.dto';
 import { LevelImageUpdateDto } from './dto/update-membership-level.dto';
 import { MembershipServiceUseToUserOnly } from './onluUseUserMembershipInfo/useMembershipUser.service';
-// import { Public } from 'src/auth/guard/public.decorator';
+import { Public } from 'src/auth/guard/public.decorator';
 
 @Controller('membership')
 export class MembershipController {
@@ -39,13 +38,11 @@ export class MembershipController {
   // }
 
   // supporter Apis
-  @Roles(Role.Supporter)
+  // @Roles(Role.Supporter)
+  @Public()
   @Get('enable-membership')
-  enableMembership(@Req() req: Request, @Query('enable') enable: boolean) {
-    return this.membershipService.enableMembership(
-      req['sub'] as string,
-      enable,
-    );
+  enableMembership(@Req() req: Request) {
+    return this.membershipService.enableMembership(req['sub'] as string);
   }
 
   // createMembershipLevel
