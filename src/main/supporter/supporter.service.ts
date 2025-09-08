@@ -31,35 +31,21 @@ export class SupporterService {
     userid: string,
     data: UpdateSupporterLayputDto,
   ) {
-    const card = await this.prisma.supportCartLayout.findFirst({
-      where: {
-        author_id: userid,
-      },
-      select: {
-        id: true,
+    const updateCartLayout = await this.prisma.supportCartLayout.update({
+      where: { author_id: userid },
+      data: {
+        default_price: data.default_price,
+        choose_layout:
+          data.choose_layout == 'suggest'
+            ? 'suggest'
+            : data.choose_layout == 'standard'
+              ? 'standard'
+              : 'standard',
       },
     });
-    // const updateCartLayout = await this.prisma.supportCartLayout.update({
-    //   where: {
-    //     id: card?.id,
-    //   },
-    //   data: {
-    //     ...data,
-    //     cheers_live_package_type: {
-    //       update: {
-    //         where: {
-    //           support_cart_layout_id: card?.id,
-    //         },
-    //         data: {
-    //           ...data.cheers_live_package_type,
-    //         },
-    //       },
-    //     },
-    //   },
-    // });
     return cResponseData({
       message: 'Update Success',
-      data: card,
+      data: updateCartLayout,
     });
   }
 

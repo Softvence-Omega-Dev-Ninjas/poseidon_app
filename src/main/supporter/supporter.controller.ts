@@ -38,8 +38,6 @@ export class SupporterController {
       req['sub'] as string,
       data,
     );
-    console.log('=========', req);
-    return { user: req['sub'] as string, data };
   }
 
   @Roles(Role.Supporter)

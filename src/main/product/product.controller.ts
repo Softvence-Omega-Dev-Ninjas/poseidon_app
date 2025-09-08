@@ -31,6 +31,7 @@ import {
 
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
+import { Request } from 'express';
 
 @ApiTags('Product')
 @Controller('product')
@@ -43,6 +44,7 @@ export class ProductController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('images'))
   create(
+    @Req() req: Request,
     @Body() createProductDto: CreateProductDto,
     @UploadedFiles() files?: Array<Express.Multer.File>,
   ) {
@@ -56,7 +58,10 @@ export class ProductController {
       );
     }
     const { categoryIds, ...restOfProductData } = createProductDto;
-    return this.productService.create(createProductDto, files);
+    return this.productService.create(
+      { ...createProductDto, shopId: req['shop_id'] as string },
+      files,
+    );
   }
 
   @Roles(Role.Supporter, Role.User)
