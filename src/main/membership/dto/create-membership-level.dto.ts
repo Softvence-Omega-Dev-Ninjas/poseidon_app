@@ -51,7 +51,7 @@ export class CreateMembershipLevelDto {
   })
   @IsOptional()
   @IsString()
-  wellcome_note?: string | null;
+  Wellcome_note?: string | null;
 
   @ApiProperty({
     type: () => [MembershipSubscriptionPlan],

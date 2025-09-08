@@ -89,7 +89,6 @@ export class MembershipService {
       data: {
         membershipId,
         ...data,
-        Wellcome_note: createMembershipLevelDto.wellcome_note || null,
         levelImage: mediaId,
         MembershipSubscriptionPlan: {
           create: MembershipSubscriptionPlan.map((plan) => ({
