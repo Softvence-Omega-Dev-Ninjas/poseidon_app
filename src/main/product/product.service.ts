@@ -181,16 +181,29 @@ async findOne(id: string) {
           category: true,
         },
       },
-      shop: {
-        include: {
-          user: true, 
-        },
-      },
     },
   });
 
   if (!product) {
     throw new NotFoundException(`Product with ID ${id} not found`);
+  }
+
+  // 👇 Fix: declare type properly
+  let medias: Array<{
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    imageUrl: string;
+    publicId: string;
+    imageId: string | null;
+  }> = [];
+
+  if (Array.isArray(product.images) && product.images.length > 0) {
+    medias = await this.prisma.media.findMany({
+      where: {
+        id: { in: product.images },
+      },
+    });
   }
 
   return cResponseData({
@@ -199,10 +212,11 @@ async findOne(id: string) {
     success: true,
     data: {
       ...product,
-      medias: product.images,
+      medias,
     },
   });
 }
+
 
 
 
