@@ -148,29 +148,63 @@ export class ProductService {
     });
   }
 
-  async findOne(id: string) {
-    const product = await this.prisma.product.findUnique({
-      where: { id },
-      include: {
-        productCategories: {
-          include: {
-            category: true,
-          },
+  // async findOne(id: string) {
+  //   const product = await this.prisma.product.findUnique({
+  //     where: { id },
+  //     include: {
+  //       productCategories: {
+  //         include: {
+  //           category: true,
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   if (!product) {
+  //     throw new NotFoundException(`Product with ID ${id} not found`);
+  //   }
+
+  //   return cResponseData({
+  //     message: 'Products retrieved successfully.',
+  //     error: null,
+  //     success: true,
+  //     data: product,
+  //   });
+  // }
+
+async findOne(id: string) {
+  const product = await this.prisma.product.findUnique({
+    where: { id },
+    include: {
+      productCategories: {
+        include: {
+          category: true,
         },
       },
-    });
+      shop: {
+        include: {
+          user: true, 
+        },
+      },
+    },
+  });
 
-    if (!product) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
-    }
-
-    return cResponseData({
-      message: 'Products retrieved successfully.',
-      error: null,
-      success: true,
-      data: product,
-    });
+  if (!product) {
+    throw new NotFoundException(`Product with ID ${id} not found`);
   }
+
+  return cResponseData({
+    message: 'Product retrieved successfully.',
+    error: null,
+    success: true,
+    data: {
+      ...product,
+      medias: product.images,
+    },
+  });
+}
+
+
 
   async update(
     id: string,
