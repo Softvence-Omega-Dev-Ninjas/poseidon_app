@@ -8,6 +8,16 @@ export class SupporterProfileService {
     private readonly prisma: PrismaService,
     // private readonly getShopDataService: GetShopDataService,
   ) {}
+  private async getMedia(mediaIds: string[]) {
+    const media = await this.prisma.media.findMany({
+      where: {
+        id: {
+          in: mediaIds,
+        },
+      },
+    });
+    return media;
+  }
 
   async findAllUsers() {
     const allUserSupporter = await this.prisma.user.findMany({
@@ -88,13 +98,7 @@ export class SupporterProfileService {
       });
 
       const postImageIds = posts.flatMap((p) => p.images);
-      const mediaImages = await tx.media.findMany({
-        where: {
-          id: {
-            in: postImageIds,
-          },
-        },
-      });
+      const mediaImages = await this.getMedia(postImageIds);
       const postImageMap = new Map(mediaImages.map((m) => [m.id, m]));
 
       // membershipInfo
@@ -134,6 +138,14 @@ export class SupporterProfileService {
           },
         },
       });
+      const mImagesIds =
+        membershipInfo?.Membership_levels.flatMap((m) => m.levelImage) || [];
+      const mImages = await this.getMedia(mImagesIds);
+      const mImageMap = new Map(mImages.map((m) => [m.id, m]));
+      const mlevels = membershipInfo?.Membership_levels.map((m) => ({
+        ...m,
+        levelImage: mImageMap.get(m.levelImage),
+      }));
       // gallery
       const gallery = await tx.image.findMany({
         where: {
@@ -155,7 +167,7 @@ export class SupporterProfileService {
           ...p,
           images: p.images.map((imageId) => postImageMap.get(imageId)),
         })),
-        membershipInfo,
+        membershipInfo: mlevels,
         image: gallery,
       };
     });
