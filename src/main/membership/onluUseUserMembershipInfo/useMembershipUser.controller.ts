@@ -6,7 +6,7 @@ import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { BuyMembershipDto } from './dto/buyMembership.dto';
 
-@Controller('membership_use_user')
+@Controller('membership-use')
 export class MembershipUseToUserOnly {
   constructor(
     private readonly membershipServiceUser: MembershipServiceUseToUserOnly,
