@@ -182,17 +182,46 @@ export class ServiceService {
 }
 
 
-  async findOne(id: string) {
-    const service = await this.prisma.service.findUnique({ where: { id } });
-    if (!service) throw new NotFoundException(`Service ${id} not found`);
+  // async findOne(id: string) {
+  //   const service = await this.prisma.service.findUnique({ where: { id } });
+  //   if (!service) throw new NotFoundException(`Service ${id} not found`);
 
-    return cResponseData({
-      message: 'Service retrieved successfully.',
-      error: null,
-      success: true,
-      data: service,
+  //   return cResponseData({
+  //     message: 'Service retrieved successfully.',
+  //     error: null,
+  //     success: true,
+  //     data: service,
+  //   });
+  // }
+
+  async findOne(id: string) {
+  const service = await this.prisma.service.findUnique({
+    where: { id },
+  });
+
+  if (!service) {
+    throw new NotFoundException(`Service ${id} not found`);
+  }
+
+  
+  let medias: Awaited<ReturnType<typeof this.prisma.media.findMany>> = [];
+  if (Array.isArray(service.images) && service.images.length > 0) {
+    medias = await this.prisma.media.findMany({
+      where: { id: { in: service.images } },
     });
   }
+
+  return cResponseData({
+    message: 'Service retrieved successfully.',
+    error: null,
+    success: true,
+    data: {
+      ...service,
+      medias,
+    },
+  });
+}
+
 
   async update(
     id: string,
