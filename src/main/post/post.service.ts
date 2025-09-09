@@ -223,43 +223,98 @@ export class PostService {
 }
 
 
-  async findOne(id: string, userId?: string): Promise<any> {
-    try {
-      const post = await this.prisma.post.findUnique({
-        where: { id },
-        include: { likes: { where: { userId } } },
-      });
-      if (!post) {
-        return {
-          message: `Post with ID ${id} not found`,
-          redirect_url: null,
-          error: 'NotFound',
-          data: null,
-          success: false,
-        };
-      }
-      // Increment view count
-      await this.prisma.post.update({
-        where: { id },
-        data: { view: { increment: 1 } },
-      });
+  // async findOne(id: string, userId?: string): Promise<any> {
+  //   try {
+  //     const post = await this.prisma.post.findUnique({
+  //       where: { id },
+  //       include: { likes: { where: { userId } } },
+  //     });
+  //     if (!post) {
+  //       return {
+  //         message: `Post with ID ${id} not found`,
+  //         redirect_url: null,
+  //         error: 'NotFound',
+  //         data: null,
+  //         success: false,
+  //       };
+  //     }
+  //     // Increment view count
+  //     await this.prisma.post.update({
+  //       where: { id },
+  //       data: { view: { increment: 1 } },
+  //     });
 
-      const { likes, ...rest } = post;
-      return cResponseData({
-        message: 'Post retrieved successfully.',
-        error: null,
-        data: { ...rest, isLiked: likes.length > 0 },
-        success: true,
-      });
-    } catch (error) {
-      return cResponseData({
-        message: 'Failed to retrieve post.',
-        error: error.message,
+  //     const { likes, ...rest } = post;
+  //     return cResponseData({
+  //       message: 'Post retrieved successfully.',
+  //       error: null,
+  //       data: { ...rest, isLiked: likes.length > 0 },
+  //       success: true,
+  //     });
+  //   } catch (error) {
+  //     return cResponseData({
+  //       message: 'Failed to retrieve post.',
+  //       error: error.message,
+  //       data: null,
+  //       success: false,
+  //     });
+  //   }
+  // }
+
+  async findOne(id: string, userId?: string): Promise<any> {
+  try {
+    const post = await this.prisma.post.findUnique({
+      where: { id },
+      include: {
+        likes: { where: { userId } },
+        user: true, 
+      },
+    });
+
+    if (!post) {
+      return {
+        message: `Post with ID ${id} not found`,
+        redirect_url: null,
+        error: 'NotFound',
         data: null,
         success: false,
-      });
+      };
     }
+
+    
+    await this.prisma.post.update({
+      where: { id },
+      data: { view: { increment: 1 } },
+    });
+
+    
+    const medias = await this.prisma.media.findMany({
+      where: { id: { in: post.images } },
+    });
+
+    const { likes, ...rest } = post;
+    return cResponseData({
+      message: 'Post retrieved successfully.',
+      error: null,
+      data: {
+        ...rest,
+        isLiked: likes.length > 0,
+        media: post.images.map((id) =>
+          medias.find((m) => m.id === id)
+        ).filter(Boolean),
+      },
+      success: true,
+    });
+  } catch (error) {
+    return cResponseData({
+      message: 'Failed to retrieve post.',
+      error: error.message,
+      data: null,
+      success: false,
+    });
   }
+}
+
 
   async update(
     id: string,
