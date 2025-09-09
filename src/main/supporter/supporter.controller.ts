@@ -41,12 +41,12 @@ export class SupporterController {
   }
 
   @Roles(Role.Supporter)
-  @Post('CreateCheersLivePackageType/:id')
+  @Post('CreateCheersLivePackageType/:layoutid')
   createCheersLivePackageType(
-    @Param('id') id: string,
+    @Param('layoutid') layoutid: string,
     @Body() data: CheersLivePackageType,
   ) {
-    return this.supporterService.createCheersLivePackageType(id, data);
+    return this.supporterService.createCheersLivePackageType(layoutid, data);
   }
 
   @Roles(Role.Supporter)

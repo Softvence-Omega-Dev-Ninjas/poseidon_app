@@ -7,7 +7,9 @@ model PermissionVideoCallAccess {
     totalVideoCalls     Int
     unlimitedVideoCalls Boolean
     createAt            DateTime @default(now())
-    endDate             DateTime
+
+    paymentId      String         @unique
+    paymentDetails paymentDetails @relation(fields: [paymentId], references: [id])
 }
 
 model PermissionMessagesAccess {
@@ -19,7 +21,9 @@ model PermissionMessagesAccess {
     totalMessages     Int
     unlimitedMessages Boolean
     createAt          DateTime @default(now())
-    endDate           DateTime
+
+    paymentId      String         @unique
+    paymentDetails paymentDetails @relation(fields: [paymentId], references: [id])
 }
 
 model PermissionGalleryAccess {
@@ -29,7 +33,9 @@ model PermissionGalleryAccess {
     supporter_id String
     supporter    User     @relation("PermissionGalleryAccessSupporter", fields: [supporter_id], references: [id])
     createAt     DateTime @default(now())
-    endDate      DateTime
+
+    paymentId      String         @unique
+    paymentDetails paymentDetails @relation(fields: [paymentId], references: [id])
 }
 
 model PermissionPostsAccess {
@@ -39,5 +45,7 @@ model PermissionPostsAccess {
     supporter_id String
     supporter    User     @relation("PermissionPostsAccessSupporter", fields: [supporter_id], references: [id])
     createAt     DateTime @default(now())
-    endDate      DateTime
+
+    paymentId      String         @unique
+    paymentDetails paymentDetails @relation(fields: [paymentId], references: [id])
 }

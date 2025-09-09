@@ -15,7 +15,12 @@ export class MembershipServiceUseToUserOnly {
         titleName: true,
         membership: {
           select: {
-            ownerId: true,
+            owner: {
+              select: {
+                id: true,
+                stripeAccountId: true,
+              },
+            },
           },
         },
         MembershipSubscriptionPlan: {
@@ -34,7 +39,14 @@ export class MembershipServiceUseToUserOnly {
 
     return cResponseData({
       message: 'Membership bought successfully',
-      data: { userId, membershipLevel },
+      data: {
+        userId,
+        membershipLevel: {
+          ...membershipLevel,
+          MembershipSubscriptionPlan:
+            membershipLevel?.MembershipSubscriptionPlan[0],
+        },
+      },
       success: true,
     });
   }
