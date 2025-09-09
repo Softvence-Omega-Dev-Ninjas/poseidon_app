@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -43,6 +44,15 @@ export class CreateMembershipLevelDto {
   @IsString()
   @IsNotEmpty()
   levelImage: Express.Multer.File;
+
+  @ApiProperty({
+    type: Boolean,
+    description: 'levels publible',
+    example: 'false or true',
+  })
+  @IsBoolean()
+  @IsNotEmpty()
+  isPublic: boolean;
 
   @ApiProperty({
     type: String,

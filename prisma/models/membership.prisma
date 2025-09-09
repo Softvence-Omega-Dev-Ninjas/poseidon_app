@@ -27,6 +27,7 @@ model Membership_levels {
     titleName        String
     levelDescription String?
     levelImage       String
+    isPublic         Boolean          @default(false)
 
     MembershipSubscriptionPlan MembershipSubscriptionPlan[]
     Wellcome_note              String?

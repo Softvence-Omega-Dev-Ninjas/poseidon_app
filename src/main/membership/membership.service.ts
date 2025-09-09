@@ -95,22 +95,34 @@ export class MembershipService {
             ...plan,
             CalligSubscriptionPlan: plan.CalligSubscriptionPlan
               ? {
-                  create: plan.CalligSubscriptionPlan,
+                  create: {
+                    ...plan.CalligSubscriptionPlan,
+                    duration: plan.duration,
+                  },
                 }
               : undefined,
             MessagesSubscriptionPlan: plan.MessagesSubscriptionPlan
               ? {
-                  create: plan.MessagesSubscriptionPlan,
+                  create: {
+                    ...plan.MessagesSubscriptionPlan,
+                    duration: plan.duration,
+                  },
                 }
               : undefined,
             GallerySubscriptionPlan: plan.GallerySubscriptionPlan
               ? {
-                  create: plan.GallerySubscriptionPlan,
+                  create: {
+                    ...plan.GallerySubscriptionPlan,
+                    duration: plan.duration,
+                  },
                 }
               : undefined,
             PostsSubscriptionPlan: plan.PostsSubscriptionPlan
               ? {
-                  create: plan.PostsSubscriptionPlan,
+                  create: {
+                    ...plan.PostsSubscriptionPlan,
+                    duration: plan.duration,
+                  },
                 }
               : undefined,
           })),
