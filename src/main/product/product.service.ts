@@ -93,60 +93,60 @@ export class ProductService {
     });
   }
 
-  async findAll(
-    page: number,
-    limit: number,
-    categoryId?: string,
-    draft?: boolean,
-  ) {
-    const skip = (page - 1) * limit;
-    const where: any = {};
+  // async findAll(
+  //   page: number,
+  //   limit: number,
+  //   categoryId?: string,
+  //   draft?: boolean,
+  // ) {
+  //   const skip = (page - 1) * limit;
+  //   const where: any = {};
 
-    if (categoryId) {
-      where.productCategories = {
-        some: {
-          categoryId: categoryId,
-        },
-      };
-    }
+  //   if (categoryId) {
+  //     where.productCategories = {
+  //       some: {
+  //         categoryId: categoryId,
+  //       },
+  //     };
+  //   }
 
-    if (draft !== undefined) {
-      where.draft = String(draft).toLowerCase() === 'true';
-    }
+  //   if (draft !== undefined) {
+  //     where.draft = String(draft).toLowerCase() === 'true';
+  //   }
 
-    const [products, total] = await this.prisma.$transaction([
-      this.prisma.product.findMany({
-        where,
-        skip,
-        take: limit,
-        include: {
-          productCategories: {
-            include: {
-              category: true,
-            },
-          },
-        },
-      }),
-      this.prisma.product.count({ where }),
-    ]);
+  //   const [products, total] = await this.prisma.$transaction([
+  //     this.prisma.product.findMany({
+  //       where,
+  //       skip,
+  //       take: limit,
+  //       include: {
+  //         productCategories: {
+  //           include: {
+  //             category: true,
+  //           },
+  //         },
+  //       },
+  //     }),
+  //     this.prisma.product.count({ where }),
+  //   ]);
 
-    const totalPages = Math.ceil(total / limit);
+  //   const totalPages = Math.ceil(total / limit);
 
-    const data = {
-      total,
-      products,
-      currentPage: page,
-      limit,
-      totalPages,
-    };
+  //   const data = {
+  //     total,
+  //     products,
+  //     currentPage: page,
+  //     limit,
+  //     totalPages,
+  //   };
 
-    return cResponseData({
-      message: 'Products retrieved successfully.',
-      error: null,
-      success: true,
-      data: data,
-    });
-  }
+  //   return cResponseData({
+  //     message: 'Products retrieved successfully.',
+  //     error: null,
+  //     success: true,
+  //     data: data,
+  //   });
+  // }
 
   // async findOne(id: string) {
   //   const product = await this.prisma.product.findUnique({
@@ -171,6 +171,80 @@ export class ProductService {
   //     data: product,
   //   });
   // }
+
+
+  async findAll(
+  page: number,
+  limit: number,
+  categoryId?: string,
+  draft?: boolean,
+) {
+  const skip = (page - 1) * limit;
+  const where: any = {};
+
+  if (categoryId) {
+    where.productCategories = {
+      some: {
+        categoryId: categoryId,
+      },
+    };
+  }
+
+  if (draft !== undefined) {
+    where.draft = String(draft).toLowerCase() === 'true';
+  }
+
+  const [products, total] = await this.prisma.$transaction([
+    this.prisma.product.findMany({
+      where,
+      skip,
+      take: limit,
+      include: {
+        productCategories: {
+          include: {
+            category: true,
+          },
+        },
+      },
+    }),
+    this.prisma.product.count({ where }),
+  ]);
+
+  // 🔥 Collect all media IDs from all products
+  const allMediaIds = products.flatMap((p) => p.images);
+
+  let medias: Awaited<ReturnType<typeof this.prisma.media.findMany>> = [];
+  if (allMediaIds.length > 0) {
+    medias = await this.prisma.media.findMany({
+      where: { id: { in: allMediaIds } },
+    });
+  }
+
+  // Map media IDs -> media objects
+  const mediaMap = new Map(medias.map((m) => [m.id, m]));
+
+  // Attach media objects to each product
+  const productsWithMedia = products.map((p) => ({
+    ...p,
+    medias: p.images.map((id) => mediaMap.get(id)).filter(Boolean),
+  }));
+
+  const totalPages = Math.ceil(total / limit);
+
+  return cResponseData({
+    message: 'Products retrieved successfully.',
+    error: null,
+    success: true,
+    data: {
+      total,
+      products: productsWithMedia,
+      currentPage: page,
+      limit,
+      totalPages,
+    },
+  });
+}
+
 
 async findOne(id: string) {
   const product = await this.prisma.product.findUnique({
