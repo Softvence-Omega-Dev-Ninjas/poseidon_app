@@ -30,4 +30,5 @@ export class authenticationUserDto {
   profile?: profileDto | null;
   shop?: { id: string } | null;
   memberships_owner?: { id: string } | null;
+  stripeAccountId?: string | null;
 }
