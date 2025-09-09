@@ -12,18 +12,23 @@ export class MembershipUseToUserOnly {
     private readonly membershipServiceUser: MembershipServiceUseToUserOnly,
   ) {}
 
-  //   @Public()
+  @Public()
+  @Get('get_all_levels/:membershipId')
+  getMembership(@Param('membershipId') membershipId: string) {
+    return this.membershipServiceUser.getMembershipLevels(membershipId);
+  }
+
+  @Public()
+  @Get('get_levels/:id')
+  getLevels(@Param('id') id: string) {
+    return this.membershipServiceUser.getLevels(id);
+  }
+
   @Roles(Role.User)
   @Post('buy')
   buyMembership(@Req() req: Request, @Body() data: BuyMembershipDto) {
     console.log(req['sub']);
     console.log(data);
     return this.membershipServiceUser.buyMembership(req['sub'] as string, data);
-  }
-
-  @Public()
-  @Get('levels/:membershipId')
-  getMembership(@Param('membershipId') membershipId: string) {
-    return this.membershipServiceUser.getMembershipLevels(membershipId);
   }
 }

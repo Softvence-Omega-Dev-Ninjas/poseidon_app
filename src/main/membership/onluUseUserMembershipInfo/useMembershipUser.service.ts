@@ -90,4 +90,31 @@ export class MembershipServiceUseToUserOnly {
       });
     });
   }
+
+  //get single membership level use to user and suupoter
+  async getLevels(levelId: string) {
+    return await this.prisma.membership_levels.findUnique({
+      where: {
+        id: levelId,
+      },
+      select: {
+        id: true,
+        membershipId: true,
+        levelName: true,
+        levelImage: true,
+        levelDescription: true,
+        MembershipSubscriptionPlan: {
+          select: {
+            id: true,
+            duration: true,
+            price: true,
+            CalligSubscriptionPlan: true,
+            MessagesSubscriptionPlan: true,
+            GallerySubscriptionPlan: true,
+            PostsSubscriptionPlan: true,
+          },
+        },
+      },
+    });
+  }
 }
