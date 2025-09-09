@@ -86,6 +86,17 @@ export class SupporterProfileService {
           createdAt: true,
         },
       });
+
+      const postImageIds = posts.flatMap((p) => p.images);
+      const mediaImages = await tx.media.findMany({
+        where: {
+          id: {
+            in: postImageIds,
+          },
+        },
+      });
+      const postImageMap = new Map(mediaImages.map((m) => [m.id, m]));
+
       // membershipInfo
       const membershipInfo = await tx.membership_owner.findFirst({
         where: {
@@ -140,7 +151,10 @@ export class SupporterProfileService {
         profileInfo,
         supporte_card,
         shopid: shopid ? shopid.id : null,
-        posts,
+        posts: posts.map((p) => ({
+          ...p,
+          images: p.images.map((imageId) => postImageMap.get(imageId)),
+        })),
         membershipInfo,
         image: gallery,
       };
