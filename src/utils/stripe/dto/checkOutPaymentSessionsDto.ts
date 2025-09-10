@@ -20,6 +20,14 @@ export class CheckOutPaymentSessionsDto {
     description: 'The ID of the buyer',
     example: 'buyer_123',
   })
+  planDuration: string;
+
+  @ApiProperty({
+    type: String,
+    required: true,
+    description: 'The ID of the buyer',
+    example: 'buyer_123',
+  })
   buyerId: string;
 
   @ApiProperty({

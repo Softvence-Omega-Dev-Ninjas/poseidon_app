@@ -1,8 +1,8 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { BuyMembershipDto } from './dto/buyMembership.dto';
 import { StripeService } from 'src/utils/stripe/stripe.service';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Injectable()
 export class MembershipServiceUseToUserOnly {
@@ -128,6 +128,7 @@ export class MembershipServiceUseToUserOnly {
     const checkout = await this.stripeService.checkOutPaymentSessionsMembership(
       {
         payment_info_id: payment_info.id,
+        planDuration: plan,
         amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
         buyerId: userId,
         sellerId: membershipLevel?.membership.owner.id as string,
@@ -137,11 +138,12 @@ export class MembershipServiceUseToUserOnly {
       },
     );
 
-    return cResponseData({
+    return {
       message: 'Membership bought successfully',
-      data: checkout,
+      redirect_url: checkout.url,
+      data: checkout.id,
       success: true,
-    });
+    };
     // return cResponseData({
     //   message: 'Membership bought successfully',
     //   data: {

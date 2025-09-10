@@ -57,8 +57,8 @@ export class StripeService {
         application_fee_amount: fee * 100,
         transfer_data: { destination: seller.stripeAccountId },
       },
-      success_url: `${process.env.FRONTEND_URL}/payment_membership/success/${data.payment_info_id}`,
-      cancel_url: `${process.env.FRONTEND_URL}/stripe/cancel`,
+      success_url: `${process.env.BACKEND_URL}/payment/success/membership/${data.payment_info_id}`,
+      cancel_url: `${process.env.BACKEND_URL}/payment/cancel`,
     });
 
     if (!session.id) {
@@ -73,11 +73,21 @@ export class StripeService {
       );
     }
 
+    let endDate: Date = new Date();
+    if (data.planDuration === 'ONE_MONTH') {
+      endDate = new Date();
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else if (data.planDuration === 'ONE_YEAR') {
+      endDate = new Date();
+      endDate.setFullYear(endDate.getFullYear() + 1);
+    }
+
     await this.prisma.paymentDetails.update({
       where: { id: data.payment_info_id },
       data: {
         cs_number: session.id,
         paymemtStatus: session.payment_status,
+        endDate,
       },
     });
 
