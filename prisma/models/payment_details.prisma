@@ -7,7 +7,7 @@ model paymentDetails {
     id            String      @id @unique @default(uuid())
     buyerId       String
     sellerId      String
-    productName   String
+    serviceName   String
     amount        Float
     cs_number     String
     paymemtStatus String      @default("painting")

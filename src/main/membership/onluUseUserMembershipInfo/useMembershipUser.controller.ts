@@ -27,8 +27,6 @@ export class MembershipUseToUserOnly {
   @Roles(Role.User)
   @Post('buy')
   buyMembership(@Req() req: Request, @Body() data: BuyMembershipDto) {
-    console.log(req['sub']);
-    console.log(data);
     return this.membershipServiceUser.buyMembership(req['sub'] as string, data);
   }
 }

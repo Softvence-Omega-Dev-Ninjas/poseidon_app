@@ -142,7 +142,7 @@ export class SupporterProfileService {
         membershipInfo?.Membership_levels.flatMap((m) => m.levelImage) || [];
       const mImages = await this.getMedia(mImagesIds);
       const mImageMap = new Map(mImages.map((m) => [m.id, m]));
-      const mlevels = membershipInfo?.Membership_levels.map((m) => ({
+      const Membership_levels = membershipInfo?.Membership_levels.map((m) => ({
         ...m,
         levelImage: mImageMap.get(m.levelImage),
       }));
@@ -167,7 +167,7 @@ export class SupporterProfileService {
           ...p,
           images: p.images.map((imageId) => postImageMap.get(imageId)),
         })),
-        membershipInfo: mlevels,
+        membershipInfo: { ...membershipInfo, Membership_levels },
         image: gallery,
       };
     });
