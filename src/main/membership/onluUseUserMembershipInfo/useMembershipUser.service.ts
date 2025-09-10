@@ -1,11 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { BuyMembershipDto } from './dto/buyMembership.dto';
+import { StripeService } from 'src/utils/stripe/stripe.service';
 
 @Injectable()
 export class MembershipServiceUseToUserOnly {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly stripeService: StripeService,
+  ) {}
 
   async buyMembership(userId: string, membershipLevelInfo: BuyMembershipDto) {
     const membershipLevel = await this.prisma.membership_levels.findFirst({
@@ -37,18 +41,48 @@ export class MembershipServiceUseToUserOnly {
       },
     });
 
+    if (
+      membershipLevel?.id &&
+      membershipLevel.MembershipSubscriptionPlan.length < 1
+    ) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Membership level not found',
+          error: 'Membership level not found',
+          data: null,
+          success: false,
+        }),
+        404,
+      );
+    }
+    const checkout = await this.stripeService.checkOutPaymentSessionsMembership(
+      {
+        amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
+        buyerId: userId,
+        sellerId: membershipLevel?.membership.owner.id as string,
+        serviceName: membershipLevel?.titleName as string,
+        serviceType: 'membership',
+        serviceId: membershipLevel?.id as string,
+      },
+    );
+
     return cResponseData({
       message: 'Membership bought successfully',
-      data: {
-        userId,
-        membershipLevel: {
-          ...membershipLevel,
-          MembershipSubscriptionPlan:
-            membershipLevel?.MembershipSubscriptionPlan[0],
-        },
-      },
+      data: { userId, membershipLevel, checkout },
       success: true,
     });
+    // return cResponseData({
+    //   message: 'Membership bought successfully',
+    //   data: {
+    //     userId,
+    //     membershipLevel: {
+    //       ...membershipLevel,
+    //       MembershipSubscriptionPlan:
+    //         membershipLevel?.MembershipSubscriptionPlan[0],
+    //     },
+    //   },
+    //   success: true,
+    // });
   }
 
   // get all membership levels use to user and suupoter

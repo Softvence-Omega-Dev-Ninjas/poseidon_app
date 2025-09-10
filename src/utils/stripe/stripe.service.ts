@@ -31,38 +31,31 @@ export class StripeService {
 
     const session = await this.stripe.checkout.sessions.create({
       // payment_method_types: ['card'],
-      payment_method_types: [
-        'card',
-        'us_bank_account',
-        'crypto',
-        'ideal',
-        'amazon_pay',
-        'alipay',
-      ],
+      payment_method_types: ['card', 'us_bank_account', 'crypto'],
       mode: 'payment',
       line_items: [
         {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: data.serviceName,
+              name: 'test',
             },
             unit_amount: data.amount * 100,
           },
           quantity: 1,
         },
       ],
-      metadata: {
-        buyerId: data.buyerId,
-        sellerId: data.sellerId,
-        productName: data.serviceName,
-        amount: data.amount,
-        serviceType: data.serviceType, // example membership or support
-        serviceId: data.serviceId, // example membershipId or supportId
-      },
+      // metadata: {
+      //   buyerId: data.buyerId,
+      //   sellerId: data.sellerId,
+      //   productName: data.serviceName,
+      //   amount: data.amount,
+      //   serviceType: data.serviceType, // example membership or support
+      //   serviceId: data.serviceId, // example membershipId or supportId
+      // },
       payment_intent_data: {
         application_fee_amount: fee * 100,
-        transfer_data: { destination: seller.stripeAccountId },
+        transfer_data: { destination: 'acct_1S5MsE5yhkwh6sNk' },
       },
       success_url: `${process.env.DOMAIN}/stripe/success`,
       cancel_url: `${process.env.DOMAIN}/stripe/cancel`,

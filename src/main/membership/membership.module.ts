@@ -7,9 +7,10 @@ import { MembershipRewardController } from './reward.controller';
 import { CloudinaryModule } from 'src/utils/cloudinary/cloudinary.module';
 import { MembershipServiceUseToUserOnly } from './onluUseUserMembershipInfo/useMembershipUser.service';
 import { MembershipUseToUserOnly } from './onluUseUserMembershipInfo/useMembershipUser.controller';
+import { StripeModule } from 'src/utils/stripe/stripe.module';
 
 @Module({
-  imports: [PrismaClientModule, CloudinaryModule],
+  imports: [PrismaClientModule, CloudinaryModule, StripeModule],
   controllers: [
     MembershipUseToUserOnly,
     MembershipController,
