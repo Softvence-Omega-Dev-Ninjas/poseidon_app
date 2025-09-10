@@ -27,7 +27,8 @@ export class StripeService {
         404,
       );
 
-    const fee = Math.floor(data.amount * 0.2); // 20% platform fee
+    const fee = Math.floor(data.amount * 0.2) * 100; // 20% platform fee
+    const Amount = Number((data.amount * 100).toFixed(2));
 
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card', 'us_bank_account', 'crypto'],
@@ -39,7 +40,7 @@ export class StripeService {
             product_data: {
               name: 'test',
             },
-            unit_amount: data.amount * 100,
+            unit_amount: Amount,
           },
           quantity: 1,
         },
@@ -54,10 +55,11 @@ export class StripeService {
         serviceId: data.serviceId, // example membershipId or supportId
       },
       payment_intent_data: {
-        application_fee_amount: fee * 100,
+        application_fee_amount: fee,
         transfer_data: { destination: seller.stripeAccountId },
       },
-      success_url: `${process.env.BACKEND_URL}/payment/success/membership/${data.payment_info_id}`,
+      // success_url: `${process.env.BACKEND_URL}/payment/success?paymemttype:membership/`,
+      success_url: `${process.env.BACKEND_URL}/payment/success?paymentType=membership&paymentId=${data.payment_info_id}`,
       cancel_url: `${process.env.BACKEND_URL}/payment/cancel`,
     });
 

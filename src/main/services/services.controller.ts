@@ -70,7 +70,7 @@ export class ServiceController {
     @Query('draft') draft?: boolean,
     @Query('providerId') providerId?: string,
   ) {
-    return this.serviceService.findAll(page, limit, draft,providerId);
+    return this.serviceService.findAll(page, limit, draft, providerId);
   }
 
   @Roles(Role.Supporter)
