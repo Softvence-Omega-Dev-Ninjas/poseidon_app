@@ -63,12 +63,14 @@ export class ServiceController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'draft', required: false, type: Boolean })
+  @ApiQuery({ name: 'providerId', required: false, type: String })
   findAll(
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('draft') draft?: boolean,
+    @Query('providerId') providerId?: string,
   ) {
-    return this.serviceService.findAll(page, limit, draft);
+    return this.serviceService.findAll(page, limit, draft,providerId);
   }
 
   @Roles(Role.Supporter)

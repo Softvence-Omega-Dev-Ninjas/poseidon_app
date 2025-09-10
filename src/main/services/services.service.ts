@@ -73,10 +73,11 @@ export class ServiceService {
   //   });
   // }
 
-  async findAll(page = 1, limit = 10, draft?: boolean) {
+  async findAll(page = 1, limit = 10, draft?: boolean, userId?: string) {
   const skip = (page - 1) * limit;
   const where: any = {};
   if (draft !== undefined) where.draft = draft;
+    if (userId) where.userId = userId; 
 
   const [services, total] = await this.prisma.$transaction([
     this.prisma.service.findMany({

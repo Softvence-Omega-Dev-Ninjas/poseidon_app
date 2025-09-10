@@ -158,6 +158,7 @@ export class ProductController {
     @UploadedFiles() newImages: Express.Multer.File[],
   ) {
     const updateProductDto = new UpdateProductDto();
+    console.log(updateProductDto);
     for (const key in body) {
       if (Object.prototype.hasOwnProperty.call(body, key)) {
         if (['images', 'categoryIds', 'color', 'features'].includes(key)) {
@@ -202,6 +203,8 @@ export class ProductController {
         }
       }
     }
+
+    
 
     return this.productService.update(id, updateProductDto, newImages);
   }
