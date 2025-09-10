@@ -91,9 +91,11 @@ export class SupporterProfileService {
           },
         },
         select: {
+          id: true,
           images: true,
           description: true,
           createdAt: true,
+          view: true,
         },
       });
 
