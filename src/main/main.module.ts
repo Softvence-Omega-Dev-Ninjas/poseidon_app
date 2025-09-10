@@ -13,6 +13,7 @@ import { MediafileModule } from './mediafile/mediafile.module';
 import { ServicesModule } from './services/services.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ZoomModule } from './zoom/zoom.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ZoomModule } from './zoom/zoom.module';
     ServicesModule,
     ScheduleModule.forRoot(),
     ZoomModule,
+    PaymentModule,
   ],
   controllers: [],
   providers: [],
