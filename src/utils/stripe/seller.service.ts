@@ -14,26 +14,6 @@ export class SellerService {
         country: 'US',
         email: user.email,
         business_type: 'individual',
-        individual: {
-          first_name: user.createProfileDto.name.split[0] as string,
-          last_name: user.createProfileDto.name.split[1]
-            ? (user.createProfileDto.name.split[1] as string)
-            : ('' as string),
-          email: user.email,
-          address: {
-            line1: user.createProfileDto.address,
-            state: user.createProfileDto.state,
-            city: user.createProfileDto.city,
-            country: user.createProfileDto.country,
-            postal_code: user.createProfileDto.postcode,
-          },
-        },
-        business_profile: {
-          name: user.createProfileDto.name,
-          support_email: user.email,
-          product_description: user.createProfileDto.description,
-          url: 'XXXXXXXXXXXXXXXXXXXXXX',
-        },
         metadata: {
           userId: user.id,
           email: user.email,

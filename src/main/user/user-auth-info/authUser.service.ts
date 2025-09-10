@@ -181,7 +181,7 @@ export class AuthUserService {
       const createAccountStripe = await this.stripe.createConnectedAccount({
         id: newSupporter.id,
         email: newSupporter.email,
-        url: '',
+        url: `${process.env.FRONTEND_URL}/viewpage/${newSupporter.id}`,
         createProfileDto: {
           name: newSupporter.profile?.name as string,
           address: newSupporter.profile?.address as string,
@@ -193,29 +193,29 @@ export class AuthUserService {
         },
       });
       console.log(createAccountStripe);
-      // if (!createAccountStripe || !createAccountStripe.id) {
-      //   throw new HttpException(
-      //     cResponseData({
-      //       message: 'Failed to create Stripe account',
-      //       data: null,
-      //       error: 'Stripe account creation failed',
-      //       success: false,
-      //     }),
-      //     HttpStatus.BAD_REQUEST,
-      //   );
-      // }
-      // // update user db stripeAccountId field
-      // await this.prisma.user.update({
-      //   where: { id: newSupporter.id },
-      //   data: { stripeAccountId: createAccountStripe.id },
-      // });
-      // // create onboarding link for supporter
-      // const linkOnboarding = await this.stripe.createOnboardingAccountLink(
-      //   createAccountStripe.id,
-      // );
+      if (!createAccountStripe || !createAccountStripe.id) {
+        throw new HttpException(
+          cResponseData({
+            message: 'Failed to create Stripe account',
+            data: null,
+            error: 'Stripe account creation failed',
+            success: false,
+          }),
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      // update user db stripeAccountId field
+      await this.prisma.user.update({
+        where: { id: newSupporter.id },
+        data: { stripeAccountId: createAccountStripe.id },
+      });
+      // create onboarding link for supporter
+      const linkOnboarding = await this.stripe.createOnboardingAccountLink(
+        createAccountStripe.id,
+      );
       return {
         message: 'Supporter account created successfully',
-        redirect_url: 'linkOnboarding.url',
+        redirect_url: linkOnboarding.url,
         error: null,
         data: { name: newSupporter.profile?.name },
         success: true,
