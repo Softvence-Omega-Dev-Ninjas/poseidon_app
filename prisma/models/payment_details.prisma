@@ -9,7 +9,7 @@ model paymentDetails {
     sellerId      String
     serviceName   String
     amount        Float
-    cs_number     String
+    cs_number     String?
     paymemtStatus String      @default("pending")
     serviceType   ServiceType
     serviceId     String

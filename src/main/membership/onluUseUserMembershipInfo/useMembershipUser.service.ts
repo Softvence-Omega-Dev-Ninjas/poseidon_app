@@ -55,8 +55,79 @@ export class MembershipServiceUseToUserOnly {
         404,
       );
     }
+
+    let endDate: Date = new Date();
+    const plan = membershipLevel?.MembershipSubscriptionPlan[0]
+      .duration as string;
+    if (plan === 'ONE_MONTH') {
+      endDate = new Date();
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else if (plan === 'ONE_YEAR') {
+      endDate = new Date();
+      endDate.setFullYear(endDate.getFullYear() + 1);
+    }
+
+    const plainAccess = membershipLevel?.MembershipSubscriptionPlan[0];
+
+    // Defualt create payment info and status pending
+    const payment_info = await this.prisma.paymentDetails.create({
+      data: {
+        buyerId: userId,
+        sellerId: membershipLevel?.membership.owner.id as string,
+        serviceName: membershipLevel?.titleName as string,
+        amount: membershipLevel?.MembershipSubscriptionPlan[0].price as number,
+        serviceType: 'membership',
+        serviceId: membershipLevel?.id as string,
+        endDate: endDate,
+        PermissionVideoCallAccess: plainAccess?.CalligSubscriptionPlan
+          ? {
+              create: {
+                user_id: userId,
+                supporter_id: membershipLevel?.membership.owner.id as string,
+                totalVideoCalls: membershipLevel?.MembershipSubscriptionPlan[0]
+                  .CalligSubscriptionPlan?.totalVideoCalls as number,
+                unlimitedVideoCalls: membershipLevel
+                  ?.MembershipSubscriptionPlan[0].CalligSubscriptionPlan
+                  ?.unlimitedVideoCalls as boolean,
+              },
+            }
+          : undefined,
+        PermissionMessagesAccess: plainAccess?.MessagesSubscriptionPlan
+          ? {
+              create: {
+                user_id: userId,
+                supporter_id: membershipLevel?.membership.owner.id as string,
+                totalMessages: membershipLevel?.MembershipSubscriptionPlan[0]
+                  .MessagesSubscriptionPlan?.totalMessages as number,
+                unlimitedMessages: membershipLevel
+                  ?.MembershipSubscriptionPlan[0].MessagesSubscriptionPlan
+                  ?.unlimitedMessages as boolean,
+              },
+            }
+          : undefined,
+        PermissionGalleryAccess: plainAccess?.GallerySubscriptionPlan
+          ? {
+              create: {
+                user_id: userId,
+                supporter_id: membershipLevel?.membership.owner.id as string,
+              },
+            }
+          : undefined,
+        PermissionPostsAccess: plainAccess?.PostsSubscriptionPlan
+          ? {
+              create: {
+                user_id: userId,
+                supporter_id: membershipLevel?.membership.owner.id as string,
+              },
+            }
+          : undefined,
+      },
+    });
+
+    // payment checkout this function
     const checkout = await this.stripeService.checkOutPaymentSessionsMembership(
       {
+        payment_info_id: payment_info.id,
         amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
         buyerId: userId,
         sellerId: membershipLevel?.membership.owner.id as string,
@@ -68,7 +139,7 @@ export class MembershipServiceUseToUserOnly {
 
     return cResponseData({
       message: 'Membership bought successfully',
-      data: { userId, membershipLevel, checkout },
+      data: checkout,
       success: true,
     });
     // return cResponseData({
