@@ -11,7 +11,7 @@ export class StripeService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async checkOutPaymentSessions(data: CheckOutPaymentSessionsDto) {
+  async checkOutPaymentSessionsMembership(data: CheckOutPaymentSessionsDto) {
     const seller = await this.prisma.user.findFirst({
       where: { id: data.sellerId, role: 'supporter' },
     });
@@ -45,7 +45,7 @@ export class StripeService {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: data.productName,
+              name: data.serviceName,
             },
             unit_amount: data.amount * 100,
           },
@@ -55,7 +55,7 @@ export class StripeService {
       metadata: {
         buyerId: data.buyerId,
         sellerId: data.sellerId,
-        productName: data.productName,
+        productName: data.serviceName,
         amount: data.amount,
         serviceType: data.serviceType, // example membership or support
         serviceId: data.serviceId, // example membershipId or supportId
@@ -91,6 +91,6 @@ export class StripeService {
     //   },
     // });
 
-    // return { session, order };
+    return { session };
   }
 }

@@ -10,7 +10,7 @@ model paymentDetails {
     serviceName   String
     amount        Float
     cs_number     String
-    paymemtStatus String      @default("painting")
+    paymemtStatus String      @default("pending")
     serviceType   ServiceType
     serviceId     String
     createAt      DateTime    @default(now())

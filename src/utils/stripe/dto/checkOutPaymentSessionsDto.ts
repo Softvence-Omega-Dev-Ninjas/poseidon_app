@@ -28,7 +28,7 @@ export class CheckOutPaymentSessionsDto {
     description: 'The name of the product',
     example: 'Product Name',
   })
-  productName: string;
+  serviceName: string;
 
   @ApiProperty({
     type: Number,
