@@ -1,13 +1,13 @@
 import { HttpException, Inject } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import Stripe from 'stripe';
-import { CreateExpressAccountDto } from './dto/createAccout.dto';
+import { ExpreeAccountDto } from './dto/createAccout.dto';
 
 export class SellerService {
   constructor(@Inject('STRIPE_CLIENT') private stripe: Stripe) {}
 
   // create connected account for seller or supporter
-  async createConnectedAccount(user: CreateExpressAccountDto) {
+  async createConnectedAccount(user: ExpreeAccountDto) {
     try {
       const account = await this.stripe.accounts.create({
         type: 'express',
@@ -17,7 +17,7 @@ export class SellerService {
         metadata: {
           userId: user.id,
           email: user.email,
-          name: user.business_profile.name,
+          name: user.CreateProfileDto.name,
         },
         capabilities: {
           transfers: { requested: true },

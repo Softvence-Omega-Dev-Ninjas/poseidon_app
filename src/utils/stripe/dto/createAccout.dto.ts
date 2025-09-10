@@ -1,64 +1,38 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, Length } from 'class-validator';
 
-class Dob {
+export class CreateProfileDto {
   @IsString()
-  @IsNotEmpty()
-  day: string;
-
-  @IsString()
-  @IsNotEmpty()
-  month: string;
-
-  @IsString()
-  @IsNotEmpty()
-  year: string;
-}
-
-class Individual {
-  @IsString()
-  @IsNotEmpty()
-  first_name: string;
-
-  @IsString()
-  @IsNotEmpty()
-  last_name: string;
-
-  @IsString()
-  @IsNotEmpty()
-  email: string;
-
-  @IsString()
-  @IsNotEmpty()
-  phone: string;
-
-  dob: Dob;
-}
-
-class Business_profile {
-  @IsString()
-  @IsNotEmpty()
+  @Length(2, 50)
   name: string;
 
   @IsString()
-  @IsNotEmpty()
-  product_description: string;
+  address: string;
 
   @IsString()
-  @IsNotEmpty()
-  support_email: string;
+  state: string;
 
   @IsString()
-  @IsNotEmpty()
-  support_phone: string;
+  city: string;
 
   @IsString()
-  @IsNotEmpty()
-  url: string; // must include http:// or https://
+  country: string;
+
+  @IsString()
+  postcode: string;
+
+  @IsString()
+  @Length(10, 500)
+  description: string;
 }
 
-export class CreateExpressAccountDto {
+export class ExpreeAccountDto {
+  @IsString()
+  @IsNotEmpty()
   id: string;
+
+  @IsString()
+  @Length(2, 50)
   email: string;
-  individual: Individual;
-  business_profile: Business_profile;
+
+  CreateProfileDto: CreateProfileDto;
 }

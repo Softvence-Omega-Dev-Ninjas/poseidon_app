@@ -20,10 +20,11 @@ export class MembershipRewardService {
 
   // vedio call reward
   async createVideoCallReward(
+    membership_ownerId: string,
     createVideoCallRewardDto: CreateVideoCallRewardDto,
   ) {
     const newData = await this.prisma.membershipAccessToVideoCall.create({
-      data: createVideoCallRewardDto,
+      data: { ...createVideoCallRewardDto, membership_ownerId },
     });
     return cResponseData({
       message: 'Video access reward created successfully',
@@ -48,10 +49,11 @@ export class MembershipRewardService {
 
   // Messages reward
   async createMessagesAccessReward(
+    membership_ownerId: string,
     createMessagesAccessDto: CreateMembershipAccessToMessagesDto,
   ) {
     const newData = await this.prisma.membershipAccessToMessages.create({
-      data: createMessagesAccessDto,
+      data: { ...createMessagesAccessDto, membership_ownerId },
     });
     return cResponseData({
       message: 'Messages access reward created successfully',
@@ -76,10 +78,11 @@ export class MembershipRewardService {
 
   // Gallery reward
   async createGalleryAccessReward(
+    membership_ownerId: string,
     createGalleryAccessDto: CreateMembershipAccessToGalleryDto,
   ) {
     const newData = await this.prisma.membershipAccessToGallery.create({
-      data: createGalleryAccessDto,
+      data: { ...createGalleryAccessDto, membership_ownerId },
     });
     return cResponseData({
       message: 'Gallery access reward created successfully',
@@ -104,10 +107,11 @@ export class MembershipRewardService {
 
   // Posts api
   async createPostsAccessReward(
+    membership_ownerId: string,
     createPostsAccessDto: CreateMembershipAccessToPostsDto,
   ) {
     const newData = await this.prisma.membershipAccessToPosts.create({
-      data: createPostsAccessDto,
+      data: { ...createPostsAccessDto, membership_ownerId },
     });
     return cResponseData({
       message: 'Posts access reward created successfully',

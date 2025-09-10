@@ -14,14 +14,6 @@ import { Type } from 'class-transformer';
 
 export class CreateVideoCallRewardDto {
   @ApiProperty({
-    required: true,
-    example: 'user-12345',
-    description: 'ID of the membership owner',
-  })
-  @IsString()
-  membership_ownerId: string;
-
-  @ApiProperty({
     description: 'Duration of the subscription',
     enum: Duration,
     example: Duration.ONE_MONTH,
@@ -69,14 +61,6 @@ export class CreateVideoCallRewardDto {
 }
 
 export class CreateMembershipAccessToMessagesDto {
-  @ApiProperty({
-    required: true,
-    example: 'user-12345',
-    description: 'ID of the membership owner',
-  })
-  @IsString()
-  membership_ownerId: string;
-
   @ApiProperty({
     description: 'Duration of the subscription',
     enum: Duration,
@@ -126,14 +110,6 @@ export class CreateMembershipAccessToMessagesDto {
 
 export class CreateMembershipAccessToGalleryDto {
   @ApiProperty({
-    required: true,
-    example: 'user-12345',
-    description: 'ID of the membership owner',
-  })
-  @IsString()
-  membership_ownerId: string;
-
-  @ApiProperty({
     description: 'Duration of the subscription',
     enum: Duration,
     example: Duration.ONE_MONTH,
@@ -170,14 +146,6 @@ export class CreateMembershipAccessToGalleryDto {
 }
 
 export class CreateMembershipAccessToPostsDto {
-  @ApiProperty({
-    required: true,
-    example: 'user-12345',
-    description: 'ID of the membership owner',
-  })
-  @IsString()
-  membership_ownerId: string;
-
   @ApiProperty({
     description: 'Duration of the subscription',
     enum: Duration,
