@@ -129,7 +129,7 @@ export class MembershipRewardController {
   // delete Reward Apis
   @Roles(Role.Supporter)
   @Delete('delete/:params')
-  deleteReward(@Param('params') params: string) {
+  async deleteReward(@Param('params') params: string) {
     const objKeys = [
       'videoCallReward',
       'messagesReward',
@@ -138,11 +138,11 @@ export class MembershipRewardController {
     ];
     const [type, id] = params.split('/');
     if (objKeys.includes(type))
-      return this.membershipRewardService.deleteVideoCallReward(id);
+      return await this.membershipRewardService.deleteVideoCallReward(id);
     if (objKeys.includes(type))
-      return this.membershipRewardService.deleteMessagesAccessReward(id);
+      return await this.membershipRewardService.deleteMessagesAccessReward(id);
     if (objKeys.includes(type))
-      return this.membershipRewardService.deleteGalleryAccessReward(id);
+      return await this.membershipRewardService.deleteGalleryAccessReward(id);
     if (objKeys.includes(type))
       return this.membershipRewardService.deletePostsAccessReward(id);
     else
