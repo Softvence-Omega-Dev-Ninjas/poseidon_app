@@ -178,20 +178,21 @@ export class AuthUserService {
       });
 
       // // create stripe connected account for supporter
-      // const createAccountStripe = await this.stripe.createConnectedAccount({
-      //   id: newSupporter.id,
-      //   email: newSupporter.email,
-      //   createProfileDto: {
-      //     name: newSupporter.profile?.name,
-      //     address: newSupporter.profile?.address,
-      //     city: newSupporter.profile?.city,
-      //     country: newSupporter.profile?.country,
-      //     postcode: newSupporter.profile?.postcode,
-      //     state: newSupporter.profile?.state,
-      //     description: newSupporter.profile?.description,
-      //     type: 'supporter',
-      //   },
-      // });
+      const createAccountStripe = await this.stripe.createConnectedAccount({
+        id: newSupporter.id,
+        email: newSupporter.email,
+        url: '',
+        createProfileDto: {
+          name: newSupporter.profile?.name as string,
+          address: newSupporter.profile?.address as string,
+          city: newSupporter.profile?.city as string,
+          country: newSupporter.profile?.country as string,
+          postcode: newSupporter.profile?.postcode as string,
+          state: newSupporter.profile?.state as string,
+          description: newSupporter.profile?.description as string,
+        },
+      });
+      console.log(createAccountStripe);
       // if (!createAccountStripe || !createAccountStripe.id) {
       //   throw new HttpException(
       //     cResponseData({
