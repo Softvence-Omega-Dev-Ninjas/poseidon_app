@@ -34,5 +34,5 @@ export class ExpreeAccountDto {
   @Length(2, 50)
   email: string;
 
-  CreateProfileDto: CreateProfileDto;
+  createProfileDto: CreateProfileDto;
 }

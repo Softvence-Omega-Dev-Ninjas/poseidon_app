@@ -17,7 +17,7 @@ export class SellerService {
         metadata: {
           userId: user.id,
           email: user.email,
-          name: user.CreateProfileDto.name,
+          name: user.createProfileDto.name,
         },
         capabilities: {
           transfers: { requested: true },

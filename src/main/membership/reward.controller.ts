@@ -36,28 +36,29 @@ export class MembershipRewardController {
   // create a reward with all tb
   @Roles(Role.Supporter)
   @Post('createReward')
-  createReward(
+  async createReward(
     @Body() createAllRewardsDto: CreateAllRewardsDto,
     @Req() req: Request,
   ) {
     const objKeys = Object.keys(createAllRewardsDto);
+
     if (objKeys.includes('videoCallReward'))
-      return this.membershipRewardService.createVideoCallReward(
+      return await this.membershipRewardService.createVideoCallReward(
         req['memberships_owner_id'] as string,
         createAllRewardsDto.videoCallReward as CreateVideoCallRewardDto,
       );
     if (objKeys.includes('messagesReward'))
-      return this.membershipRewardService.createMessagesAccessReward(
+      return await this.membershipRewardService.createMessagesAccessReward(
         req['memberships_owner_id'] as string,
         createAllRewardsDto.messagesReward as CreateMembershipAccessToMessagesDto,
       );
     if (objKeys.includes('galleryReward'))
-      return this.membershipRewardService.createGalleryAccessReward(
+      return await this.membershipRewardService.createGalleryAccessReward(
         req['memberships_owner_id'] as string,
         createAllRewardsDto.galleryReward as CreateMembershipAccessToGalleryDto,
       );
     if (objKeys.includes('postsReward'))
-      return this.membershipRewardService.createPostsAccessReward(
+      return await this.membershipRewardService.createPostsAccessReward(
         req['memberships_owner_id'] as string,
         createAllRewardsDto.postsReward as CreateMembershipAccessToPostsDto,
       );

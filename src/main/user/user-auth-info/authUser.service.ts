@@ -163,16 +163,35 @@ export class AuthUserService {
           id: true,
           email: true,
           provider: true,
-          profile: true,
+          profile: {
+            select: {
+              name: true,
+              address: true,
+              city: true,
+              country: true,
+              postcode: true,
+              state: true,
+              description: true,
+            },
+          },
         },
       });
 
-      // create stripe connected account for supporter
-      // const createAccountStripe = await this.stripe.createConnectedAccount(
-      //   newSupporter.email,
-      //   newSupporter.id,
-      //   newSupporter.profile?.name as string,
-      // );
+      // // create stripe connected account for supporter
+      // const createAccountStripe = await this.stripe.createConnectedAccount({
+      //   id: newSupporter.id,
+      //   email: newSupporter.email,
+      //   createProfileDto: {
+      //     name: newSupporter.profile?.name,
+      //     address: newSupporter.profile?.address,
+      //     city: newSupporter.profile?.city,
+      //     country: newSupporter.profile?.country,
+      //     postcode: newSupporter.profile?.postcode,
+      //     state: newSupporter.profile?.state,
+      //     description: newSupporter.profile?.description,
+      //     type: 'supporter',
+      //   },
+      // });
       // if (!createAccountStripe || !createAccountStripe.id) {
       //   throw new HttpException(
       //     cResponseData({
@@ -184,12 +203,12 @@ export class AuthUserService {
       //     HttpStatus.BAD_REQUEST,
       //   );
       // }
-      // update user db stripeAccountId field
+      // // update user db stripeAccountId field
       // await this.prisma.user.update({
       //   where: { id: newSupporter.id },
       //   data: { stripeAccountId: createAccountStripe.id },
       // });
-      // create onboarding link for supporter
+      // // create onboarding link for supporter
       // const linkOnboarding = await this.stripe.createOnboardingAccountLink(
       //   createAccountStripe.id,
       // );
