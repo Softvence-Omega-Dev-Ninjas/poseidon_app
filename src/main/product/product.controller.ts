@@ -93,10 +93,11 @@ export class ProductController {
   findAll(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
+    @Req() req:any,
     @Query('categoryId') categoryId?: string,
     @Query('draft') draft?: boolean,
   ) {
-    return this.productService.findAll(+page, +limit, categoryId, draft);
+    return this.productService.findAll(+page, +limit,req.user?.sub , categoryId, draft);
   }
 
   @Roles(Role.Supporter, Role.User)

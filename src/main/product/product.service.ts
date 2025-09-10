@@ -19,7 +19,7 @@ export class ProductService {
   constructor(
     private readonly prisma: PrismaService,
     private cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   async create(
     createProductDto: CreateProductDto,
@@ -174,31 +174,86 @@ export class ProductService {
 
 
   async findAll(
-  page: number,
-  limit: number,
-  categoryId?: string,
-  draft?: boolean,
-) {
-  const skip = (page - 1) * limit;
-  const where: any = {};
+    page: number,
+    limit: number,
+    userId?: string,
+    categoryId?: string,
+    draft?: boolean,
+  ) {
+    const skip = (page - 1) * limit;
+    const where: any = {};
 
-  if (categoryId) {
-    where.productCategories = {
-      some: {
-        categoryId: categoryId,
+    if (categoryId) {
+      where.productCategories = {
+        some: {
+          categoryId: categoryId,
+        },
+      };
+    }
+
+    if (draft !== undefined) {
+      where.draft = String(draft).toLowerCase() === 'true';
+    }
+
+    if (userId) {
+    where.userId = userId;
+  }
+
+    const [products, total] = await this.prisma.$transaction([
+      this.prisma.product.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          productCategories: {
+            include: {
+              category: true,
+            },
+          },
+        },
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+
+    // 🔥 Collect all media IDs from all products
+    const allMediaIds = products.flatMap((p) => p.images);
+
+    let medias: Awaited<ReturnType<typeof this.prisma.media.findMany>> = [];
+    if (allMediaIds.length > 0) {
+      medias = await this.prisma.media.findMany({
+        where: { id: { in: allMediaIds } },
+      });
+    }
+
+    // Map media IDs -> media objects
+    const mediaMap = new Map(medias.map((m) => [m.id, m]));
+
+    // Attach media objects to each product
+    const productsWithMedia = products.map((p) => ({
+      ...p,
+      medias: p.images.map((id) => mediaMap.get(id)).filter(Boolean),
+    }));
+
+    const totalPages = Math.ceil(total / limit);
+
+    return cResponseData({
+      message: 'Products retrieved successfully.',
+      error: null,
+      success: true,
+      data: {
+        total,
+        products: productsWithMedia,
+        currentPage: page,
+        limit,
+        totalPages,
       },
-    };
+    });
   }
 
-  if (draft !== undefined) {
-    where.draft = String(draft).toLowerCase() === 'true';
-  }
 
-  const [products, total] = await this.prisma.$transaction([
-    this.prisma.product.findMany({
-      where,
-      skip,
-      take: limit,
+  async findOne(id: string) {
+    const product = await this.prisma.product.findUnique({
+      where: { id },
       include: {
         productCategories: {
           include: {
@@ -206,90 +261,40 @@ export class ProductService {
           },
         },
       },
-    }),
-    this.prisma.product.count({ where }),
-  ]);
-
-  // 🔥 Collect all media IDs from all products
-  const allMediaIds = products.flatMap((p) => p.images);
-
-  let medias: Awaited<ReturnType<typeof this.prisma.media.findMany>> = [];
-  if (allMediaIds.length > 0) {
-    medias = await this.prisma.media.findMany({
-      where: { id: { in: allMediaIds } },
     });
-  }
 
-  // Map media IDs -> media objects
-  const mediaMap = new Map(medias.map((m) => [m.id, m]));
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
 
-  // Attach media objects to each product
-  const productsWithMedia = products.map((p) => ({
-    ...p,
-    medias: p.images.map((id) => mediaMap.get(id)).filter(Boolean),
-  }));
+    // 👇 Fix: declare type properly
+    let medias: Array<{
+      id: string;
+      createdAt: Date;
+      updatedAt: Date;
+      imageUrl: string;
+      publicId: string;
+      imageId: string | null;
+    }> = [];
 
-  const totalPages = Math.ceil(total / limit);
-
-  return cResponseData({
-    message: 'Products retrieved successfully.',
-    error: null,
-    success: true,
-    data: {
-      total,
-      products: productsWithMedia,
-      currentPage: page,
-      limit,
-      totalPages,
-    },
-  });
-}
-
-
-async findOne(id: string) {
-  const product = await this.prisma.product.findUnique({
-    where: { id },
-    include: {
-      productCategories: {
-        include: {
-          category: true,
+    if (Array.isArray(product.images) && product.images.length > 0) {
+      medias = await this.prisma.media.findMany({
+        where: {
+          id: { in: product.images },
         },
-      },
-    },
-  });
+      });
+    }
 
-  if (!product) {
-    throw new NotFoundException(`Product with ID ${id} not found`);
-  }
-
-  // 👇 Fix: declare type properly
-  let medias: Array<{
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    imageUrl: string;
-    publicId: string;
-    imageId: string | null;
-  }> = [];
-
-  if (Array.isArray(product.images) && product.images.length > 0) {
-    medias = await this.prisma.media.findMany({
-      where: {
-        id: { in: product.images },
+    return cResponseData({
+      message: 'Product retrieved successfully.',
+      error: null,
+      success: true,
+      data: {
+        ...product,
+        medias,
       },
     });
   }
-
-  return cResponseData({
-    message: 'Product retrieved successfully.',
-    error: null,
-    success: true,
-    data: {
-      ...product,
-      medias,
-    },
-  });
-}
 
 
 
