@@ -10,7 +10,7 @@ export class PaymentController {
   @Get('success/:params')
   Success(@Param('params') params: string) {
     const [type, id] = params.split('/');
-    console.log({ params, type, id });
+    console.log({ params });
     return { params, type, id };
     // return this.paymentService.findAll();
   }
