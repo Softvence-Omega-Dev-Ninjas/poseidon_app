@@ -111,6 +111,9 @@ export class SupporterProfileService {
         select: {
           id: true,
           Membership_levels: {
+            where: {
+              isPublic: true,
+            },
             take: 3,
             select: {
               id: true,

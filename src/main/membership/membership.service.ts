@@ -3,7 +3,10 @@ import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { CreateMembershipLevelDto } from './dto/create-membership-level.dto';
-import { LevelImageUpdateDto } from './dto/update-membership-level.dto';
+import {
+  LevelImageUpdateDto,
+  UpdateMembershipLevelDto,
+} from './dto/update-membership-level.dto';
 
 @Injectable()
 export class MembershipService {
@@ -134,6 +137,113 @@ export class MembershipService {
       data: newMembershipLevel,
       success: true,
     });
+  }
+
+  async updateMembershipLevel(dto: UpdateMembershipLevelDto) {
+    const updateNewData = await this.prisma.membership_levels.update({
+      where: { id: dto.id },
+      data: {
+        levelName: dto.levelName,
+        titleName: dto.titleName,
+        levelDescription: dto.levelDescription,
+        levelImage: dto.levelImage,
+        isPublic: dto.isPublic,
+        Wellcome_note: dto.Wellcome_note ?? null,
+
+        MembershipSubscriptionPlan: {
+          update: dto.MembershipSubscriptionPlan.map((plan) => ({
+            where: { id: plan.id },
+            data: {
+              duration: plan.duration,
+              price: plan.price,
+
+              CalligSubscriptionPlan: plan.CalligSubscriptionPlan
+                ? { update: { ...plan.CalligSubscriptionPlan } }
+                : { delete: true },
+
+              MessagesSubscriptionPlan: plan.MessagesSubscriptionPlan
+                ? { update: { ...plan.MessagesSubscriptionPlan } }
+                : { delete: true },
+
+              GallerySubscriptionPlan: plan.GallerySubscriptionPlan
+                ? { update: { ...plan.GallerySubscriptionPlan } }
+                : { delete: true },
+
+              PostsSubscriptionPlan: plan.PostsSubscriptionPlan
+                ? { update: { ...plan.PostsSubscriptionPlan } }
+                : { delete: true },
+            },
+          })),
+        },
+      },
+    });
+
+    return cResponseData({
+      message: 'Membership level updated successfully',
+      data: updateNewData,
+      success: true,
+    });
+
+    // await this.prisma.$transaction(async (tx) => {
+    //   // 1️⃣ Update the parent membership level
+    //   const updatedLevel = await tx.membership_levels.update({
+    //     where: { id: dto.id },
+    //     data: {
+    //       levelName: dto.levelName,
+    //       titleName: dto.titleName,
+    //       levelDescription: dto.levelDescription,
+    //       levelImage: dto.levelImage,
+    //       isPublic: dto.isPublic,
+    //       Wellcome_note: dto.Wellcome_note,
+    //     },
+    //   });
+
+    //   // 2️⃣ Update each subscription plan with its nested child plans
+    //   for (const plan of dto.MembershipSubscriptionPlan) {
+    //     await tx.membershipSubscriptionPlan.update({
+    //       where: { id: plan.id },
+    //       data: {
+    //         duration: plan.duration,
+    //         price: plan.price,
+
+    //         CalligSubscriptionPlan: plan.CalligSubscriptionPlan
+    //           ? {
+    //               update: {
+    //                 where: { id: plan.CalligSubscriptionPlan.id },
+    //                 data: { ...plan.CalligSubscriptionPlan },
+    //               },
+    //             }
+    //           : { delete: {} },
+
+    //         MessagesSubscriptionPlan: plan.MessagesSubscriptionPlan
+    //           ? {
+    //               update: {
+    //                 ...plan.MessagesSubscriptionPlan,
+    //               },
+    //             }
+    //           : undefined,
+
+    //         GallerySubscriptionPlan: plan.GallerySubscriptionPlan
+    //           ? {
+    //               update: {
+    //                 ...plan.GallerySubscriptionPlan,
+    //               },
+    //             }
+    //           : undefined,
+
+    //         PostsSubscriptionPlan: plan.PostsSubscriptionPlan
+    //           ? {
+    //               update: {
+    //                 ...plan.PostsSubscriptionPlan,
+    //               },
+    //             }
+    //           : undefined,
+    //       },
+    //     });
+    //   }
+
+    //   return updatedLevel;
+    // });
   }
 
   async levelImageUpdate(id: string, levelImage: LevelImageUpdateDto) {

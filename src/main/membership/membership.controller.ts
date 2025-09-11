@@ -20,7 +20,10 @@ import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
 import { CreateMembershipLevelDto } from './dto/create-membership-level.dto';
 import { MembershipSubscriptionPlanPipe } from './pipeline/membershipSubscriptionPlan.pipe';
 import { MembershipSubscriptionPlan } from './dto/MembershipSubscriptionPlan.dto';
-import { LevelImageUpdateDto } from './dto/update-membership-level.dto';
+import {
+  LevelImageUpdateDto,
+  UpdateMembershipLevelDto,
+} from './dto/update-membership-level.dto';
 import { MembershipServiceUseToUserOnly } from './onluUseUserMembershipInfo/useMembershipUser.service';
 
 @Controller('membership')
@@ -68,6 +71,17 @@ export class MembershipController {
         levelImage,
         MembershipSubscriptionPlan: membershipSubscriptionPlan,
       },
+    );
+  }
+
+  // upadte Membership Level
+  @Roles(Role.Supporter)
+  @Patch('update-levels')
+  updateMembershipLevel(
+    @Body() updateMembershipLevelDto: UpdateMembershipLevelDto,
+  ) {
+    return this.membershipService.updateMembershipLevel(
+      updateMembershipLevelDto,
     );
   }
 
