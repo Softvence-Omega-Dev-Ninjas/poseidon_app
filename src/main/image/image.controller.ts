@@ -38,7 +38,7 @@ import { Roles as Visibility } from '../../../generated/prisma';
 @Roles(Role.Admin, Role.Supporter, Role.User)
 @Controller('images')
 export class ImageController {
-  constructor(private readonly imageService: ImageService) {}
+  constructor(private readonly imageService: ImageService) { }
 
   @Post()
   @ApiConsumes('multipart/form-data')
@@ -84,8 +84,14 @@ export class ImageController {
     enum: [Visibility.admin, Visibility.user, Visibility.supporter],
     description: 'Filter by visibility',
   })
-  findAll(@Query() query: FindAllImagesDto, @Req() req) {
-    return this.imageService.findAll(query, req.user?.sub);
+  @ApiQuery({
+    name: 'providerId',
+    required: false,
+    type: String,
+    description: 'Filter by provider ID',
+  })
+  findAll(@Query() query: FindAllImagesDto) {
+    return this.imageService.findAll(query, query.providerId);
   }
 
   @Get(':id')
@@ -98,7 +104,7 @@ export class ImageController {
     example: '5857257a-7610-470e-ae2f-29a3ca9c06d5',
   })
   findOne(@Param('id') id: string, @Req() req) {
-    return this.imageService.findOne(id, req.user?.sub);
+    return this.imageService.findOne(id, req.sub);
   }
 
   @Patch(':id')

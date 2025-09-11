@@ -19,7 +19,7 @@ export class PostService {
   constructor(
     private prisma: PrismaService,
     private cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   async create(
     createPostDto: CreatePostDto,
@@ -162,6 +162,9 @@ export class PostService {
       const where: Prisma.PostWhereInput = {};
       if (whoCanSee) {
         where.whoCanSee = whoCanSee;
+      }
+      if (userId) {
+        where.userId = userId;
       }
 
       const [posts, total] = await this.prisma.$transaction([
