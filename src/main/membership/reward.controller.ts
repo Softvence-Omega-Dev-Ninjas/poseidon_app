@@ -7,6 +7,7 @@ import {
   Patch,
   Delete,
   Req,
+  Query,
 } from '@nestjs/common';
 import { MembershipRewardService } from './reward.service';
 import { Roles } from 'src/auth/guard/roles.decorator';
@@ -128,27 +129,33 @@ export class MembershipRewardController {
 
   // delete Reward Apis
   @Roles(Role.Supporter)
-  @Delete('delete/:params')
-  async deleteReward(@Param('params') params: string) {
-    const objKeys = [
-      'videoCallReward',
-      'messagesReward',
-      'galleryReward',
-      'postsReward',
-    ];
-    const [type, id] = params.split('/');
-    if (objKeys.includes(type))
+  @Delete('delete')
+  async deleteReward(@Query('type') type: string, @Query('id') id: string) {
+    // const [type, id] = params.split('/');
+    if (type == 'videoCallReward') {
+      console.log({ type, id });
+      // return 'videoCallReward';
       return await this.membershipRewardService.deleteVideoCallReward(id);
-    if (objKeys.includes(type))
+    }
+    if (type == 'messagesReward') {
+      console.log({ type, id });
+      // return 'messagesReward';
       return await this.membershipRewardService.deleteMessagesAccessReward(id);
-    if (objKeys.includes(type))
+    }
+    if (type == 'galleryReward') {
+      console.log({ type, id });
+      // return 'galleryReward';
       return await this.membershipRewardService.deleteGalleryAccessReward(id);
-    if (objKeys.includes(type))
-      return this.membershipRewardService.deletePostsAccessReward(id);
-    else
-      return cResponseData({
-        message: 'Invalid type Url',
-        data: null,
-      });
+    }
+    if (type == 'postsReward') {
+      console.log({ type, id });
+      // return 'postsReward';
+      return await this.membershipRewardService.deletePostsAccessReward(id);
+    }
+    console.log({ type, id });
+    return cResponseData({
+      message: 'Invalid type Url',
+      data: null,
+    });
   }
 }
