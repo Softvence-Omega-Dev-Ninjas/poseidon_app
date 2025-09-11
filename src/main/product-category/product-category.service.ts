@@ -15,7 +15,7 @@ export class ProductCategoryService {
   constructor(
     private readonly prisma: PrismaService,
     private cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   async create(
     createProductCategoryDto: CreateProductCategoryDto,
@@ -54,7 +54,59 @@ export class ProductCategoryService {
     }
   }
 
-  async findAll(query: FindAllProductCategoriesDto) {
+
+
+  //   async findAll(query: FindAllProductCategoriesDto,userId?:string) {
+  //   const page = query.page ?? 1;
+  //   const limit = query.limit ?? 10;
+  //   const sortBy = query.sortBy;
+  //   const skip = (page - 1) * limit;
+
+  //   const orderBy: Prisma.ProductCategoryOrderByWithRelationInput = {};
+  //   if (sortBy === ProductCategorySortBy.NEWEST) {
+  //     orderBy.createdAt = 'desc';
+  //   } else if (sortBy === ProductCategorySortBy.NAME) {
+  //     orderBy.name = 'asc';
+  //   }
+
+  //   const [categories, total] = await Promise.all([
+  //     this.prisma.productCategory.findMany({
+  //       skip,
+  //       take: limit,
+  //       orderBy,
+  //     }),
+  //     this.prisma.productCategory.count(),
+  //   ]);
+
+
+  //   const mediaIds = categories
+  //     .map((c) => c.image)
+  //     .filter((id): id is string => Boolean(id));
+
+
+  //   const medias = await this.prisma.media.findMany({
+  //     where: { id: { in: mediaIds } },
+  //   });
+
+  //   const mediaMap = new Map(medias.map((m) => [m.id, m]));
+
+
+  //   const categoriesWithMedia = categories.map((c) => ({
+  //     ...c,
+  //     media: c.image ? mediaMap.get(c.image) ?? null : null,
+  //   }));
+
+  //   return {
+  //     data: categoriesWithMedia,
+  //     total,
+  //     currentPage: page,
+  //     limit,
+  //     totalPages: Math.ceil(total / limit),
+  //   };
+  // }
+
+
+  async findAll(query: FindAllProductCategoriesDto, userId?: string) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const sortBy = query.sortBy;
@@ -67,23 +119,62 @@ export class ProductCategoryService {
       orderBy.name = 'asc';
     }
 
-    const [data, total] = await Promise.all([
+   
+    const where: Prisma.ProductCategoryWhereInput = userId
+      ? {
+        productCategories: {
+          some: {
+            product: {
+              shop: {
+                userId,
+              },
+            },
+          },
+        },
+      }
+      : {};
+
+    
+    const [categories, total] = await Promise.all([
       this.prisma.productCategory.findMany({
         skip,
         take: limit,
         orderBy,
+        where,
       }),
-      this.prisma.productCategory.count(),
+      this.prisma.productCategory.count({ where }),
     ]);
 
+    
+    const mediaIds = categories
+      .map((c) => c.image)
+      .filter((id): id is string => Boolean(id));
+
+    const medias = await this.prisma.media.findMany({
+      where: { id: { in: mediaIds } },
+    });
+
+    const mediaMap = new Map(medias.map((m) => [m.id, m]));
+
+
+    const categoriesWithMedia = categories.map((c) => ({
+      ...c,
+      media: c.image ? mediaMap.get(c.image) ?? null : null,
+    }));
+
     return {
-      data,
+      data: categoriesWithMedia,
       total,
       currentPage: page,
       limit,
       totalPages: Math.ceil(total / limit),
     };
   }
+
+
+
+
+
 
   async findOne(id: string) {
     const data = await this.prisma.productCategory.findUnique({

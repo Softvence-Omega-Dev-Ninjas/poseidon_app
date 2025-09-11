@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   UploadedFiles,
   UploadedFile,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProductCategoryService } from './product-category.service';
@@ -47,8 +48,8 @@ export class ProductCategoryController {
   @Roles(Role.Supporter, Role.User)
   @Get()
   @UsePipes(new ValidationPipe({ transform: true }))
-  async findAll(@Query() query: FindAllProductCategoriesDto) {
-    const result = await this.productCategoryService.findAll(query);
+  async findAll(@Query() query: FindAllProductCategoriesDto,@Req() req:any) {
+    const result = await this.productCategoryService.findAll(query,req.user?.sub);
     return cResponseData({
       message: 'Product categories fetched successfully.',
       error: null,

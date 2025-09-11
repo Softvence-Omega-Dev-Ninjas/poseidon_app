@@ -17,14 +17,6 @@ import { Type } from 'class-transformer';
 // Common reusable base
 export class CommonPlanDetailsData {
   @ApiProperty({
-    description: 'Duration of the subscription',
-    enum: Duration,
-    example: Duration.ONE_MONTH,
-  })
-  @IsEnum(Duration)
-  duration: Duration;
-
-  @ApiProperty({
     type: String,
     description: 'Subscription plan title',
     example: 'Per month 1 video call',

@@ -8,9 +8,19 @@ export class SupporterProfileService {
     private readonly prisma: PrismaService,
     // private readonly getShopDataService: GetShopDataService,
   ) {}
+  private async getMedia(mediaIds: string[]) {
+    const media = await this.prisma.media.findMany({
+      where: {
+        id: {
+          in: mediaIds,
+        },
+      },
+    });
+    return media;
+  }
 
   async findAllUsers() {
-    return await this.prisma.user.findMany({
+    const allUserSupporter = await this.prisma.user.findMany({
       where: {
         role: 'supporter',
       },
@@ -23,8 +33,12 @@ export class SupporterProfileService {
             description: true,
           },
         },
+        _count: {
+          select: { supporter: true },
+        },
       },
     });
+    return allUserSupporter;
   }
 
   async profilePage(userid: string) {
@@ -82,6 +96,11 @@ export class SupporterProfileService {
           createdAt: true,
         },
       });
+
+      const postImageIds = posts.flatMap((p) => p.images);
+      const mediaImages = await this.getMedia(postImageIds);
+      const postImageMap = new Map(mediaImages.map((m) => [m.id, m]));
+
       // membershipInfo
       const membershipInfo = await tx.membership_owner.findFirst({
         where: {
@@ -119,6 +138,14 @@ export class SupporterProfileService {
           },
         },
       });
+      const mImagesIds =
+        membershipInfo?.Membership_levels.flatMap((m) => m.levelImage) || [];
+      const mImages = await this.getMedia(mImagesIds);
+      const mImageMap = new Map(mImages.map((m) => [m.id, m]));
+      const mlevels = membershipInfo?.Membership_levels.map((m) => ({
+        ...m,
+        levelImage: mImageMap.get(m.levelImage),
+      }));
       // gallery
       const gallery = await tx.image.findMany({
         where: {
@@ -136,8 +163,11 @@ export class SupporterProfileService {
         profileInfo,
         supporte_card,
         shopid: shopid ? shopid.id : null,
-        posts,
-        membershipInfo,
+        posts: posts.map((p) => ({
+          ...p,
+          images: p.images.map((imageId) => postImageMap.get(imageId)),
+        })),
+        membershipInfo: mlevels,
         image: gallery,
       };
     });

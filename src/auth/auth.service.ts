@@ -31,15 +31,16 @@ export class AuthService {
       );
     }
     const payload = {
+      id: user?.id,
       provider: user?.provider,
       email: user?.email,
       role: user?.role,
       profile: user?.profile,
       shop_id: user?.shop?.id || '',
       memberships_owner_id: user?.memberships_owner?.id || '',
+      stripeAccountId: user?.stripeAccountId || '',
     };
     const access_token = await this.jwtService.signAsync({
-      id: user?.id,
       ...payload,
     });
 

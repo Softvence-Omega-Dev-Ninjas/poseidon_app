@@ -21,15 +21,29 @@ import { CreateMembershipLevelDto } from './dto/create-membership-level.dto';
 import { MembershipSubscriptionPlanPipe } from './pipeline/membershipSubscriptionPlan.pipe';
 import { MembershipSubscriptionPlan } from './dto/MembershipSubscriptionPlan.dto';
 import { LevelImageUpdateDto } from './dto/update-membership-level.dto';
+import { MembershipServiceUseToUserOnly } from './onluUseUserMembershipInfo/useMembershipUser.service';
 
 @Controller('membership')
 export class MembershipController {
-  constructor(private readonly membershipService: MembershipService) {}
+  constructor(
+    private readonly membershipService: MembershipService,
+    private readonly membershipServiceUser: MembershipServiceUseToUserOnly,
+  ) {}
 
+  // @Public()
+  // @Post('buy-membership')
+  // create(@Req() req: Request, @Body() Data: any) {
+  //   return this.membershipService.enableMembership(req['sub'] as string);
+  // }
+
+  // supporter Apis
   @Roles(Role.Supporter)
   @Get('enable-membership')
   enableMembership(@Req() req: Request) {
-    return this.membershipService.enableMembership(req['sub'] as string);
+    console.log("req['memberships_owner_id']", req['memberships_owner_id']);
+    return this.membershipService.enableMembership(
+      req['memberships_owner_id'] as string,
+    );
   }
 
   // createMembershipLevel
@@ -39,6 +53,7 @@ export class MembershipController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateMembershipLevelDto })
   createMembershipLevel(
+    @Req() req: Request,
     @Body('MembershipSubscriptionPlan', MembershipSubscriptionPlanPipe)
     membershipSubscriptionPlan: MembershipSubscriptionPlan[],
     @Body() createMembershipLevelDto: CreateMembershipLevelDto,
@@ -46,11 +61,14 @@ export class MembershipController {
     levelImage: Express.Multer.File,
   ) {
     // return JSON.stringify(ghdf);
-    return this.membershipService.createMembershipLevel({
-      ...createMembershipLevelDto,
-      levelImage,
-      MembershipSubscriptionPlan: membershipSubscriptionPlan,
-    });
+    return this.membershipService.createMembershipLevel(
+      req['memberships_owner_id'] as string,
+      {
+        ...createMembershipLevelDto,
+        levelImage,
+        MembershipSubscriptionPlan: membershipSubscriptionPlan,
+      },
+    );
   }
 
   @Roles(Role.Supporter)
@@ -74,13 +92,7 @@ export class MembershipController {
     // @Param('membershipId') membershipId: string,
     @Req() req: Request,
   ) {
-    console.log(
-      'membershipId - jwt ============== >',
-      req['memberships_owner_id'] as string,
-      'user id - jwt ============== >',
-      req['sub'] as string,
-    );
-    return this.membershipService.getMembershipLevels(
+    return this.membershipServiceUser.getMembershipLevels(
       req['memberships_owner_id'] as string,
     );
   }

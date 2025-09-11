@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
   ValidateNested,
 } from 'class-validator';
 import { MembershipSubscriptionPlan } from './MembershipSubscriptionPlan.dto';
@@ -13,23 +13,22 @@ export class CreateMembershipLevelDto {
   @ApiProperty({
     type: String,
     required: true,
-    description: 'ID of the membership owner',
-    example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-  })
-  @IsString()
-  @IsNotEmpty()
-  @IsUUID()
-  membershipId: string;
-
-  @ApiProperty({
-    type: String,
-    required: true,
     description: 'Name of the membership level',
     example: 'Gold',
   })
   @IsString()
   @IsNotEmpty()
   levelName: string;
+
+  @ApiProperty({
+    type: String,
+    required: true,
+    description: 'Name of the membership level',
+    example: 'online chat',
+  })
+  @IsString()
+  @IsNotEmpty()
+  titleName: string;
 
   @ApiPropertyOptional({
     type: String,
@@ -47,13 +46,22 @@ export class CreateMembershipLevelDto {
   levelImage: Express.Multer.File;
 
   @ApiProperty({
+    type: Boolean,
+    description: 'levels publible',
+    example: 'false or true',
+  })
+  @IsBoolean()
+  @IsNotEmpty()
+  isPublic: boolean;
+
+  @ApiProperty({
     type: String,
     description: 'user notification buy membership then show wellcome_note',
     example: 'wellcome_note',
   })
   @IsOptional()
   @IsString()
-  wellcome_note?: string | null;
+  Wellcome_note?: string | null;
 
   @ApiProperty({
     type: () => [MembershipSubscriptionPlan],

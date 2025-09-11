@@ -104,7 +104,7 @@ export class ImageService {
           skip: offset,
           take: parseInt(limit as any),
           orderBy,
-          include: { likes: { where: { userId } } },
+          include: { likes: { where: { userId } }, media: true },
         }),
         this.prisma.image.count({ where }),
       ]);
@@ -528,7 +528,7 @@ export class ImageService {
     try {
       const images = await this.prisma.image.findMany({
         where: { visibility },
-        include: { likes: { where: { userId } } },
+        include: { likes: { where: { userId } }, media: true },
       });
 
       const imagesWithIsLiked = images.map((image) => {

@@ -59,6 +59,78 @@ export class PostService {
     }
   }
 
+  // async findAll(query: FindAllPostsDto, userId?: string): Promise<any> {
+  //   try {
+  //     const {
+  //       page = 1,
+  //       limit = 10,
+  //       sortBy = PostSortBy.NEWEST,
+  //       whoCanSee,
+  //     } = query;
+  //     const pageNumber = typeof page === 'string' ? parseInt(page, 10) : page;
+  //     const limitNumber =
+  //       typeof limit === 'string' ? parseInt(limit, 10) : limit;
+  //     const offset = (pageNumber - 1) * limitNumber;
+
+  //     let orderBy: Prisma.PostOrderByWithRelationInput;
+  //     switch (sortBy) {
+  //       case PostSortBy.VIEWED:
+  //         orderBy = { view: 'desc' };
+  //         break;
+  //       case PostSortBy.LIKED:
+  //         orderBy = { likes: { _count: 'desc' } };
+  //         break;
+  //       case PostSortBy.NEWEST:
+  //       default:
+  //         orderBy = { createdAt: 'desc' };
+  //         break;
+  //     }
+
+  //     const where: Prisma.PostWhereInput = {};
+  //     if (whoCanSee) {
+  //       where.whoCanSee = whoCanSee;
+  //     }
+
+  //     const [posts, total] = await this.prisma.$transaction([
+  //       this.prisma.post.findMany({
+  //         where,
+  //         skip: offset,
+  //         take: parseInt(limit as any),
+  //         orderBy,
+  //         include: { likes: { where: { userId } }, },
+  //       }),
+  //       this.prisma.post.count({ where }),
+  //     ]);
+
+  //     const postsWithIsLiked = posts.map((post) => {
+  //       const { likes, ...rest } = post;
+  //       return { ...rest, isLiked: likes.length > 0 };
+  //     });
+
+  //     const totalPages = Math.ceil(total / limitNumber);
+
+  //     return cResponseData({
+  //       message: 'Posts retrieved successfully.',
+  //       error: null,
+  //       data: {
+  //         data: postsWithIsLiked,
+  //         total,
+  //         currentPage: pageNumber,
+  //         limit: limitNumber,
+  //         totalPages,
+  //       },
+  //       success: true,
+  //     });
+  //   } catch (error) {
+  //     return cResponseData({
+  //       message: 'Failed to retrieve posts.',
+  //       error: error.message,
+  //       data: null,
+  //       success: false,
+  //     });
+  //   }
+  // }
+
   async findAll(query: FindAllPostsDto, userId?: string): Promise<any> {
     try {
       const {
@@ -67,6 +139,7 @@ export class PostService {
         sortBy = PostSortBy.NEWEST,
         whoCanSee,
       } = query;
+
       const pageNumber = typeof page === 'string' ? parseInt(page, 10) : page;
       const limitNumber =
         typeof limit === 'string' ? parseInt(limit, 10) : limit;
@@ -95,16 +168,34 @@ export class PostService {
         this.prisma.post.findMany({
           where,
           skip: offset,
-          take: parseInt(limit as any),
+          take: limitNumber,
           orderBy,
-          include: { likes: { where: { userId } } },
+          include: {
+            likes: { where: { userId } },
+            user: true, // optional: include user info
+          },
         }),
         this.prisma.post.count({ where }),
       ]);
 
-      const postsWithIsLiked = posts.map((post) => {
+      // 🔥 Collect all mediaIds from all posts
+      const allMediaIds = posts.flatMap((p) => p.images);
+
+      // Fetch media
+      const medias = await this.prisma.media.findMany({
+        where: { id: { in: allMediaIds } },
+      });
+
+      const mediaMap = new Map(medias.map((m) => [m.id, m]));
+
+      // Build posts response
+      const postsWithExtras = posts.map((post) => {
         const { likes, ...rest } = post;
-        return { ...rest, isLiked: likes.length > 0 };
+        return {
+          ...rest,
+          isLiked: likes.length > 0,
+          media: post.images.map((id) => mediaMap.get(id)).filter(Boolean),
+        };
       });
 
       const totalPages = Math.ceil(total / limitNumber);
@@ -113,7 +204,7 @@ export class PostService {
         message: 'Posts retrieved successfully.',
         error: null,
         data: {
-          data: postsWithIsLiked,
+          data: postsWithExtras,
           total,
           currentPage: pageNumber,
           limit: limitNumber,
@@ -131,12 +222,54 @@ export class PostService {
     }
   }
 
+  // async findOne(id: string, userId?: string): Promise<any> {
+  //   try {
+  //     const post = await this.prisma.post.findUnique({
+  //       where: { id },
+  //       include: { likes: { where: { userId } } },
+  //     });
+  //     if (!post) {
+  //       return {
+  //         message: `Post with ID ${id} not found`,
+  //         redirect_url: null,
+  //         error: 'NotFound',
+  //         data: null,
+  //         success: false,
+  //       };
+  //     }
+  //     // Increment view count
+  //     await this.prisma.post.update({
+  //       where: { id },
+  //       data: { view: { increment: 1 } },
+  //     });
+
+  //     const { likes, ...rest } = post;
+  //     return cResponseData({
+  //       message: 'Post retrieved successfully.',
+  //       error: null,
+  //       data: { ...rest, isLiked: likes.length > 0 },
+  //       success: true,
+  //     });
+  //   } catch (error) {
+  //     return cResponseData({
+  //       message: 'Failed to retrieve post.',
+  //       error: error.message,
+  //       data: null,
+  //       success: false,
+  //     });
+  //   }
+  // }
+
   async findOne(id: string, userId?: string): Promise<any> {
     try {
       const post = await this.prisma.post.findUnique({
         where: { id },
-        include: { likes: { where: { userId } } },
+        include: {
+          likes: { where: { userId } },
+          user: true,
+        },
       });
+
       if (!post) {
         return {
           message: `Post with ID ${id} not found`,
@@ -146,17 +279,27 @@ export class PostService {
           success: false,
         };
       }
-      // Increment view count
+
       await this.prisma.post.update({
         where: { id },
         data: { view: { increment: 1 } },
+      });
+
+      const medias = await this.prisma.media.findMany({
+        where: { id: { in: post.images } },
       });
 
       const { likes, ...rest } = post;
       return cResponseData({
         message: 'Post retrieved successfully.',
         error: null,
-        data: { ...rest, isLiked: likes.length > 0 },
+        data: {
+          ...rest,
+          isLiked: likes.length > 0,
+          media: post.images
+            .map((id) => medias.find((m) => m.id === id))
+            .filter(Boolean),
+        },
         success: true,
       });
     } catch (error) {

@@ -5,10 +5,20 @@ import { PrismaClientModule } from 'src/prisma-client/prisma-client.module';
 import { MembershipRewardService } from './reward.service';
 import { MembershipRewardController } from './reward.controller';
 import { CloudinaryModule } from 'src/utils/cloudinary/cloudinary.module';
+import { MembershipServiceUseToUserOnly } from './onluUseUserMembershipInfo/useMembershipUser.service';
+import { MembershipUseToUserOnly } from './onluUseUserMembershipInfo/useMembershipUser.controller';
 
 @Module({
   imports: [PrismaClientModule, CloudinaryModule],
-  controllers: [MembershipController, MembershipRewardController],
-  providers: [MembershipService, MembershipRewardService],
+  controllers: [
+    MembershipUseToUserOnly,
+    MembershipController,
+    MembershipRewardController,
+  ],
+  providers: [
+    MembershipService,
+    MembershipRewardService,
+    MembershipServiceUseToUserOnly,
+  ],
 })
 export class MembershipModule {}

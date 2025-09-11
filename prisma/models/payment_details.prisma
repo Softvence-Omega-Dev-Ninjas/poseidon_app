@@ -1,0 +1,24 @@
+enum ServiceType {
+    membership
+    support
+}
+
+model paymentDetails {
+    id            String      @id @unique @default(uuid())
+    buyerId       String
+    sellerId      String
+    productName   String
+    amount        Float
+    cs_number     String
+    paymemtStatus String      @default("painting")
+    serviceType   ServiceType
+    serviceId     String
+    createAt      DateTime    @default(now())
+    endDate       DateTime
+
+    //access controller route
+    PermissionVideoCallAccess PermissionVideoCallAccess?
+    PermissionMessagesAccess  PermissionMessagesAccess?
+    PermissionGalleryAccess   PermissionGalleryAccess?
+    PermissionPostsAccess     PermissionPostsAccess?
+}

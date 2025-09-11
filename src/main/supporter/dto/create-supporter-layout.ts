@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { SupportCartLayout } from 'generated/prisma';
+import { LayoutType } from 'generated/prisma';
 
 export class CheersLivePackageType {
   @ApiProperty({
@@ -43,7 +43,7 @@ export class CreateSupporterCartLayout {
   })
   @IsString()
   @IsNotEmpty()
-  choose_layout: SupportCartLayout;
+  choose_layout: LayoutType;
 
   @ApiProperty({
     required: true,

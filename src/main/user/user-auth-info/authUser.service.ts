@@ -138,6 +138,7 @@ export class AuthUserService {
   private async createSupporterAccount(createUserDto: CreateUserDto) {
     try {
       // If the user is a supporter, create a support_cart_layout
+      console.log('createSupporterAccount......');
       const newSupporter = await this.prisma.user.create({
         data: {
           email: createUserDto.email,
@@ -154,6 +155,9 @@ export class AuthUserService {
           shop: {
             create: {},
           },
+          memberships_owner: {
+            create: {},
+          },
         },
         select: {
           id: true,
@@ -167,6 +171,7 @@ export class AuthUserService {
           },
         },
       });
+
       // create stripe connected account for supporter
       const createAccountStripe = await this.stripe.createConnectedAccount(
         newSupporter.email,

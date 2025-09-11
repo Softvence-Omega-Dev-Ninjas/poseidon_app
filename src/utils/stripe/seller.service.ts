@@ -60,4 +60,22 @@ export class SellerService {
       );
     }
   }
+
+  async deleteAccount(accountId: string) {
+    try {
+      const deleted = await this.stripe.accounts.del(accountId);
+      return deleted;
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      throw new HttpException(
+        cResponseData({
+          message: 'Failed to delete Stripe account',
+          data: null,
+          error: errorMessage,
+          success: false,
+        }),
+        400,
+      );
+    }
+  }
 }

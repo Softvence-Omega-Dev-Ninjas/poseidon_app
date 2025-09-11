@@ -12,6 +12,7 @@ import { ChatModule } from './message/message.module';
 import { MediafileModule } from './mediafile/mediafile.module';
 import { ServicesModule } from './services/services.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ZoomModule } from './zoom/zoom.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ChatModule,
     ServicesModule,
     ScheduleModule.forRoot(),
+    ZoomModule,
   ],
   controllers: [],
   providers: [],

@@ -31,6 +31,7 @@ import {
 
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
+import { Request } from 'express';
 
 @ApiTags('Product')
 @Controller('product')
@@ -43,6 +44,7 @@ export class ProductController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('images'))
   create(
+    @Req() req: Request,
     @Body() createProductDto: CreateProductDto,
     @UploadedFiles() files?: Array<Express.Multer.File>,
   ) {
@@ -56,7 +58,10 @@ export class ProductController {
       );
     }
     const { categoryIds, ...restOfProductData } = createProductDto;
-    return this.productService.create(createProductDto, files);
+    return this.productService.create(
+      { ...createProductDto, shopId: req['shop_id'] as string },
+      files,
+    );
   }
 
   @Roles(Role.Supporter, Role.User)
@@ -88,10 +93,11 @@ export class ProductController {
   findAll(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
+    @Req() req:any,
     @Query('categoryId') categoryId?: string,
     @Query('draft') draft?: boolean,
   ) {
-    return this.productService.findAll(+page, +limit, categoryId, draft);
+    return this.productService.findAll(+page, +limit,req.user?.sub , categoryId, draft);
   }
 
   @Roles(Role.Supporter, Role.User)
@@ -152,6 +158,7 @@ export class ProductController {
     @UploadedFiles() newImages: Express.Multer.File[],
   ) {
     const updateProductDto = new UpdateProductDto();
+    console.log(updateProductDto);
     for (const key in body) {
       if (Object.prototype.hasOwnProperty.call(body, key)) {
         if (['images', 'categoryIds', 'color', 'features'].includes(key)) {
@@ -196,6 +203,8 @@ export class ProductController {
         }
       }
     }
+
+    
 
     return this.productService.update(id, updateProductDto, newImages);
   }

@@ -12,83 +12,117 @@ export class MembershipService {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  // Enable membership for a specific supporter user
-  async enableMembership(userId: string) {
-    const enableMembership = await this.prisma.$transaction(async (tx) => {
-      const existingMembership = await tx.membership_owner.findFirst({
-        where: {
-          ownerId: userId,
-        },
-      });
-      if (existingMembership && existingMembership.id) {
-        return {
-          message: 'Membership already exists',
-          error: 'Membership conflict',
-          data: null,
-          success: false,
-        };
-      }
-      const newMembership = await tx.membership_owner.create({
-        data: {
-          ownerId: userId,
-          MembershipAccessToVideoCall: {
-            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
-          },
-          MembershipAccessToMessages: {
-            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
-          },
-          MembershipAccessToGallery: {
-            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
-          },
-          MembershipAccessToPosts: {
-            create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
-          },
-        },
-      });
-      return {
-        message: 'Membership enabled successfully',
-        data: newMembership.id,
-        success: true,
-      };
+  private async checkEnableMembership(id: string) {
+    return await this.prisma.membership_owner.findFirst({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        enableMembership: true,
+      },
     });
-    return cResponseData(enableMembership);
+  }
+
+  // Enable membership for a specific supporter user
+  async enableMembership(mid: string) {
+    const existingMembership = await this.checkEnableMembership(mid);
+    if (existingMembership?.enableMembership) {
+      return {
+        message: 'Your Membership Enable already',
+        error: 'Membership conflict',
+        data: null,
+        success: false,
+      };
+    }
+    const newMembership = await this.prisma.membership_owner.update({
+      where: {
+        id: existingMembership?.id,
+      },
+      data: {
+        enableMembership: true,
+        MembershipAccessToVideoCall: {
+          create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+        },
+        MembershipAccessToMessages: {
+          create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+        },
+        MembershipAccessToGallery: {
+          create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+        },
+        MembershipAccessToPosts: {
+          create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
+        },
+      },
+      select: { id: true },
+    });
+
+    return cResponseData({
+      message: 'Membership enabled successfully',
+      data: newMembership.id,
+      success: true,
+    });
   }
 
   // create a membership levels
   async createMembershipLevel(
+    membershipId: string,
     createMembershipLevelDto: CreateMembershipLevelDto,
   ) {
     // levelImage upload
+    const mEnable = await this.checkEnableMembership(membershipId);
+    if (!mEnable?.enableMembership)
+      throw new HttpException(
+        cResponseData({
+          message: 'Membership not enabled',
+          error: 'create Membership Level conflict',
+          data: null,
+          success: false,
+        }),
+        404,
+      );
     const { mediaId } = await this.cloudinaryService.imageUpload(
       createMembershipLevelDto.levelImage,
     );
     const { MembershipSubscriptionPlan, ...data } = createMembershipLevelDto;
     const newMembershipLevel = await this.prisma.membership_levels.create({
       data: {
+        membershipId,
         ...data,
-        Wellcome_note: createMembershipLevelDto.wellcome_note || null,
         levelImage: mediaId,
         MembershipSubscriptionPlan: {
           create: MembershipSubscriptionPlan.map((plan) => ({
             ...plan,
             CalligSubscriptionPlan: plan.CalligSubscriptionPlan
               ? {
-                  create: plan.CalligSubscriptionPlan,
+                  create: {
+                    ...plan.CalligSubscriptionPlan,
+                    duration: plan.duration,
+                  },
                 }
               : undefined,
             MessagesSubscriptionPlan: plan.MessagesSubscriptionPlan
               ? {
-                  create: plan.MessagesSubscriptionPlan,
+                  create: {
+                    ...plan.MessagesSubscriptionPlan,
+                    duration: plan.duration,
+                  },
                 }
               : undefined,
             GallerySubscriptionPlan: plan.GallerySubscriptionPlan
               ? {
-                  create: plan.GallerySubscriptionPlan,
+                  create: {
+                    ...plan.GallerySubscriptionPlan,
+                    duration: plan.duration,
+                  },
                 }
               : undefined,
             PostsSubscriptionPlan: plan.PostsSubscriptionPlan
               ? {
-                  create: plan.PostsSubscriptionPlan,
+                  create: {
+                    ...plan.PostsSubscriptionPlan,
+                    duration: plan.duration,
+                  },
                 }
               : undefined,
           })),
@@ -121,58 +155,6 @@ export class MembershipService {
     return cResponseData({
       message: 'Membership level image updated successfully',
       data: updateLevelImage,
-    });
-  }
-
-  // get all membership levels
-  async getMembershipLevels(mId: string) {
-    return await this.prisma.$transaction(async (tx) => {
-      const allLevels = await tx.membership_levels.findMany({
-        where: {
-          membershipId: mId,
-        },
-        select: {
-          id: true,
-          membershipId: true,
-          levelName: true,
-          levelImage: true,
-          levelDescription: true,
-          MembershipSubscriptionPlan: {
-            select: {
-              id: true,
-              duration: true,
-              price: true,
-              CalligSubscriptionPlan: true,
-              MessagesSubscriptionPlan: true,
-              GallerySubscriptionPlan: true,
-              PostsSubscriptionPlan: true,
-            },
-          },
-        },
-      });
-      const imageIds = allLevels.map((level) => level.levelImage);
-      // call media tb
-      const imageurl = await tx.media.findMany({
-        where: {
-          id: {
-            in: imageIds,
-          },
-        },
-      });
-      return cResponseData({
-        message: 'Membership level created successfully',
-        data:
-          allLevels.map((level) => {
-            const levelImage = imageurl.find(
-              (image) => image.id === level.levelImage,
-            );
-            return {
-              ...level,
-              levelImage: levelImage ? levelImage : null,
-            };
-          }) || [],
-        success: true,
-      });
     });
   }
 }
