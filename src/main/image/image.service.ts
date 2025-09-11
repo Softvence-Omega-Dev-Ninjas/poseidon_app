@@ -98,6 +98,10 @@ export class ImageService {
         where.visibility = visibility;
       }
 
+      if (userId) {
+        where.userId = userId;
+      }
+
       const [images, total] = await this.prisma.$transaction([
         this.prisma.image.findMany({
           where,
