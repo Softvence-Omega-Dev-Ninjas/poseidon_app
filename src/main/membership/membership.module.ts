@@ -8,6 +8,7 @@ import { CloudinaryModule } from 'src/utils/cloudinary/cloudinary.module';
 import { MembershipServiceUseToUserOnly } from './onluUseUserMembershipInfo/useMembershipUser.service';
 import { MembershipUseToUserOnly } from './onluUseUserMembershipInfo/useMembershipUser.controller';
 import { StripeModule } from 'src/utils/stripe/stripe.module';
+import { PaymentInfoService } from './onluUseUserMembershipInfo/paymentDetails.service';
 
 @Module({
   imports: [PrismaClientModule, CloudinaryModule, StripeModule],
@@ -20,6 +21,7 @@ import { StripeModule } from 'src/utils/stripe/stripe.module';
     MembershipService,
     MembershipRewardService,
     MembershipServiceUseToUserOnly,
+    PaymentInfoService,
   ],
 })
 export class MembershipModule {}

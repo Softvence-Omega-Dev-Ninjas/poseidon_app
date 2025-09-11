@@ -3,12 +3,14 @@ import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { BuyMembershipDto } from './dto/buyMembership.dto';
 import { StripeService } from 'src/utils/stripe/stripe.service';
 import { cResponseData } from 'src/common/utils/common-responseData';
+import { PaymentInfoService } from './paymentDetails.service';
 
 @Injectable()
 export class MembershipServiceUseToUserOnly {
   constructor(
     private readonly prisma: PrismaService,
     private readonly stripeService: StripeService,
+    private readonly paymentInfoService: PaymentInfoService,
   ) {}
 
   async buyMembership(userId: string, membershipLevelInfo: BuyMembershipDto) {
@@ -68,6 +70,13 @@ export class MembershipServiceUseToUserOnly {
     }
 
     const plainAccess = membershipLevel?.MembershipSubscriptionPlan[0];
+    // exaiting membership payment info
+    // const existingPaymentInfo =
+    //   await this.paymentInfoService.existingBuyMembership({
+    //     userId: userId,
+    //     sellerId: membershipLevel?.membership.owner.id as string,
+    //     serviceId: membershipLevel?.id as string,
+    //   });
 
     // Defualt create payment info and status pending
     const payment_info = await this.prisma.paymentDetails.create({
