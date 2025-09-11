@@ -19,7 +19,7 @@ export class ProductService {
   constructor(
     private readonly prisma: PrismaService,
     private cloudinaryService: CloudinaryService,
-  ) { }
+  ) {}
 
   async create(
     createProductDto: CreateProductDto,
@@ -172,7 +172,6 @@ export class ProductService {
   //   });
   // }
 
-
   async findAll(
     page: number,
     limit: number,
@@ -196,8 +195,8 @@ export class ProductService {
     }
 
     if (userId) {
-    where.userId = userId;
-  }
+      where.userId = userId;
+    }
 
     const [products, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
@@ -250,7 +249,6 @@ export class ProductService {
     });
   }
 
-
   async findOne(id: string) {
     const product = await this.prisma.product.findUnique({
       where: { id },
@@ -295,9 +293,6 @@ export class ProductService {
       },
     });
   }
-
-
-
 
   async update(
     id: string,

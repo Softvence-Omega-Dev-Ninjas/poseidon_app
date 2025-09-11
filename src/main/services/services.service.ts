@@ -74,52 +74,47 @@ export class ServiceService {
   // }
 
   async findAll(page = 1, limit = 10, draft?: boolean, userId?: string) {
-  const skip = (page - 1) * limit;
-  const where: any = {};
-  if (draft !== undefined) where.draft = draft;
-    if (userId) where.userId = userId; 
+    const skip = (page - 1) * limit;
+    const where: any = {};
+    if (draft !== undefined) where.draft = draft;
+    if (userId) where.userId = userId;
 
-  const [services, total] = await this.prisma.$transaction([
-    this.prisma.service.findMany({
-      where,
-      skip,
-      take: limit,
-    }),
-    this.prisma.service.count({ where }),
-  ]);
+    const [services, total] = await this.prisma.$transaction([
+      this.prisma.service.findMany({
+        where,
+        skip,
+        take: limit,
+      }),
+      this.prisma.service.count({ where }),
+    ]);
 
-  
-  const allMediaIds = services.flatMap((s) => s.images);
+    const allMediaIds = services.flatMap((s) => s.images);
 
-  
-  const medias = await this.prisma.media.findMany({
-    where: { id: { in: allMediaIds } },
-  });
+    const medias = await this.prisma.media.findMany({
+      where: { id: { in: allMediaIds } },
+    });
 
- 
-  const mediaMap = new Map(medias.map((m) => [m.id, m]));
+    const mediaMap = new Map(medias.map((m) => [m.id, m]));
 
- 
-  const servicesWithMedia = services.map((s) => ({
-    ...s,
-    media: s.images.map((id) => mediaMap.get(id)).filter(Boolean),
-  }));
+    const servicesWithMedia = services.map((s) => ({
+      ...s,
+      media: s.images.map((id) => mediaMap.get(id)).filter(Boolean),
+    }));
 
-  const totalPages = Math.ceil(total / limit);
-  return cResponseData({
-    message: 'Services retrieved successfully.',
-    error: null,
-    success: true,
-    data: { 
-      total, 
-      services: servicesWithMedia, 
-      currentPage: page, 
-      totalPages, 
-      limit 
-    },
-  });
-}
-
+    const totalPages = Math.ceil(total / limit);
+    return cResponseData({
+      message: 'Services retrieved successfully.',
+      error: null,
+      success: true,
+      data: {
+        total,
+        services: servicesWithMedia,
+        currentPage: page,
+        totalPages,
+        limit,
+      },
+    });
+  }
 
   // async findAllUser(userid: string, page = 1, limit = 10, draft?: boolean) {
   //   const skip = (page - 1) * limit;
@@ -141,47 +136,42 @@ export class ServiceService {
   // }
 
   async findAllUser(userId: string, page = 1, limit = 10, draft?: boolean) {
-  const skip = (page - 1) * limit;
-  const where: any = { userId };
-  if (draft !== undefined) where.draft = draft;
+    const skip = (page - 1) * limit;
+    const where: any = { userId };
+    if (draft !== undefined) where.draft = draft;
 
-  const [services, total] = await this.prisma.$transaction([
-    this.prisma.service.findMany({ where, skip, take: limit }),
-    this.prisma.service.count({ where }),
-  ]);
+    const [services, total] = await this.prisma.$transaction([
+      this.prisma.service.findMany({ where, skip, take: limit }),
+      this.prisma.service.count({ where }),
+    ]);
 
+    const allMediaIds = services.flatMap((s) => s.images);
 
-  const allMediaIds = services.flatMap((s) => s.images);
+    const medias = await this.prisma.media.findMany({
+      where: { id: { in: allMediaIds } },
+    });
 
+    const mediaMap = new Map(medias.map((m) => [m.id, m]));
 
-  const medias = await this.prisma.media.findMany({
-    where: { id: { in: allMediaIds } },
-  });
+    const servicesWithMedia = services.map((s) => ({
+      ...s,
+      media: s.images.map((id) => mediaMap.get(id)).filter(Boolean),
+    }));
 
-
-  const mediaMap = new Map(medias.map((m) => [m.id, m]));
-
-
-  const servicesWithMedia = services.map((s) => ({
-    ...s,
-    media: s.images.map((id) => mediaMap.get(id)).filter(Boolean),
-  }));
-
-  const totalPages = Math.ceil(total / limit);
-  return cResponseData({
-    message: 'Services retrieved successfully.',
-    error: null,
-    success: true,
-    data: { 
-      total, 
-      services: servicesWithMedia, 
-      currentPage: page, 
-      totalPages, 
-      limit 
-    },
-  });
-}
-
+    const totalPages = Math.ceil(total / limit);
+    return cResponseData({
+      message: 'Services retrieved successfully.',
+      error: null,
+      success: true,
+      data: {
+        total,
+        services: servicesWithMedia,
+        currentPage: page,
+        totalPages,
+        limit,
+      },
+    });
+  }
 
   // async findOne(id: string) {
   //   const service = await this.prisma.service.findUnique({ where: { id } });
@@ -196,33 +186,31 @@ export class ServiceService {
   // }
 
   async findOne(id: string) {
-  const service = await this.prisma.service.findUnique({
-    where: { id },
-  });
+    const service = await this.prisma.service.findUnique({
+      where: { id },
+    });
 
-  if (!service) {
-    throw new NotFoundException(`Service ${id} not found`);
-  }
+    if (!service) {
+      throw new NotFoundException(`Service ${id} not found`);
+    }
 
-  
-  let medias: Awaited<ReturnType<typeof this.prisma.media.findMany>> = [];
-  if (Array.isArray(service.images) && service.images.length > 0) {
-    medias = await this.prisma.media.findMany({
-      where: { id: { in: service.images } },
+    let medias: Awaited<ReturnType<typeof this.prisma.media.findMany>> = [];
+    if (Array.isArray(service.images) && service.images.length > 0) {
+      medias = await this.prisma.media.findMany({
+        where: { id: { in: service.images } },
+      });
+    }
+
+    return cResponseData({
+      message: 'Service retrieved successfully.',
+      error: null,
+      success: true,
+      data: {
+        ...service,
+        medias,
+      },
     });
   }
-
-  return cResponseData({
-    message: 'Service retrieved successfully.',
-    error: null,
-    success: true,
-    data: {
-      ...service,
-      medias,
-    },
-  });
-}
-
 
   async update(
     id: string,

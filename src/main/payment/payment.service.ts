@@ -1,26 +1,53 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePaymentDto } from './dto/create-payment.dto';
+import { HttpException, Injectable } from '@nestjs/common';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { PrismaService } from 'src/prisma-client/prisma-client.service';
+import { CheckOutService } from 'src/utils/stripe/checkOut.service';
 
 @Injectable()
 export class PaymentService {
-  create(createPaymentDto: CreatePaymentDto) {
-    return 'This action adds a new payment';
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly checkOutService: CheckOutService,
+  ) {}
+
+  async membershipPaymentCheckOut(id: string) {
+    const unpaid = await this.prisma.paymentDetails.findFirst({
+      where: { id },
+      select: {
+        buyerId: true,
+        sellerId: true,
+        amount: true,
+        serviceType: true,
+        serviceId: true,
+        paymemtStatus: true,
+        cs_number: true,
+      },
+    });
+    console.log('unpaid Data with payment', unpaid);
+    if (!unpaid?.cs_number) throw new HttpException('Payment not found', 404);
+    const checkoutSession = await this.checkOutService.checkPayment(
+      unpaid.cs_number,
+    );
+    if (!checkoutSession) throw new HttpException('Payment not found', 404);
+    if (checkoutSession.payment_status === 'paid') {
+      await this.upDateOne(id, {
+        paymemtStatus: 'paid',
+      });
+    }
+    const membershipId = await this.prisma.membership_owner.findFirst({
+      where: { ownerId: unpaid.sellerId },
+      select: { id: true },
+    });
+    console.log('membershipId', membershipId);
+    return membershipId?.id
+      ? `${process.env.FRONTEND_URL}/membership/${membershipId?.id}`
+      : `${process.env.FRONTEND_URL}`;
   }
 
-  findAll() {
-    return `This action returns all payment`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} payment`;
-  }
-
-  update(id: number, updatePaymentDto: UpdatePaymentDto) {
-    return `This action updates a #${id} payment`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} payment`;
+  async upDateOne(id: string, data: UpdatePaymentDto) {
+    return await this.prisma.paymentDetails.update({
+      where: { id },
+      data,
+    });
   }
 }

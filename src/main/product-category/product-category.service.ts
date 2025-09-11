@@ -15,7 +15,7 @@ export class ProductCategoryService {
   constructor(
     private readonly prisma: PrismaService,
     private cloudinaryService: CloudinaryService,
-  ) { }
+  ) {}
 
   async create(
     createProductCategoryDto: CreateProductCategoryDto,
@@ -54,8 +54,6 @@ export class ProductCategoryService {
     }
   }
 
-
-
   //   async findAll(query: FindAllProductCategoriesDto,userId?:string) {
   //   const page = query.page ?? 1;
   //   const limit = query.limit ?? 10;
@@ -78,18 +76,15 @@ export class ProductCategoryService {
   //     this.prisma.productCategory.count(),
   //   ]);
 
-
   //   const mediaIds = categories
   //     .map((c) => c.image)
   //     .filter((id): id is string => Boolean(id));
-
 
   //   const medias = await this.prisma.media.findMany({
   //     where: { id: { in: mediaIds } },
   //   });
 
   //   const mediaMap = new Map(medias.map((m) => [m.id, m]));
-
 
   //   const categoriesWithMedia = categories.map((c) => ({
   //     ...c,
@@ -105,7 +100,6 @@ export class ProductCategoryService {
   //   };
   // }
 
-
   async findAll(query: FindAllProductCategoriesDto, userId?: string) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
@@ -119,22 +113,20 @@ export class ProductCategoryService {
       orderBy.name = 'asc';
     }
 
-   
     const where: Prisma.ProductCategoryWhereInput = userId
       ? {
-        productCategories: {
-          some: {
-            product: {
-              shop: {
-                userId,
+          productCategories: {
+            some: {
+              product: {
+                shop: {
+                  userId,
+                },
               },
             },
           },
-        },
-      }
+        }
       : {};
 
-    
     const [categories, total] = await Promise.all([
       this.prisma.productCategory.findMany({
         skip,
@@ -145,7 +137,6 @@ export class ProductCategoryService {
       this.prisma.productCategory.count({ where }),
     ]);
 
-    
     const mediaIds = categories
       .map((c) => c.image)
       .filter((id): id is string => Boolean(id));
@@ -156,10 +147,9 @@ export class ProductCategoryService {
 
     const mediaMap = new Map(medias.map((m) => [m.id, m]));
 
-
     const categoriesWithMedia = categories.map((c) => ({
       ...c,
-      media: c.image ? mediaMap.get(c.image) ?? null : null,
+      media: c.image ? (mediaMap.get(c.image) ?? null) : null,
     }));
 
     return {
@@ -170,11 +160,6 @@ export class ProductCategoryService {
       totalPages: Math.ceil(total / limit),
     };
   }
-
-
-
-
-
 
   async findOne(id: string) {
     const data = await this.prisma.productCategory.findUnique({

@@ -48,8 +48,11 @@ export class ProductCategoryController {
   @Roles(Role.Supporter, Role.User)
   @Get()
   @UsePipes(new ValidationPipe({ transform: true }))
-  async findAll(@Query() query: FindAllProductCategoriesDto,@Req() req:any) {
-    const result = await this.productCategoryService.findAll(query,req.user?.sub);
+  async findAll(@Query() query: FindAllProductCategoriesDto, @Req() req: any) {
+    const result = await this.productCategoryService.findAll(
+      query,
+      req.user?.sub,
+    );
     return cResponseData({
       message: 'Product categories fetched successfully.',
       error: null,

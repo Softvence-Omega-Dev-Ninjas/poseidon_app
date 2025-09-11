@@ -75,7 +75,7 @@ export class MembershipServiceUseToUserOnly {
         buyerId: userId,
         sellerId: membershipLevel?.membership.owner.id as string,
         serviceName: membershipLevel?.titleName as string,
-        amount: membershipLevel?.MembershipSubscriptionPlan[0].price as number,
+        amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
         serviceType: 'membership',
         serviceId: membershipLevel?.id as string,
         endDate: endDate,
