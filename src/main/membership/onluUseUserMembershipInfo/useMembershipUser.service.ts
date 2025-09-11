@@ -69,7 +69,6 @@ export class MembershipServiceUseToUserOnly {
       endDate.setFullYear(endDate.getFullYear() + 1);
     }
 
-    const plainAccess = membershipLevel?.MembershipSubscriptionPlan[0];
     // exaiting membership payment info
     // const existingPaymentInfo =
     //   await this.paymentInfoService.existingBuyMembership({
@@ -78,6 +77,7 @@ export class MembershipServiceUseToUserOnly {
     //     serviceId: membershipLevel?.id as string,
     //   });
 
+    const plainAccess = membershipLevel?.MembershipSubscriptionPlan[0];
     // Defualt create payment info and status pending
     const payment_info = await this.prisma.paymentDetails.create({
       data: {
@@ -173,6 +173,7 @@ export class MembershipServiceUseToUserOnly {
       const allLevels = await tx.membership_levels.findMany({
         where: {
           membershipId: mId,
+          isPublic: true,
         },
         select: {
           id: true,
@@ -180,6 +181,7 @@ export class MembershipServiceUseToUserOnly {
           levelName: true,
           levelImage: true,
           levelDescription: true,
+          isPublic: true,
           MembershipSubscriptionPlan: {
             select: {
               id: true,
