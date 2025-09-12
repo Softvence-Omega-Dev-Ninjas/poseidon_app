@@ -15,7 +15,7 @@ services:
       REDIS_CONNECTION_URL: redis://redis:6379
       STRIPE_SECRET_KEY: sk_test_51S14538ZZDvAakDbsGqbQDmg5wXzoTdkk2J1Nyob9EKQdnDBQQvAXA7pXp6ZMEAWapCy5zEbC8uv4sAbXRuWPB8X00nyy8JgHZ
       PORT: 3000
-      FRONTEND_URL: http://localhost:3001
+      FRONTEND_URL: http://localhost:5173
       BACKEND_URL: https://drinkwithme.click
       ZOOM_CLIENT_ID: 7ugkZmTiSCCdzBQE6pjaUw
       ZOOM_CLIENT_SECRET: 8yWkiv3PyQOY2YCB8Bxnjow63St4NgJF
