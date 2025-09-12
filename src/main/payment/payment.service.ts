@@ -40,7 +40,7 @@ export class PaymentService {
     });
     console.log('membershipId', membershipId);
     return membershipId?.id
-      ? `${process.env.FRONTEND_URL}/membership/${membershipId?.id}`
+      ? `${process.env.FRONTEND_URL}/success` //${process.env.FRONTEND_URL}/membership/${membershipId?.id}
       : `${process.env.FRONTEND_URL}`;
   }
 
