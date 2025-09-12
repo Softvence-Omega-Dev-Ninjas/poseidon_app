@@ -32,6 +32,7 @@ export class MembershipUseToUserOnly {
     @Query('buyforce') buyforce: boolean,
   ) {
     buyforce = buyforce === true ? true : false;
+    console.log({ buyforce, data });
     return this.membershipServiceUser.buyMembership(
       req['sub'] as string,
       data,

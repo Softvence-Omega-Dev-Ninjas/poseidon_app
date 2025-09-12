@@ -155,6 +155,7 @@ export class SupporterProfileService {
       const gallery = await tx.image.findMany({
         where: {
           userId: userid,
+          visibility: 'user',
         },
         select: {
           id: true,

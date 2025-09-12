@@ -62,6 +62,8 @@ export class MembershipServiceUseToUserOnly {
       );
     }
 
+    console.log({ membershipLevel });
+
     let endDate: Date = new Date();
     const plan = membershipLevel?.MembershipSubscriptionPlan[0]
       .duration as string;
@@ -74,24 +76,24 @@ export class MembershipServiceUseToUserOnly {
     }
 
     // exaiting membership payment info
-    const existingPaymentInfo =
-      await this.paymentInfoService.existingBuyMembership({
-        userId: userId,
-        sellerId: membershipLevel?.membership.owner.id as string,
-        serviceId: membershipLevel?.id as string,
-      });
+    // const existingPaymentInfo =
+    //   await this.paymentInfoService.existingBuyMembership({
+    //     userId: userId,
+    //     sellerId: membershipLevel?.membership.owner.id as string,
+    //     serviceId: membershipLevel?.id as string,
+    //   });
 
-    if (!buyforce && existingPaymentInfo && existingPaymentInfo.id) {
-      const existingService = await this.prisma.membership_levels.findFirst({
-        where: { id: existingPaymentInfo.serviceId },
-      });
-      return cResponseData({
-        message: 'You already have this membership',
-        error: null,
-        data: existingService,
-        success: true,
-      });
-    }
+    // if (!buyforce && existingPaymentInfo && existingPaymentInfo.id) {
+    //   const existingService = await this.prisma.membership_levels.findFirst({
+    //     where: { id: existingPaymentInfo.serviceId },
+    //   });
+    //   return cResponseData({
+    //     message: 'You already have this membership',
+    //     error: null,
+    //     data: existingService,
+    //     success: true,
+    //   });
+    // }
 
     const plainAccess = membershipLevel?.MembershipSubscriptionPlan[0];
     // Defualt create payment info and status pending
