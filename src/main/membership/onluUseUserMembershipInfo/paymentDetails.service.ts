@@ -11,13 +11,19 @@ export class PaymentInfoService {
     serviceId: string;
   }) {
     const { userId, sellerId, serviceId } = data;
-    return await this.prisma.paymentDetails.findFirst({
+    const existingPaymentInfo = await this.prisma.paymentDetails.findFirst({
       where: {
         buyerId: userId,
         sellerId: sellerId,
         serviceId: serviceId,
         serviceType: 'membership',
+        paymemtStatus: 'paid',
+        endDate: {
+          gte: new Date(),
+        },
       },
     });
+    console.log('existingPaymentInfo', existingPaymentInfo);
+    return existingPaymentInfo;
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Query } from '@nestjs/common';
 import { MembershipServiceUseToUserOnly } from './useMembershipUser.service';
 import { Public } from 'src/auth/guard/public.decorator';
 import { Request } from 'express';
@@ -26,7 +26,16 @@ export class MembershipUseToUserOnly {
 
   @Roles(Role.User)
   @Post('buy')
-  buyMembership(@Req() req: Request, @Body() data: BuyMembershipDto) {
-    return this.membershipServiceUser.buyMembership(req['sub'] as string, data);
+  buyMembership(
+    @Req() req: Request,
+    @Body() data: BuyMembershipDto,
+    @Query('buyforce') buyforce: boolean,
+  ) {
+    buyforce = buyforce === true ? true : false;
+    return this.membershipServiceUser.buyMembership(
+      req['sub'] as string,
+      data,
+      buyforce,
+    );
   }
 }
