@@ -19,6 +19,13 @@ services:
       CLOUDINARY_API_SECRET: UULVbMCsK_b0uMyWu4EIABgTUm4
       REDIS_CONNECTION_URL: redis://redis:6379
       PORT: 3000
+      STRIPE_SECRET_KEY: sk_test_51S14538ZZDvAakDbsGqbQDmg5wXzoTdkk2J1Nyob9EKQdnDBQQvAXA7pXp6ZMEAWapCy5zEbC8uv4sAbXRuWPB8X00nyy8JgHZ
+      FRONTEND_URL: http://localhost:5173
+      BACKEND_URL: http://localhost:3000
+      ZOOM_CLIENT_ID: 7ugkZmTiSCCdzBQE6pjaUw
+      ZOOM_CLIENT_SECRET: 8yWkiv3PyQOY2YCB8Bxnjow63St4NgJF
+      ZOOM_ACCOUNT_ID: p79SDRYlRb-x1C3_WUK6yA
+      ZOOM_API_BASE: https://api.zoom.us/v2
     depends_on:
       - db
       - redis
