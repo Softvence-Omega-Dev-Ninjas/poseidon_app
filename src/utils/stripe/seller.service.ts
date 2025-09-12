@@ -45,7 +45,7 @@ export class SellerService {
         refresh_url: `${process.env.FRONTEND_URL}/notfound`,
         return_url: redirect_url
           ? `${process.env.FRONTEND_URL}/${redirect_url}`
-          : `${process.env.FRONTEND_URL}/signin`,
+          : `${process.env.FRONTEND_URL}/login`,
         type: 'account_onboarding',
       });
       return accountLink;

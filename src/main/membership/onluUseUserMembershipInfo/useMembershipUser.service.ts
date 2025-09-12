@@ -83,15 +83,18 @@ export class MembershipServiceUseToUserOnly {
         serviceId: membershipLevel?.id as string,
       });
 
-    if (!buyforce && existingPaymentInfo && existingPaymentInfo.id) {
-      const existingService = await this.prisma.membership_levels.findFirst({
-        where: { id: existingPaymentInfo.serviceId },
-      });
+    console.log('===== existingPaymentInfo ======', existingPaymentInfo);
+    console.log('===== buyforce >>>>>>>>>>>>>>>>>>>> ======', buyforce);
+    const existingService = await this.prisma.membership_levels.findFirst({
+      where: { id: existingPaymentInfo?.serviceId },
+    });
+
+    if (!buyforce && existingPaymentInfo && existingService?.id) {
       return cResponseData({
-        message: 'You already have this membership',
+        message: 'You already have this membership, Are you sure purchece this',
         error: null,
-        data: existingService,
-        success: true,
+        data: null,
+        success: false,
       });
     }
 
@@ -152,23 +155,23 @@ export class MembershipServiceUseToUserOnly {
     });
 
     // // payment checkout this function
-    // const checkout = await this.stripeService.checkOutPaymentSessionsMembership(
-    //   {
-    //     payment_info_id: payment_info.id,
-    //     planDuration: plan,
-    //     amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
-    //     buyerId: userId,
-    //     sellerId: membershipLevel?.membership.owner.id as string,
-    //     serviceName: membershipLevel?.titleName as string,
-    //     serviceType: 'membership',
-    //     serviceId: membershipLevel?.id as string,
-    //   },
-    // );
+    const checkout = await this.stripeService.checkOutPaymentSessionsMembership(
+      {
+        payment_info_id: payment_info.id,
+        planDuration: plan,
+        amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
+        buyerId: userId,
+        sellerId: membershipLevel?.membership.owner.id as string,
+        serviceName: membershipLevel?.titleName as string,
+        serviceType: 'membership',
+        serviceId: membershipLevel?.id as string,
+      },
+    );
 
     return {
       message: 'Membership bought successfully',
-      redirect_url: 'checkout.url',
-      data: 'checkout.id',
+      redirect_url: checkout.url,
+      data: checkout.id,
       success: true,
     };
     // return cResponseData({
@@ -244,6 +247,7 @@ export class MembershipServiceUseToUserOnly {
     return await this.prisma.membership_levels.findUnique({
       where: {
         id: levelId,
+        isPublic: true,
       },
       select: {
         id: true,

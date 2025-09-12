@@ -5,6 +5,7 @@ import { Request } from 'express';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { BuyMembershipDto } from './dto/buyMembership.dto';
+import { StringToBooleanPipe } from 'src/common/utils/stringToBoolean.pipe';
 
 @Controller('membership-use')
 export class MembershipUseToUserOnly {
@@ -29,9 +30,9 @@ export class MembershipUseToUserOnly {
   buyMembership(
     @Req() req: Request,
     @Body() data: BuyMembershipDto,
-    @Query('buyforce') buyforce: boolean,
+    @Query('buyforce', StringToBooleanPipe) buyforce: boolean,
   ) {
-    buyforce = buyforce === true ? true : false;
+    // buyforce = buyforce === true ? true : false;
     console.log({ buyforce, data });
     return this.membershipServiceUser.buyMembership(
       req['sub'] as string,

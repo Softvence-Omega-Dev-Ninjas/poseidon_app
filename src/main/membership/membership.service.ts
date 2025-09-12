@@ -134,7 +134,6 @@ export class MembershipService {
       },
     });
 
-    console.log(createMembershipLevelDto);
     return cResponseData({
       message: 'Membership level created successfully',
       data: newMembershipLevel,

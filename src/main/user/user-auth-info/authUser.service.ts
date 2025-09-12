@@ -39,7 +39,7 @@ export class AuthUserService {
       throw new HttpException(
         {
           message: 'Your Have all ready register please login',
-          redirect_url: 'http://localhost:3000/signin',
+          redirect_url: `${process.env.FRONTEND_URL}/login`,
           error: null,
           data: null,
           success: false,
@@ -82,7 +82,7 @@ export class AuthUserService {
     });
     return {
       message: 'Your Have SignUp Successful',
-      redirect_url: 'http://localhost:3000/signin',
+      redirect_url: `${process.env.FRONTEND_URL}/login`,
       error: null,
       data: { name: newUser.profile?.name },
       success: true,
