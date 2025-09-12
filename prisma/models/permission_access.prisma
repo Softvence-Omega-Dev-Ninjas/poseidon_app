@@ -8,8 +8,8 @@ model PermissionVideoCallAccess {
     unlimitedVideoCalls Boolean
     createAt            DateTime @default(now())
 
-    paymentId      String         @unique
-    paymentDetails paymentDetails @relation(fields: [paymentId], references: [id])
+    paymentId String @unique
+    paymentDetails paymentDetails @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 }
 
 model PermissionMessagesAccess {
@@ -23,7 +23,7 @@ model PermissionMessagesAccess {
     createAt          DateTime @default(now())
 
     paymentId      String         @unique
-    paymentDetails paymentDetails @relation(fields: [paymentId], references: [id])
+    paymentDetails paymentDetails @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 }
 
 model PermissionGalleryAccess {
@@ -35,7 +35,7 @@ model PermissionGalleryAccess {
     createAt     DateTime @default(now())
 
     paymentId      String         @unique
-    paymentDetails paymentDetails @relation(fields: [paymentId], references: [id])
+    paymentDetails paymentDetails @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 }
 
 model PermissionPostsAccess {
@@ -47,5 +47,5 @@ model PermissionPostsAccess {
     createAt     DateTime @default(now())
 
     paymentId      String         @unique
-    paymentDetails paymentDetails @relation(fields: [paymentId], references: [id])
+    paymentDetails paymentDetails @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 }

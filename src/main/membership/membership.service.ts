@@ -88,6 +88,7 @@ export class MembershipService {
       createMembershipLevelDto.levelImage,
     );
     const { MembershipSubscriptionPlan, ...data } = createMembershipLevelDto;
+
     const newMembershipLevel = await this.prisma.membership_levels.create({
       data: {
         membershipId,
@@ -132,6 +133,8 @@ export class MembershipService {
         },
       },
     });
+
+    console.log(createMembershipLevelDto);
     return cResponseData({
       message: 'Membership level created successfully',
       data: newMembershipLevel,

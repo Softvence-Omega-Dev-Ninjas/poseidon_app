@@ -50,6 +50,7 @@ export class CreateMembershipLevelDto {
     description: 'levels publible',
     example: 'false or true',
   })
+  @Type(() => Boolean)
   @IsBoolean()
   @IsNotEmpty()
   isPublic: boolean;

@@ -25,6 +25,7 @@ import {
   UpdateMembershipLevelDto,
 } from './dto/update-membership-level.dto';
 import { MembershipServiceUseToUserOnly } from './onluUseUserMembershipInfo/useMembershipUser.service';
+import { StringToBooleanPipe } from 'src/common/utils/stringToBoolean.pipe';
 
 @Controller('membership')
 export class MembershipController {
@@ -32,12 +33,6 @@ export class MembershipController {
     private readonly membershipService: MembershipService,
     private readonly membershipServiceUser: MembershipServiceUseToUserOnly,
   ) {}
-
-  // @Public()
-  // @Post('buy-membership')
-  // create(@Req() req: Request, @Body() Data: any) {
-  //   return this.membershipService.enableMembership(req['sub'] as string);
-  // }
 
   // supporter Apis
   @Roles(Role.Supporter)
@@ -59,15 +54,16 @@ export class MembershipController {
     @Req() req: Request,
     @Body('MembershipSubscriptionPlan', MembershipSubscriptionPlanPipe)
     membershipSubscriptionPlan: MembershipSubscriptionPlan[],
+    @Body('isPublic', StringToBooleanPipe) isPublic: boolean,
     @Body() createMembershipLevelDto: CreateMembershipLevelDto,
     @UploadedFile(new ImageValidationPipe())
     levelImage: Express.Multer.File,
   ) {
-    // return JSON.stringify(ghdf);
     return this.membershipService.createMembershipLevel(
       req['memberships_owner_id'] as string,
       {
         ...createMembershipLevelDto,
+        isPublic,
         levelImage,
         MembershipSubscriptionPlan: membershipSubscriptionPlan,
       },

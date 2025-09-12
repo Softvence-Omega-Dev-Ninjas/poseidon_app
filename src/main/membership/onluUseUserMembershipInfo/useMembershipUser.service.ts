@@ -76,24 +76,24 @@ export class MembershipServiceUseToUserOnly {
     }
 
     // exaiting membership payment info
-    // const existingPaymentInfo =
-    //   await this.paymentInfoService.existingBuyMembership({
-    //     userId: userId,
-    //     sellerId: membershipLevel?.membership.owner.id as string,
-    //     serviceId: membershipLevel?.id as string,
-    //   });
+    const existingPaymentInfo =
+      await this.paymentInfoService.existingBuyMembership({
+        userId: userId,
+        sellerId: membershipLevel?.membership.owner.id as string,
+        serviceId: membershipLevel?.id as string,
+      });
 
-    // if (!buyforce && existingPaymentInfo && existingPaymentInfo.id) {
-    //   const existingService = await this.prisma.membership_levels.findFirst({
-    //     where: { id: existingPaymentInfo.serviceId },
-    //   });
-    //   return cResponseData({
-    //     message: 'You already have this membership',
-    //     error: null,
-    //     data: existingService,
-    //     success: true,
-    //   });
-    // }
+    if (!buyforce && existingPaymentInfo && existingPaymentInfo.id) {
+      const existingService = await this.prisma.membership_levels.findFirst({
+        where: { id: existingPaymentInfo.serviceId },
+      });
+      return cResponseData({
+        message: 'You already have this membership',
+        error: null,
+        data: existingService,
+        success: true,
+      });
+    }
 
     const plainAccess = membershipLevel?.MembershipSubscriptionPlan[0];
     // Defualt create payment info and status pending
@@ -151,24 +151,24 @@ export class MembershipServiceUseToUserOnly {
       },
     });
 
-    // payment checkout this function
-    const checkout = await this.stripeService.checkOutPaymentSessionsMembership(
-      {
-        payment_info_id: payment_info.id,
-        planDuration: plan,
-        amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
-        buyerId: userId,
-        sellerId: membershipLevel?.membership.owner.id as string,
-        serviceName: membershipLevel?.titleName as string,
-        serviceType: 'membership',
-        serviceId: membershipLevel?.id as string,
-      },
-    );
+    // // payment checkout this function
+    // const checkout = await this.stripeService.checkOutPaymentSessionsMembership(
+    //   {
+    //     payment_info_id: payment_info.id,
+    //     planDuration: plan,
+    //     amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
+    //     buyerId: userId,
+    //     sellerId: membershipLevel?.membership.owner.id as string,
+    //     serviceName: membershipLevel?.titleName as string,
+    //     serviceType: 'membership',
+    //     serviceId: membershipLevel?.id as string,
+    //   },
+    // );
 
     return {
       message: 'Membership bought successfully',
-      redirect_url: checkout.url,
-      data: checkout.id,
+      redirect_url: 'checkout.url',
+      data: 'checkout.id',
       success: true,
     };
     // return cResponseData({
