@@ -21,6 +21,7 @@ export class SellerService {
         },
         capabilities: {
           transfers: { requested: true },
+          crypto_payments: { requested: true },
         },
       });
       return account;
@@ -54,6 +55,37 @@ export class SellerService {
       throw new HttpException(
         cResponseData({
           message: 'Failed to create Stripe account link',
+          data: null,
+          error: errorMessage,
+          success: false,
+        }),
+        400,
+      );
+    }
+  }
+
+  async financialServices(accountId: string) {
+    try {
+      const balance = await this.stripe.balance.retrieve({
+        stripeAccount: accountId,
+      });
+      const payouts = await this.stripe.payouts.list(
+        {
+          limit: 10,
+        },
+        {
+          stripeAccount: accountId,
+        },
+      );
+      return {
+        balance,
+        payouts,
+      };
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      throw new HttpException(
+        cResponseData({
+          message: 'Failed to retrieve financial services',
           data: null,
           error: errorMessage,
           success: false,
