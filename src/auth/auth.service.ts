@@ -38,10 +38,10 @@ export class AuthService {
       profile: user?.profile,
       shop_id: user?.shop?.id || '',
       memberships_owner_id: user?.memberships_owner?.id || '',
-      stripeAccountId: user?.stripeAccountId || '',
     };
     const access_token = await this.jwtService.signAsync({
       ...payload,
+      stripeAccountId: user?.stripeAccountId || '',
     });
 
     // return payload;
