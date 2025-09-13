@@ -69,6 +69,37 @@ export class SellerService {
       const balance = await this.stripe.balance.retrieve({
         stripeAccount: accountId,
       });
+
+      function formatAmount(amount: number, currency: string) {
+        // Convert cents to dollars
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency,
+        }).format(amount / 100);
+      }
+
+      const available = balance.available.reduce(
+        (sum, b) => (b.currency == 'usd' ? sum + b.amount : 0),
+        0,
+      );
+      const pending = balance.pending.reduce(
+        (sum, b) => (b.currency == 'usd' ? sum + b.amount : 0),
+        0,
+      );
+      const total = available + pending;
+
+      const cCurrency = ['usdc', 'usdp', 'usdg'];
+
+      const cryptoAvailable = balance.available.reduce(
+        (sum, b) => (cCurrency.includes(b.currency) ? sum + b.amount : 0),
+        0,
+      );
+      const cryptoPending = balance.pending.reduce(
+        (sum, b) => (cCurrency.includes(b.currency) ? sum + b.amount : 0),
+        0,
+      );
+      const cryptoTotal = cryptoAvailable + cryptoPending;
+
       const payouts = await this.stripe.payouts.list(
         {
           limit: 10,
@@ -77,9 +108,14 @@ export class SellerService {
           stripeAccount: accountId,
         },
       );
+
       return {
-        balance,
-        payouts,
+        // Withdraw: formatAmount(available, 'usd'),
+        Available_for_Payout: formatAmount(pending, 'usd'),
+        Total_Earning: formatAmount(total, 'usd'),
+        Crypto_balance: formatAmount(cryptoPending, 'usd'),
+        payouts: payouts,
+        rowData: balance,
       };
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : String(e);

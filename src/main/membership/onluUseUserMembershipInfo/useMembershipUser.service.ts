@@ -90,12 +90,13 @@ export class MembershipServiceUseToUserOnly {
     });
 
     if (!buyforce && existingPaymentInfo && existingService?.id) {
-      return cResponseData({
+      return {
         message: 'You already have this membership, Are you sure purchece this',
         error: null,
         data: null,
+        buyforce: true,
         success: false,
-      });
+      };
     }
 
     const plainAccess = membershipLevel?.MembershipSubscriptionPlan[0];

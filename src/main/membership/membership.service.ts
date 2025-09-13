@@ -84,10 +84,15 @@ export class MembershipService {
         }),
         404,
       );
+
+    console.log('images uploading - host......');
+
     const { mediaId } = await this.cloudinaryService.imageUpload(
       createMembershipLevelDto.levelImage,
     );
     const { MembershipSubscriptionPlan, ...data } = createMembershipLevelDto;
+
+    console.log('images upload - successfull......');
 
     const newMembershipLevel = await this.prisma.membership_levels.create({
       data: {
