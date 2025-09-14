@@ -65,10 +65,18 @@ export class CreateUserDto {
   role: string;
 
   @ApiProperty({
+    type: String,
+    required: true,
+    example: 'user345',
+  })
+  username: string;
+
+  @ApiProperty({
     required: true,
     example: 'user@gmail.com',
   })
   email: string;
+
   @ApiProperty({
     required: true,
     example: 'User345@#$',

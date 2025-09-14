@@ -39,11 +39,12 @@ export class AuthController {
   ) {
     // call cloudinary profile image upload - this area
     const { imageUrl } = await this.cloudinaryService.profileImageUpload(image);
-    const { role, email, password, ...profile } = createAuthDto;
+    const { role, username, email, password, ...profile } = createAuthDto;
 
     return this.authUserService.createUser({
       role,
       email,
+      username,
       password,
       profile: {
         ...profile,
@@ -71,6 +72,12 @@ export class AuthController {
       // partitioned: true,
     });
     return res.status(HttpStatus.OK).json(varifyUser);
+  }
+
+  @Public()
+  @Get('check/:username')
+  async checkUsername(@Param('username') username: string) {
+    return this.authUserService.checkUsername(username);
   }
 
   @Public()

@@ -13,6 +13,7 @@ export class SignUpUserDto {
     example: 'user@gmail.com',
   })
   email: string;
+
   @ApiProperty({
     required: true,
     example: 'User345@#$',
@@ -20,6 +21,11 @@ export class SignUpUserDto {
   password: string;
 
   /// profile
+  @ApiProperty({
+    required: true,
+    example: 'username',
+  })
+  username: string;
 
   @ApiProperty({
     required: true,

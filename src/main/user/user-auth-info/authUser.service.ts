@@ -60,6 +60,7 @@ export class AuthUserService {
     const newUser = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
+        username: createUserDto.username,
         password: hashedPassword,
         role: createUserDto.role as 'user',
         profile: {
@@ -142,6 +143,7 @@ export class AuthUserService {
       const newSupporter = await this.prisma.user.create({
         data: {
           email: createUserDto.email,
+          username: createUserDto.username,
           password: createUserDto.password,
           role: createUserDto.role as 'supporter',
           profile: {
@@ -231,5 +233,18 @@ export class AuthUserService {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  async checkUsername(username: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        username: username,
+      },
+      select: {
+        id: true,
+        username: true,
+      },
+    });
+    return !user;
   }
 }
