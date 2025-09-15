@@ -81,7 +81,7 @@ export class SupporterController {
   }
 
   @Post('payment')
-  create(@Body() createSupporterDto: CreateSupporterPayDto) {
+  buySupport(@Body() createSupporterDto: CreateSupporterPayDto) {
     return this.supporterService.create(createSupporterDto);
   }
 }

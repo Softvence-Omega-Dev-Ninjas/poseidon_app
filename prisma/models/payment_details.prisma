@@ -3,17 +3,23 @@ enum ServiceType {
     support
 }
 
+enum PaymemtStatus {
+    pending
+    unpaid
+    paid
+}
+
 model paymentDetails {
-    id            String      @id @unique @default(uuid())
-    buyerId       String
+    id            String        @id @unique @default(uuid())
+    buyerId       String?
     sellerId      String
     serviceName   String
     amount        Float
     cs_number     String?
-    paymemtStatus String      @default("pending")
+    paymemtStatus PaymemtStatus @default(pending)
     serviceType   ServiceType
     serviceId     String
-    createAt      DateTime    @default(now())
+    createAt      DateTime      @default(now())
     endDate       DateTime
 
     //access controller route

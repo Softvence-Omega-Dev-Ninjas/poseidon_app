@@ -1,8 +1,9 @@
 model SupporterPay {
   id                String             @id @unique @default(uuid())
-  user_id           String
+  user_id           String?
   author_id         String
   transaction_id    String
+  paymemtStatus     PaymemtStatus      @default(pending)
   total_price       Float
   name              String
   country           String
@@ -10,7 +11,7 @@ model SupporterPay {
   createAt          DateTime           @default(now())
   updateAt          DateTime           @updatedAt
   author            User               @relation("author_supportor", fields: [author_id], references: [id])
-  user              User               @relation(fields: [user_id], references: [id])
+  user              User?              @relation(fields: [user_id], references: [id])
   oder_package_name oder_package_name?
 }
 

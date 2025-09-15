@@ -18,6 +18,8 @@ model User {
   posts               Post[]
   profile             Profile?
   shop                Shop?
+
+  // supporter card system
   support_cart_layout SupportCartLayout?
   author_supportor    SupporterPay[]     @relation("author_supportor")
   supporter           SupporterPay[]

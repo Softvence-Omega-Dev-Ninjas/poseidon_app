@@ -88,7 +88,8 @@ export class StripeService {
       where: { id: data.payment_info_id },
       data: {
         cs_number: session.id,
-        paymemtStatus: session.payment_status,
+        paymemtStatus:
+          session.payment_status == 'unpaid' ? 'unpaid' : 'pending',
         endDate,
       },
     });
