@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
+import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 // import { GetShopDataService } from './getShopData.service';
 
@@ -26,6 +27,7 @@ export class SupporterProfileService {
       },
       select: {
         id: true,
+        username: true,
         profile: {
           select: {
             name: true,
@@ -41,8 +43,30 @@ export class SupporterProfileService {
     return allUserSupporter;
   }
 
-  async profilePage(userid: string) {
+  async profilePage(username: string) {
     return await this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.findFirst({
+        where: {
+          username: username,
+          role: 'supporter',
+        },
+        select: {
+          id: true,
+          username: true,
+        },
+      });
+      if (!user || !user.id) {
+        throw new HttpException(
+          cResponseData({
+            message: 'User not found',
+            error: 'User not found',
+            data: null,
+            success: false,
+          }),
+          400,
+        );
+      }
+      const userid = user.id;
       const profileInfo = await tx.profile.findUnique({
         where: {
           userid: userid,
@@ -166,6 +190,8 @@ export class SupporterProfileService {
         },
       });
       return {
+        userid: user.id,
+        username: user.username,
         profileInfo,
         supporte_card,
         shopid: shopid ? shopid.id : null,

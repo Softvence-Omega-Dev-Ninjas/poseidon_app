@@ -28,14 +28,17 @@ export class SupporterProfileController {
 
   @Public()
   @Roles(Role.User, Role.Supporter)
-  @Get(':profile_id')
+  @Get(':profile_username')
   async getSupportCart(
-    @Param('profile_id') profile_id: string,
+    @Param('profile_username') username: string,
     @Req() res: Request,
   ) {
-    const hPageData =
-      await this.supporterProfileService.profilePage(profile_id);
-    return resData({ data: hPageData, editing: profile_id == res['sub'] });
+    const { userid, ...hPageData } =
+      await this.supporterProfileService.profilePage(username);
+    return resData({
+      data: hPageData,
+      editing: userid == res['sub'],
+    });
   }
 
   // shop data
