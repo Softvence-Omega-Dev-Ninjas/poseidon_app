@@ -67,6 +67,7 @@ export class SupporterProfileService {
         );
       }
       const userid = user.id;
+      console.log('userssssssssssss ', user);
       const profileInfo = await tx.profile.findUnique({
         where: {
           userid: userid,
@@ -190,7 +191,7 @@ export class SupporterProfileService {
         },
       });
       return {
-        userid: user.id,
+        userid: userid,
         username: user.username,
         profileInfo,
         supporte_card,

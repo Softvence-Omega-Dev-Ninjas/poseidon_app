@@ -24,6 +24,7 @@ type profileDto = {
 export class authenticationUserDto {
   id: string;
   provider: string;
+  username: string;
   email: string;
   password?: string | null;
   role: string;

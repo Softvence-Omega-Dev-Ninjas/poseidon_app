@@ -113,6 +113,7 @@ export class AuthUserService {
       select: {
         id: true,
         provider: true,
+        username: true,
         email: true,
         password: true,
         role: true,
