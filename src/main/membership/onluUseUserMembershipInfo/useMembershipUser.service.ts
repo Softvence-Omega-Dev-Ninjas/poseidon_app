@@ -245,7 +245,7 @@ export class MembershipServiceUseToUserOnly {
 
   //get single membership level use to user and suupoter
   async getLevels(levelId: string) {
-    return await this.prisma.membership_levels.findUnique({
+    const level = await this.prisma.membership_levels.findUnique({
       where: {
         id: levelId,
         isPublic: true,
@@ -269,5 +269,11 @@ export class MembershipServiceUseToUserOnly {
         },
       },
     });
+    const imageMedia = await this.prisma.media.findFirst({
+      where: {
+        id: level?.levelImage,
+      },
+    });
+    return { ...level, levelImage: imageMedia };
   }
 }
