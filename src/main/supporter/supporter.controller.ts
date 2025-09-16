@@ -17,10 +17,15 @@ import { Request } from 'express';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { CheersLivePackageType } from './dto/create-supporter-layout';
+import { StripeService } from 'src/utils/stripe/stripe.service';
+import { Public } from 'src/auth/guard/public.decorator';
 
 @Controller('supporter')
 export class SupporterController {
-  constructor(private readonly supporterService: SupporterService) {}
+  constructor(
+    private readonly supporterService: SupporterService,
+    private readonly stripe: StripeService,
+  ) {}
 
   @Roles(Role.Supporter)
   @Get('get-cart-layout')
@@ -83,5 +88,18 @@ export class SupporterController {
   @Post('payment')
   buySupport(@Body() createSupporterDto: CreateSupporterPayDto) {
     return this.supporterService.create(createSupporterDto);
+  }
+
+  @Public()
+  @Post('paymentsss')
+  payment(@Body() data: any) {
+    console.log(data);
+    return this.stripe.supporterCardPaymentIntents();
+  }
+
+  @Public()
+  @Get('payment-check/:pi')
+  paymentCheck(@Param('pi') pi: string) {
+    return this.stripe.paymentIntentCheck(pi);
   }
 }

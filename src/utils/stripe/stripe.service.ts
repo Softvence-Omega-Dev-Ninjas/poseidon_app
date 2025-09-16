@@ -96,4 +96,25 @@ export class StripeService {
 
     return session;
   }
+
+  // paymentIntents supporter card
+  async supporterCardPaymentIntents() {
+    return this.stripe.paymentIntents.create({
+      amount: 1000,
+      currency: 'usd',
+      automatic_payment_methods: { enabled: true },
+      metadata: {
+        suppoterCardId: '4574hgv6u4g5-----------y45yht',
+      },
+      // payment_method_types: ['card', 'us_bank_account', 'crypto'],
+      application_fee_amount: 200,
+      transfer_data: {
+        destination: 'acct_1S6pse80rufk5BDv',
+      },
+    });
+  }
+
+  async paymentIntentCheck(pi: string) {
+    return await this.stripe.paymentIntents.retrieve(pi);
+  }
 }
