@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -79,6 +80,12 @@ export class MembershipController {
     return this.membershipService.updateMembershipLevel(
       updateMembershipLevelDto,
     );
+  }
+
+  @Roles(Role.Supporter)
+  @Delete('delete-levels/:levelId')
+  deleteMembershipLevel(@Param('levelId') levelId: string) {
+    return this.membershipService.deleteMembershipLevel(levelId);
   }
 
   @Roles(Role.Supporter)

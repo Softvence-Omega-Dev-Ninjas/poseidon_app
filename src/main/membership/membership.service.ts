@@ -7,12 +7,14 @@ import {
   LevelImageUpdateDto,
   UpdateMembershipLevelDto,
 } from './dto/update-membership-level.dto';
+import { MediafileService } from '../mediafile/mediafile.service';
 
 @Injectable()
 export class MembershipService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly mediafileService: MediafileService,
   ) {}
 
   private async checkEnableMembership(id: string) {
@@ -251,6 +253,53 @@ export class MembershipService {
 
     //   return updatedLevel;
     // });
+  }
+
+  // delete membership level
+  async deleteMembershipLevel(id: string) {
+    const checkLevel = await this.prisma.membership_levels.findFirst({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        levelImage: true,
+      },
+    });
+    if (!checkLevel || !checkLevel?.id) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Membership level not found',
+          data: null,
+          success: false,
+        }),
+        404,
+      );
+    }
+
+    // delete images with db media and cloudinary
+    const deleteImage = await this.mediafileService.deleteMembershipImage(
+      checkLevel?.levelImage,
+    );
+
+    const deleteMembershipLevel = await this.prisma.membership_levels.delete({
+      where: {
+        id,
+      },
+    });
+    if (!deleteMembershipLevel || !deleteMembershipLevel?.id)
+      throw new HttpException(
+        cResponseData({
+          message: 'Membership level delete failed',
+          data: null,
+          success: false,
+        }),
+        404,
+      );
+    return cResponseData({
+      message: 'Membership level deleted successfully',
+      data: { ...deleteMembershipLevel, deleteImage },
+    });
   }
 
   async levelImageUpdate(id: string, levelImage: LevelImageUpdateDto) {

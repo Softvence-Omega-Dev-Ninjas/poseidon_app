@@ -9,9 +9,15 @@ import { MembershipServiceUseToUserOnly } from './onluUseUserMembershipInfo/useM
 import { MembershipUseToUserOnly } from './onluUseUserMembershipInfo/useMembershipUser.controller';
 import { StripeModule } from 'src/utils/stripe/stripe.module';
 import { PaymentInfoService } from './onluUseUserMembershipInfo/paymentDetails.service';
+import { MediafileModule } from '../mediafile/mediafile.module';
 
 @Module({
-  imports: [PrismaClientModule, CloudinaryModule, StripeModule],
+  imports: [
+    PrismaClientModule,
+    CloudinaryModule,
+    StripeModule,
+    MediafileModule,
+  ],
   controllers: [
     MembershipUseToUserOnly,
     MembershipController,
