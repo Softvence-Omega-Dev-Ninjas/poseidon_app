@@ -32,7 +32,7 @@ import { Role } from 'src/auth/guard/role.enum';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { CreateImageCommentDto } from './dto/create-image-comment.dto';
 import { FindAllImageCommentsDto } from './dto/find-all-image-comments.dto';
-import { Roles as Visibility } from '../../../generated/prisma';
+import { Visibility } from '../../../generated/prisma';
 
 @ApiTags('images')
 @Roles(Role.Admin, Role.Supporter, Role.User)
@@ -81,7 +81,7 @@ export class ImageController {
   @ApiQuery({
     name: 'visibility',
     required: false,
-    enum: [Visibility.admin, Visibility.user, Visibility.supporter],
+    enum: [Visibility.PUBLIC, Visibility.PRIVATE,],
     description: 'Filter by visibility',
   })
   @ApiQuery({
