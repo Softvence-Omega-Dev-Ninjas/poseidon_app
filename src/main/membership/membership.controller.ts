@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -82,6 +83,12 @@ export class MembershipController {
   }
 
   @Roles(Role.Supporter)
+  @Delete('delete-levels/:levelId')
+  deleteMembershipLevel(@Param('levelId') levelId: string) {
+    return this.membershipService.deleteMembershipLevel(levelId);
+  }
+
+  @Roles(Role.Supporter)
   @Patch('update-image/:levelId')
   @ApiBody({ type: LevelImageUpdateDto })
   updateMembershipImage(
@@ -105,5 +112,11 @@ export class MembershipController {
     return this.membershipServiceUser.getMembershipLevels(
       req['memberships_owner_id'] as string,
     );
+  }
+
+  @Roles(Role.Supporter)
+  @Get('get-levels/:levelId')
+  getMembershipLevel(@Param('levelId') levelId: string) {
+    return this.membershipService.getMembershipLevel(levelId);
   }
 }

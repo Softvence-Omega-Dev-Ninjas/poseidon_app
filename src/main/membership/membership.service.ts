@@ -7,12 +7,14 @@ import {
   LevelImageUpdateDto,
   UpdateMembershipLevelDto,
 } from './dto/update-membership-level.dto';
+import { MediafileService } from '../mediafile/mediafile.service';
 
 @Injectable()
 export class MembershipService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly mediafileService: MediafileService,
   ) {}
 
   private async checkEnableMembership(id: string) {
@@ -253,6 +255,53 @@ export class MembershipService {
     // });
   }
 
+  // delete membership level
+  async deleteMembershipLevel(id: string) {
+    const checkLevel = await this.prisma.membership_levels.findFirst({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        levelImage: true,
+      },
+    });
+    if (!checkLevel || !checkLevel?.id) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Membership level not found',
+          data: null,
+          success: false,
+        }),
+        404,
+      );
+    }
+
+    // delete images with db media and cloudinary
+    const deleteImage = await this.mediafileService.deleteMembershipImage(
+      checkLevel?.levelImage,
+    );
+
+    const deleteMembershipLevel = await this.prisma.membership_levels.delete({
+      where: {
+        id,
+      },
+    });
+    if (!deleteMembershipLevel || !deleteMembershipLevel?.id)
+      throw new HttpException(
+        cResponseData({
+          message: 'Membership level delete failed',
+          data: null,
+          success: false,
+        }),
+        404,
+      );
+    return cResponseData({
+      message: 'Membership level deleted successfully',
+      data: { ...deleteMembershipLevel, deleteImage },
+    });
+  }
+
   async levelImageUpdate(id: string, levelImage: LevelImageUpdateDto) {
     const updateLevelImage = await this.prisma.membership_levels.update({
       where: {
@@ -272,6 +321,40 @@ export class MembershipService {
     return cResponseData({
       message: 'Membership level image updated successfully',
       data: updateLevelImage,
+    });
+  }
+
+  async getMembershipLevel(levelId: string) {
+    const level = await this.prisma.membership_levels.findFirst({
+      where: {
+        id: levelId,
+      },
+      include: {
+        MembershipSubscriptionPlan: {
+          include: {
+            CalligSubscriptionPlan: true,
+            MessagesSubscriptionPlan: true,
+            GallerySubscriptionPlan: true,
+            PostsSubscriptionPlan: true,
+          },
+        },
+      },
+    });
+    if (level && level.levelImage) {
+      const images = await this.prisma.media.findFirst({
+        where: {
+          id: level.levelImage,
+        },
+      });
+      return cResponseData({
+        message: 'Membership level found successfully',
+        data: { ...level, levelImage: images },
+      });
+    }
+
+    return cResponseData({
+      message: 'Membership level not found',
+      data: level,
     });
   }
 }
