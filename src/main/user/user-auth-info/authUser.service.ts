@@ -237,6 +237,14 @@ export class AuthUserService {
   }
 
   async checkUsername(username: string) {
+    const regex = /^[a-z0-9]+$/;
+    if (!regex.test(username)) {
+      return {
+        message:
+          'Username must be lowercase and contain only letters and numbers without spaces.',
+        success: false,
+      };
+    }
     const user = await this.prisma.user.findFirst({
       where: {
         username: username,
@@ -246,6 +254,9 @@ export class AuthUserService {
         username: true,
       },
     });
-    return !user;
+    return {
+      message: !user ? 'Ok' : 'Username already exists',
+      success: !user,
+    };
   }
 }

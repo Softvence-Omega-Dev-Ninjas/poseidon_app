@@ -19,6 +19,8 @@ async function bootstrap() {
   //   // prefix: '/static',
   // });
 
+  // console.log(new Date('2025-09-18'));
+
   SwaggerSetting(app);
   app.enableCors({
     origin: true, // 🔑 allow any origin dynamically
