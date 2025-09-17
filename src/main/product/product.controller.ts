@@ -164,7 +164,7 @@ export class ProductController {
     @UploadedFiles() newImages: Express.Multer.File[],
   ) {
     const updateProductDto = new UpdateProductDto();
-    console.log(updateProductDto);
+    console.log(body);
     for (const key in body) {
       if (Object.prototype.hasOwnProperty.call(body, key)) {
         if (['images', 'categoryIds', 'color', 'features'].includes(key)) {
@@ -234,7 +234,7 @@ export class ProductController {
   ) {
     return this.productService.findByShopId(shopId, +page, +limit);
   }
-
+  @Roles(Role.Supporter)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a product by ID' })
   @ApiResponse({ status: 200, description: 'Product deleted successfully.' })
