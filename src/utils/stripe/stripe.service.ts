@@ -117,4 +117,38 @@ export class StripeService {
   async paymentIntentCheck(pi: string) {
     return await this.stripe.paymentIntents.retrieve(pi);
   }
+
+  async testPaymentcheckout() {
+    return await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card', 'us_bank_account', 'crypto'],
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'test',
+            },
+            unit_amount: 1000,
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        paymentDetails: 'payment_info_id',
+        buyerId: 'buyerId',
+        sellerId: 'sellerId',
+        productName: 'productName',
+        amount: 1000,
+        serviceType: 'serviceType', // example membership or support
+        serviceId: 'serviceId', // example membershipId or supportId
+      },
+      payment_intent_data: {
+        application_fee_amount: 200,
+        transfer_data: { destination: 'acct_1S5jTh7v1K8YAWAr' },
+      },
+      success_url: `${process.env.BACKEND_URL}/payment/success?paymemttype:membership/`,
+      cancel_url: `${process.env.BACKEND_URL}/payment/cancel`,
+    });
+  }
 }

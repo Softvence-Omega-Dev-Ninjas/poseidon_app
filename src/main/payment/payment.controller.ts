@@ -3,12 +3,14 @@ import { PaymentService } from './payment.service';
 import { Public } from 'src/auth/guard/public.decorator';
 import { CheckOutService } from 'src/utils/stripe/checkOut.service';
 import { Response } from 'express';
+import { StripeService } from 'src/utils/stripe/stripe.service';
 
 @Controller('payment')
 export class PaymentController {
   constructor(
     private readonly paymentService: PaymentService,
     private readonly checkOutService: CheckOutService,
+    private readonly stripeService: StripeService,
   ) {}
 
   @Public()
@@ -33,5 +35,11 @@ export class PaymentController {
   @Get('cancel')
   findOne() {
     return 'cancel payment';
+  }
+
+  @Public()
+  @Get('testPayment-checkout')
+  async testPayment() {
+    return await this.stripeService.testPaymentcheckout();
   }
 }
