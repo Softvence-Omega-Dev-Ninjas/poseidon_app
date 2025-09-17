@@ -108,8 +108,9 @@ export class MembershipServiceUseToUserOnly {
         serviceName: membershipLevel?.titleName as string,
         amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
         serviceType: 'membership',
+        paymemtStatus: 'paid',
         serviceId: membershipLevel?.id as string,
-        endDate: endDate,
+        endDate: endDate, // PK duration time
         PermissionVideoCallAccess: plainAccess?.CalligSubscriptionPlan
           ? {
               create: {
@@ -155,38 +156,31 @@ export class MembershipServiceUseToUserOnly {
       },
     });
 
-    // // payment checkout this function
-    const checkout = await this.stripeService.checkOutPaymentSessionsMembership(
-      {
-        payment_info_id: payment_info.id,
-        planDuration: plan,
-        amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
-        buyerId: userId,
-        sellerId: membershipLevel?.membership.owner.id as string,
-        serviceName: membershipLevel?.titleName as string,
-        serviceType: 'membership',
-        serviceId: membershipLevel?.id as string,
-      },
-    );
+    return cResponseData({
+      message: 'Membership payment info created successfully',
+      data: payment_info,
+    });
 
-    return {
-      message: 'Membership bought successfully',
-      redirect_url: checkout.url,
-      data: checkout.id,
-      success: true,
-    };
-    // return cResponseData({
-    //   message: 'Membership bought successfully',
-    //   data: {
-    //     userId,
-    //     membershipLevel: {
-    //       ...membershipLevel,
-    //       MembershipSubscriptionPlan:
-    //         membershipLevel?.MembershipSubscriptionPlan[0],
-    //     },
+    // // // payment checkout this function
+    // const checkout = await this.stripeService.checkOutPaymentSessionsMembership(
+    //   {
+    //     payment_info_id: payment_info.id,
+    //     planDuration: plan,
+    //     amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
+    //     buyerId: userId,
+    //     sellerId: membershipLevel?.membership.owner.id as string,
+    //     serviceName: membershipLevel?.titleName as string,
+    //     serviceType: 'membership',
+    //     serviceId: membershipLevel?.id as string,
     //   },
+    // );
+
+    // return {
+    //   message: 'Membership bought successfully',
+    //   redirect_url: checkout.url,
+    //   data: checkout.id,
     //   success: true,
-    // });
+    // };
   }
 
   // get all membership levels use to user and suupoter
