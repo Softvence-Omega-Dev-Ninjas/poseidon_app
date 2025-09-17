@@ -5,7 +5,7 @@ model Image {
   mediaId     String   @unique
   media       Media    @relation(fields: [mediaId], references: [id])
   title       String
-  visibility  Roles @default(supporter)
+  visibility  Visibility  @default(PUBLIC)
   likeCount   Int        @default(0)
   commentCount Int        @default(0)
   view        Int        @default(0)
@@ -41,4 +41,9 @@ model ImageComment {
 
   user      User     @relation(fields: [userId], references: [id])
   image     Image    @relation(fields: [imageId], references: [id])
+}
+
+enum Visibility {
+  PRIVATE
+  PUBLIC
 }
