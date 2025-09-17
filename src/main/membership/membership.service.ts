@@ -323,4 +323,27 @@ export class MembershipService {
       data: updateLevelImage,
     });
   }
+
+  async getMembershipLevel(levelId: string) {
+    const level = await this.prisma.membership_levels.findFirst({
+      where: {
+        id: levelId,
+      },
+      include: {
+        MembershipSubscriptionPlan: {
+          include: {
+            CalligSubscriptionPlan: true,
+            MessagesSubscriptionPlan: true,
+            GallerySubscriptionPlan: true,
+            PostsSubscriptionPlan: true,
+          },
+        },
+      },
+    });
+    // if (level && level?.id && level.levelImage) {
+    //   const image = await this.prisma.media.findFirst(level.levelImage);
+    // }
+
+    return level;
+  }
 }

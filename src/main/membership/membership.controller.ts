@@ -113,4 +113,10 @@ export class MembershipController {
       req['memberships_owner_id'] as string,
     );
   }
+
+  @Roles(Role.Supporter)
+  @Get('get-levels/:levelId')
+  getMembershipLevel(@Param('levelId') levelId: string) {
+    return this.membershipService.getMembershipLevel(levelId);
+  }
 }
