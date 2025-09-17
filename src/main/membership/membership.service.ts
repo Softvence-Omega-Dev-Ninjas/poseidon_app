@@ -192,67 +192,6 @@ export class MembershipService {
       data: updateNewData,
       success: true,
     });
-
-    // await this.prisma.$transaction(async (tx) => {
-    //   // 1️⃣ Update the parent membership level
-    //   const updatedLevel = await tx.membership_levels.update({
-    //     where: { id: dto.id },
-    //     data: {
-    //       levelName: dto.levelName,
-    //       titleName: dto.titleName,
-    //       levelDescription: dto.levelDescription,
-    //       levelImage: dto.levelImage,
-    //       isPublic: dto.isPublic,
-    //       Wellcome_note: dto.Wellcome_note,
-    //     },
-    //   });
-
-    //   // 2️⃣ Update each subscription plan with its nested child plans
-    //   for (const plan of dto.MembershipSubscriptionPlan) {
-    //     await tx.membershipSubscriptionPlan.update({
-    //       where: { id: plan.id },
-    //       data: {
-    //         duration: plan.duration,
-    //         price: plan.price,
-
-    //         CalligSubscriptionPlan: plan.CalligSubscriptionPlan
-    //           ? {
-    //               update: {
-    //                 where: { id: plan.CalligSubscriptionPlan.id },
-    //                 data: { ...plan.CalligSubscriptionPlan },
-    //               },
-    //             }
-    //           : { delete: {} },
-
-    //         MessagesSubscriptionPlan: plan.MessagesSubscriptionPlan
-    //           ? {
-    //               update: {
-    //                 ...plan.MessagesSubscriptionPlan,
-    //               },
-    //             }
-    //           : undefined,
-
-    //         GallerySubscriptionPlan: plan.GallerySubscriptionPlan
-    //           ? {
-    //               update: {
-    //                 ...plan.GallerySubscriptionPlan,
-    //               },
-    //             }
-    //           : undefined,
-
-    //         PostsSubscriptionPlan: plan.PostsSubscriptionPlan
-    //           ? {
-    //               update: {
-    //                 ...plan.PostsSubscriptionPlan,
-    //               },
-    //             }
-    //           : undefined,
-    //       },
-    //     });
-    //   }
-
-    //   return updatedLevel;
-    // });
   }
 
   // delete membership level
