@@ -41,11 +41,13 @@ model ProductCategoryOnProduct {
   productId  String
   categoryId String
   assignedAt DateTime        @default(now())
+
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
   category   ProductCategory @relation(fields: [categoryId], references: [id])
-  product    Product         @relation(fields: [productId], references: [id])
 
   @@id([productId, categoryId])
 }
+
 
 model Order {
   id               String   @id @default(uuid())
