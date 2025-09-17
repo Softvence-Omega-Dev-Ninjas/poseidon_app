@@ -14,10 +14,12 @@ import { ServicesModule } from './services/services.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ZoomModule } from './zoom/zoom.module';
 import { PaymentModule } from './payment/payment.module';
+import { UserDashboardModule } from './dashboard/user-dashboard/user-dashboard.module';
 
 @Module({
   imports: [
     UserModule,
+    UserDashboardModule,
     SupporterProfileModule,
     SupporterModule,
     MembershipModule,

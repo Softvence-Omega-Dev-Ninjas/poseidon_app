@@ -33,11 +33,10 @@ export class SupporterProfileController {
     @Param('profile_username') username: string,
     @Req() res: Request,
   ) {
-    const { userid, ...hPageData } =
-      await this.supporterProfileService.profilePage(username);
+    const hPageData = await this.supporterProfileService.profilePage(username);
     return resData({
       data: hPageData,
-      editing: userid == res['sub'],
+      editing: hPageData.userid == res['sub'],
     });
   }
 
