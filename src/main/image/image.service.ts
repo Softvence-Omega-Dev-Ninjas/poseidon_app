@@ -13,7 +13,7 @@ import {
   Image,
   Prisma,
   Roles,
-  Roles as Visibility,
+  Visibility,
 } from '../../../generated/prisma';
 import { CreateImageCommentDto } from './dto/create-image-comment.dto';
 import { FindAllImageCommentsDto } from './dto/find-all-image-comments.dto';
