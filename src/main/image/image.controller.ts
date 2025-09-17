@@ -33,6 +33,7 @@ import { Roles } from 'src/auth/guard/roles.decorator';
 import { CreateImageCommentDto } from './dto/create-image-comment.dto';
 import { FindAllImageCommentsDto } from './dto/find-all-image-comments.dto';
 import { Visibility } from '../../../generated/prisma';
+import { Public } from 'src/auth/guard/public.decorator';
 
 @ApiTags('images')
 @Roles(Role.Admin, Role.Supporter, Role.User)
@@ -58,6 +59,7 @@ export class ImageController {
   }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Get all images with pagination and sorting' })
   @ApiResponse({ status: 200, description: 'Returns a list of images.' })
   @ApiQuery({

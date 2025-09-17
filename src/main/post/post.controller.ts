@@ -35,6 +35,7 @@ import { Request } from 'express';
 
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { FindAllCommentsDto } from './dto/find-all-comments.dto';
+import { Public } from 'src/auth/guard/public.decorator';
 
 @ApiTags('posts')
 @Roles(Role.Admin, Role.Supporter, Role.User)
@@ -61,6 +62,7 @@ export class PostController {
   }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Get all posts with pagination and sorting' })
   @ApiResponse({ status: 200, description: 'Returns a list of posts.' })
   @ApiQuery({
@@ -81,9 +83,14 @@ export class PostController {
     enum: ['viewed', 'liked', 'newest'],
     description: 'Sort order',
   })
-  findAll(@Query() query: FindAllPostsDto, @Req() req) {
-    console.log(req.sub);
-    return this.postService.findAll(query, req?.sub);
+  @ApiQuery({
+    name: 'providerId',
+    required: false,
+    type: String,
+    description: 'Filter by provider ID',
+  })
+  findAll(@Query() query: FindAllPostsDto) {
+    return this.postService.findAll(query,query.providerId);
   }
 
   @Get(':id')
