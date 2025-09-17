@@ -340,10 +340,21 @@ export class MembershipService {
         },
       },
     });
-    // if (level && level?.id && level.levelImage) {
-    //   const image = await this.prisma.media.findFirst(level.levelImage);
-    // }
+    if (level && level.levelImage) {
+      const images = await this.prisma.media.findFirst({
+        where: {
+          id: level.levelImage,
+        },
+      });
+      return cResponseData({
+        message: 'Membership level found successfully',
+        data: { ...level, levelImage: images },
+      });
+    }
 
-    return level;
+    return cResponseData({
+      message: 'Membership level not found',
+      data: level,
+    });
   }
 }
