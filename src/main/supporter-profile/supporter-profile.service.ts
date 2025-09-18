@@ -234,4 +234,13 @@ export class SupporterProfileService {
       };
     });
   }
+
+  async findByIDUser(id: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: id,
+      },
+    });
+    return user;
+  }
 }

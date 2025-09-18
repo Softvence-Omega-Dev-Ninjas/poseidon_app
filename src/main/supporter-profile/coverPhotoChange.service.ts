@@ -1,8 +1,9 @@
-import { HttpException } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { MediafileService } from '../mediafile/mediafile.service';
 
+@Injectable()
 export class CoverPhotoChangeService {
   constructor(
     private readonly prisma: PrismaService,
@@ -61,7 +62,33 @@ export class CoverPhotoChangeService {
             400,
           );
         }
-        return uploadImage;
+        const profile = await tx.profile.update({
+          where: {
+            userid: userId,
+          },
+          data: {
+            cover_image: uploadImage.id,
+          },
+          select: {
+            cover_image: true,
+          },
+        });
+        if (!profile) {
+          throw new HttpException(
+            cResponseData({
+              message: 'Profile not cover image Not Updated',
+              error: 'Profile not found',
+              data: null,
+              success: false,
+            }),
+            400,
+          );
+        }
+        return cResponseData({
+          message: 'Profile cover image updated',
+          data: uploadImage,
+          success: true,
+        });
       }
 
       //   remove images with coudinary and media tb

@@ -79,7 +79,7 @@ export class SupporterProfileController {
   @UseInterceptors(FileInterceptor('image'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateMediafileDto })
-  @Post('change-cover-photo')
+  @Post('cover-photo/change')
   changeCoverPhoto(
     @UploadedFile(new ImageValidationPipe(20))
     image: Express.Multer.File,

@@ -102,7 +102,9 @@ export class StripeService {
     return this.stripe.paymentIntents.create({
       amount: 1000,
       currency: 'usd',
-      automatic_payment_methods: { enabled: true },
+      // automatic_payment_methods: { enabled: true },
+      payment_method_types: ['card', 'us_bank_account', 'crypto'],
+      // payment_method: 'pm_card_visa',
       metadata: {
         suppoterCardId: '4574hgv6u4g5-----------y45yht',
       },

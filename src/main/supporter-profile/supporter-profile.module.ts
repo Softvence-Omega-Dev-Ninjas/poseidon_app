@@ -5,10 +5,11 @@ import { GetShopDataService } from './getShopData.service';
 import { GetPostDataService } from './getPostData.service';
 import { CoverPhotoChangeService } from './coverPhotoChange.service';
 import { MediafileModule } from '../mediafile/mediafile.module';
+import { PrismaClientModule } from 'src/prisma-client/prisma-client.module';
 // import { CloudinaryModule } from 'src/utils/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [MediafileModule],
+  imports: [MediafileModule, PrismaClientModule],
   controllers: [SupporterProfileController],
   providers: [
     SupporterProfileService,
