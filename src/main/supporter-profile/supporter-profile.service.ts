@@ -205,4 +205,47 @@ export class SupporterProfileService {
       };
     });
   }
+
+  async changeCoverPhotoSupporterProfile(userId: string) {
+    return await this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.findFirst({
+        where: {
+          id: userId,
+          role: 'supporter',
+        },
+        select: {
+          id: true,
+          username: true,
+        },
+      });
+      if (!user || !user.id) {
+        throw new HttpException(
+          cResponseData({
+            message: 'User not found',
+            error: 'User not found',
+            data: null,
+            success: false,
+          }),
+          400,
+        );
+      }
+      const userid = user.id;
+      const profileInfo = await tx.profile.findUnique({
+        where: {
+          userid: userid,
+          user: {
+            role: 'supporter',
+          },
+        },
+        select: {
+          cover_image: true,
+        },
+      });
+      return {
+        userid: userid,
+        username: user.username,
+        profileInfo,
+      };
+    });
+  }
 }
