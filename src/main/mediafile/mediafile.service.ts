@@ -82,4 +82,50 @@ export class MediafileService {
       data: null,
     };
   }
+
+  async fullDeleteFileSystem(id: string) {
+    const mediaData = await this.findById(id);
+    if (!mediaData)
+      return {
+        massage: 'file not Found',
+        data: null,
+        success: true,
+      };
+    if (mediaData && mediaData.id && !mediaData.publicId) {
+      const dltFile = await this.deleteFile(mediaData.id);
+      if (dltFile && dltFile.id) {
+        return {
+          message: 'File deleted successfully',
+          data: id,
+          success: true,
+        };
+      }
+    }
+    const deletecloudinary: { result: string } =
+      await this.cloudinaryService.deleteFile(mediaData?.publicId as string);
+    if (deletecloudinary.result == 'ok') {
+      const dltFile = await this.deleteFile(mediaData.id);
+      if (dltFile && dltFile.id) {
+        return {
+          message: 'File deleted successfully',
+          data: id,
+          success: true,
+        };
+      }
+      return {
+        message: 'Something went wrong - media tb',
+        data: null,
+        success: false,
+      };
+    }
+    return {
+      message: 'Something went wrong - coudinary',
+      data: null,
+      success: false,
+    };
+  }
+
+  async fullUploadFileSystem(file?: Express.Multer.File) {
+    return await this.cloudinaryService.fullUploadSystemFileData(file);
+  }
 }

@@ -10,11 +10,22 @@ export class SupporterProfileService {
     // private readonly getShopDataService: GetShopDataService,
   ) {}
   private async getMedia(mediaIds: string[]) {
+    if (!mediaIds || mediaIds.length === 0) {
+      return [];
+    }
     const media = await this.prisma.media.findMany({
       where: {
         id: {
           in: mediaIds,
         },
+      },
+    });
+    return media;
+  }
+  private async getSingleMedia(mediaIds: string) {
+    const media = await this.prisma.media.findFirst({
+      where: {
+        id: mediaIds,
       },
     });
     return media;
@@ -82,6 +93,19 @@ export class SupporterProfileService {
           description: true,
         },
       });
+      // if (profileInfo && profileInfo?.cover_image) {
+      //   profileInfo.cover_image =
+      // }
+
+      // if (profileInfo && profileInfo.cover_image) {
+      //   const coverImages = await this.getMedia([profileInfo.cover_image]);
+      //   if (coverImages && coverImages.length && coverImages[0].id) {
+      //     profileInfo.cover_image = coverImages[0];
+      //   }
+      //   // const coverImageMap = new Map(coverImages.map((m) => [m.id, m]));
+      //   // profileInfo.cover_image = coverImageMap.get(profileInfo.cover_image);
+      // }
+
       const supporte_card = await tx.supportCartLayout.findFirst({
         where: {
           author_id: userid,
@@ -193,7 +217,12 @@ export class SupporterProfileService {
       return {
         userid: userid,
         username: user.username,
-        profileInfo,
+        profileInfo: {
+          ...profileInfo,
+          cover_image: profileInfo?.cover_image
+            ? await this.getSingleMedia(profileInfo?.cover_image)
+            : null,
+        },
         supporte_card,
         shopid: shopid ? shopid.id : null,
         posts: posts.map((p) => ({
@@ -202,49 +231,6 @@ export class SupporterProfileService {
         })),
         membershipInfo: { ...membershipInfo, Membership_levels },
         image: gallery,
-      };
-    });
-  }
-
-  async changeCoverPhotoSupporterProfile(userId: string) {
-    return await this.prisma.$transaction(async (tx) => {
-      const user = await tx.user.findFirst({
-        where: {
-          id: userId,
-          role: 'supporter',
-        },
-        select: {
-          id: true,
-          username: true,
-        },
-      });
-      if (!user || !user.id) {
-        throw new HttpException(
-          cResponseData({
-            message: 'User not found',
-            error: 'User not found',
-            data: null,
-            success: false,
-          }),
-          400,
-        );
-      }
-      const userid = user.id;
-      const profileInfo = await tx.profile.findUnique({
-        where: {
-          userid: userid,
-          user: {
-            role: 'supporter',
-          },
-        },
-        select: {
-          cover_image: true,
-        },
-      });
-      return {
-        userid: userid,
-        username: user.username,
-        profileInfo,
       };
     });
   }

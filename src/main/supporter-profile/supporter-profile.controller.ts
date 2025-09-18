@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { SupporterProfileService } from './supporter-profile.service';
 // import { CreateSupporterProfileDto } from './dto/create-supporter-profile.dto';
 // import { UpdateSupporterProfileDto } from './dto/update-supporter-profile.dto';
@@ -9,6 +17,11 @@ import { Role } from 'src/auth/guard/role.enum';
 import { GetShopDataService } from './getShopData.service';
 import { GetPostDataService } from './getPostData.service';
 import { resData } from 'src/common/utils/sup-profile.resData';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { CreateMediafileDto } from '../mediafile/dto/create-mediafile.dto';
+import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
+import { CoverPhotoChangeService } from './coverPhotoChange.service';
 // import { ProductService } from '../product/product.service';
 
 @Public()
@@ -18,6 +31,7 @@ export class SupporterProfileController {
     private readonly supporterProfileService: SupporterProfileService,
     private readonly getShopDataService: GetShopDataService,
     private readonly getPostDataService: GetPostDataService,
+    private readonly coverPhotoChangeService: CoverPhotoChangeService,
   ) {}
 
   @Public()
@@ -59,5 +73,21 @@ export class SupporterProfileController {
   @Get('posts/:userid')
   getAllPost(@Param('userid') user_id: string) {
     return this.getPostDataService.getAllPost(user_id);
+  }
+
+  @Roles(Role.Supporter)
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateMediafileDto })
+  @Post('change-cover-photo')
+  changeCoverPhoto(
+    @UploadedFile(new ImageValidationPipe(20))
+    image: Express.Multer.File,
+    @Req() req: Request,
+  ) {
+    return this.coverPhotoChangeService.changeCoverPhotoSupporterProfile(
+      req['sub'] as string,
+      image,
+    );
   }
 }
