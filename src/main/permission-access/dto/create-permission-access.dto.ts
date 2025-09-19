@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreatePermissionAccessDto {
+export class AccesPermissionAccessDto {
   @ApiProperty({
     required: true,
     type: String,
     description: 'The ID of the buyer',
-    example: '1234567890',
+    example: 'ae7d8b1a-f338-43c2-97cc-9f54ec93c77d',
   })
   buyerid: string;
 
@@ -13,15 +13,7 @@ export class CreatePermissionAccessDto {
     required: true,
     type: String,
     description: 'The ID of the seller ber girl',
-    example: '1234567890',
+    example: 'ec9bc8d9-dedb-44a5-9030-4d0a9c56fea2',
   })
   sellerid: string;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-    description: 'access last time',
-    example: '2025-09-18',
-  })
-  endDate: string;
 }

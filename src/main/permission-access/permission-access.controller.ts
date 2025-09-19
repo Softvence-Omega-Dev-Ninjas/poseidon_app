@@ -1,7 +1,18 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  // Body,
+  Controller,
+  Get,
+  HttpException,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { PermissionAccessService } from './permission-access.service';
-import { CreatePermissionAccessDto } from './dto/create-permission-access.dto';
-import { Public } from 'src/auth/guard/public.decorator';
+// import { AccesPermissionAccessDto } from './dto/create-permission-access.dto';
+// import { Public } from 'src/auth/guard/public.decorator';
+import { Roles } from 'src/auth/guard/roles.decorator';
+import { Role } from 'src/auth/guard/role.enum';
+import { Request } from 'express';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Controller('permission-access')
 export class PermissionAccessController {
@@ -9,9 +20,28 @@ export class PermissionAccessController {
     private readonly permissionAccessService: PermissionAccessService,
   ) {}
 
-  @Public()
-  @Post()
-  findAll(@Body() createPermissionAccessDto: CreatePermissionAccessDto) {
-    return this.permissionAccessService.create(createPermissionAccessDto);
+  // @Public()
+  @Roles(Role.User)
+  @Get()
+  findAll(
+    // @Body() accesPermissionAccessDto: AccesPermissionAccessDto,
+    @Req() req: Request,
+    @Query('berGirlId') berGirlId: string,
+  ) {
+    if (!berGirlId) {
+      throw new HttpException(
+        cResponseData({
+          message: 'berGirlId is required',
+          error: 'berGirlId is required',
+          success: false,
+          data: null,
+        }),
+        400,
+      );
+    }
+    return this.permissionAccessService.findAccesPermit(
+      req['sub'] as string,
+      berGirlId,
+    );
   }
 }

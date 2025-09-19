@@ -33,5 +33,5 @@ export const SwaggerSetting = (app: INestApplication) => {
       ),
     ]),
   );
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('doc', app, document);
 };
