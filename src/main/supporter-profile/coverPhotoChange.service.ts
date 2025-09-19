@@ -91,6 +91,7 @@ export class CoverPhotoChangeService {
         });
       }
 
+      console.log('upppppp');
       //   remove images with coudinary and media tb
       const mediaData = await this.mediafileService.fullDeleteFileSystem(
         user.profile?.cover_image as string,
@@ -106,7 +107,7 @@ export class CoverPhotoChangeService {
           400,
         );
       }
-
+      console.log('upppppp-----------');
       const uploadImage =
         await this.mediafileService.fullUploadFileSystem(image);
       if (!uploadImage || !uploadImage.id) {
@@ -120,7 +121,7 @@ export class CoverPhotoChangeService {
           400,
         );
       }
-
+      console.log('upppppp==================');
       const profile = await tx.profile.update({
         where: {
           userid: userId,

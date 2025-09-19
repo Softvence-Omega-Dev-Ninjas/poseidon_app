@@ -78,7 +78,7 @@ export class SupporterProfileService {
         );
       }
       const userid = user.id;
-      console.log('userssssssssssss ', user);
+      // console.log('userssssssssssss ', user);
       const profileInfo = await tx.profile.findUnique({
         where: {
           userid: userid,
