@@ -106,9 +106,10 @@ export class CoverPhotoChangeService {
           400,
         );
       }
+
       const uploadImage =
         await this.mediafileService.fullUploadFileSystem(image);
-      if (!uploadImage || uploadImage.id) {
+      if (!uploadImage || !uploadImage.id) {
         throw new HttpException(
           cResponseData({
             message: 'Image not uploaded',
@@ -119,6 +120,7 @@ export class CoverPhotoChangeService {
           400,
         );
       }
+
       const profile = await tx.profile.update({
         where: {
           userid: userId,
