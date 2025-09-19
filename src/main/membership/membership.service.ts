@@ -296,4 +296,50 @@ export class MembershipService {
       data: level,
     });
   }
+
+  async getTop3Card(id: string) {
+    const time = new Date();
+    const y = time.getFullYear();
+    const m = time.getMonth();
+
+    return await this.prisma.$transaction(async (tx) => {
+      const totalMember = await tx.paymentDetails.groupBy({
+        by: ['buyerId'],
+        where: {
+          sellerId: id,
+          buyerId: { not: null },
+          serviceType: 'membership',
+        },
+      });
+      const perMonth = await tx.paymentDetails.aggregate({
+        _sum: {
+          amount: true,
+        },
+        where: {
+          sellerId: id,
+          buyerId: { not: null },
+          serviceType: 'membership',
+          createAt: {
+            gte: new Date(y, m, 1),
+            lte: new Date(y, m + 1, 0),
+          },
+        },
+      });
+      const allTime = await tx.paymentDetails.aggregate({
+        _sum: {
+          amount: true,
+        },
+        where: {
+          sellerId: id,
+          buyerId: { not: null },
+          serviceType: 'membership',
+        },
+      });
+      return {
+        Members: totalMember.length,
+        perMonth: perMonth?._sum.amount,
+        allTime: allTime?._sum.amount,
+      };
+    });
+  }
 }

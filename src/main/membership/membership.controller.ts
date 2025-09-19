@@ -119,4 +119,10 @@ export class MembershipController {
   getMembershipLevel(@Param('levelId') levelId: string) {
     return this.membershipService.getMembershipLevel(levelId);
   }
+
+  @Roles(Role.Supporter)
+  @Get('get-top3-card')
+  getTop3Card(@Req() req: Request) {
+    return this.membershipService.getTop3Card(req['sub'] as string);
+  }
 }
