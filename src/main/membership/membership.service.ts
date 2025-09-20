@@ -383,8 +383,8 @@ export class MembershipService {
     }
     return (
       MONTH_NAMES.map((month) => {
-        if (monthly[month]) return { month, totalAmount: monthly[month] };
-        return { month, totalAmount: 0.0 };
+        if (monthly[month]) return { name: month, earnings: monthly[month] };
+        return { name: month, earnings: 0.0 };
       }) || []
     );
   }
