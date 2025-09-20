@@ -358,7 +358,7 @@ export class MembershipService {
       'Nov',
       'Dec',
     ];
-    const year = 2025;
+    const year = new Date().getFullYear();
     const payments = await this.prisma.paymentDetails.findMany({
       where: {
         sellerId: id,
