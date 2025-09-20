@@ -342,4 +342,50 @@ export class MembershipService {
       };
     });
   }
+
+  async yearlyEarningChart(id: string) {
+    const MONTH_NAMES = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    const year = 2025;
+    const payments = await this.prisma.paymentDetails.findMany({
+      where: {
+        sellerId: id,
+        paymemtStatus: 'paid',
+        createAt: {
+          gte: new Date(year, 0, 1), // Jan 1
+          lt: new Date(year + 1, 0, 1), // next year Jan 1
+        },
+      },
+      select: {
+        amount: true,
+        createAt: true,
+      },
+    });
+    const monthly: Record<string, number> = {};
+    for (const p of payments) {
+      const month = MONTH_NAMES[Number(p.createAt.getMonth())]; // 0-11
+      if (!monthly[month]) {
+        monthly[month] = 0;
+      }
+      monthly[month] += p.amount;
+    }
+    return (
+      MONTH_NAMES.map((month) => {
+        if (monthly[month]) return { month, totalAmount: monthly[month] };
+        return { month, totalAmount: 0.0 };
+      }) || []
+    );
+  }
 }

@@ -125,4 +125,10 @@ export class MembershipController {
   getTop3Card(@Req() req: Request) {
     return this.membershipService.getTop3Card(req['sub'] as string);
   }
+
+  @Roles(Role.Supporter)
+  @Get('yearlyEarningChart')
+  yearlyEarningChart(@Req() req: Request) {
+    return this.membershipService.yearlyEarningChart(req['sub'] as string);
+  }
 }
