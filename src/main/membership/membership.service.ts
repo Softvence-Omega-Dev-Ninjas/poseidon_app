@@ -337,8 +337,8 @@ export class MembershipService {
       });
       return {
         Members: totalMember.length,
-        perMonth: perMonth?._sum.amount,
-        allTime: allTime?._sum.amount,
+        perMonth: perMonth?._sum.amount ? perMonth?._sum.amount : 0.0,
+        allTime: allTime?._sum.amount ? allTime?._sum.amount : 0.0,
       };
     });
   }
