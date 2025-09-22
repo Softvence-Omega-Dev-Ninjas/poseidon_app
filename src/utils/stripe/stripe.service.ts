@@ -30,21 +30,44 @@ export class StripeService {
     const fee = Math.floor(data.amount * 0.2) * 100; // 20% platform fee
     const Amount = Number((data.amount * 100).toFixed(2));
 
-    const session = await this.stripe.checkout.sessions.create({
+    // const session = await this.stripe.checkout.sessions.create({
+    //   payment_method_types: ['card', 'us_bank_account', 'crypto'],
+    //   mode: 'payment',
+    //   line_items: [
+    //     {
+    //       price_data: {
+    //         currency: 'usd',
+    //         product_data: {
+    //           name: 'test',
+    //         },
+    //         unit_amount: Amount,
+    //       },
+    //       quantity: 1,
+    //     },
+    //   ],
+    //   metadata: {
+    //     paymentDetails: data.payment_info_id,
+    //     buyerId: data.buyerId,
+    //     sellerId: data.sellerId,
+    //     productName: data.serviceName,
+    //     amount: data.amount,
+    //     serviceType: data.serviceType, // example membership or support
+    //     serviceId: data.serviceId, // example membershipId or supportId
+    //   },
+    //   payment_intent_data: {
+    //     application_fee_amount: fee,
+    //     transfer_data: { destination: seller.stripeAccountId },
+    //   },
+    //   // success_url: `${process.env.BACKEND_URL}/payment/success?paymemttype:membership/`,
+    //   success_url: `${process.env.BACKEND_URL}/payment/success?paymentType=membership&paymentId=${data.payment_info_id}`,
+    //   cancel_url: `${process.env.BACKEND_URL}/payment/cancel`,
+    // });
+
+    const paymentAction = await this.stripe.paymentIntents.create({
+      amount: Amount,
+      currency: 'usd',
       payment_method_types: ['card', 'us_bank_account', 'crypto'],
-      mode: 'payment',
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: 'test',
-            },
-            unit_amount: Amount,
-          },
-          quantity: 1,
-        },
-      ],
+      application_fee_amount: fee,
       metadata: {
         paymentDetails: data.payment_info_id,
         buyerId: data.buyerId,
@@ -54,16 +77,12 @@ export class StripeService {
         serviceType: data.serviceType, // example membership or support
         serviceId: data.serviceId, // example membershipId or supportId
       },
-      payment_intent_data: {
-        application_fee_amount: fee,
-        transfer_data: { destination: seller.stripeAccountId },
+      transfer_data: {
+        destination: seller.stripeAccountId,
       },
-      // success_url: `${process.env.BACKEND_URL}/payment/success?paymemttype:membership/`,
-      success_url: `${process.env.BACKEND_URL}/payment/success?paymentType=membership&paymentId=${data.payment_info_id}`,
-      cancel_url: `${process.env.BACKEND_URL}/payment/cancel`,
     });
 
-    if (!session.id) {
+    if (!paymentAction.id || !paymentAction.client_secret) {
       throw new HttpException(
         cResponseData({
           message: 'Failed to Your Checkout ',
@@ -87,14 +106,12 @@ export class StripeService {
     await this.prisma.paymentDetails.update({
       where: { id: data.payment_info_id },
       data: {
-        cs_number: session.id,
-        paymemtStatus:
-          session.payment_status == 'unpaid' ? 'unpaid' : 'pending',
+        cs_number: paymentAction.id,
         endDate,
       },
     });
 
-    return session;
+    return paymentAction.client_secret;
   }
 
   // paymentIntents supporter card
