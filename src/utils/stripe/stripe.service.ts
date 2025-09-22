@@ -66,7 +66,8 @@ export class StripeService {
     const paymentAction = await this.stripe.paymentIntents.create({
       amount: Amount,
       currency: 'usd',
-      payment_method_types: ['card', 'us_bank_account', 'crypto'],
+      // payment_method_types: ['card', 'us_bank_account', 'crypto'],
+      automatic_payment_methods: { enabled: true },
       application_fee_amount: fee,
       metadata: {
         paymentDetails: data.payment_info_id,
@@ -112,7 +113,7 @@ export class StripeService {
       },
     });
 
-    return paymentAction.client_secret;
+    return { client_secret: paymentAction.client_secret, id: paymentAction.id };
   }
 
   // paymentIntents supporter card

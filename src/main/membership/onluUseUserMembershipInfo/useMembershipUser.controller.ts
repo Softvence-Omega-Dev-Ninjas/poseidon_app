@@ -44,8 +44,8 @@ export class MembershipUseToUserOnly {
     );
   }
 
-  @Roles(Role.User)
-  @Post('payemt-Status')
+  @Roles(Role.User, Role.Supporter)
+  @Post('payment-Status')
   paymentStatus(@Body() data: BuyMembershipResponseDto) {
     return this.membershipServiceUser.paymentStatus(data);
   }

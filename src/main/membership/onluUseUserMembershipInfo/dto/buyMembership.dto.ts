@@ -27,12 +27,4 @@ export class BuyMembershipResponseDto {
     example: 'pi_1234567890',
   })
   paymentIntentId: string;
-
-  @ApiProperty({
-    type: String,
-    required: true,
-    description: 'uuid',
-    example: 'dsfey5y45ev5yv56uv56urvyrer',
-  })
-  payment_info_id: string;
 }
