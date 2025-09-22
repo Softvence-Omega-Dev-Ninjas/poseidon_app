@@ -1,6 +1,9 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
-import { BuyMembershipDto } from './dto/buyMembership.dto';
+import {
+  BuyMembershipDto,
+  BuyMembershipResponseDto,
+} from './dto/buyMembership.dto';
 import { StripeService } from 'src/utils/stripe/stripe.service';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { PaymentInfoService } from './paymentDetails.service';
@@ -108,7 +111,7 @@ export class MembershipServiceUseToUserOnly {
         serviceName: membershipLevel?.titleName as string,
         amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
         serviceType: 'membership',
-        paymemtStatus: 'paid',
+        paymemtStatus: 'pending',
         serviceId: membershipLevel?.id as string,
         endDate: endDate, // PK duration time
         PermissionVideoCallAccess: plainAccess?.CalligSubscriptionPlan
@@ -182,6 +185,44 @@ export class MembershipServiceUseToUserOnly {
       data: checkout,
       success: true,
     });
+  }
+
+  // payment status
+  async paymentStatus(data: BuyMembershipResponseDto) {
+    const paymentIntent = await this.stripeService.paymentIntentCheck(
+      data.paymentIntentId,
+    );
+    console.log('paymentIntent - pi checkout', paymentIntent);
+    if (paymentIntent.status === 'succeeded') {
+      const paymentIntentData = await this.prisma.paymentDetails.update({
+        where: {
+          id: data.payment_info_id,
+        },
+        data: {
+          paymemtStatus: 'paid',
+        },
+      });
+      return cResponseData({
+        message: 'Payment successfully',
+        data: paymentIntentData,
+        success: true,
+      });
+    }
+    if (paymentIntent.status === 'canceled') {
+      const paymentIntent = await this.prisma.paymentDetails.update({
+        where: {
+          id: data.payment_info_id,
+        },
+        data: {
+          paymemtStatus: 'canceled',
+        },
+      });
+      return cResponseData({
+        message: 'payment canceled ',
+        data: paymentIntent,
+        success: false,
+      });
+    }
   }
 
   // get all membership levels use to user and suupoter

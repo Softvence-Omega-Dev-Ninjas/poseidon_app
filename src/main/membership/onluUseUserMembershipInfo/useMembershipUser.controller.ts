@@ -4,7 +4,10 @@ import { Public } from 'src/auth/guard/public.decorator';
 import { Request } from 'express';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
-import { BuyMembershipDto } from './dto/buyMembership.dto';
+import {
+  BuyMembershipDto,
+  BuyMembershipResponseDto,
+} from './dto/buyMembership.dto';
 import { StringToBooleanPipe } from 'src/common/utils/stringToBoolean.pipe';
 
 @Controller('membership-use')
@@ -39,5 +42,11 @@ export class MembershipUseToUserOnly {
       data,
       buyforce,
     );
+  }
+
+  @Roles(Role.User)
+  @Post('payemt-Status')
+  paymentStatus(@Body() data: BuyMembershipResponseDto) {
+    return this.membershipServiceUser.paymentStatus(data);
   }
 }

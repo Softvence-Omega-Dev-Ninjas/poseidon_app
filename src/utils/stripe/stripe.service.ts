@@ -107,6 +107,7 @@ export class StripeService {
       where: { id: data.payment_info_id },
       data: {
         cs_number: paymentAction.id,
+        paymemtStatus: 'unpaid',
         endDate,
       },
     });

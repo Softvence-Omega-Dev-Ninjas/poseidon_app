@@ -18,3 +18,21 @@ export class BuyMembershipDto {
   })
   membershipLevelId: string;
 }
+
+export class BuyMembershipResponseDto {
+  @ApiProperty({
+    type: String,
+    required: true,
+    description: 'payment intent id',
+    example: 'pi_1234567890',
+  })
+  paymentIntentId: string;
+
+  @ApiProperty({
+    type: String,
+    required: true,
+    description: 'uuid',
+    example: 'dsfey5y45ev5yv56uv56urvyrer',
+  })
+  payment_info_id: string;
+}
