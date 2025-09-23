@@ -25,13 +25,7 @@ export class CreateSupporterPayDto {
     required: true,
     example: '5cde7c60-24ce-4129-a62d-9b591c11bb79',
   })
-  user_id: string;
-
-  @ApiProperty({
-    required: true,
-    example: 'a4f57e39-b7a8-4d98-b810-657dfa7c0987',
-  })
-  author_id: string;
+  id: string;
 
   @ApiProperty({
     required: false,
@@ -46,15 +40,9 @@ export class CreateSupporterPayDto {
 
   @ApiProperty({
     required: true,
-    example: 'a4f57e39b7a84d98b810657dfa7c0987',
-  })
-  transaction_id: string;
-
-  @ApiProperty({
-    required: true,
     example: 25,
   })
-  total_price: number;
+  default_price: number;
 
   @ApiProperty({
     required: true,

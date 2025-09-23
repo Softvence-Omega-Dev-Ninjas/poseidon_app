@@ -106,7 +106,10 @@ export class OrderService {
     console.log('shop paydata =====>>>>>', paydata);
     console.log('createPiStrpekey ======>>>>>', createPiStrpekey);
 
-    return createPiStrpekey.client_secret;
+    return {
+      client_secret: createPiStrpekey.client_secret,
+      id: createPiStrpekey.id,
+    };
   }
 
   async findAll(query: FindAllOrdersDto) {

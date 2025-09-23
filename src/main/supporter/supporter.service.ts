@@ -105,29 +105,31 @@ export class SupporterService {
   }
 
   // buy support on
-  async create(createSupporterDto: CreateSupporterPayDto) {
+  async create(createSupporterDto: CreateSupporterPayDto, userid: string) {
     const { oder_package_name, ...rootData } = createSupporterDto;
 
     const newSupporter = await this.prisma.$transaction(async (tx) => {
-      const supporter = await tx.supporterPay.create({
-        data: {
-          ...rootData,
-        },
+      const supporterCardInfo = await tx.supportCartLayout.findUnique({
+        where: { id: rootData.id },
       });
+      // const supporter = await tx.supporterPay.create({
+      //   data: {
+      //     ...rootData,
+      //   },
+      // });
 
-      if (!oder_package_name) return supporter;
+      // if (!oder_package_name) return supporter;
 
-      const newPackage = await tx.oder_package_name.create({
-        data: {
-          supporter_pay_id: supporter.id,
-          ...oder_package_name,
-        },
-      });
-      return {
-        ...supporter,
-        oder_package_name: newPackage,
-      };
+      // const newPackage = await tx.oder_package_name.create({
+      //   data: {
+      //     supporter_pay_id: supporter.id,
+      //     ...oder_package_name,
+      //   },
+      // });
+      return supporterCardInfo;
     });
+
+    console.log('userid', userid, 'createSupporterDto', createSupporterDto);
 
     return cResponseData({
       message: 'Create Success',

@@ -85,9 +85,17 @@ export class SupporterController {
     });
   }
 
+  @Public()
+  @Roles(Role.User, Role.Supporter)
   @Post('payment')
-  buySupport(@Body() createSupporterDto: CreateSupporterPayDto) {
-    return this.supporterService.create(createSupporterDto);
+  buySupport(
+    @Body() createSupporterDto: CreateSupporterPayDto,
+    @Req() req: Request,
+  ) {
+    return this.supporterService.create(
+      createSupporterDto,
+      req['sub'] as string,
+    );
   }
 
   // @Public()
