@@ -28,7 +28,7 @@ export class MembershipUseToUserOnly {
     return this.membershipServiceUser.getLevels(id);
   }
 
-  @Roles(Role.User)
+  @Roles(Role.User, Role.Supporter)
   @Post('buy')
   buyMembership(
     @Req() req: Request,

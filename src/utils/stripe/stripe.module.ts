@@ -5,6 +5,7 @@ import { SellerService } from './seller.service';
 import { StripeService } from './stripe.service';
 import { PrismaClientModule } from 'src/prisma-client/prisma-client.module';
 import { CheckOutService } from './checkOut.service';
+import { ShopPaymentService } from './shopPayment.service';
 
 @Module({
   imports: [ConfigModule, PrismaClientModule],
@@ -22,7 +23,14 @@ import { CheckOutService } from './checkOut.service';
     SellerService,
     StripeService,
     CheckOutService,
+    ShopPaymentService,
   ],
-  exports: ['STRIPE_CLIENT', SellerService, StripeService, CheckOutService],
+  exports: [
+    'STRIPE_CLIENT',
+    SellerService,
+    StripeService,
+    CheckOutService,
+    ShopPaymentService,
+  ],
 })
 export class StripeModule {}

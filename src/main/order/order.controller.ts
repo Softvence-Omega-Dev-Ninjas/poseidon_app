@@ -4,7 +4,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { Role } from 'src/auth/guard/role.enum';
 import { Roles } from 'src/auth/guard/roles.decorator';
-import { Public } from 'src/auth/guard/public.decorator';
+// import { Public } from 'src/auth/guard/public.decorator';
 import { FindAllOrdersDto } from './dto/find-all-orders.dto';
 
 @ApiTags('order')
@@ -15,7 +15,7 @@ export class OrderController {
   @Post()
   @Roles(Role.User)
   create(@Body() createOrderDto: CreateOrderDto, @Req() req: Request) {
-    return this.orderService.create(createOrderDto, req['sub']);
+    return this.orderService.create(createOrderDto, req['sub'] as string);
   }
 
   @Get()

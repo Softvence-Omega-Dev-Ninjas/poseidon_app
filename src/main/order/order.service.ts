@@ -1,35 +1,66 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { FindAllOrdersDto } from './dto/find-all-orders.dto';
 import { sendResponse } from 'src/common/utils/send-response.util';
+import { cResponseData } from 'src/common/utils/common-responseData';
+import { ShopPaymentService } from 'src/utils/stripe/shopPayment.service';
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly shopPaymentService: ShopPaymentService,
+  ) {}
 
   async create(createOrderDto: CreateOrderDto, userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    // const payment = await this.prisma.payment.findUnique({
-    //   where: { id: paymentId },
-    // });
-    // if (!payment) throw new NotFoundException('Payment not found');
-
-    const product = await this.prisma.product.findUnique({
+    const productInfo = await this.prisma.product.findUnique({
       where: { id: createOrderDto.productId },
     });
-    if (!product) throw new NotFoundException('Product not found');
-
-    const order = await this.prisma.order.create({
-      data: { ...createOrderDto, userId },
+    if (!productInfo || !productInfo.id)
+      throw new HttpException(
+        cResponseData({
+          message: 'Product not found',
+          success: false,
+        }),
+        404,
+      );
+    const orderCreatedPending = await this.prisma.order.create({
+      data: {
+        ...createOrderDto,
+        color: createOrderDto.color,
+        userId: userId ? userId : null,
+        paymentDetailsByShop: {
+          create: {
+            amount: productInfo.price,
+          },
+        },
+      },
+      include: {
+        product: {
+          select: {
+            id: true,
+            shop: {
+              select: {
+                user: {
+                  select: {
+                    id: true,
+                    stripeAccountId: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        paymentDetailsByShop: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
-
-    return sendResponse('Order created successfully', order, 201);
+    console.log('orderCreatedPending ========== ', orderCreatedPending);
+    return orderCreatedPending;
   }
 
   async findAll(query: FindAllOrdersDto) {

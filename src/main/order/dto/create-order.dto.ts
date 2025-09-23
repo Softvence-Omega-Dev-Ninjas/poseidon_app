@@ -37,10 +37,10 @@ export class CreateOrderDto {
   @IsNotEmpty()
   phoneNumber: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty()
   @IsString()
-  @IsOptional()
-  paymentId?: string;
+  @IsNotEmpty()
+  color: string;
 
   @ApiProperty()
   @IsString()
