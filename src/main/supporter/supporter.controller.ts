@@ -90,16 +90,16 @@ export class SupporterController {
     return this.supporterService.create(createSupporterDto);
   }
 
-  @Public()
-  @Post('paymentsss')
-  payment(@Body() data: any) {
-    console.log(data);
-    return this.stripe.supporterCardPaymentIntents();
-  }
+  // @Public()
+  // @Post('paymentsss')
+  // payment(@Body() data: any) {
+  //   console.log(data);
+  //   return this.stripe.supporterCardPaymentIntents();
+  // }
 
-  @Public()
-  @Get('payment-check/:pi')
-  paymentCheck(@Param('pi') pi: string) {
-    return this.stripe.paymentIntentCheck(pi);
-  }
+  // @Public()
+  // @Get('payment-check/:pi')
+  // paymentCheck(@Param('pi') pi: string) {
+  //   return this.stripe.paymentIntentCheck(pi);
+  // }
 }

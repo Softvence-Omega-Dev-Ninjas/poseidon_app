@@ -72,27 +72,41 @@ export class OrderService {
       name: createOrderDto.fullName,
       email: createOrderDto.email,
     };
-    // const createPiStrpekey =
-    //   await this.shopPaymentService.shopPaymentIntent(paydata);
+    if (
+      !paydata.stripeAccountId ||
+      !paydata.paymentDetailsId ||
+      !paydata.shopOrderId
+    )
+      throw new HttpException(
+        cResponseData({
+          message: 'Product Buy faild',
+          error: 'author info missing and do not create order',
+          success: false,
+        }),
+        400,
+      );
+    const createPiStrpekey =
+      await this.shopPaymentService.shopPaymentIntent(paydata);
 
-    // if (
-    //   !createPiStrpekey ||
-    //   createPiStrpekey.client_secret ||
-    //   createPiStrpekey.id
-    // )
-    //   throw new HttpException(
-    //     cResponseData({
-    //       message: 'Payment Intents Faild',
-    //       error: 'payament error',
-    //       data: null,
-    //       success: false,
-    //     }),
-    //     400,
-    //   );
+    if (
+      !createPiStrpekey ||
+      !createPiStrpekey.client_secret ||
+      !createPiStrpekey.id
+    )
+      throw new HttpException(
+        cResponseData({
+          message: 'Payment Intents Faild',
+          error: 'payament error',
+          data: null,
+          success: false,
+        }),
+        400,
+      );
 
-    console.log('createPiStrpekey', paydata);
+    console.log('shop paydata =====>>>>>', paydata);
+    console.log('createPiStrpekey ======>>>>>', createPiStrpekey);
 
-    return paydata;
+    return createPiStrpekey.client_secret;
   }
 
   async findAll(query: FindAllOrdersDto) {
