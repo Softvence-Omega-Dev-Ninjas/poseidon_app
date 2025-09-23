@@ -2,12 +2,13 @@ import { HttpException, Inject } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import Stripe from 'stripe';
 import { ExpreeAccountDto } from './dto/createAccout.dto';
-
+// import cc from 'country-list';
 export class SellerService {
   constructor(@Inject('STRIPE_CLIENT') private stripe: Stripe) {}
 
   // create connected account for seller or supporter
   async createConnectedAccount(user: ExpreeAccountDto) {
+    console.log(user.createProfileDto);
     try {
       const account = await this.stripe.accounts.create({
         type: 'express',
@@ -30,13 +31,13 @@ export class SellerService {
         individual: {
           first_name: user.createProfileDto.name,
           last_name: user.createProfileDto.username,
-          address: {
-            line1: user.createProfileDto.address,
-            state: user.createProfileDto.state,
-            city: user.createProfileDto.city,
-            postal_code: user.createProfileDto.postcode,
-            country: user.createProfileDto.country,
-          },
+          // address: {
+          //   line1: user.createProfileDto.address,
+          //   state: user.createProfileDto.state,
+          //   city: user.createProfileDto.city,
+          //   postal_code: user.createProfileDto.postcode,
+          //   country: cc.getCode(user.createProfileDto.country),
+          // },
         },
       });
       return account;
