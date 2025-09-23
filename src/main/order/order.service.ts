@@ -5,6 +5,7 @@ import { FindAllOrdersDto } from './dto/find-all-orders.dto';
 import { sendResponse } from 'src/common/utils/send-response.util';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { ShopPaymentService } from 'src/utils/stripe/shopPayment.service';
+import { ShopPaymentDto } from 'src/utils/stripe/dto/shopPayment.dto';
 
 @Injectable()
 export class OrderService {
@@ -55,12 +56,43 @@ export class OrderService {
         paymentDetailsByShop: {
           select: {
             id: true,
+            amount: true,
           },
         },
       },
     });
-    console.log('orderCreatedPending ========== ', orderCreatedPending);
-    return orderCreatedPending;
+    const paydata: ShopPaymentDto = {
+      stripeAccountId: orderCreatedPending.product.shop.user
+        .stripeAccountId as string,
+      paymentDetailsId: orderCreatedPending.paymentDetailsByShop?.id as string,
+      shopOrderId: orderCreatedPending.id,
+      productId: orderCreatedPending.product.id,
+      userId: userId,
+      amount: orderCreatedPending.paymentDetailsByShop?.amount as number,
+      name: createOrderDto.fullName,
+      email: createOrderDto.email,
+    };
+    const createPiStrpekey =
+      await this.shopPaymentService.shopPaymentIntent(paydata);
+
+    if (
+      !createPiStrpekey ||
+      createPiStrpekey.client_secret ||
+      createPiStrpekey.id
+    )
+      throw new HttpException(
+        cResponseData({
+          message: 'Payment Intents Faild',
+          error: 'payament error',
+          data: null,
+          success: false,
+        }),
+        400,
+      );
+
+    console.log('createPiStrpekey', createPiStrpekey);
+
+    return createPiStrpekey;
   }
 
   async findAll(query: FindAllOrdersDto) {

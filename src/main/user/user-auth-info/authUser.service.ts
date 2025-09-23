@@ -166,6 +166,7 @@ export class AuthUserService {
           id: true,
           email: true,
           provider: true,
+          username: true,
           profile: {
             select: {
               name: true,
@@ -184,9 +185,10 @@ export class AuthUserService {
       const createAccountStripe = await this.stripe.createConnectedAccount({
         id: newSupporter.id,
         email: newSupporter.email,
-        url: `${process.env.FRONTEND_URL}/viewpage/${newSupporter.id}`,
+        url: `viewpage/${newSupporter.username}`, // ${process.env.FRONTEND_URL}/
         createProfileDto: {
           name: newSupporter.profile?.name as string,
+          username: newSupporter.username,
           address: newSupporter.profile?.address as string,
           city: newSupporter.profile?.city as string,
           country: newSupporter.profile?.country as string,

@@ -34,8 +34,8 @@ export class StripeService {
     const paymentAction = await this.stripe.paymentIntents.create({
       amount: converAmountStripe(data.amount),
       currency: 'usd',
-      // payment_method_types: ['card', 'us_bank_account', 'crypto'],
-      automatic_payment_methods: { enabled: true },
+      payment_method_types: ['card', 'us_bank_account', 'crypto'],
+      // automatic_payment_methods: { enabled: true },
       application_fee_amount: platformFee(data.amount),
       metadata: {
         paymentDetails: data.payment_info_id,

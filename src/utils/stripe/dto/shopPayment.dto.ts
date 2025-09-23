@@ -5,7 +5,7 @@ export class ShopPaymentDto {
   stripeAccountId: string;
 
   @ApiProperty()
-  paymentShopId: string;
+  paymentDetailsId: string;
 
   @ApiProperty()
   shopOrderId: string;

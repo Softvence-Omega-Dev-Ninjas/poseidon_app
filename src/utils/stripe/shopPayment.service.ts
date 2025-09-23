@@ -13,7 +13,7 @@ export class ShopPaymentService {
       payment_method_types: ['card', 'crypto'],
       metadata: { ...data },
       transfer_data: {
-        destination: data.paymentShopId,
+        destination: data.stripeAccountId,
       },
     });
 

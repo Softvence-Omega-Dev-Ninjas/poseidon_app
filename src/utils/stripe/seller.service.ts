@@ -23,6 +23,21 @@ export class SellerService {
           transfers: { requested: true },
           crypto_payments: { requested: true },
         },
+        business_profile: {
+          mcc: '8999',
+          url: `drinkwithme.click/${user.url}`,
+        },
+        individual: {
+          first_name: user.createProfileDto.name,
+          last_name: user.createProfileDto.username,
+          address: {
+            line1: user.createProfileDto.address,
+            state: user.createProfileDto.state,
+            city: user.createProfileDto.city,
+            postal_code: user.createProfileDto.postcode,
+            country: user.createProfileDto.country,
+          },
+        },
       });
       return account;
     } catch (e: unknown) {

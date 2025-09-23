@@ -13,7 +13,7 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  @Roles(Role.User)
+  @Roles(Role.User, Role.Supporter)
   create(@Body() createOrderDto: CreateOrderDto, @Req() req: Request) {
     return this.orderService.create(createOrderDto, req['sub'] as string);
   }
