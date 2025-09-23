@@ -117,6 +117,7 @@ export class AuthUserService {
         email: true,
         password: true,
         role: true,
+        varify: true,
         stripeAccountId: true,
         profile: {
           select: {

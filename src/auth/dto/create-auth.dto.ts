@@ -32,4 +32,5 @@ export class authenticationUserDto {
   shop?: { id: string } | null;
   memberships_owner?: { id: string } | null;
   stripeAccountId?: string | null;
+  varify: boolean;
 }

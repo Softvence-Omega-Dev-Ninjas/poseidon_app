@@ -48,7 +48,11 @@ export class AuthService {
     // return payload;
     return {
       access_token: `Bearer ${access_token}`,
-      user: payload,
+      user: {
+        ...payload,
+        profile_varify: user?.varify,
+        financial_account: user?.stripeAccountId ? true : false,
+      },
     };
   }
 
