@@ -21,7 +21,8 @@ model Service {
 model ServiceOrder {
   id        String   @id @unique @default(uuid())
   status ServiceOrderStatus @default(pending)
-  paymentId String
+  payment   PaymentDetailsByServices? @relation(fields: [paymentId], references: [id])
+  paymentId String? @unique
   service   Service  @relation(fields: [serviceId], references: [id])
   serviceId String
    user      User     @relation("UserServiceOrders", fields: [userId], references: [id]) 
@@ -38,5 +39,15 @@ enum ServiceOrderStatus {
   pending
   approved
   rejected
+}
+
+model PaymentDetailsByServices {
+  id            String        @id @default(uuid())
+  amount        Float
+  pi_number     String?
+  paymemtStatus PaymemtStatus @default(pending)
+  createAt      DateTime      @default(now())
+
+  order ServiceOrder?
 }
 
