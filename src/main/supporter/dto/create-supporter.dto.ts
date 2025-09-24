@@ -42,7 +42,7 @@ export class CreateSupporterPayDto {
     required: true,
     example: 25,
   })
-  default_price: number;
+  total_price: number;
 
   @ApiProperty({
     required: true,

@@ -39,7 +39,7 @@ import { Public } from 'src/auth/guard/public.decorator';
 @Roles(Role.Admin, Role.Supporter, Role.User)
 @Controller('images')
 export class ImageController {
-  constructor(private readonly imageService: ImageService) { }
+  constructor(private readonly imageService: ImageService) {}
 
   @Post()
   @ApiConsumes('multipart/form-data')
@@ -83,7 +83,7 @@ export class ImageController {
   @ApiQuery({
     name: 'visibility',
     required: false,
-    enum: [Visibility.PUBLIC, Visibility.PRIVATE,],
+    enum: [Visibility.PUBLIC, Visibility.PRIVATE],
     description: 'Filter by visibility',
   })
   @ApiQuery({

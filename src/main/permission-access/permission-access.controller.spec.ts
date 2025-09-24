@@ -11,7 +11,9 @@ describe('PermissionAccessController', () => {
       providers: [PermissionAccessService],
     }).compile();
 
-    controller = module.get<PermissionAccessController>(PermissionAccessController);
+    controller = module.get<PermissionAccessController>(
+      PermissionAccessController,
+    );
   });
 
   it('should be defined', () => {

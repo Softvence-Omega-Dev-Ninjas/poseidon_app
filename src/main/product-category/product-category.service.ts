@@ -137,7 +137,7 @@ export class ProductCategoryService {
       this.prisma.productCategory.count({ where }),
     ]);
 
-     console.log(categories)
+    console.log(categories);
 
     const mediaIds = categories
       .map((c) => c.image)

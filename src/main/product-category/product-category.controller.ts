@@ -49,10 +49,7 @@ export class ProductCategoryController {
   @Get()
   @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(@Query() query: FindAllProductCategoriesDto, @Req() req: any) {
-    const result = await this.productCategoryService.findAll(
-      query,
-      req?.sub,
-    );
+    const result = await this.productCategoryService.findAll(query, req?.sub);
     return cResponseData({
       message: 'Product categories fetched successfully.',
       error: null,

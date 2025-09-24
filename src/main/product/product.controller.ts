@@ -65,7 +65,6 @@ export class ProductController {
     );
   }
 
-
   @Get()
   @Public()
   @ApiQuery({
@@ -104,7 +103,7 @@ export class ProductController {
     @Req() req: any,
     @Query('categoryId') categoryId?: string,
     @Query('draft') draft?: boolean,
-    @Query('providerId') providerId?:any
+    @Query('providerId') providerId?: any,
   ) {
     return this.productService.findAll(
       +page,

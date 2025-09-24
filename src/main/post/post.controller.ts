@@ -90,7 +90,7 @@ export class PostController {
     description: 'Filter by provider ID',
   })
   findAll(@Query() query: FindAllPostsDto) {
-    return this.postService.findAll(query,query.providerId);
+    return this.postService.findAll(query, query.providerId);
   }
 
   @Get(':id')

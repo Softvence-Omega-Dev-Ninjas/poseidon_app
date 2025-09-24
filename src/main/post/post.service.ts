@@ -19,7 +19,7 @@ export class PostService {
   constructor(
     private prisma: PrismaService,
     private cloudinaryService: CloudinaryService,
-  ) { }
+  ) {}
 
   async create(
     createPostDto: CreatePostDto,
