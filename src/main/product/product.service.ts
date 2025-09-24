@@ -195,8 +195,11 @@ export class ProductService {
     }
 
     if (userId) {
+      console.log(userId)
       where.userId = userId;
     }
+
+    
 
     const [products, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
