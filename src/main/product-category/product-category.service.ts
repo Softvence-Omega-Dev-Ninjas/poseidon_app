@@ -113,7 +113,7 @@ export class ProductCategoryService {
     orderBy.name = 'asc';
   }
 
-  // ✅ filtering by userId if provided
+
   const where: Prisma.ProductCategoryWhereInput = userId
     ? {
         productCategories: {
@@ -128,7 +128,7 @@ export class ProductCategoryService {
       }
     : {};
 
-  // ✅ main query with both filtering + including relations
+
   const [categories, total] = await Promise.all([
     this.prisma.productCategory.findMany({
       skip,
