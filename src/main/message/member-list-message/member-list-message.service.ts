@@ -11,7 +11,7 @@ export class MemberListMessageService {
     const data = await this.prisma.$transaction(async (tx) => {
       const memberships = await tx.paymentDetails.findMany({
         where: {
-          buyerId: '3e7572ca-4c09-4e37-b984-0913e183c83c',
+          buyerId: userId,
           // paymemtStatus: 'paid',
           endDate: {
             gte: new Date(),
@@ -28,7 +28,25 @@ export class MemberListMessageService {
         ...new Set(memberships.flatMap((membership) => membership.sellerId)),
       ];
 
-      return sellerIds;
+      const berGirlLis = await tx.user.findMany({
+        where: {
+          id: {
+            in: sellerIds,
+          },
+          role: 'supporter',
+        },
+        select: {
+          id: true,
+          profile: {
+            select: {
+              name: true,
+              image: true,
+            },
+          },
+        },
+      });
+
+      return berGirlLis;
     });
     return data;
   }
