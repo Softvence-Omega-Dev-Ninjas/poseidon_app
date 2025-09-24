@@ -3,6 +3,10 @@ import Stripe from 'stripe';
 import { CheckOutPaymentSessionsDto } from './dto/checkOutPaymentSessionsDto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { cResponseData } from 'src/common/utils/common-responseData';
+import {
+  converAmountStripe,
+  platformFee,
+} from 'src/common/utils/stripeAmountConvert';
 
 @Injectable()
 export class StripeService {
@@ -27,47 +31,12 @@ export class StripeService {
         404,
       );
 
-    const fee = Math.floor(data.amount * 0.2) * 100; // 20% platform fee
-    const Amount = Number((data.amount * 100).toFixed(2));
-
-    // const session = await this.stripe.checkout.sessions.create({
-    //   payment_method_types: ['card', 'us_bank_account', 'crypto'],
-    //   mode: 'payment',
-    //   line_items: [
-    //     {
-    //       price_data: {
-    //         currency: 'usd',
-    //         product_data: {
-    //           name: 'test',
-    //         },
-    //         unit_amount: Amount,
-    //       },
-    //       quantity: 1,
-    //     },
-    //   ],
-    //   metadata: {
-    //     paymentDetails: data.payment_info_id,
-    //     buyerId: data.buyerId,
-    //     sellerId: data.sellerId,
-    //     productName: data.serviceName,
-    //     amount: data.amount,
-    //     serviceType: data.serviceType, // example membership or support
-    //     serviceId: data.serviceId, // example membershipId or supportId
-    //   },
-    //   payment_intent_data: {
-    //     application_fee_amount: fee,
-    //     transfer_data: { destination: seller.stripeAccountId },
-    //   },
-    //   // success_url: `${process.env.BACKEND_URL}/payment/success?paymemttype:membership/`,
-    //   success_url: `${process.env.BACKEND_URL}/payment/success?paymentType=membership&paymentId=${data.payment_info_id}`,
-    //   cancel_url: `${process.env.BACKEND_URL}/payment/cancel`,
-    // });
-
     const paymentAction = await this.stripe.paymentIntents.create({
-      amount: Amount,
+      amount: converAmountStripe(data.amount),
       currency: 'usd',
-      payment_method_types: ['card', 'us_bank_account', 'crypto'],
-      application_fee_amount: fee,
+      // payment_method_types: ['card', 'us_bank_account', 'crypto'],
+      automatic_payment_methods: { enabled: true },
+      application_fee_amount: platformFee(data.amount),
       metadata: {
         paymentDetails: data.payment_info_id,
         buyerId: data.buyerId,
@@ -112,26 +81,12 @@ export class StripeService {
       },
     });
 
-    return paymentAction.client_secret;
+    return { client_secret: paymentAction.client_secret, id: paymentAction.id };
   }
 
   // paymentIntents supporter card
   async supporterCardPaymentIntents() {
-    return this.stripe.paymentIntents.create({
-      amount: 1000,
-      currency: 'usd',
-      // automatic_payment_methods: { enabled: true },
-      payment_method_types: ['card', 'us_bank_account', 'crypto'],
-      // payment_method: 'pm_card_visa',
-      metadata: {
-        suppoterCardId: '4574hgv6u4g5-----------y45yht',
-      },
-      // payment_method_types: ['card', 'us_bank_account', 'crypto'],
-      application_fee_amount: 200,
-      transfer_data: {
-        destination: 'acct_1S6pse80rufk5BDv',
-      },
-    });
+    return await this.stripe.accounts.retrieve('acct_1SAdi58uRi3mkP2j');
   }
 
   async paymentIntentCheck(pi: string) {

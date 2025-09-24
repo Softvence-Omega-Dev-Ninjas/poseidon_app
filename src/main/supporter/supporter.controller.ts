@@ -85,21 +85,31 @@ export class SupporterController {
     });
   }
 
+  @Public()
+  @Roles(Role.User, Role.Supporter)
   @Post('payment')
-  buySupport(@Body() createSupporterDto: CreateSupporterPayDto) {
-    return this.supporterService.create(createSupporterDto);
+  buySupport(
+    @Body() createSupporterDto: CreateSupporterPayDto,
+    @Req() req: Request,
+  ) {
+    return this.supporterService.create(
+      createSupporterDto,
+      req['sub'] as string,
+    );
   }
 
   @Public()
-  @Post('paymentsss')
-  payment(@Body() data: any) {
+  @Post('checkout-acccount-this')
+  async payment(@Body() data: any) {
     console.log(data);
-    return this.stripe.supporterCardPaymentIntents();
+    const acc = await this.stripe.supporterCardPaymentIntents();
+    console.log(acc.requirements);
+    return acc;
   }
 
-  @Public()
-  @Get('payment-check/:pi')
-  paymentCheck(@Param('pi') pi: string) {
-    return this.stripe.paymentIntentCheck(pi);
-  }
+  // @Public()
+  // @Get('payment-check/:pi')
+  // paymentCheck(@Param('pi') pi: string) {
+  //   return this.stripe.paymentIntentCheck(pi);
+  // }
 }

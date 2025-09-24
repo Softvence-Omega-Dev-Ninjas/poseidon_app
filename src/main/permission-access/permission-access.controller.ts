@@ -13,6 +13,7 @@ import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { Request } from 'express';
 import { cResponseData } from 'src/common/utils/common-responseData';
+// import { Public } from 'src/auth/guard/public.decorator';
 
 @Controller('permission-access')
 export class PermissionAccessController {
@@ -21,7 +22,7 @@ export class PermissionAccessController {
   ) {}
 
   // @Public()
-  @Roles(Role.User)
+  @Roles(Role.User, Role.Supporter)
   @Get()
   findAll(
     // @Body() accesPermissionAccessDto: AccesPermissionAccessDto,

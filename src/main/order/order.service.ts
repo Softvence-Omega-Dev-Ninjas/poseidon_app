@@ -1,35 +1,115 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { FindAllOrdersDto } from './dto/find-all-orders.dto';
 import { sendResponse } from 'src/common/utils/send-response.util';
+import { cResponseData } from 'src/common/utils/common-responseData';
+import { ShopPaymentService } from 'src/utils/stripe/shopPayment.service';
+import { ShopPaymentDto } from 'src/utils/stripe/dto/shopPayment.dto';
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly shopPaymentService: ShopPaymentService,
+  ) {}
 
   async create(createOrderDto: CreateOrderDto, userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    // const payment = await this.prisma.payment.findUnique({
-    //   where: { id: paymentId },
-    // });
-    // if (!payment) throw new NotFoundException('Payment not found');
-
-    const product = await this.prisma.product.findUnique({
+    const productInfo = await this.prisma.product.findUnique({
       where: { id: createOrderDto.productId },
     });
-    if (!product) throw new NotFoundException('Product not found');
-
-    const order = await this.prisma.order.create({
-      data: { ...createOrderDto, userId },
+    if (!productInfo || !productInfo.id)
+      throw new HttpException(
+        cResponseData({
+          message: 'Product not found',
+          success: false,
+        }),
+        404,
+      );
+    const orderCreatedPending = await this.prisma.order.create({
+      data: {
+        ...createOrderDto,
+        color: createOrderDto.color,
+        userId: userId ? userId : null,
+        paymentDetailsByShop: {
+          create: {
+            amount: productInfo.price,
+          },
+        },
+      },
+      include: {
+        product: {
+          select: {
+            id: true,
+            shop: {
+              select: {
+                user: {
+                  select: {
+                    id: true,
+                    stripeAccountId: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        paymentDetailsByShop: {
+          select: {
+            id: true,
+            amount: true,
+          },
+        },
+      },
     });
+    const paydata: ShopPaymentDto = {
+      stripeAccountId: orderCreatedPending.product.shop.user
+        .stripeAccountId as string,
+      paymentDetailsId: orderCreatedPending.paymentDetailsByShop?.id as string,
+      shopOrderId: orderCreatedPending.id,
+      productId: orderCreatedPending.product.id,
+      userId: userId,
+      amount: orderCreatedPending.paymentDetailsByShop?.amount as number,
+      name: createOrderDto.fullName,
+      email: createOrderDto.email,
+    };
+    if (
+      !paydata.stripeAccountId ||
+      !paydata.paymentDetailsId ||
+      !paydata.shopOrderId
+    )
+      throw new HttpException(
+        cResponseData({
+          message: 'Product Buy faild',
+          error: 'author info missing and do not create order',
+          success: false,
+        }),
+        400,
+      );
+    const createPiStrpekey =
+      await this.shopPaymentService.shopPaymentIntent(paydata);
 
-    return sendResponse('Order created successfully', order, 201);
+    if (
+      !createPiStrpekey ||
+      !createPiStrpekey.client_secret ||
+      !createPiStrpekey.id
+    )
+      throw new HttpException(
+        cResponseData({
+          message: 'Payment Intents Faild',
+          error: 'payament error',
+          data: null,
+          success: false,
+        }),
+        400,
+      );
+
+    console.log('shop paydata =====>>>>>', paydata);
+    console.log('createPiStrpekey ======>>>>>', createPiStrpekey);
+
+    return {
+      client_secret: createPiStrpekey.client_secret,
+      id: createPiStrpekey.id,
+    };
   }
 
   async findAll(query: FindAllOrdersDto) {

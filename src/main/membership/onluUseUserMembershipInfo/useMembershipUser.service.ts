@@ -189,29 +189,40 @@ export class MembershipServiceUseToUserOnly {
 
   // payment status
   async paymentStatus(data: BuyMembershipResponseDto) {
-    const paymentIntent = await this.stripeService.paymentIntentCheck(
+    const payStatus = await this.stripeService.paymentIntentCheck(
       data.paymentIntentId,
     );
-    console.log('paymentIntent - pi checkout', paymentIntent);
-    if (paymentIntent.status === 'succeeded') {
+    if (!payStatus || payStatus.status !== 'succeeded') {
+      throw new HttpException(
+        cResponseData({
+          message: 'Payment failed',
+          error: 'Payment failed',
+          data: null,
+          success: false,
+        }),
+        400,
+      );
+    }
+    console.log('paymentIntent - pi checkout', payStatus);
+    if (payStatus.status === 'succeeded') {
       const paymentIntentData = await this.prisma.paymentDetails.update({
         where: {
-          id: data.payment_info_id,
+          id: payStatus.metadata.paymentDetails,
         },
         data: {
           paymemtStatus: 'paid',
         },
       });
       return cResponseData({
-        message: 'Payment successfully',
+        message: 'Payment successfully complated',
         data: paymentIntentData,
         success: true,
       });
     }
-    if (paymentIntent.status === 'canceled') {
+    if (payStatus.status === 'canceled') {
       const paymentIntent = await this.prisma.paymentDetails.update({
         where: {
-          id: data.payment_info_id,
+          id: payStatus.metadata.paymentDetails,
         },
         data: {
           paymemtStatus: 'canceled',
