@@ -54,6 +54,7 @@ export class AuthService {
       const result = await this.stripeSellerService.checkAccountsInfoSystem(
         user.stripeAccountId,
       );
+      console.log('varify stripe ', result);
       financial_account_check.stripe = result;
     }
 

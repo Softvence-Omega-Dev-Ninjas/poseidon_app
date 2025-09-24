@@ -145,10 +145,12 @@ export class SellerService {
   // use to Auth login user system this function
   async checkAccountsInfoSystem(accountId: string) {
     const account = await this.stripe.accounts.retrieve(accountId);
+    console.log('checkAccountsInfoSystem', account);
     if (
       !account ||
       !account.external_accounts ||
       !account.external_accounts.data ||
+      account.external_accounts.data.length < 1 ||
       !account.tos_acceptance ||
       !account.tos_acceptance.date
     ) {
