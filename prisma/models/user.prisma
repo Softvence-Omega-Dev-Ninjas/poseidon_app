@@ -39,6 +39,8 @@ model User {
 
   //
 
+   productCategories ProductCategory[] 
+
   services Service[]
 
   // permission access tb

@@ -19,7 +19,9 @@ export class ProductCategoryService {
 
   async create(
     createProductCategoryDto: CreateProductCategoryDto,
+     userId:string,
     file?: Express.Multer.File,
+   
   ): Promise<any> {
     try {
       let imageUrl: string | null = null;
@@ -29,10 +31,11 @@ export class ProductCategoryService {
         const uploadRes = await this.cloudinaryService.imageUpload(file);
         imageUrl = uploadRes.mediaId;
       }
-
+       
       // Save category to DB
       const newCategory = await this.prisma.productCategory.create({
         data: {
+          userId,
           name: createProductCategoryDto.name,
           image: imageUrl,
         },
@@ -100,11 +103,12 @@ export class ProductCategoryService {
   //   };
   // }
 
-  async findAll(query: FindAllProductCategoriesDto, userId: string) {
+ async findAll(query: FindAllProductCategoriesDto, userId: string) {
   const page = query.page ?? 1;
   const limit = query.limit ?? 10;
   const sortBy = query.sortBy;
   const skip = (page - 1) * limit;
+
 
   const orderBy: Prisma.ProductCategoryOrderByWithRelationInput = {};
   if (sortBy === ProductCategorySortBy.NEWEST) {
@@ -113,19 +117,9 @@ export class ProductCategoryService {
     orderBy.name = 'asc';
   }
 
-
+ 
   const where: Prisma.ProductCategoryWhereInput = userId
-    ? {
-        productCategories: {
-          some: {
-            product: {
-              shop: {
-                userId,
-              },
-            },
-          },
-        },
-      }
+    ? { userId } 
     : {};
 
 
@@ -136,15 +130,12 @@ export class ProductCategoryService {
       orderBy,
       where,
       include: {
+        user: {
+          select: { id: true,  email: true }, 
+        },
         productCategories: {
           include: {
-            product: {
-              include: {
-                shop: {
-                  select: { userId: true },
-                },
-              },
-            },
+            product: true, 
           },
         },
       },
@@ -152,7 +143,7 @@ export class ProductCategoryService {
     this.prisma.productCategory.count({ where }),
   ]);
 
-  // handle images/media
+  // Handle images/media
   const mediaIds = categories
     .map((c) => c.image)
     .filter((id): id is string => Boolean(id));
@@ -165,7 +156,7 @@ export class ProductCategoryService {
 
   const categoriesWithMedia = categories.map((c) => ({
     ...c,
-    media: c.image ? (mediaMap.get(c.image) ?? null) : null,
+    media: c.image ? mediaMap.get(c.image) ?? null : null,
   }));
 
   return {
@@ -176,6 +167,7 @@ export class ProductCategoryService {
     totalPages: Math.ceil(total / limit),
   };
 }
+
 
 
   async findOne(id: string) {

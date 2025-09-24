@@ -40,9 +40,12 @@ export class ProductCategoryController {
   @ApiBody({ type: CreateProductCategoryDto })
   create(
     @Body() createProductCategoryDto: CreateProductCategoryDto,
+    @Req() req:any,
     @UploadedFile() image?: Express.Multer.File,
+    
   ) {
-    return this.productCategoryService.create(createProductCategoryDto, image);
+    console.log(req?.sub)
+    return this.productCategoryService.create(createProductCategoryDto,req?.sub, image);
   }
 
   @Roles(Role.Supporter, Role.User)
