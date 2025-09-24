@@ -24,10 +24,9 @@ export class MemberListMessageService {
           sellerId: true,
         },
       });
-
-      const sellerIds = memberships.flatMap(
-        (membership) => membership.sellerId,
-      );
+      const sellerIds = [
+        ...new Set(memberships.flatMap((membership) => membership.sellerId)),
+      ];
 
       return sellerIds;
     });
