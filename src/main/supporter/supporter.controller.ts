@@ -98,12 +98,14 @@ export class SupporterController {
     );
   }
 
-  // @Public()
-  // @Post('paymentsss')
-  // payment(@Body() data: any) {
-  //   console.log(data);
-  //   return this.stripe.supporterCardPaymentIntents();
-  // }
+  @Public()
+  @Post('checkout-acccount-this')
+  async payment(@Body() data: any) {
+    console.log(data);
+    const acc = await this.stripe.supporterCardPaymentIntents();
+    console.log(acc.requirements);
+    return acc;
+  }
 
   // @Public()
   // @Get('payment-check/:pi')

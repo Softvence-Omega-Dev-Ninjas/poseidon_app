@@ -34,8 +34,8 @@ export class StripeService {
     const paymentAction = await this.stripe.paymentIntents.create({
       amount: converAmountStripe(data.amount),
       currency: 'usd',
-      payment_method_types: ['card', 'us_bank_account', 'crypto'],
-      // automatic_payment_methods: { enabled: true },
+      // payment_method_types: ['card', 'us_bank_account', 'crypto'],
+      automatic_payment_methods: { enabled: true },
       application_fee_amount: platformFee(data.amount),
       metadata: {
         paymentDetails: data.payment_info_id,
@@ -86,21 +86,7 @@ export class StripeService {
 
   // paymentIntents supporter card
   async supporterCardPaymentIntents() {
-    return this.stripe.paymentIntents.create({
-      amount: 1000,
-      currency: 'usd',
-      // automatic_payment_methods: { enabled: true },
-      payment_method_types: ['card', 'us_bank_account', 'crypto'],
-      // payment_method: 'pm_card_visa',
-      metadata: {
-        suppoterCardId: '4574hgv6u4g5-----------y45yht',
-      },
-      // payment_method_types: ['card', 'us_bank_account', 'crypto'],
-      application_fee_amount: 200,
-      transfer_data: {
-        destination: 'acct_1S6pse80rufk5BDv',
-      },
-    });
+    return await this.stripe.accounts.retrieve('acct_1SAdi58uRi3mkP2j');
   }
 
   async paymentIntentCheck(pi: string) {

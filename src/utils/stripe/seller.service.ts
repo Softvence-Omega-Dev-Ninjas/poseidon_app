@@ -31,13 +31,6 @@ export class SellerService {
         individual: {
           first_name: user.createProfileDto.name,
           last_name: user.createProfileDto.username,
-          // address: {
-          //   line1: user.createProfileDto.address,
-          //   state: user.createProfileDto.state,
-          //   city: user.createProfileDto.city,
-          //   postal_code: user.createProfileDto.postcode,
-          //   country: cc.getCode(user.createProfileDto.country),
-          // },
         },
       });
       return account;
@@ -116,6 +109,8 @@ export class SellerService {
       );
       const cryptoTotal = cryptoAvailable + cryptoPending;
 
+      console.log('cryptoTotal', cryptoTotal);
+
       const payouts = await this.stripe.payouts.list(
         {
           limit: 10,
@@ -145,6 +140,21 @@ export class SellerService {
         400,
       );
     }
+  }
+
+  // use to Auth login user system this function
+  async checkAccountsInfoSystem(accountId: string) {
+    const account = await this.stripe.accounts.retrieve(accountId);
+    if (
+      !account ||
+      !account.external_accounts ||
+      !account.external_accounts.data ||
+      !account.tos_acceptance ||
+      !account.tos_acceptance.date
+    ) {
+      return false;
+    }
+    return true;
   }
 
   async deleteAccount(accountId: string) {
