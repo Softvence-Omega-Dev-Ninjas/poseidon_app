@@ -346,4 +346,32 @@ export class SupporterService {
       };
     });
   }
+
+  async suporterUserList(author_id: string) {
+    return await this.prisma.supporterPay.findMany({
+      where: {
+        author_id: author_id,
+        paymemtStatus: 'paid',
+      },
+      select: {
+        id: true,
+        name: true,
+        user_id: true,
+        massage: true,
+        country: true,
+        createAt: true,
+        total_price: true,
+        user: {
+          select: {
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 }

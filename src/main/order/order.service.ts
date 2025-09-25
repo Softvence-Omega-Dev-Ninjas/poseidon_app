@@ -152,6 +152,9 @@ export class OrderService {
         include: {
           product: true, // Include product details if needed
         },
+        orderBy: {
+          createdAt: 'desc',
+        },
       }),
       this.prisma.order.count({ where }),
     ]);

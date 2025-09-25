@@ -35,6 +35,7 @@ export class AuthUserService {
   // credentials register system
   async createUser(createUserDto: CreateUserDto, skip: boolean) {
     // const { skip, ...createUserDto } = data;
+    console.log('createUserDto ========++++++++000000', createUserDto);
     const userIsExest = await this.isExestUser(createUserDto.email);
     if (userIsExest) {
       throw new HttpException(

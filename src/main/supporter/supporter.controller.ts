@@ -128,4 +128,10 @@ export class SupporterController {
   get3topCard(@Req() req: Request) {
     return this.supporterService.get3topCard(req['sub'] as string);
   }
+
+  @Roles(Role.Supporter)
+  @Get('suporterUserList')
+  suporterUserList(@Req() req: Request) {
+    return this.supporterService.suporterUserList(req['sub'] as string);
+  }
 }
