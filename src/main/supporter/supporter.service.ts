@@ -252,4 +252,98 @@ export class SupporterService {
       });
     }
   }
+
+  async get3topCard(author_id: string) {
+    console.log(author_id, '2eb5c09d-fe1e-45c5-afc9-d9cb7ff023f2');
+    const currentTime = new Date();
+    return await this.prisma.$transaction(async (tx) => {
+      const TotalSupportersCount =
+        (await tx.supporterPay.count({
+          where: {
+            author_id: author_id,
+            paymemtStatus: 'paid',
+          },
+        })) || 0;
+      const currentMonthTotalSupportersCount =
+        (await tx.supporterPay.count({
+          where: {
+            author_id: author_id,
+            paymemtStatus: 'paid',
+            createAt: {
+              gte: new Date(
+                currentTime.getFullYear(),
+                currentTime.getMonth(),
+                1,
+              ),
+              lt: new Date(
+                currentTime.getFullYear(),
+                currentTime.getMonth() + 1,
+                1,
+              ),
+            },
+          },
+        })) || 0;
+
+      const lastMonthErn = await tx.supporterPay.aggregate({
+        where: {
+          author_id: author_id,
+          paymemtStatus: 'paid',
+          createAt: {
+            gte: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
+            lt: new Date(
+              currentTime.getFullYear(),
+              currentTime.getMonth() + 1,
+              1,
+            ),
+          },
+        },
+        _sum: {
+          total_price: true,
+        },
+      });
+
+      const totalSupportersInLastMonth =
+        (await tx.supporterPay.count({
+          where: {
+            author_id: author_id,
+            paymemtStatus: 'paid',
+            user_id: {
+              not: null,
+            },
+            createAt: {
+              gte: new Date(
+                currentTime.getFullYear(),
+                currentTime.getMonth(),
+                1,
+              ),
+              lt: new Date(
+                currentTime.getFullYear(),
+                currentTime.getMonth() + 1,
+                1,
+              ),
+            },
+          },
+        })) || 0;
+
+      const allTime = await tx.supporterPay.aggregate({
+        where: {
+          author_id: author_id,
+          paymemtStatus: 'paid',
+        },
+        _sum: {
+          total_price: true,
+        },
+      });
+      return {
+        Supporters: { TotalSupportersCount, currentMonthTotalSupportersCount },
+        Last30days: {
+          lastMonthTotalAmount: lastMonthErn?._sum?.total_price
+            ? lastMonthErn?._sum?.total_price
+            : 0,
+          totalSupportersInLastMonth,
+        },
+        allTime: allTime?._sum?.total_price ? allTime?._sum?.total_price : 0,
+      };
+    });
+  }
 }

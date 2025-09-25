@@ -146,6 +146,7 @@ export class AuthUserService {
     createUserDto: CreateUserDto,
     skip: boolean,
   ) {
+    console.log('createUserDto =====++++++', createUserDto);
     try {
       // If the user is a supporter, create a support_cart_layout
       console.log('createSupporterAccount......');

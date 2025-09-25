@@ -41,7 +41,16 @@ export class AuthController {
   ) {
     // call cloudinary profile image upload - this area
     const { imageUrl } = await this.cloudinaryService.profileImageUpload(image);
-    const { role, username, email, password, ...profile } = createAuthDto;
+    const {
+      skip: skipAuth,
+      role,
+      username,
+      email,
+      password,
+      ...profile
+    } = createAuthDto;
+
+    console.log('skip ------------+++', skip);
 
     return this.authUserService.createUser(
       {

@@ -122,4 +122,10 @@ export class SupporterController {
   // paymentCheck(@Param('pi') pi: string) {
   //   return this.stripe.paymentIntentCheck(pi);
   // }
+
+  @Roles(Role.Supporter)
+  @Get('gettop3card')
+  get3topCard(@Req() req: Request) {
+    return this.supporterService.get3topCard(req['sub'] as string);
+  }
 }
