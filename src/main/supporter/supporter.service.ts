@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreateSupporterPayDto } from './dto/create-supporter.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { SupportCartLayoutQuantity } from './dto/supportCartLayoutQuantity.dto';
@@ -6,6 +6,8 @@ import { CheersLivePackageType } from './dto/create-supporter-layout';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { UpdateSupporterLayputDto } from './dto/update-supporter.dto';
 import { SupporterCardPaymentService } from 'src/utils/stripe/supporterCard.service';
+import { BuyMembershipResponseDto } from '../membership/onluUseUserMembershipInfo/dto/buyMembership.dto';
+import { StripeService } from 'src/utils/stripe/stripe.service';
 // import { UpdateSupporterDto } from './dto/update-supporter.dto';
 
 @Injectable()
@@ -13,6 +15,7 @@ export class SupporterService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly supporterCardPaymentService: SupporterCardPaymentService,
+    private readonly stripeService: StripeService,
   ) {}
 
   async getSupporterCartLayout(userId: string) {
@@ -120,85 +123,132 @@ export class SupporterService {
         redirect_url: `${process.env.FRONTEND_URL}/login`,
       };
     }
-    const newSupport = await this.prisma.$transaction(async (tx) => {
-      const supporterCardInfo = await tx.supportCartLayout.findUnique({
-        where: { id: pkId },
-        select: {
-          id: true,
-          author_id: true,
-          author: {
-            select: {
-              stripeAccountId: true,
-            },
+    // const newSupport: any = await this.prisma.$transaction(async (tx) => {
+    const supporterCardInfo = await this.prisma.supportCartLayout.findUnique({
+      where: { id: pkId },
+      select: {
+        id: true,
+        author_id: true,
+        author: {
+          select: {
+            stripeAccountId: true,
           },
         },
+      },
+    });
+    if (!supporterCardInfo) {
+      return cResponseData({
+        message: 'No data found',
+        error: 'No data found',
+        success: false,
       });
-      if (!supporterCardInfo) {
-        return cResponseData({
-          message: 'No data found',
-          error: 'No data found',
-          success: false,
-        });
-      }
+    }
 
-      const paymentPandingData = await tx.supporterPay.create({
-        data: {
-          author_id: supporterCardInfo.author_id,
-          total_price: rootData.total_price,
-          name: rootData.name,
-          country: rootData.country,
-          massage: rootData.message,
-        },
-        select: {
-          id: true,
-          total_price: true,
-          author_id: true,
-        },
-      });
-
-      if (
-        order_package_name &&
-        order_package_name.package_name &&
-        paymentPandingData &&
-        paymentPandingData.id
-      ) {
-        await tx.oder_package_name.create({
-          data: {
-            ...order_package_name,
-            supporter_pay_id: paymentPandingData.id,
-          },
-        });
-        return {
-          stripeAccountId: supporterCardInfo.author.stripeAccountId,
-          ...paymentPandingData,
-        };
-        // return await this.supporterCardPaymentService.supportPayemnt({
-        //   id: paymentPandingData.id,
-        //   user_id: userid,
-        //   author_id: paymentPandingData.author_id,
-        //   total_price: paymentPandingData.total_price,
-        //   stripeAccountId: supporterCardInfo.author.stripeAccountId,
-        // });
-      }
-      return {
-        ...paymentPandingData,
-        stripeAccountId: supporterCardInfo.author.stripeAccountId,
-      };
+    const paymentPandingData = await this.prisma.supporterPay.create({
+      data: {
+        author_id: supporterCardInfo.author_id,
+        total_price: rootData.total_price,
+        name: rootData.name,
+        country: rootData.country,
+        massage: rootData.message,
+      },
+      select: {
+        id: true,
+        total_price: true,
+        author_id: true,
+      },
     });
 
-    // const { id } = newSupport;
+    if (
+      order_package_name &&
+      order_package_name.package_name &&
+      paymentPandingData &&
+      paymentPandingData.id
+    ) {
+      await this.prisma.oder_package_name.create({
+        data: {
+          ...order_package_name,
+          supporter_pay_id: paymentPandingData.id,
+        },
+      });
+    }
 
-    // const payintigr = await this.supporterCardPaymentService.supportPayemnt({
-    //   id: newSupport.id,
-    //   user_id: userid,
-    //   author_id: '',
-    //   total_price: 34,
-    //   stripeAccountId: '',
-    // });
+    if (
+      !paymentPandingData ||
+      !supporterCardInfo ||
+      !supporterCardInfo.author ||
+      !supporterCardInfo.author.stripeAccountId
+    ) {
+      throw new HttpException(
+        cResponseData({
+          message: 'supporter card info Not Found',
+          error: 'supporter card  payment issue',
+          success: false,
+        }),
+        400,
+      );
+    }
+
+    const payintigr = await this.supporterCardPaymentService.supportPayemnt({
+      id: paymentPandingData.id,
+      user_id: userid,
+      author_id: paymentPandingData.author_id,
+      total_price: paymentPandingData.total_price,
+      stripeAccountId: supporterCardInfo.author.stripeAccountId,
+    });
 
     return cResponseData({
       message: 'Create Success',
-      data: newSupport,
+      data: payintigr,
     });
+  }
+
+  // payment status check
+  async paymentStatusCheck(data: BuyMembershipResponseDto) {
+    const payStatus = await this.stripeService.paymentIntentCheck(
+      data.paymentIntentId,
+    );
+    if (!payStatus || payStatus.status !== 'succeeded' || !payStatus.id) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Payment failed',
+          error: 'Payment failed',
+          data: null,
+          success: false,
+        }),
+        400,
+      );
+    }
+    console.log('paymentIntent - pi checkout', payStatus);
+    if (payStatus.status === 'succeeded') {
+      const paymentIntentData = await this.prisma.supporterPay.update({
+        where: {
+          id: payStatus.metadata.supporterPayTb,
+        },
+        data: {
+          paymemtStatus: 'paid',
+        },
+      });
+      return cResponseData({
+        message: 'Payment successfully complated',
+        data: paymentIntentData,
+        success: true,
+      });
+    }
+    if (payStatus.status === 'canceled') {
+      const paymentIntent = await this.prisma.supporterPay.update({
+        where: {
+          id: payStatus.metadata.supporterPayTb,
+        },
+        data: {
+          paymemtStatus: 'canceled',
+        },
+      });
+      return cResponseData({
+        message: 'payment canceled ',
+        data: paymentIntent,
+        success: false,
+      });
+    }
   }
 }

@@ -19,6 +19,7 @@ import { Role } from 'src/auth/guard/role.enum';
 import { CheersLivePackageType } from './dto/create-supporter-layout';
 import { StripeService } from 'src/utils/stripe/stripe.service';
 import { Public } from 'src/auth/guard/public.decorator';
+import { BuyMembershipResponseDto } from '../membership/onluUseUserMembershipInfo/dto/buyMembership.dto';
 
 @Controller('supporter')
 export class SupporterController {
@@ -101,6 +102,13 @@ export class SupporterController {
       createSupporterDto,
       req['sub'] as string,
     );
+  }
+
+  @Public()
+  @Roles(Role.User, Role.Supporter)
+  @Post('paymentStutasCheck')
+  paymentStutasCheck(@Body() createSupporterDto: BuyMembershipResponseDto) {
+    return this.supporterService.paymentStatusCheck(createSupporterDto);
   }
 
   @Public()
