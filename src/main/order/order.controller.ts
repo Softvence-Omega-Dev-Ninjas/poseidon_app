@@ -6,6 +6,7 @@ import { Role } from 'src/auth/guard/role.enum';
 import { Roles } from 'src/auth/guard/roles.decorator';
 // import { Public } from 'src/auth/guard/public.decorator';
 import { FindAllOrdersDto } from './dto/find-all-orders.dto';
+import { BuyMembershipResponseDto } from '../membership/onluUseUserMembershipInfo/dto/buyMembership.dto';
 
 @ApiTags('order')
 @Controller('order')
@@ -28,5 +29,11 @@ export class OrderController {
   @Roles(Role.Supporter, Role.User)
   findOne(@Param('id') id: string) {
     return this.orderService.findOne(id);
+  }
+
+  @Post('paymentStatusCheck')
+  @Roles(Role.Supporter, Role.User)
+  paymentStatusCheck(@Body() body: BuyMembershipResponseDto) {
+    return this.orderService.paymentStatusCheck(body);
   }
 }

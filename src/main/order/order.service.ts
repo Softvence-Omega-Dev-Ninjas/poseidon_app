@@ -6,12 +6,15 @@ import { sendResponse } from 'src/common/utils/send-response.util';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { ShopPaymentService } from 'src/utils/stripe/shopPayment.service';
 import { ShopPaymentDto } from 'src/utils/stripe/dto/shopPayment.dto';
+import { StripeService } from 'src/utils/stripe/stripe.service';
+import { BuyMembershipResponseDto } from '../membership/onluUseUserMembershipInfo/dto/buyMembership.dto';
 
 @Injectable()
 export class OrderService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly shopPaymentService: ShopPaymentService,
+    private readonly stripeService: StripeService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, userId: string) {
@@ -170,5 +173,53 @@ export class OrderService {
       throw new NotFoundException(`Order with id ${id} not found`);
     }
     return sendResponse('Order retrieved successfully', order, 200);
+  }
+
+  async paymentStatusCheck(data: BuyMembershipResponseDto) {
+    const payStatus = await this.stripeService.paymentIntentCheck(
+      data.paymentIntentId,
+    );
+    if (!payStatus || payStatus.status !== 'succeeded' || !payStatus.id) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Payment failed',
+          error: 'Payment failed',
+          data: null,
+          success: false,
+        }),
+        400,
+      );
+    }
+    console.log('paymentIntent - pi checkout', payStatus);
+    if (payStatus.status === 'succeeded') {
+      const paymentIntentData = await this.prisma.paymentDetailsByShop.update({
+        where: {
+          id: payStatus.metadata.paymentDetailsId,
+        },
+        data: {
+          paymemtStatus: 'paid',
+        },
+      });
+      return cResponseData({
+        message: 'Payment successfully complated',
+        data: paymentIntentData,
+        success: true,
+      });
+    }
+    if (payStatus.status === 'canceled') {
+      const paymentIntent = await this.prisma.paymentDetailsByShop.update({
+        where: {
+          id: payStatus.metadata.paymentDetailsId,
+        },
+        data: {
+          paymemtStatus: 'canceled',
+        },
+      });
+      return cResponseData({
+        message: 'payment canceled ',
+        data: paymentIntent,
+        success: false,
+      });
+    }
   }
 }
