@@ -10,7 +10,7 @@ model SupporterPay {
   massage           String
   author            User               @relation("author_supportor", fields: [author_id], references: [id])
   user              User?              @relation(fields: [user_id], references: [id])
-  oder_package_name oder_package_name?
+  oder_package_name oder_package_name? @relation(name: "SupporterPayTooder_package_name")
   createAt          DateTime           @default(now())
   updateAt          DateTime           @updatedAt
 }
@@ -24,7 +24,7 @@ model oder_package_name {
   complate         Boolean      @default(false)
   createAt         DateTime     @default(now())
   updateAt         DateTime     @updatedAt
-  SupporterPay     SupporterPay @relation(fields: [supporter_pay_id], references: [id])
+  SupporterPay     SupporterPay @relation(name: "SupporterPayTooder_package_name", fields: [supporter_pay_id], references: [id], onDelete: Cascade)
 }
 
 // root cart details

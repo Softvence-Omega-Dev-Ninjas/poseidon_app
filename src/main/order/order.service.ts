@@ -36,7 +36,9 @@ export class OrderService {
         userId: userId ? userId : null,
         paymentDetailsByShop: {
           create: {
-            amount: productInfo.price,
+            amount: productInfo.offerPrice
+              ? productInfo.offerPrice
+              : productInfo.price,
           },
         },
       },

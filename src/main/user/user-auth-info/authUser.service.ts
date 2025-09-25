@@ -33,7 +33,8 @@ export class AuthUserService {
   }
 
   // credentials register system
-  async createUser(createUserDto: CreateUserDto) {
+  async createUser(createUserDto: CreateUserDto, skip: boolean) {
+    // const { skip, ...createUserDto } = data;
     const userIsExest = await this.isExestUser(createUserDto.email);
     if (userIsExest) {
       throw new HttpException(
@@ -50,10 +51,13 @@ export class AuthUserService {
     const hashedPassword = await argon2.hash(createUserDto.password);
     // create new supporter
     if (createUserDto.role === 'supporter') {
-      return await this.createSupporterAccount({
-        ...createUserDto,
-        password: hashedPassword,
-      });
+      return await this.createSupporterAccount(
+        {
+          ...createUserDto,
+          password: hashedPassword,
+        },
+        skip,
+      );
     }
     // create new user
     // create a hash password
@@ -138,7 +142,10 @@ export class AuthUserService {
   }
 
   // create supporter account
-  private async createSupporterAccount(createUserDto: CreateUserDto) {
+  private async createSupporterAccount(
+    createUserDto: CreateUserDto,
+    skip: boolean,
+  ) {
     try {
       // If the user is a supporter, create a support_cart_layout
       console.log('createSupporterAccount......');
@@ -181,6 +188,16 @@ export class AuthUserService {
           },
         },
       });
+
+      if (skip) {
+        return {
+          message: 'Supporter account created successfully',
+          redirect_url: `${process.env.FRONTEND_URL}/login`,
+          error: null,
+          data: { name: newSupporter.profile?.name },
+          success: true,
+        };
+      }
 
       // // create stripe connected account for supporter
       const createAccountStripe = await this.stripe.createConnectedAccount({
