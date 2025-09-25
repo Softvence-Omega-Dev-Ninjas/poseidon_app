@@ -106,30 +106,72 @@ export class SupporterService {
 
   // buy support on
   async create(createSupporterDto: CreateSupporterPayDto, userid: string) {
-    const { oder_package_name, ...rootData } = createSupporterDto;
+    const { order_package_name, id: pkId, ...rootData } = createSupporterDto;
 
+    if (!!order_package_name && !userid) {
+      return {
+        message: 'User id is required',
+        error: 'No data found',
+        success: false,
+        redirect_url: `${process.env.FRONTEND_URL}/login`,
+      };
+    }
     const newSupporter = await this.prisma.$transaction(async (tx) => {
       const supporterCardInfo = await tx.supportCartLayout.findUnique({
-        where: { id: rootData.id },
+        where: { id: pkId },
+        select: {
+          id: true,
+          author_id: true,
+          author: {
+            select: {
+              stripeAccountId: true,
+            },
+          },
+        },
       });
-      // const supporter = await tx.supporterPay.create({
-      //   data: {
-      //     ...rootData,
-      //   },
-      // });
+      if (!supporterCardInfo) {
+        return cResponseData({
+          message: 'No data found',
+          error: 'No data found',
+          success: false,
+        });
+      }
 
-      // if (!oder_package_name) return supporter;
+      const paymentPandingData = await tx.supporterPay.create({
+        data: {
+          author_id: supporterCardInfo.author_id,
+          total_price: rootData.total_price,
+          name: rootData.name,
+          country: rootData.country,
+          massage: rootData.message,
+        },
+      });
 
-      // const newPackage = await tx.oder_package_name.create({
-      //   data: {
-      //     supporter_pay_id: supporter.id,
-      //     ...oder_package_name,
-      //   },
-      // });
-      return supporterCardInfo;
+      if (
+        order_package_name &&
+        order_package_name.package_name &&
+        paymentPandingData &&
+        paymentPandingData.id
+      ) {
+        const oder_package_name = await tx.oder_package_name.create({
+          data: {
+            ...order_package_name,
+            supporter_pay_id: paymentPandingData.id,
+          },
+        });
+        return {
+          stripeAccountId: supporterCardInfo.author.stripeAccountId,
+          ...paymentPandingData,
+          oder_package_name,
+        };
+      }
+      return {
+        ...paymentPandingData,
+        stripeAccountId: supporterCardInfo.author.stripeAccountId,
+      };
     });
 
-    console.log('userid', userid, 'createSupporterDto', createSupporterDto);
+    // console.log('userid', userid, 'createSupporterDto', createSupporterDto);
 
     return cResponseData({
       message: 'Create Success',

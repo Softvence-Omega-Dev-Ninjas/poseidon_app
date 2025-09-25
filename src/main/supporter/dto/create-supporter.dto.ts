@@ -36,7 +36,7 @@ export class CreateSupporterPayDto {
       package_price: 20,
     },
   })
-  oder_package_name?: PackageTypePay;
+  order_package_name?: PackageTypePay;
 
   @ApiProperty({
     required: true,
@@ -60,5 +60,5 @@ export class CreateSupporterPayDto {
     required: true,
     example: 'hey, suppoter',
   })
-  massage: string;
+  message: string;
 }
