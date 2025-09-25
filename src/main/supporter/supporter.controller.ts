@@ -94,10 +94,7 @@ export class SupporterController {
     @Req() req: Request,
   ) {
     // console.log('order_package_name ===========> ', typeof order_package_name);
-    // console.log(
-    //   'createSupporterDto ===========>>>>>>>>>>>>>>>>>>',
-    //   createSupporterDto,
-    // );
+    console.log('login user ===========>>>>>>>>>>>>>>>>>>', req['sub']);
     return this.supporterService.create(
       createSupporterDto,
       req['sub'] as string,

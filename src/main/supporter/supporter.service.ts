@@ -148,6 +148,7 @@ export class SupporterService {
       data: {
         author_id: supporterCardInfo.author_id,
         total_price: rootData.total_price,
+        user_id: userid ? userid : null,
         name: rootData.name,
         country: rootData.country,
         massage: rootData.message,
