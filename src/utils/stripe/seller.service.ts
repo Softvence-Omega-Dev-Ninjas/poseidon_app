@@ -1,8 +1,10 @@
-import { HttpException, Inject } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import Stripe from 'stripe';
 import { ExpreeAccountDto } from './dto/createAccout.dto';
 // import cc from 'country-list';
+
+@Injectable()
 export class SellerService {
   constructor(@Inject('STRIPE_CLIENT') private stripe: Stripe) {}
 

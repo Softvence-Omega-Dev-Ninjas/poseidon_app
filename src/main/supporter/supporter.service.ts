@@ -5,11 +5,15 @@ import { SupportCartLayoutQuantity } from './dto/supportCartLayoutQuantity.dto';
 import { CheersLivePackageType } from './dto/create-supporter-layout';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { UpdateSupporterLayputDto } from './dto/update-supporter.dto';
+import { SupporterCardPaymentService } from 'src/utils/stripe/supporterCard.service';
 // import { UpdateSupporterDto } from './dto/update-supporter.dto';
 
 @Injectable()
 export class SupporterService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly supporterCardPaymentService: SupporterCardPaymentService,
+  ) {}
 
   async getSupporterCartLayout(userId: string) {
     const getCartLayout = await this.prisma.supportCartLayout.findMany({
@@ -116,7 +120,7 @@ export class SupporterService {
         redirect_url: `${process.env.FRONTEND_URL}/login`,
       };
     }
-    const newSupporter = await this.prisma.$transaction(async (tx) => {
+    const newSupport = await this.prisma.$transaction(async (tx) => {
       const supporterCardInfo = await tx.supportCartLayout.findUnique({
         where: { id: pkId },
         select: {
@@ -145,6 +149,11 @@ export class SupporterService {
           country: rootData.country,
           massage: rootData.message,
         },
+        select: {
+          id: true,
+          total_price: true,
+          author_id: true,
+        },
       });
 
       if (
@@ -153,7 +162,7 @@ export class SupporterService {
         paymentPandingData &&
         paymentPandingData.id
       ) {
-        const oder_package_name = await tx.oder_package_name.create({
+        await tx.oder_package_name.create({
           data: {
             ...order_package_name,
             supporter_pay_id: paymentPandingData.id,
@@ -162,8 +171,14 @@ export class SupporterService {
         return {
           stripeAccountId: supporterCardInfo.author.stripeAccountId,
           ...paymentPandingData,
-          oder_package_name,
         };
+        // return await this.supporterCardPaymentService.supportPayemnt({
+        //   id: paymentPandingData.id,
+        //   user_id: userid,
+        //   author_id: paymentPandingData.author_id,
+        //   total_price: paymentPandingData.total_price,
+        //   stripeAccountId: supporterCardInfo.author.stripeAccountId,
+        // });
       }
       return {
         ...paymentPandingData,
@@ -171,11 +186,19 @@ export class SupporterService {
       };
     });
 
-    // console.log('userid', userid, 'createSupporterDto', createSupporterDto);
+    // const { id } = newSupport;
+
+    // const payintigr = await this.supporterCardPaymentService.supportPayemnt({
+    //   id: newSupport.id,
+    //   user_id: userid,
+    //   author_id: '',
+    //   total_price: 34,
+    //   stripeAccountId: '',
+    // });
 
     return cResponseData({
       message: 'Create Success',
-      data: newSupporter,
+      data: newSupport,
     });
   }
 }
