@@ -13,8 +13,8 @@ export class ShopPaymentService {
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount: converAmountStripe(data.amount),
         currency: 'usd',
-        payment_method_types: ['card', 'us_bank_account', 'crypto'],
-        // automatic_payment_methods: { enabled: true },
+        // payment_method_types: ['card', 'us_bank_account', 'crypto'],
+        automatic_payment_methods: { enabled: true },
         // application_fee_amount: platformFee(20),
         metadata: {
           paymentDetailsId: data.paymentDetailsId,
