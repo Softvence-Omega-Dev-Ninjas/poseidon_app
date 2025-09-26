@@ -39,3 +39,25 @@ export class FindAllOrdersDto {
   @IsString()
   fullName?: string;
 }
+
+export class GetOrderItemWithBerGirl {
+  @ApiProperty({
+    required: false,
+    default: 1,
+    description: 'Page number for pagination',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  page?: number = 1;
+
+  @ApiProperty({
+    required: false,
+    default: 10,
+    description: 'Number of items per page',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  limit?: number = 10;
+}

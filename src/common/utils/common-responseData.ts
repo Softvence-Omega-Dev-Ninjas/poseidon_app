@@ -3,7 +3,7 @@ interface ResDataOptions {
   error?: string | undefined | null;
   data?: any[] | null | undefined | object | string | number | boolean;
   success?: boolean | undefined | null;
-  optional?: any;
+  [key: string]: any;
 }
 
 export const cResponseData = ({

@@ -1,7 +1,10 @@
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
-import { FindAllOrdersDto } from './dto/find-all-orders.dto';
+import {
+  FindAllOrdersDto,
+  GetOrderItemWithBerGirl,
+} from './dto/find-all-orders.dto';
 import { sendResponse } from 'src/common/utils/send-response.util';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { ShopPaymentService } from 'src/utils/stripe/shopPayment.service';
@@ -170,6 +173,101 @@ export class OrderService {
     };
 
     return sendResponse('Orders retrieved successfully', data, 200);
+  }
+
+  // this founction use to ber girl
+  async getAllOrderWithBerGirl(id: string, query: GetOrderItemWithBerGirl) {
+    const { page = 1, limit = 10 } = query;
+    const parsedPage = Number(page);
+    const parsedLimit = Number(limit);
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    console.log('ber girl id', id);
+    const orders = await this.prisma.order.findMany({
+      where: {
+        product: {
+          shop: {
+            userId: id,
+          },
+        },
+      },
+      skip,
+      take: parsedLimit,
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        country: true,
+        city: true,
+        postCode: true,
+        apartmentOrHouse: true,
+        phoneNumber: true,
+        color: true,
+        user: {
+          select: {
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        paymentDetailsByShop: true,
+        createdAt: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            offerPrice: true,
+            images: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    const totalItems = await this.prisma.order.count({
+      where: {
+        product: {
+          shop: {
+            userId: id,
+          },
+        },
+      },
+    });
+    const totalPages = Math.ceil(totalItems / parsedLimit);
+
+    console.log(orders);
+    const allData = orders.map((order) => {
+      const { paymentDetailsByShop, product, user, createdAt, id, ...address } =
+        order;
+      return {
+        orderId: id,
+        product: {
+          ...product,
+          images: product.images[0],
+        },
+        coustomer: user,
+        deliveryAddress: address,
+        paymentDetails: paymentDetailsByShop,
+        createdAt,
+      };
+    });
+    return cResponseData({
+      message: 'Orders retrieved successfully',
+      data: allData,
+      pagination: {
+        totalItems: totalItems || 0,
+        totalPages: totalPages || 0,
+        currentPage: parsedPage || 0,
+        limit: parsedLimit,
+      },
+      success: true,
+    });
   }
 
   async findOne(id: string) {
