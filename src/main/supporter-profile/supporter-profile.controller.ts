@@ -84,13 +84,14 @@ export class SupporterProfileController {
   changeCoverPhoto(
     @UploadedFile(new ImageValidationPipe(20))
     image: Express.Multer.File,
-    @Body('offsetY') offsetY: string,
+    @Body() data: ProfileCoverImageDto,
     @Req() req: Request,
   ) {
+    console.log('change cover images', data);
     return this.coverPhotoChangeService.changeCoverPhotoSupporterProfile({
       userId: req['sub'] as string,
       image,
-      offsetY: offsetY,
+      offsetY: data.offsetY,
     });
   }
 }
