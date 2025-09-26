@@ -41,7 +41,7 @@ jobs:
           username: root
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
-            cd ../home/poseidon
+            cd ../home/drinkwithme
             echo "Stopping and removing old containers..."
             docker compose down
 
