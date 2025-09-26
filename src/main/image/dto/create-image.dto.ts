@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Roles as Visibility } from 'generated/prisma';
+import { Visibility } from 'generated/prisma';
 
 export class CreateImageDto {
   @ApiProperty({
@@ -12,7 +12,7 @@ export class CreateImageDto {
   title: string;
 
   @ApiProperty({
-    example: Visibility.supporter,
+    example: Visibility.PUBLIC,
     enum: Visibility,
     description: 'Visibility of the image (PUBLIC, SUPPORTERS)',
   })

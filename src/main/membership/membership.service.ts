@@ -7,12 +7,14 @@ import {
   LevelImageUpdateDto,
   UpdateMembershipLevelDto,
 } from './dto/update-membership-level.dto';
+import { MediafileService } from '../mediafile/mediafile.service';
 
 @Injectable()
 export class MembershipService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly mediafileService: MediafileService,
   ) {}
 
   private async checkEnableMembership(id: string) {
@@ -190,67 +192,53 @@ export class MembershipService {
       data: updateNewData,
       success: true,
     });
+  }
 
-    // await this.prisma.$transaction(async (tx) => {
-    //   // 1️⃣ Update the parent membership level
-    //   const updatedLevel = await tx.membership_levels.update({
-    //     where: { id: dto.id },
-    //     data: {
-    //       levelName: dto.levelName,
-    //       titleName: dto.titleName,
-    //       levelDescription: dto.levelDescription,
-    //       levelImage: dto.levelImage,
-    //       isPublic: dto.isPublic,
-    //       Wellcome_note: dto.Wellcome_note,
-    //     },
-    //   });
+  // delete membership level
+  async deleteMembershipLevel(id: string) {
+    const checkLevel = await this.prisma.membership_levels.findFirst({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        levelImage: true,
+      },
+    });
+    if (!checkLevel || !checkLevel?.id) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Membership level not found',
+          data: null,
+          success: false,
+        }),
+        404,
+      );
+    }
 
-    //   // 2️⃣ Update each subscription plan with its nested child plans
-    //   for (const plan of dto.MembershipSubscriptionPlan) {
-    //     await tx.membershipSubscriptionPlan.update({
-    //       where: { id: plan.id },
-    //       data: {
-    //         duration: plan.duration,
-    //         price: plan.price,
+    // delete images with db media and cloudinary
+    const deleteImage = await this.mediafileService.deleteMembershipImage(
+      checkLevel?.levelImage,
+    );
 
-    //         CalligSubscriptionPlan: plan.CalligSubscriptionPlan
-    //           ? {
-    //               update: {
-    //                 where: { id: plan.CalligSubscriptionPlan.id },
-    //                 data: { ...plan.CalligSubscriptionPlan },
-    //               },
-    //             }
-    //           : { delete: {} },
-
-    //         MessagesSubscriptionPlan: plan.MessagesSubscriptionPlan
-    //           ? {
-    //               update: {
-    //                 ...plan.MessagesSubscriptionPlan,
-    //               },
-    //             }
-    //           : undefined,
-
-    //         GallerySubscriptionPlan: plan.GallerySubscriptionPlan
-    //           ? {
-    //               update: {
-    //                 ...plan.GallerySubscriptionPlan,
-    //               },
-    //             }
-    //           : undefined,
-
-    //         PostsSubscriptionPlan: plan.PostsSubscriptionPlan
-    //           ? {
-    //               update: {
-    //                 ...plan.PostsSubscriptionPlan,
-    //               },
-    //             }
-    //           : undefined,
-    //       },
-    //     });
-    //   }
-
-    //   return updatedLevel;
-    // });
+    const deleteMembershipLevel = await this.prisma.membership_levels.delete({
+      where: {
+        id,
+      },
+    });
+    if (!deleteMembershipLevel || !deleteMembershipLevel?.id)
+      throw new HttpException(
+        cResponseData({
+          message: 'Membership level delete failed',
+          data: null,
+          success: false,
+        }),
+        404,
+      );
+    return cResponseData({
+      message: 'Membership level deleted successfully',
+      data: { ...deleteMembershipLevel, deleteImage },
+    });
   }
 
   async levelImageUpdate(id: string, levelImage: LevelImageUpdateDto) {
@@ -273,5 +261,131 @@ export class MembershipService {
       message: 'Membership level image updated successfully',
       data: updateLevelImage,
     });
+  }
+
+  async getMembershipLevel(levelId: string) {
+    const level = await this.prisma.membership_levels.findFirst({
+      where: {
+        id: levelId,
+      },
+      include: {
+        MembershipSubscriptionPlan: {
+          include: {
+            CalligSubscriptionPlan: true,
+            MessagesSubscriptionPlan: true,
+            GallerySubscriptionPlan: true,
+            PostsSubscriptionPlan: true,
+          },
+        },
+      },
+    });
+    if (level && level.levelImage) {
+      const images = await this.prisma.media.findFirst({
+        where: {
+          id: level.levelImage,
+        },
+      });
+      return cResponseData({
+        message: 'Membership level found successfully',
+        data: { ...level, levelImage: images },
+      });
+    }
+
+    return cResponseData({
+      message: 'Membership level not found',
+      data: level,
+    });
+  }
+
+  async getTop3Card(id: string) {
+    const time = new Date();
+    const y = time.getFullYear();
+    const m = time.getMonth();
+
+    return await this.prisma.$transaction(async (tx) => {
+      const totalMember = await tx.paymentDetails.groupBy({
+        by: ['buyerId'],
+        where: {
+          sellerId: id,
+          buyerId: { not: null },
+          serviceType: 'membership',
+        },
+      });
+      const perMonth = await tx.paymentDetails.aggregate({
+        _sum: {
+          amount: true,
+        },
+        where: {
+          sellerId: id,
+          buyerId: { not: null },
+          serviceType: 'membership',
+          createAt: {
+            gte: new Date(y, m, 1),
+            lte: new Date(y, m + 1, 0),
+          },
+        },
+      });
+      const allTime = await tx.paymentDetails.aggregate({
+        _sum: {
+          amount: true,
+        },
+        where: {
+          sellerId: id,
+          buyerId: { not: null },
+          serviceType: 'membership',
+        },
+      });
+      return {
+        Members: totalMember.length,
+        perMonth: perMonth?._sum.amount ? perMonth?._sum.amount : 0.0,
+        allTime: allTime?._sum.amount ? allTime?._sum.amount : 0.0,
+      };
+    });
+  }
+
+  async yearlyEarningChart(id: string) {
+    const MONTH_NAMES = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    const year = new Date().getFullYear();
+    const payments = await this.prisma.paymentDetails.findMany({
+      where: {
+        sellerId: id,
+        paymemtStatus: 'paid',
+        createAt: {
+          gte: new Date(year, 0, 1), // Jan 1
+          lt: new Date(year + 1, 0, 1), // next year Jan 1
+        },
+      },
+      select: {
+        amount: true,
+        createAt: true,
+      },
+    });
+    const monthly: Record<string, number> = {};
+    for (const p of payments) {
+      const month = MONTH_NAMES[Number(p.createAt.getMonth())]; // 0-11
+      if (!monthly[month]) {
+        monthly[month] = 0;
+      }
+      monthly[month] += p.amount;
+    }
+    return (
+      MONTH_NAMES.map((month) => {
+        if (monthly[month]) return { name: month, earnings: monthly[month] };
+        return { name: month, earnings: 0.0 };
+      }) || []
+    );
   }
 }

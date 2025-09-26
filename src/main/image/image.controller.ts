@@ -32,13 +32,14 @@ import { Role } from 'src/auth/guard/role.enum';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { CreateImageCommentDto } from './dto/create-image-comment.dto';
 import { FindAllImageCommentsDto } from './dto/find-all-image-comments.dto';
-import { Roles as Visibility } from '../../../generated/prisma';
+import { Visibility } from '../../../generated/prisma';
+import { Public } from 'src/auth/guard/public.decorator';
 
 @ApiTags('images')
 @Roles(Role.Admin, Role.Supporter, Role.User)
 @Controller('images')
 export class ImageController {
-  constructor(private readonly imageService: ImageService) { }
+  constructor(private readonly imageService: ImageService) {}
 
   @Post()
   @ApiConsumes('multipart/form-data')
@@ -58,6 +59,7 @@ export class ImageController {
   }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Get all images with pagination and sorting' })
   @ApiResponse({ status: 200, description: 'Returns a list of images.' })
   @ApiQuery({
@@ -81,7 +83,7 @@ export class ImageController {
   @ApiQuery({
     name: 'visibility',
     required: false,
-    enum: [Visibility.admin, Visibility.user, Visibility.supporter],
+    enum: [Visibility.PUBLIC, Visibility.PRIVATE],
     description: 'Filter by visibility',
   })
   @ApiQuery({

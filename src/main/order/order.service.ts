@@ -1,35 +1,123 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
-import { FindAllOrdersDto } from './dto/find-all-orders.dto';
+import {
+  FindAllOrdersDto,
+  GetOrderItemWithBerGirl,
+} from './dto/find-all-orders.dto';
 import { sendResponse } from 'src/common/utils/send-response.util';
+import { cResponseData } from 'src/common/utils/common-responseData';
+import { ShopPaymentService } from 'src/utils/stripe/shopPayment.service';
+import { ShopPaymentDto } from 'src/utils/stripe/dto/shopPayment.dto';
+import { StripeService } from 'src/utils/stripe/stripe.service';
+import { BuyMembershipResponseDto } from '../membership/onluUseUserMembershipInfo/dto/buyMembership.dto';
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly shopPaymentService: ShopPaymentService,
+    private readonly stripeService: StripeService,
+  ) {}
 
   async create(createOrderDto: CreateOrderDto, userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    // const payment = await this.prisma.payment.findUnique({
-    //   where: { id: paymentId },
-    // });
-    // if (!payment) throw new NotFoundException('Payment not found');
-
-    const product = await this.prisma.product.findUnique({
+    const productInfo = await this.prisma.product.findUnique({
       where: { id: createOrderDto.productId },
     });
-    if (!product) throw new NotFoundException('Product not found');
-
-    const order = await this.prisma.order.create({
-      data: { ...createOrderDto, userId },
+    if (!productInfo || !productInfo.id)
+      throw new HttpException(
+        cResponseData({
+          message: 'Product not found',
+          success: false,
+        }),
+        404,
+      );
+    const orderCreatedPending = await this.prisma.order.create({
+      data: {
+        ...createOrderDto,
+        color: createOrderDto.color,
+        userId: userId ? userId : null,
+        paymentDetailsByShop: {
+          create: {
+            amount: productInfo.offerPrice
+              ? productInfo.offerPrice
+              : productInfo.price,
+          },
+        },
+      },
+      include: {
+        product: {
+          select: {
+            id: true,
+            shop: {
+              select: {
+                user: {
+                  select: {
+                    id: true,
+                    stripeAccountId: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        paymentDetailsByShop: {
+          select: {
+            id: true,
+            amount: true,
+          },
+        },
+      },
     });
+    const paydata: ShopPaymentDto = {
+      stripeAccountId: orderCreatedPending.product.shop.user
+        .stripeAccountId as string,
+      paymentDetailsId: orderCreatedPending.paymentDetailsByShop?.id as string,
+      shopOrderId: orderCreatedPending.id,
+      productId: orderCreatedPending.product.id,
+      userId: userId,
+      amount: orderCreatedPending.paymentDetailsByShop?.amount as number,
+      name: createOrderDto.fullName,
+      email: createOrderDto.email,
+    };
+    if (
+      !paydata.stripeAccountId ||
+      !paydata.paymentDetailsId ||
+      !paydata.shopOrderId
+    )
+      throw new HttpException(
+        cResponseData({
+          message: 'Product Buy faild',
+          error: 'author info missing and do not create order',
+          success: false,
+        }),
+        400,
+      );
+    const createPiStrpekey =
+      await this.shopPaymentService.shopPaymentIntent(paydata);
 
-    return sendResponse('Order created successfully', order, 201);
+    if (
+      !createPiStrpekey ||
+      !createPiStrpekey.client_secret ||
+      !createPiStrpekey.id
+    )
+      throw new HttpException(
+        cResponseData({
+          message: 'Payment Intents Faild',
+          error: 'payament error',
+          data: null,
+          success: false,
+        }),
+        400,
+      );
+
+    console.log('shop paydata =====>>>>>', paydata);
+    console.log('createPiStrpekey ======>>>>>', createPiStrpekey);
+
+    return {
+      client_secret: createPiStrpekey.client_secret,
+      id: createPiStrpekey.id,
+    };
   }
 
   async findAll(query: FindAllOrdersDto) {
@@ -67,6 +155,9 @@ export class OrderService {
         include: {
           product: true, // Include product details if needed
         },
+        orderBy: {
+          createdAt: 'desc',
+        },
       }),
       this.prisma.order.count({ where }),
     ]);
@@ -84,11 +175,252 @@ export class OrderService {
     return sendResponse('Orders retrieved successfully', data, 200);
   }
 
+  // this founction use to ber girl
+  async getAllOrderWithBerGirl(id: string, query: GetOrderItemWithBerGirl) {
+    const { page = 1, limit = 1 } = query;
+    const parsedPage = Number(page);
+    const parsedLimit = Number(limit);
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    console.log('ber girl id', id);
+    const orders = await this.prisma.order.findMany({
+      where: {
+        product: {
+          shop: {
+            userId: id,
+          },
+        },
+      },
+      skip,
+      take: parsedLimit,
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        country: true,
+        city: true,
+        postCode: true,
+        apartmentOrHouse: true,
+        phoneNumber: true,
+        color: true,
+        user: {
+          select: {
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        paymentDetailsByShop: true,
+        createdAt: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            offerPrice: true,
+            images: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    const totalItems = await this.prisma.order.count({
+      where: {
+        product: {
+          shop: {
+            userId: id,
+          },
+        },
+      },
+    });
+    const totalPages = Math.ceil(totalItems / parsedLimit);
+
+    // console.log(orders);
+    const allData = orders.map((order) => {
+      const { paymentDetailsByShop, product, user, createdAt, id, ...address } =
+        order;
+      return {
+        orderId: id,
+        product: {
+          ...product,
+          images: product.images[0],
+        },
+        coustomer: user,
+        deliveryAddress: address,
+        paymentDetails: paymentDetailsByShop,
+        createdAt,
+      };
+    });
+    return cResponseData({
+      message: 'Orders retrieved successfully',
+      data: allData,
+      pagination: {
+        totalItems: totalItems || 0,
+        totalPages: totalPages || 0,
+        currentPage: parsedPage || 0,
+        limit: parsedLimit,
+      },
+      success: true,
+    });
+  }
+
   async findOne(id: string) {
     const order = await this.prisma.order.findUnique({ where: { id } });
     if (!order) {
       throw new NotFoundException(`Order with id ${id} not found`);
     }
     return sendResponse('Order retrieved successfully', order, 200);
+  }
+
+  async paymentStatusCheck(data: BuyMembershipResponseDto) {
+    const payStatus = await this.stripeService.paymentIntentCheck(
+      data.paymentIntentId,
+    );
+    if (!payStatus || payStatus.status !== 'succeeded' || !payStatus.id) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Payment failed',
+          error: 'Payment failed',
+          data: null,
+          success: false,
+        }),
+        400,
+      );
+    }
+    console.log('paymentIntent - pi checkout', payStatus);
+    if (payStatus.status === 'succeeded') {
+      const paymentIntentData = await this.prisma.paymentDetailsByShop.update({
+        where: {
+          id: payStatus.metadata.paymentDetailsId,
+        },
+        data: {
+          paymemtStatus: 'paid',
+        },
+      });
+      return cResponseData({
+        message: 'Payment successfully complated',
+        data: paymentIntentData,
+        success: true,
+      });
+    }
+    if (payStatus.status === 'canceled') {
+      const paymentIntent = await this.prisma.paymentDetailsByShop.update({
+        where: {
+          id: payStatus.metadata.paymentDetailsId,
+        },
+        data: {
+          paymemtStatus: 'canceled',
+        },
+      });
+      return cResponseData({
+        message: 'payment canceled ',
+        data: paymentIntent,
+        success: false,
+      });
+    }
+  }
+
+  async getTop3Card(author_id: string) {
+    const currentTime = new Date();
+
+    const TotalUserOrder = await this.prisma.order.findMany({
+      where: {
+        product: {
+          shop: {
+            userId: author_id,
+          },
+        },
+        paymentDetailsByShop: {
+          paymemtStatus: 'paid',
+        },
+      },
+      distinct: ['userId'],
+      select: {
+        userId: true,
+      },
+    });
+    const lastMonthJoinUser = await this.prisma.order.findMany({
+      where: {
+        product: {
+          shop: {
+            userId: author_id,
+          },
+        },
+        paymentDetailsByShop: {
+          paymemtStatus: 'paid',
+        },
+        user: {
+          createdAt: {
+            gte: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
+            lt: new Date(
+              currentTime.getFullYear(),
+              currentTime.getMonth() + 1,
+              1,
+            ),
+          },
+        },
+      },
+      distinct: ['userId'],
+      select: {
+        userId: true,
+      },
+    });
+    const lastMonthEran = await this.prisma.paymentDetailsByShop.aggregate({
+      where: {
+        order: {
+          product: {
+            shop: {
+              userId: author_id,
+            },
+          },
+          createdAt: {
+            gte: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
+            lt: new Date(
+              currentTime.getFullYear(),
+              currentTime.getMonth() + 1,
+              1,
+            ),
+          },
+        },
+        paymemtStatus: 'paid',
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+    const allTime = await this.prisma.paymentDetailsByShop.aggregate({
+      where: {
+        order: {
+          product: {
+            shop: {
+              userId: author_id,
+            },
+          },
+        },
+        paymemtStatus: 'paid',
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+    return {
+      supporters: {
+        TotalUserOrder: TotalUserOrder.length,
+        lastMonthJoinUser: lastMonthJoinUser.length,
+      },
+      last30days: {
+        lastMonthTotalAmount: lastMonthEran._sum.amount
+          ? lastMonthEran._sum.amount
+          : 0,
+        lastMonthBuySupport: lastMonthJoinUser.length,
+      },
+      allTime: allTime._sum.amount ? allTime._sum.amount : 0,
+    };
   }
 }

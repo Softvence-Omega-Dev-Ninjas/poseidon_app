@@ -40,19 +40,19 @@ export class ProductCategoryController {
   @ApiBody({ type: CreateProductCategoryDto })
   create(
     @Body() createProductCategoryDto: CreateProductCategoryDto,
+    @Req() req:any,
     @UploadedFile() image?: Express.Multer.File,
+    
   ) {
-    return this.productCategoryService.create(createProductCategoryDto, image);
+    console.log(req?.sub)
+    return this.productCategoryService.create(createProductCategoryDto,req?.sub, image);
   }
 
   @Roles(Role.Supporter, Role.User)
   @Get()
   @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(@Query() query: FindAllProductCategoriesDto, @Req() req: any) {
-    const result = await this.productCategoryService.findAll(
-      query,
-      req.user?.sub,
-    );
+    const result = await this.productCategoryService.findAll(query, req?.sub);
     return cResponseData({
       message: 'Product categories fetched successfully.',
       error: null,

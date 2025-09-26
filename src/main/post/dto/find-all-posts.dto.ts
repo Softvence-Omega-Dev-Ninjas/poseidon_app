@@ -1,6 +1,6 @@
 import { IsOptional, IsInt, Min, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { WhoCanSee } from 'generated/prisma';
 
 export enum PostSortBy {
@@ -51,4 +51,10 @@ export class FindAllPostsDto {
   @IsOptional()
   @IsEnum(WhoCanSee)
   whoCanSee?: WhoCanSee;
+
+  @ApiPropertyOptional({
+    description: 'Filter by provider ID',
+    type: String,
+  })
+  providerId?: string;
 }

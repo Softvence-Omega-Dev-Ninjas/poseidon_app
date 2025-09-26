@@ -33,7 +33,9 @@ export class AuthUserService {
   }
 
   // credentials register system
-  async createUser(createUserDto: CreateUserDto) {
+  async createUser(createUserDto: CreateUserDto, skip: boolean) {
+    // const { skip, ...createUserDto } = data;
+    console.log('createUserDto ========++++++++000000', createUserDto);
     const userIsExest = await this.isExestUser(createUserDto.email);
     if (userIsExest) {
       throw new HttpException(
@@ -50,10 +52,13 @@ export class AuthUserService {
     const hashedPassword = await argon2.hash(createUserDto.password);
     // create new supporter
     if (createUserDto.role === 'supporter') {
-      return await this.createSupporterAccount({
-        ...createUserDto,
-        password: hashedPassword,
-      });
+      return await this.createSupporterAccount(
+        {
+          ...createUserDto,
+          password: hashedPassword,
+        },
+        skip,
+      );
     }
     // create new user
     // create a hash password
@@ -113,9 +118,11 @@ export class AuthUserService {
       select: {
         id: true,
         provider: true,
+        username: true,
         email: true,
         password: true,
         role: true,
+        varify: true,
         stripeAccountId: true,
         profile: {
           select: {
@@ -136,7 +143,11 @@ export class AuthUserService {
   }
 
   // create supporter account
-  private async createSupporterAccount(createUserDto: CreateUserDto) {
+  private async createSupporterAccount(
+    createUserDto: CreateUserDto,
+    skip: boolean,
+  ) {
+    console.log('createUserDto =====++++++', createUserDto);
     try {
       // If the user is a supporter, create a support_cart_layout
       console.log('createSupporterAccount......');
@@ -165,6 +176,7 @@ export class AuthUserService {
           id: true,
           email: true,
           provider: true,
+          username: true,
           profile: {
             select: {
               name: true,
@@ -179,13 +191,24 @@ export class AuthUserService {
         },
       });
 
+      if (skip) {
+        return {
+          message: 'Supporter account created successfully',
+          redirect_url: `${process.env.FRONTEND_URL}/login`,
+          error: null,
+          data: { name: newSupporter.profile?.name },
+          success: true,
+        };
+      }
+
       // // create stripe connected account for supporter
       const createAccountStripe = await this.stripe.createConnectedAccount({
         id: newSupporter.id,
         email: newSupporter.email,
-        url: `${process.env.FRONTEND_URL}/viewpage/${newSupporter.id}`,
+        url: `viewpage/${newSupporter.username}`, // ${process.env.FRONTEND_URL}/
         createProfileDto: {
           name: newSupporter.profile?.name as string,
+          username: newSupporter.username,
           address: newSupporter.profile?.address as string,
           city: newSupporter.profile?.city as string,
           country: newSupporter.profile?.country as string,
@@ -236,6 +259,14 @@ export class AuthUserService {
   }
 
   async checkUsername(username: string) {
+    const regex = /^[a-z0-9]+$/;
+    if (!regex.test(username)) {
+      return {
+        message:
+          'Username must be lowercase and contain only letters and numbers without spaces.',
+        success: false,
+      };
+    }
     const user = await this.prisma.user.findFirst({
       where: {
         username: username,
@@ -245,6 +276,9 @@ export class AuthUserService {
         username: true,
       },
     });
-    return !user;
+    return {
+      message: !user ? 'Ok' : 'Username already exists',
+      success: !user,
+    };
   }
 }

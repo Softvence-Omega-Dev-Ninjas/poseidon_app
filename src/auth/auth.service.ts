@@ -4,12 +4,14 @@ import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { ConfigService } from '@nestjs/config';
 import { PayloadType } from './guard/jwtPayloadType';
+import { SellerService } from 'src/utils/stripe/seller.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly stripeSellerService: SellerService,
   ) {}
 
   async userCredentialsAuthentication(
@@ -32,6 +34,7 @@ export class AuthService {
     }
     const payload = {
       id: user?.id,
+      username: user?.username,
       provider: user?.provider,
       email: user?.email,
       role: user?.role,
@@ -44,10 +47,28 @@ export class AuthService {
       stripeAccountId: user?.stripeAccountId || '',
     });
 
+    const financial_account_check: { stripe: boolean } = {
+      stripe: false,
+    };
+    if (user?.role == 'supporter' && user.stripeAccountId) {
+      const result = await this.stripeSellerService.checkAccountsInfoSystem(
+        user.stripeAccountId,
+      );
+      console.log('varify stripe ', result);
+      financial_account_check.stripe = result;
+    }
+
     // return payload;
     return {
       access_token: `Bearer ${access_token}`,
-      user: payload,
+      user: {
+        ...payload,
+        profile_varify: user?.varify,
+        financial_account:
+          user?.role == 'user' || user?.role == 'admin'
+            ? true
+            : financial_account_check.stripe,
+      },
     };
   }
 

@@ -1,6 +1,9 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
-import { BuyMembershipDto } from './dto/buyMembership.dto';
+import {
+  BuyMembershipDto,
+  BuyMembershipResponseDto,
+} from './dto/buyMembership.dto';
 import { StripeService } from 'src/utils/stripe/stripe.service';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { PaymentInfoService } from './paymentDetails.service';
@@ -83,8 +86,8 @@ export class MembershipServiceUseToUserOnly {
         serviceId: membershipLevel?.id as string,
       });
 
-    console.log('===== existingPaymentInfo ======', existingPaymentInfo);
-    console.log('===== buyforce >>>>>>>>>>>>>>>>>>>> ======', buyforce);
+    // console.log('===== existingPaymentInfo ======', existingPaymentInfo);
+    // console.log('===== buyforce >>>>>>>>>>>>>>>>>>>> ======', buyforce);
     const existingService = await this.prisma.membership_levels.findFirst({
       where: { id: existingPaymentInfo?.serviceId },
     });
@@ -108,8 +111,9 @@ export class MembershipServiceUseToUserOnly {
         serviceName: membershipLevel?.titleName as string,
         amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
         serviceType: 'membership',
+        paymemtStatus: 'pending',
         serviceId: membershipLevel?.id as string,
-        endDate: endDate,
+        endDate: endDate, // PK duration time
         PermissionVideoCallAccess: plainAccess?.CalligSubscriptionPlan
           ? {
               create: {
@@ -155,7 +159,12 @@ export class MembershipServiceUseToUserOnly {
       },
     });
 
-    // // payment checkout this function
+    // return cResponseData({
+    //   message: 'Membership payment info created successfully',
+    //   data: payment_info,
+    // });
+
+    // // // payment checkout this function
     const checkout = await this.stripeService.checkOutPaymentSessionsMembership(
       {
         payment_info_id: payment_info.id,
@@ -169,24 +178,62 @@ export class MembershipServiceUseToUserOnly {
       },
     );
 
-    return {
-      message: 'Membership bought successfully',
-      redirect_url: checkout.url,
-      data: checkout.id,
+    console.log('membership - checkout', checkout);
+
+    return cResponseData({
+      message: 'Membership payment info created successfully',
+      data: checkout,
       success: true,
-    };
-    // return cResponseData({
-    //   message: 'Membership bought successfully',
-    //   data: {
-    //     userId,
-    //     membershipLevel: {
-    //       ...membershipLevel,
-    //       MembershipSubscriptionPlan:
-    //         membershipLevel?.MembershipSubscriptionPlan[0],
-    //     },
-    //   },
-    //   success: true,
-    // });
+    });
+  }
+
+  // payment status
+  async paymentStatus(data: BuyMembershipResponseDto) {
+    const payStatus = await this.stripeService.paymentIntentCheck(
+      data.paymentIntentId,
+    );
+    if (!payStatus || payStatus.status !== 'succeeded') {
+      throw new HttpException(
+        cResponseData({
+          message: 'Payment failed',
+          error: 'Payment failed',
+          data: null,
+          success: false,
+        }),
+        400,
+      );
+    }
+    console.log('paymentIntent - pi checkout', payStatus);
+    if (payStatus.status === 'succeeded') {
+      const paymentIntentData = await this.prisma.paymentDetails.update({
+        where: {
+          id: payStatus.metadata.paymentDetails,
+        },
+        data: {
+          paymemtStatus: 'paid',
+        },
+      });
+      return cResponseData({
+        message: 'Payment successfully complated',
+        data: paymentIntentData,
+        success: true,
+      });
+    }
+    if (payStatus.status === 'canceled') {
+      const paymentIntent = await this.prisma.paymentDetails.update({
+        where: {
+          id: payStatus.metadata.paymentDetails,
+        },
+        data: {
+          paymemtStatus: 'canceled',
+        },
+      });
+      return cResponseData({
+        message: 'payment canceled ',
+        data: paymentIntent,
+        success: false,
+      });
+    }
   }
 
   // get all membership levels use to user and suupoter
@@ -245,7 +292,7 @@ export class MembershipServiceUseToUserOnly {
 
   //get single membership level use to user and suupoter
   async getLevels(levelId: string) {
-    return await this.prisma.membership_levels.findUnique({
+    const level = await this.prisma.membership_levels.findUnique({
       where: {
         id: levelId,
         isPublic: true,
@@ -269,5 +316,11 @@ export class MembershipServiceUseToUserOnly {
         },
       },
     });
+    const imageMedia = await this.prisma.media.findFirst({
+      where: {
+        id: level?.levelImage,
+      },
+    });
+    return { ...level, levelImage: imageMedia };
   }
 }

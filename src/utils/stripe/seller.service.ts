@@ -1,13 +1,16 @@
-import { HttpException, Inject } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import Stripe from 'stripe';
 import { ExpreeAccountDto } from './dto/createAccout.dto';
+// import cc from 'country-list';
 
+@Injectable()
 export class SellerService {
   constructor(@Inject('STRIPE_CLIENT') private stripe: Stripe) {}
 
   // create connected account for seller or supporter
   async createConnectedAccount(user: ExpreeAccountDto) {
+    console.log(user.createProfileDto);
     try {
       const account = await this.stripe.accounts.create({
         type: 'express',
@@ -22,6 +25,14 @@ export class SellerService {
         capabilities: {
           transfers: { requested: true },
           crypto_payments: { requested: true },
+        },
+        business_profile: {
+          mcc: '8999',
+          url: `drinkwithme.click/${user.url}`,
+        },
+        individual: {
+          first_name: user.createProfileDto.name,
+          last_name: user.createProfileDto.username,
         },
       });
       return account;
@@ -100,6 +111,8 @@ export class SellerService {
       );
       const cryptoTotal = cryptoAvailable + cryptoPending;
 
+      console.log('cryptoTotal', cryptoTotal);
+
       const payouts = await this.stripe.payouts.list(
         {
           limit: 10,
@@ -129,6 +142,23 @@ export class SellerService {
         400,
       );
     }
+  }
+
+  // use to Auth login user system this function
+  async checkAccountsInfoSystem(accountId: string) {
+    const account = await this.stripe.accounts.retrieve(accountId);
+    console.log('checkAccountsInfoSystem', account);
+    if (
+      !account ||
+      !account.external_accounts ||
+      !account.external_accounts.data ||
+      account.external_accounts.data.length < 1 ||
+      !account.tos_acceptance ||
+      !account.tos_acceptance.date
+    ) {
+      return false;
+    }
+    return true;
   }
 
   async deleteAccount(accountId: string) {

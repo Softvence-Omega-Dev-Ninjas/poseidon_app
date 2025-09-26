@@ -1,4 +1,13 @@
-import { Controller, Get, Param, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Req,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { SupporterProfileService } from './supporter-profile.service';
 // import { CreateSupporterProfileDto } from './dto/create-supporter-profile.dto';
 // import { UpdateSupporterProfileDto } from './dto/update-supporter-profile.dto';
@@ -9,6 +18,11 @@ import { Role } from 'src/auth/guard/role.enum';
 import { GetShopDataService } from './getShopData.service';
 import { GetPostDataService } from './getPostData.service';
 import { resData } from 'src/common/utils/sup-profile.resData';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
+import { CoverPhotoChangeService } from './coverPhotoChange.service';
+import { ProfileCoverImageDto } from './dto/create-supporter-profile.dto';
 // import { ProductService } from '../product/product.service';
 
 @Public()
@@ -18,6 +32,7 @@ export class SupporterProfileController {
     private readonly supporterProfileService: SupporterProfileService,
     private readonly getShopDataService: GetShopDataService,
     private readonly getPostDataService: GetPostDataService,
+    private readonly coverPhotoChangeService: CoverPhotoChangeService,
   ) {}
 
   @Public()
@@ -33,11 +48,10 @@ export class SupporterProfileController {
     @Param('profile_username') username: string,
     @Req() res: Request,
   ) {
-    const { userid, ...hPageData } =
-      await this.supporterProfileService.profilePage(username);
+    const hPageData = await this.supporterProfileService.profilePage(username);
     return resData({
       data: hPageData,
-      editing: userid == res['sub'],
+      editing: hPageData.userid == res['sub'],
     });
   }
 
@@ -60,5 +74,24 @@ export class SupporterProfileController {
   @Get('posts/:userid')
   getAllPost(@Param('userid') user_id: string) {
     return this.getPostDataService.getAllPost(user_id);
+  }
+
+  @Roles(Role.Supporter)
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: ProfileCoverImageDto })
+  @Patch('cover-photo/change')
+  changeCoverPhoto(
+    @UploadedFile(new ImageValidationPipe(20))
+    image: Express.Multer.File,
+    @Body() data: ProfileCoverImageDto,
+    @Req() req: Request,
+  ) {
+    console.log('change cover images', data);
+    return this.coverPhotoChangeService.changeCoverPhotoSupporterProfile({
+      userId: req['sub'] as string,
+      image,
+      offsetY: data.offsetY,
+    });
   }
 }

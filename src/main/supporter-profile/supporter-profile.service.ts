@@ -10,11 +10,22 @@ export class SupporterProfileService {
     // private readonly getShopDataService: GetShopDataService,
   ) {}
   private async getMedia(mediaIds: string[]) {
+    if (!mediaIds || mediaIds.length === 0) {
+      return [];
+    }
     const media = await this.prisma.media.findMany({
       where: {
         id: {
           in: mediaIds,
         },
+      },
+    });
+    return media;
+  }
+  private async getSingleMedia(mediaIds: string) {
+    const media = await this.prisma.media.findFirst({
+      where: {
+        id: mediaIds,
       },
     });
     return media;
@@ -67,6 +78,7 @@ export class SupporterProfileService {
         );
       }
       const userid = user.id;
+      // console.log('userssssssssssss ', user);
       const profileInfo = await tx.profile.findUnique({
         where: {
           userid: userid,
@@ -76,11 +88,25 @@ export class SupporterProfileService {
         },
         select: {
           cover_image: true,
+          cover_image_offsetY: true,
           name: true,
           image: true,
           description: true,
         },
       });
+      // if (profileInfo && profileInfo?.cover_image) {
+      //   profileInfo.cover_image =
+      // }
+
+      // if (profileInfo && profileInfo.cover_image) {
+      //   const coverImages = await this.getMedia([profileInfo.cover_image]);
+      //   if (coverImages && coverImages.length && coverImages[0].id) {
+      //     profileInfo.cover_image = coverImages[0];
+      //   }
+      //   // const coverImageMap = new Map(coverImages.map((m) => [m.id, m]));
+      //   // profileInfo.cover_image = coverImageMap.get(profileInfo.cover_image);
+      // }
+
       const supporte_card = await tx.supportCartLayout.findFirst({
         where: {
           author_id: userid,
@@ -179,7 +205,7 @@ export class SupporterProfileService {
       const gallery = await tx.image.findMany({
         where: {
           userId: userid,
-          visibility: 'user',
+          visibility: 'PUBLIC',
         },
         select: {
           id: true,
@@ -190,9 +216,14 @@ export class SupporterProfileService {
         },
       });
       return {
-        userid: user.id,
+        userid: userid,
         username: user.username,
-        profileInfo,
+        profileInfo: {
+          ...profileInfo,
+          cover_image: profileInfo?.cover_image
+            ? await this.getSingleMedia(profileInfo?.cover_image)
+            : null,
+        },
         supporte_card,
         shopid: shopid ? shopid.id : null,
         posts: posts.map((p) => ({
@@ -203,5 +234,14 @@ export class SupporterProfileService {
         image: gallery,
       };
     });
+  }
+
+  async findByIDUser(id: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: id,
+      },
+    });
+    return user;
   }
 }

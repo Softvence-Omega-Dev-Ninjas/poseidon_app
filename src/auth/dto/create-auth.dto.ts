@@ -24,6 +24,7 @@ type profileDto = {
 export class authenticationUserDto {
   id: string;
   provider: string;
+  username: string;
   email: string;
   password?: string | null;
   role: string;
@@ -31,4 +32,5 @@ export class authenticationUserDto {
   shop?: { id: string } | null;
   memberships_owner?: { id: string } | null;
   stripeAccountId?: string | null;
+  varify: boolean;
 }

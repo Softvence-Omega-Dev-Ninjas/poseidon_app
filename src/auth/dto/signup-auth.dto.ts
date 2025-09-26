@@ -3,6 +3,13 @@ import { IsNotEmpty, IsString } from 'class-validator';
 
 export class SignUpUserDto {
   @ApiProperty({
+    type: Boolean,
+    required: true,
+    example: false,
+  })
+  skip: boolean;
+
+  @ApiProperty({
     required: true,
     example: 'user or supporter',
   })

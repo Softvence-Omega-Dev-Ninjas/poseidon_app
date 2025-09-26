@@ -6,6 +6,10 @@ export class CreateProfileDto {
   name: string;
 
   @IsString()
+  @Length(2, 50)
+  username: string;
+
+  @IsString()
   address: string;
 
   @IsString()

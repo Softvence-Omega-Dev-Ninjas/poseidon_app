@@ -19,6 +19,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
 import { SignUpUserDto } from './dto/signup-auth.dto';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
+import { StringToBooleanPipe } from 'src/common/utils/stringToBoolean.pipe';
 
 @Controller('auth')
 export class AuthController {
@@ -34,23 +35,36 @@ export class AuthController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: SignUpUserDto })
   async signup(
+    @Body('skip', StringToBooleanPipe) skip: boolean,
     @Body() createAuthDto: SignUpUserDto,
     @UploadedFile(new ImageValidationPipe()) image: Express.Multer.File,
   ) {
     // call cloudinary profile image upload - this area
     const { imageUrl } = await this.cloudinaryService.profileImageUpload(image);
-    const { role, username, email, password, ...profile } = createAuthDto;
-
-    return this.authUserService.createUser({
+    const {
+      skip: skipAuth,
       role,
-      email,
       username,
+      email,
       password,
-      profile: {
-        ...profile,
-        image: imageUrl,
+      ...profile
+    } = createAuthDto;
+
+    console.log('skip ------------+++', skip);
+
+    return this.authUserService.createUser(
+      {
+        role,
+        email,
+        username,
+        password,
+        profile: {
+          ...profile,
+          image: imageUrl,
+        },
       },
-    });
+      skip,
+    );
   }
 
   @Public()

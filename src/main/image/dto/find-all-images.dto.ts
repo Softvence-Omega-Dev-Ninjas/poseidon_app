@@ -1,7 +1,7 @@
 import { IsOptional, IsInt, Min, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Roles as Visibility } from 'generated/prisma';
+import { Visibility } from 'generated/prisma';
 
 export enum ImageSortBy {
   VIEWED = 'viewed',
@@ -43,7 +43,7 @@ export class FindAllImagesDto {
   sortBy?: ImageSortBy = ImageSortBy.NEWEST;
 
   @ApiProperty({
-    example: Visibility.user,
+    example: Visibility.PUBLIC,
     enum: Visibility,
     description: 'Filter images by visibility',
     required: false,

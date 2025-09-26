@@ -32,6 +32,7 @@ import {
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { Request } from 'express';
+import { Public } from 'src/auth/guard/public.decorator';
 
 @ApiTags('Product')
 @Controller('product')
@@ -64,8 +65,8 @@ export class ProductController {
     );
   }
 
-  @Roles(Role.Supporter, Role.User)
   @Get()
+  @Public()
   @ApiQuery({
     name: 'page',
     required: false,
@@ -90,24 +91,32 @@ export class ProductController {
     type: Boolean,
     description: 'Filter by draft status',
   })
+  @ApiQuery({
+    name: 'providerId',
+    required: false,
+    type: String,
+    description: 'Filter by provider ID',
+  })
   findAll(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Req() req: any,
     @Query('categoryId') categoryId?: string,
     @Query('draft') draft?: boolean,
+    @Query('providerId') providerId?: any,
   ) {
     return this.productService.findAll(
       +page,
       +limit,
-      req.user?.sub,
+      providerId,
       categoryId,
       draft,
     );
   }
 
-  @Roles(Role.Supporter, Role.User)
+  
   @Get(':id')
+  @Public()
   findOne(@Param('id') id: string) {
     return this.productService.findOne(id);
   }
@@ -164,7 +173,7 @@ export class ProductController {
     @UploadedFiles() newImages: Express.Multer.File[],
   ) {
     const updateProductDto = new UpdateProductDto();
-    console.log(updateProductDto);
+    console.log(body);
     for (const key in body) {
       if (Object.prototype.hasOwnProperty.call(body, key)) {
         if (['images', 'categoryIds', 'color', 'features'].includes(key)) {
@@ -234,7 +243,7 @@ export class ProductController {
   ) {
     return this.productService.findByShopId(shopId, +page, +limit);
   }
-
+  @Roles(Role.Supporter)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a product by ID' })
   @ApiResponse({ status: 200, description: 'Product deleted successfully.' })
