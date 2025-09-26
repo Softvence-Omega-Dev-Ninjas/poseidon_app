@@ -1,23 +1,23 @@
 model User {
-  id                  String             @id @unique @default(uuid())
-  username            String             @unique
-  provider            String             @default("credentials") // Authentication provider credentials, google, facebook, etc.
-  email               String
-  password            String?
-  otp                 String?
-  varify              Boolean            @default(false)
-  deactivate          Boolean            @default(false)
-  role                Roles              @default(user)
-  stripeAccountId     String?
-  comments            Comment[]
-  images              Image[]
-  imagescomments      ImageComment[]
-  imageslikes         ImageLike[]
-  likes               Like[]
-  orders              Order[]
-  posts               Post[]
-  profile             Profile?
-  shop                Shop?
+  id              String         @id @unique @default(uuid())
+  username        String         @unique
+  provider        String         @default("credentials") // Authentication provider credentials, google, facebook, etc.
+  email           String
+  password        String?
+  otp             String?
+  varify          Boolean        @default(false)
+  deactivate      Boolean        @default(false)
+  role            Roles          @default(user)
+  stripeAccountId String?
+  comments        Comment[]
+  images          Image[]
+  imagescomments  ImageComment[]
+  imageslikes     ImageLike[]
+  likes           Like[]
+  orders          Order[]
+  posts           Post[]
+  profile         Profile?
+  shop            Shop?
 
   // supporter card system
   support_cart_layout SupportCartLayout?
@@ -39,7 +39,7 @@ model User {
 
   //
 
-   productCategories ProductCategory[] 
+  productCategories ProductCategory[]
 
   services Service[]
 
@@ -55,21 +55,24 @@ model User {
 
   // zoom
   zoomAccounts ZoomAccount?
+
+  createdAt DateTime @default(now())
 }
 
 model Profile {
-  id          String  @id @unique @default(uuid())
-  userid      String  @unique
-  name        String
-  image       String
-  address     String?
-  state       String?
-  city        String?
-  country     String?
-  postcode    String?
-  cover_image String?
-  description String?
-  user        User    @relation(fields: [userid], references: [id], onDelete: Cascade)
+  id                  String  @id @unique @default(uuid())
+  userid              String  @unique
+  name                String
+  image               String
+  address             String?
+  state               String?
+  city                String?
+  country             String?
+  postcode            String?
+  cover_image         String?
+  cover_image_offsetY String? @default("0")
+  description         String?
+  user                User    @relation(fields: [userid], references: [id], onDelete: Cascade)
 }
 
 enum Roles {

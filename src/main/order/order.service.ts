@@ -229,18 +229,100 @@ export class OrderService {
   }
 
   async getTop3Card(author_id: string) {
-    const top3Cards = await this.prisma.order.count({
+    const currentTime = new Date();
+
+    const TotalUserOrder = await this.prisma.order.findMany({
       where: {
         product: {
           shop: {
             userId: author_id,
           },
         },
+        paymentDetailsByShop: {
+          paymemtStatus: 'paid',
+        },
       },
+      distinct: ['userId'],
       select: {
         userId: true,
       },
     });
-    return sendResponse('Top 3 cards retrieved successfully', top3Cards, 200);
+    const lastMonthJoinUser = await this.prisma.order.findMany({
+      where: {
+        product: {
+          shop: {
+            userId: author_id,
+          },
+        },
+        paymentDetailsByShop: {
+          paymemtStatus: 'paid',
+        },
+        user: {
+          createdAt: {
+            gte: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
+            lt: new Date(
+              currentTime.getFullYear(),
+              currentTime.getMonth() + 1,
+              1,
+            ),
+          },
+        },
+      },
+      distinct: ['userId'],
+      select: {
+        userId: true,
+      },
+    });
+    const lastMonthEran = await this.prisma.paymentDetailsByShop.aggregate({
+      where: {
+        order: {
+          product: {
+            shop: {
+              userId: author_id,
+            },
+          },
+          createdAt: {
+            gte: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
+            lt: new Date(
+              currentTime.getFullYear(),
+              currentTime.getMonth() + 1,
+              1,
+            ),
+          },
+        },
+        paymemtStatus: 'paid',
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+    const allTime = await this.prisma.paymentDetailsByShop.aggregate({
+      where: {
+        order: {
+          product: {
+            shop: {
+              userId: author_id,
+            },
+          },
+        },
+        paymemtStatus: 'paid',
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+    return {
+      supporters: {
+        TotalUserOrder: TotalUserOrder.length,
+        lastMonthJoinUser: lastMonthJoinUser.length,
+      },
+      last30days: {
+        lastMonthTotalAmount: lastMonthEran._sum.amount
+          ? lastMonthEran._sum.amount
+          : 0,
+        lastMonthBuySupport: lastMonthJoinUser.length,
+      },
+      allTime: allTime._sum.amount ? allTime._sum.amount : 0,
+    };
   }
 }
