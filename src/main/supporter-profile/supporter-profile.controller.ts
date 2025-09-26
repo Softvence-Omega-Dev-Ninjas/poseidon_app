@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
@@ -19,9 +20,9 @@ import { GetPostDataService } from './getPostData.service';
 import { resData } from 'src/common/utils/sup-profile.resData';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
-import { CreateMediafileDto } from '../mediafile/dto/create-mediafile.dto';
 import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
 import { CoverPhotoChangeService } from './coverPhotoChange.service';
+import { ProfileCoverImageDto } from './dto/create-supporter-profile.dto';
 // import { ProductService } from '../product/product.service';
 
 @Public()
@@ -78,16 +79,18 @@ export class SupporterProfileController {
   @Roles(Role.Supporter)
   @UseInterceptors(FileInterceptor('image'))
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: CreateMediafileDto })
+  @ApiBody({ type: ProfileCoverImageDto })
   @Patch('cover-photo/change')
   changeCoverPhoto(
     @UploadedFile(new ImageValidationPipe(20))
     image: Express.Multer.File,
+    @Body('offsetY') offsetY: string,
     @Req() req: Request,
   ) {
-    return this.coverPhotoChangeService.changeCoverPhotoSupporterProfile(
-      req['sub'] as string,
+    return this.coverPhotoChangeService.changeCoverPhotoSupporterProfile({
+      userId: req['sub'] as string,
       image,
-    );
+      offsetY: offsetY,
+    });
   }
 }

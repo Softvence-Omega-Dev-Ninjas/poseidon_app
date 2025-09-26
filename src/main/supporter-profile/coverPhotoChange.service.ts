@@ -9,10 +9,15 @@ export class CoverPhotoChangeService {
     private readonly prisma: PrismaService,
     private readonly mediafileService: MediafileService,
   ) {}
-  async changeCoverPhotoSupporterProfile(
-    userId: string,
-    image?: Express.Multer.File,
-  ) {
+  async changeCoverPhotoSupporterProfile({
+    userId,
+    image,
+    offsetY,
+  }: {
+    userId: string;
+    image?: Express.Multer.File;
+    offsetY: string;
+  }) {
     if (!image)
       return cResponseData({
         message: 'Image not found',
@@ -68,6 +73,7 @@ export class CoverPhotoChangeService {
           },
           data: {
             cover_image: uploadImage.id,
+            cover_image_offsetY: offsetY,
           },
           select: {
             cover_image: true,
@@ -128,6 +134,7 @@ export class CoverPhotoChangeService {
         },
         data: {
           cover_image: uploadImage.id,
+          cover_image_offsetY: offsetY,
         },
         select: {
           cover_image: true,
