@@ -85,6 +85,7 @@ export class MediafileService {
 
   async fullDeleteFileSystem(id: string) {
     const mediaData = await this.findById(id);
+    console.log('mediaData', mediaData);
     if (!mediaData)
       return {
         massage: 'file not Found',
@@ -101,11 +102,30 @@ export class MediafileService {
         };
       }
     }
+    console.log('mediaData >>>>>>>>', mediaData);
     const deletecloudinary: { result: string } =
       await this.cloudinaryService.deleteFile(mediaData?.publicId as string);
     if (deletecloudinary.result == 'ok') {
+      console.log('deletecloudinary ------- ok', deletecloudinary);
       const dltFile = await this.deleteFile(mediaData.id);
       if (dltFile && dltFile.id) {
+        console.log('deletecloudinary ------- ok 22222', dltFile);
+        return {
+          message: 'File deleted successfully',
+          data: id,
+          success: true,
+        };
+      }
+      return {
+        message: 'Something went wrong - media tb',
+        data: null,
+        success: false,
+      };
+    }
+    if (deletecloudinary.result == 'not found') {
+      const dltFile = await this.deleteFile(mediaData.id);
+      if (dltFile && dltFile.id) {
+        console.log('deletecloudinary ------- ok 44444', dltFile);
         return {
           message: 'File deleted successfully',
           data: id,

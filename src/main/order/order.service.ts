@@ -177,7 +177,7 @@ export class OrderService {
 
   // this founction use to ber girl
   async getAllOrderWithBerGirl(id: string, query: GetOrderItemWithBerGirl) {
-    const { page = 1, limit = 10 } = query;
+    const { page = 1, limit = 1 } = query;
     const parsedPage = Number(page);
     const parsedLimit = Number(limit);
     const skip = (parsedPage - 1) * parsedLimit;
@@ -241,7 +241,7 @@ export class OrderService {
     });
     const totalPages = Math.ceil(totalItems / parsedLimit);
 
-    console.log(orders);
+    // console.log(orders);
     const allData = orders.map((order) => {
       const { paymentDetailsByShop, product, user, createdAt, id, ...address } =
         order;
