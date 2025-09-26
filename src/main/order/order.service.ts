@@ -227,4 +227,20 @@ export class OrderService {
       });
     }
   }
+
+  async getTop3Card(author_id: string) {
+    const top3Cards = await this.prisma.order.count({
+      where: {
+        product: {
+          shop: {
+            userId: author_id,
+          },
+        },
+      },
+      select: {
+        userId: true,
+      },
+    });
+    return sendResponse('Top 3 cards retrieved successfully', top3Cards, 200);
+  }
 }

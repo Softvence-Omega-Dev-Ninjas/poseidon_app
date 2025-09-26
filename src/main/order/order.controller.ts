@@ -25,15 +25,21 @@ export class OrderController {
     return this.orderService.findAll(query);
   }
 
-  @Get(':id')
-  @Roles(Role.Supporter, Role.User)
-  findOne(@Param('id') id: string) {
-    return this.orderService.findOne(id);
-  }
+  // @Get(':id')
+  // @Roles(Role.Supporter, Role.User)
+  // findOne(@Param('id') id: string) {
+  //   return this.orderService.findOne(id);
+  // }
 
   @Post('paymentStatusCheck')
   @Roles(Role.Supporter, Role.User)
   paymentStatusCheck(@Body() body: BuyMembershipResponseDto) {
     return this.orderService.paymentStatusCheck(body);
+  }
+
+  @Get('gettop3card')
+  @Roles(Role.Supporter)
+  getTop3Card(@Req() req: Request) {
+    return this.orderService.getTop3Card(req['sub'] as string);
   }
 }
