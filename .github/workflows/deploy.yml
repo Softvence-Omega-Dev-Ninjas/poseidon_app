@@ -42,14 +42,20 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
             cd ../home/drinkwithme
+
             echo "Stopping and removing old containers..."
-            docker compose down
+            docker compose down --remove-orphans
 
             echo "Removing old images..."
-            docker image prune -af
+            docker compose rm -f
 
             echo "Pulling latest images..."
             docker compose pull
 
             echo "Starting new containers..."
             docker compose up -d
+
+            echo "Waiting for containers remove unused images"
+            docker image prune -f
+
+            echo "Deployment completed successfully."
