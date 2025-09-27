@@ -45,3 +45,6 @@ services:
       - '6379:6379'
     volumes:
       - /home/drinkwithmedbset/redis:/data
+
+volumes:
+  pgdata:
