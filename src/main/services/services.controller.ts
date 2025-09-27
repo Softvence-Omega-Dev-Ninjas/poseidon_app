@@ -35,6 +35,7 @@ import {
   UpdateServiceOrderStatusDto,
 } from './dto/create-services';
 import { Public } from 'src/auth/guard/public.decorator';
+import { Request } from 'express';
 
 @ApiTags('Service')
 @Controller('service')
@@ -88,12 +89,11 @@ export class ServiceController {
     return this.serviceService.findAllUser(req.sub, page, limit, draft);
   }
 
+  @Roles(Role.User, Role.Supporter)
   @Post('/createOrder')
-  @Roles(Role.Supporter)
   @ApiOperation({ summary: 'Create a new service order' })
-  async createOrder(@Body() dto: CreateServiceOrderDto, @Req() req: any) {
-    req.sub;
-    return this.serviceService.createOrder(dto, req.sub);
+  async createOrder(@Body() dto: CreateServiceOrderDto, @Req() req: Request) {
+    return this.serviceService.createOrder(dto, req['sub'] as string);
   }
 
   @Get('/getallservicesOrder')

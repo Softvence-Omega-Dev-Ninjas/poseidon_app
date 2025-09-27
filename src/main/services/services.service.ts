@@ -283,45 +283,38 @@ export class ServiceService {
   }
 
   async createOrder(dto: CreateServiceOrderDto, userId: string) {
-    return this.prisma.$transaction(async (tx) => {
-      // Get the current service
-      const service = await tx.service.findUnique({
-        where: { id: dto.serviceId },
-        select: { orderNumber: true },
-      });
-
-      // Increment order number
-      const newOrderNumber = (service?.orderNumber ?? 0) + 1;
-
-      // Update service with new order number and lastOrderBy
-      await tx.service.update({
-        where: { id: dto.serviceId },
-        data: {
-          orderNumber: newOrderNumber,
-          lastOrderBy: userId,
-        },
-      });
-
-      // Create service order
-      const order = await tx.serviceOrder.create({
-        data: {
-          paymentId: dto.paymentId,
-          serviceId: dto.serviceId,
-          userId,
-        },
-        include: {
-          service: true,
-          user: true,
-        },
-      });
-
-      return cResponseData({
-        message: 'Service created successfully.',
-        error: null,
-        success: true,
-        data: order,
-      });
+    const service = await this.prisma.service.findFirst({
+      where: { id: dto.serviceId },
+      include: {
+        user: true,
+      },
     });
+    if (!service || !service.id) {
+      return cResponseData({
+        message: 'Service not found',
+        error: 'NotFound',
+        success: false,
+        data: null,
+      });
+    }
+    const OderSerderSave = await this.prisma.serviceOrder.create({
+      data: {
+        paymentDetails: {
+          create: {
+            amount: service.price,
+          },
+        },
+        userId: userId,
+        sellerId: service.userId,
+      },
+      include: {
+        paymentDetails: true,
+      },
+    });
+
+    console.log('OderSerderSave', OderSerderSave);
+
+    return OderSerderSave;
   }
 
   /** Get all service orders with optional pagination */
@@ -451,15 +444,15 @@ export class ServiceService {
       throw new NotFoundException('Order not found');
     }
 
-    const data = await this.prisma.serviceOrder.update({
-      where: { id: orderId },
-      data: { status: dto.status },
-    });
+    // const data = await this.prisma.serviceOrder.update({
+    //   where: { id: orderId },
+    //   data: { status: dto.status },
+    // });
     return cResponseData({
       message: 'update orderstatus successfully.',
       error: null,
       success: true,
-      data,
+      data: order,
     });
   }
 }
