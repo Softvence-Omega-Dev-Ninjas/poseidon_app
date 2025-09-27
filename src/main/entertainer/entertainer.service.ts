@@ -35,10 +35,21 @@ export class EntertainerService {
     
     return await this.prisma.user.findUnique({
         where:{id:supporterId, role:Roles.supporter},
-        include:{profile: true}
+        select:{
+            id:true,
+            profile:{
+                select:{
+                    name:true,
+                    image:true,
+                    description:true
+                }
+            }
+        }
     })
 
   }
+
+  
 
 
 
