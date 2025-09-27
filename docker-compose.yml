@@ -1,27 +1,27 @@
 services:
-  app:
-    image: sharif780/drinkwithme:latest
-    container_name: drinkwithme_app
-    ports:
-      - '3000:3000'
-    environment:
-      DATABASE_URL: postgres://admin:admin@db:5432/drinkwithme
-      AUTHSECRET: kjklsjfdkjksf
-      CLOUDINARY_CLOUD_NAME: deskuwdew
-      CLOUDINARY_API_KEY: 432538935528244
-      CLOUDINARY_API_SECRET: UULVbMCsK_b0uMyWu4EIABgTUm4
-      REDIS_CONNECTION_URL: redis://redis:6379
-      STRIPE_SECRET_KEY: sk_test_51S14538ZZDvAakDbsGqbQDmg5wXzoTdkk2J1Nyob9EKQdnDBQQvAXA7pXp6ZMEAWapCy5zEbC8uv4sAbXRuWPB8X00nyy8JgHZ
-      PORT: 3000
-      FRONTEND_URL: https://drinkwithme.click
-      BACKEND_URL: https://api.drinkwithme.click
-      ZOOM_CLIENT_ID: 7ugkZmTiSCCdzBQE6pjaUw
-      ZOOM_CLIENT_SECRET: 8yWkiv3PyQOY2YCB8Bxnjow63St4NgJF
-      ZOOM_ACCOUNT_ID: p79SDRYlRb-x1C3_WUK6yA
-      ZOOM_API_BASE: https://api.zoom.us/v2
-    depends_on:
-      - db
-      - redis
+  # app:
+  #   image: sharif780/drinkwithme:latest
+  #   container_name: drinkwithme_app
+  #   ports:
+  #     - '3000:3000'
+  #   environment:
+  #     DATABASE_URL: postgres://admin:admin@db:5432/drinkwithme
+  #     AUTHSECRET: kjklsjfdkjksf
+  #     CLOUDINARY_CLOUD_NAME: deskuwdew
+  #     CLOUDINARY_API_KEY: 432538935528244
+  #     CLOUDINARY_API_SECRET: UULVbMCsK_b0uMyWu4EIABgTUm4
+  #     REDIS_CONNECTION_URL: redis://redis:6379
+  #     STRIPE_SECRET_KEY: sk_test_51S14538ZZDvAakDbsGqbQDmg5wXzoTdkk2J1Nyob9EKQdnDBQQvAXA7pXp6ZMEAWapCy5zEbC8uv4sAbXRuWPB8X00nyy8JgHZ
+  #     PORT: 3000
+  #     FRONTEND_URL: https://drinkwithme.click
+  #     BACKEND_URL: https://api.drinkwithme.click
+  #     ZOOM_CLIENT_ID: 7ugkZmTiSCCdzBQE6pjaUw
+  #     ZOOM_CLIENT_SECRET: 8yWkiv3PyQOY2YCB8Bxnjow63St4NgJF
+  #     ZOOM_ACCOUNT_ID: p79SDRYlRb-x1C3_WUK6yA
+  #     ZOOM_API_BASE: https://api.zoom.us/v2
+  #   depends_on:
+  #     - db
+  #     - redis
 
   db:
     image: postgres
@@ -37,11 +37,17 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: drinkwithme
 
-  redis:
-    image: redis:7.2
-    container_name: my_redis
-    restart: always
-    ports:
-      - '6379:6379'
-    volumes:
-      - /home/drinkwithmedbset/redis:/data
+#   redis:
+#     image: redis:7.2
+#     container_name: my_redis
+#     restart: always
+#     ports:
+#       - '6379:6379'
+#     volumes:
+#       - /home/drinkwithmedbset/redis:/data
+
+volumes:
+  pgdata:
+#   redis:
+# networks:
+#   default:

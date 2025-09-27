@@ -9,6 +9,6 @@ import { StripeModule } from 'src/utils/stripe/stripe.module';
   imports: [PrismaClientModule, StripeModule],
   controllers: [UserController],
   providers: [UserService, AuthUserService],
-  exports: [AuthUserService],
+  exports: [AuthUserService, UserService],
 })
 export class UserModule {}
