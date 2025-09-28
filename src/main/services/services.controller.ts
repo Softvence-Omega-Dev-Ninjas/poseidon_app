@@ -196,4 +196,10 @@ export class ServiceController {
   ) {
     return this.serviceService.updateOrderStatus(orderId, dto);
   }
+
+  @Roles(Role.Supporter)
+  @Get('getServicesBuyPayemtData')
+  getServicesBuyPayemtData(@Req() req: Request) {
+    return this.serviceService.getServicesBuyPayemtData(req['sub'] as string);
+  }
 }

@@ -306,13 +306,12 @@ export class ServiceService {
         },
         userId: userId,
         sellerId: service.userId,
+        serviceId: service.id,
       },
       include: {
         paymentDetails: true,
       },
     });
-
-    console.log('OderSerderSave', OderSerderSave);
 
     return OderSerderSave;
   }
@@ -453,6 +452,153 @@ export class ServiceService {
       error: null,
       success: true,
       data: order,
+    });
+  }
+
+  async getServicesBuyPayemtData(userId: string) {
+    const currentTime = new Date();
+    const top3cardData = await this.prisma.$transaction(async (tx) => {
+      const suportCount = await tx.serviceOrder.count({
+        where: {
+          sellerId: userId,
+          paymentDetails: {
+            paymemtStatus: 'pending',
+          },
+        },
+      });
+      const newSupport = await tx.serviceOrder.count({
+        where: {
+          sellerId: userId,
+          paymentDetails: {
+            paymemtStatus: 'pending',
+          },
+          createdAt: {
+            gte: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
+            lt: new Date(
+              currentTime.getFullYear(),
+              currentTime.getMonth() + 1,
+              1,
+            ),
+          },
+        },
+      });
+
+      const lastMonthTotalAmount = await tx.paymentDetailsByServices.aggregate({
+        where: {
+          serviceOrderInfo: {
+            sellerId: userId,
+            paymentDetails: {
+              paymemtStatus: 'paid',
+            },
+            createdAt: {
+              gte: new Date(
+                currentTime.getFullYear(),
+                currentTime.getMonth(),
+                1,
+              ),
+              lt: new Date(
+                currentTime.getFullYear(),
+                currentTime.getMonth() + 1,
+                1,
+              ),
+            },
+          },
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
+      const newSupportbuyService = await tx.serviceOrder.findMany({
+        where: {
+          sellerId: userId,
+          paymentDetails: {
+            paymemtStatus: 'pending',
+          },
+          createdAt: {
+            gte: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
+            lt: new Date(
+              currentTime.getFullYear(),
+              currentTime.getMonth() + 1,
+              1,
+            ),
+          },
+        },
+        distinct: ['userId'],
+        select: {
+          userId: true,
+        },
+      });
+
+      const allDay = await tx.paymentDetailsByServices.aggregate({
+        where: {
+          serviceOrderInfo: {
+            sellerId: userId,
+            paymentDetails: {
+              paymemtStatus: 'paid',
+            },
+          },
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
+      return {
+        supporters: {
+          suportCount,
+          newSupport,
+        },
+        last30day: {
+          lastMonthTotalAmount: lastMonthTotalAmount._sum.amount
+            ? lastMonthTotalAmount._sum.amount
+            : 0,
+          newSupportbuyService: newSupportbuyService.length,
+        },
+        allDay: {
+          totalAmount: allDay._sum.amount ? allDay._sum.amount : 0,
+        },
+      };
+    });
+
+    const services = await this.prisma.serviceOrder.findMany({
+      where: {
+        sellerId: userId,
+      },
+      select: {
+        id: true,
+        createdAt: true,
+        user: {
+          select: {
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        paymentDetails: {
+          select: {
+            id: true,
+            amount: true,
+            paymemtStatus: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return cResponseData({
+      message: 'get all services successfully.',
+      error: null,
+      success: true,
+      data: {
+        ...top3cardData,
+        supporterProfile: services,
+      },
     });
   }
 }
