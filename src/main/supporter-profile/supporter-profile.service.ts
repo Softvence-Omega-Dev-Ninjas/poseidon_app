@@ -88,7 +88,6 @@ export class SupporterProfileService {
         },
         select: {
           cover_image: true,
-          cover_image_offsetY: true,
           name: true,
           image: true,
           description: true,

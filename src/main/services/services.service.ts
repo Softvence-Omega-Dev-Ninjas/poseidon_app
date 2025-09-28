@@ -17,12 +17,14 @@ import {
   UpdateServiceOrderStatusDto,
 } from './dto/create-services';
 import { UpdateservicesDto } from './dto/update-serviecs';
+import { ServicePaymentService } from 'src/utils/stripe/services.service';
 
 @Injectable()
 export class ServiceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly servicePaymentService: ServicePaymentService,
   ) {}
 
   async create(
@@ -310,7 +312,35 @@ export class ServiceService {
       },
       include: {
         paymentDetails: true,
+        user: {
+          select: {
+            id: true,
+            profile: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
       },
+    });
+
+    const { id, serviceId, sellerId, createdAt, paymentDetails, user } =
+      OderSerderSave;
+
+    if (!user || !serviceId || !createdAt || !paymentDetails) {
+      throw new BadRequestException('user not found');
+    }
+
+    const seripePaymentInfo = this.servicePaymentService.servicePaymentIntent({
+      id,
+      serviceId,
+      userId,
+      sellerId,
+      createdAt,
+      paymentDetails,
+      name: 'dfn',
+      stripeAccountId: '',
     });
 
     return OderSerderSave;
