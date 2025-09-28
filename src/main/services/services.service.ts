@@ -456,6 +456,7 @@ export class ServiceService {
   }
 
   async getServicesBuyPayemtData(userId: string) {
+    console.log('user idsssss', userId);
     const currentTime = new Date();
     const top3cardData = await this.prisma.$transaction(async (tx) => {
       const suportCount = await tx.serviceOrder.count({

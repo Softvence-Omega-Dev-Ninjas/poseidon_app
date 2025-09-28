@@ -198,7 +198,7 @@ export class ServiceController {
   }
 
   @Roles(Role.Supporter)
-  @Get('getServicesBuyPayemtData')
+  @Get('getServices/BuyPayemtData')
   getServicesBuyPayemtData(@Req() req: Request) {
     return this.serviceService.getServicesBuyPayemtData(req['sub'] as string);
   }
