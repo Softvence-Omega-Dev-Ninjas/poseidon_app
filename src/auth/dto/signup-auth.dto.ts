@@ -2,6 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class SignUpUserDto {
+
+  // referral
+  @ApiProperty({
+    required: false,
+    example: 'abcd-1234-efgh-5678',
+  })
+  referralId?: string
+
   @ApiProperty({
     type: Boolean,
     required: true,

@@ -9,7 +9,7 @@ model User {
   deactivate      Boolean        @default(false)
   role            Roles          @default(user)
   stripeAccountId String?
-  comments        Comment[]
+  comments        Comment[] 
   images          Image[]
   imagescomments  ImageComment[]
   imageslikes     ImageLike[]
@@ -18,11 +18,18 @@ model User {
   posts           Post[]
   profile         Profile?
   shop            Shop?
+  referralCode    String?    @unique @default(uuid())
+  referredBy      String?
+  
 
   // supporter card system
   support_cart_layout SupportCartLayout?
   author_supportor    SupporterPay[]     @relation("author_supportor")
   supporter           SupporterPay[]
+
+  // referral 
+  inviter   Referral[] @relation("UserInviter")
+  invited   Referral[] @relation("UserInvited")
 
   // Memberships
   memberships_owner Membership_owner?
@@ -79,4 +86,15 @@ enum Roles {
   admin
   supporter
   user
+}
+
+model Referral {
+  id         String   @id @default(uuid())
+  inviterId  String   
+  inviter    User     @relation("UserInviter", fields: [inviterId], references: [id])
+
+  invitedId  String   
+  invited    User     @relation("UserInvited", fields: [invitedId], references: [id])
+
+  createdAt  DateTime @default(now())
 }

@@ -5,6 +5,7 @@ import { CredentialsSignInInfo } from 'src/auth/dto/create-auth.dto';
 import * as argon2 from 'argon2';
 import { SellerService } from 'src/utils/stripe/seller.service';
 import { cResponseData } from 'src/common/utils/common-responseData';
+// import { v4 as uuidv4 } from 'uuid';
 // import { UserInfoType } from './response.type';
 // import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
@@ -14,7 +15,7 @@ export class AuthUserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly stripe: SellerService,
-  ) {}
+  ) { }
 
   // chack user db isExestUser - yes or not
   private async isExestUser(email: string) {
@@ -31,7 +32,6 @@ export class AuthUserService {
     });
     return !!result;
   }
-
   // credentials register system
   async createUser(createUserDto: CreateUserDto, skip: boolean) {
     // const { skip, ...createUserDto } = data;
@@ -50,6 +50,7 @@ export class AuthUserService {
       );
     }
     const hashedPassword = await argon2.hash(createUserDto.password);
+
     // create new supporter
     if (createUserDto.role === 'supporter') {
       return await this.createSupporterAccount(
@@ -62,6 +63,16 @@ export class AuthUserService {
     }
     // create new user
     // create a hash password
+    let refData = {};
+    if (createUserDto.referralId) {
+      refData = {
+        invited: {
+          create: {
+            inviterId: createUserDto.referralId
+          }
+        }
+      }
+    }
     const newUser = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
@@ -73,6 +84,7 @@ export class AuthUserService {
             ...createUserDto.profile,
           },
         },
+        ...refData
       },
       select: {
         id: true,
@@ -94,6 +106,144 @@ export class AuthUserService {
       success: true,
     };
   }
+  //   async createUser(createUserDto: CreateUserDto, skip: boolean) {
+  //   const userIsExest = await this.isExestUser(createUserDto.email);
+  //   if (userIsExest) {
+  //     throw new HttpException(
+  //       {
+  //         message: 'You already registered, please login',
+  //         redirect_url: `${process.env.FRONTEND_URL}/login`,
+  //         error: null,
+  //         data: null,
+  //         success: false,
+  //       },
+  //       HttpStatus.CONFLICT,
+  //     );
+  //   }
+
+  //   const hashedPassword = await argon2.hash(createUserDto.password);
+
+  //   let newUser;
+  //   if (createUserDto.role === 'supporter') {
+  //     newUser = await this.createSupporterAccount(
+  //       {
+  //         ...createUserDto,
+  //         password: hashedPassword,
+  //       },
+  //       skip,
+  //     );
+  //   } else {
+  //     newUser = await this.prisma.user.create({
+  //       data: {
+  //         email: createUserDto.email,
+  //         username: createUserDto.username,
+  //         password: hashedPassword,
+  //         role: createUserDto.role as 'user',
+  //         profile: {
+  //           create: {
+  //             ...createUserDto.profile,
+  //           },
+  //         },
+  //       },
+  //       select: {
+  //         id: true,
+  //         email: true,
+  //         provider: true,
+  //         profile: {
+  //           select: {
+  //             name: true,
+  //             image: true,
+  //           },
+  //         },
+  //       },
+  //     });
+  //   }
+
+  //   //  Referral logic
+  //   if (createUserDto.referrerId) {
+  //     const inviter = await this.prisma.user.findUnique({
+  //       where: { id: createUserDto.referrerId },
+  //     });
+  //     if (inviter) {
+  //       await this.prisma.referral.create({
+  //         data: {
+  //           inviterId: inviter.id,
+  //           invitedId: newUser.id,
+  //         },
+  //       });
+  //     }
+  //   }
+
+  //   return {
+  //     message: 'Signup successful',
+  //     redirect_url: `${process.env.FRONTEND_URL}/login`,
+  //     error: null,
+  //     data: { name: newUser.profile?.name },
+  //     success: true,
+  //   };
+  // }
+
+
+  //   // const { skip, ...createUserDto } = data;
+  //   console.log('createUserDto ========++++++++000000', createUserDto);
+  //   const userIsExest = await this.isExestUser(createUserDto.email);
+  //   if (userIsExest) {
+  //     throw new HttpException(
+  //       {
+  //         message: 'Your Have all ready register please login',
+  //         redirect_url: `${process.env.FRONTEND_URL}/login`,
+  //         error: null,
+  //         data: null,
+  //         success: false,
+  //       },
+  //       HttpStatus.CONFLICT,
+  //     );
+  //   }
+  //   const hashedPassword = await argon2.hash(createUserDto.password);
+  //   // create new supporter
+  //   if (createUserDto.role === 'supporter') {
+  //     return await this.createSupporterAccount(
+  //       {
+  //         ...createUserDto,
+  //         password: hashedPassword,
+  //       },
+  //       skip,
+  //     );
+  //   }
+  //   // create new user
+  //   // create a hash password
+  //   const newUser = await this.prisma.user.create({
+  //     data: {
+  //       email: createUserDto.email,
+  //       username: createUserDto.username,
+  //       password: hashedPassword,
+  //       role: createUserDto.role as 'user',
+  //       profile: {
+  //         create: {
+  //           ...createUserDto.profile,
+  //         },
+  //       },
+  //     },
+  //     select: {
+  //       id: true,
+  //       email: true,
+  //       provider: true,
+  //       profile: {
+  //         select: {
+  //           name: true,
+  //           image: true,
+  //         },
+  //       },
+  //     },
+  //   });
+  //   return {
+  //     message: 'Your Have SignUp Successful',
+  //     redirect_url: `${process.env.FRONTEND_URL}/login`,
+  //     error: null,
+  //     data: { name: newUser.profile?.name },
+  //     success: true,
+  //   };
+  // }
 
   // credentials login system
   async loginUser(loginUserDto: CredentialsSignInInfo) {
@@ -149,6 +299,7 @@ export class AuthUserService {
   ) {
     console.log('createUserDto =====++++++', createUserDto);
     try {
+
       // If the user is a supporter, create a support_cart_layout
       console.log('createSupporterAccount......');
       const newSupporter = await this.prisma.user.create({
