@@ -9,5 +9,6 @@ import { StripeModule } from 'src/utils/stripe/stripe.module';
   imports: [UserModule, CloudinaryModule, StripeModule],
   controllers: [AuthController],
   providers: [AuthService],
+  exports: [],
 })
 export class AuthModule {}

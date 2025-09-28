@@ -92,4 +92,10 @@ export class AuthService {
       );
     }
   }
+
+  // (devlopersabbir) here is our all strategies
+  async validateOAuthLogin<P = any>(profile: P) {
+    console.log(profile);
+    return this.jwtService.sign({ sub: 'sub', provider: 'provider' });
+  }
 }

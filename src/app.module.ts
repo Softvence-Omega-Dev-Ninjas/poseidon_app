@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
 
 import { PrismaClientModule } from './prisma-client/prisma-client.module';
+import { ContinueModule } from './continue/continue.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PrismaClientModule } from './prisma-client/prisma-client.module';
         signOptions: { expiresIn: '1d' },
       }),
     }),
+    ContinueModule,
   ],
   controllers: [AppController],
   providers: [

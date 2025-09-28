@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerSetting } from './config/swagger';
+import * as session from 'express-session';
+
 // import cookieParser from 'cookie-parser';
 // import { NestExpressApplication } from '@nestjs/platform-express';
 // import { join } from 'path';
@@ -9,6 +11,14 @@ import { SwaggerSetting } from './config/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(
+    session({
+      secret: 'some_secret_key',
+      resave: false,
+      saveUninitialized: false,
+      cookie: { maxAge: 3600000 }, // 1 hour
+    }),
+  );
 
   // (app as any).use(cookieParser());
 

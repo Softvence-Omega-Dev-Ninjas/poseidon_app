@@ -12,7 +12,7 @@ import {
 import { AuthService } from './auth.service';
 import { CredentialsSignInInfo } from './dto/create-auth.dto';
 import { AuthUserService } from 'src/main/user/user-auth-info/authUser.service';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { Public } from './guard/public.decorator';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
