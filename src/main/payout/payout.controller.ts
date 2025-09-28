@@ -1,34 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Req } from '@nestjs/common';
 import { PayoutService } from './payout.service';
-import { CreatePayoutDto } from './dto/create-payout.dto';
-import { UpdatePayoutDto } from './dto/update-payout.dto';
+import { Roles } from 'src/auth/guard/roles.decorator';
+import { Role } from 'src/auth/guard/role.enum';
+import { Request } from 'express';
 
 @Controller('payout')
 export class PayoutController {
   constructor(private readonly payoutService: PayoutService) {}
 
-  @Post()
-  create(@Body() createPayoutDto: CreatePayoutDto) {
-    return this.payoutService.create(createPayoutDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.payoutService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.payoutService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePayoutDto: UpdatePayoutDto) {
-    return this.payoutService.update(+id, updatePayoutDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.payoutService.remove(+id);
+  @Roles(Role.Supporter)
+  @Get('balance-sheet')
+  async getBalanceSheet(@Req() req: Request) {
+    return this.payoutService.balenceSheet(req['stripeAccountId'] as string);
   }
 }

@@ -1,26 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePayoutDto } from './dto/create-payout.dto';
-import { UpdatePayoutDto } from './dto/update-payout.dto';
+import { SellerService } from 'src/utils/stripe/seller.service';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Injectable()
 export class PayoutService {
-  create(createPayoutDto: CreatePayoutDto) {
-    return 'This action adds a new payout';
-  }
+  constructor(private readonly sellerServiceStripe: SellerService) {}
 
-  findAll() {
-    return `This action returns all payout`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} payout`;
-  }
-
-  update(id: number, updatePayoutDto: UpdatePayoutDto) {
-    return `This action updates a #${id} payout`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} payout`;
+  async balenceSheet(stripeAccountId: string) {
+    if (!stripeAccountId) {
+      return cResponseData({
+        message: 'Stripe account id is required',
+        data: null,
+        error: null,
+        success: false,
+      });
+    }
+    const balanceSheet =
+      await this.sellerServiceStripe.financialServices(stripeAccountId);
+    console.log('balanceSheet', balanceSheet);
+    return cResponseData({
+      message: 'Balance sheet',
+      data: balanceSheet,
+      error: null,
+      success: true,
+    });
   }
 }
