@@ -1,67 +1,46 @@
 model User {
-  id              String         @id @unique @default(uuid())
-  username        String         @unique
-  provider        String         @default("credentials") // Authentication provider credentials, google, facebook, etc.
-  email           String
-  password        String?
-  otp             String?
-  varify          Boolean        @default(false)
-  deactivate      Boolean        @default(false)
-  role            Roles          @default(user)
-  stripeAccountId String?
-  comments        Comment[] 
-  images          Image[]
-  imagescomments  ImageComment[]
-  imageslikes     ImageLike[]
-  likes           Like[]
-  orders          Order[]
-  posts           Post[]
-  profile         Profile?
-  shop            Shop?
-  
-
-  // supporter card system
-  support_cart_layout SupportCartLayout?
-  author_supportor    SupporterPay[]     @relation("author_supportor")
-  supporter           SupporterPay[]
-
-  // referral 
-  inviter   Referral[] @relation("UserInviter")
-  invited   Referral[] @relation("UserInvited")
-
-  // Memberships
-  memberships_owner Membership_owner?
-
-  // messages system
-  conversations1 Conversation[] @relation("User1Conversations")
-  conversations2 Conversation[] @relation("User2Conversations")
-
-  sentMessages     Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
-
-  //services
-  serviceOrders ServiceOrder[] @relation("UserServiceOrders")
-
-  //
-
-  productCategories ProductCategory[]
-
-  services Service[]
-
-  // permission access tb
-  PermissionvideoCallAccessUser      PermissionVideoCallAccess[] @relation("PermissionVideoCallAccessUser")
-  PermissionvideoCallAccessSupporter PermissionVideoCallAccess[] @relation("PermissionVideoCallAccessSupporter")
-  PermissionMessagesAccessUser       PermissionMessagesAccess[]  @relation("PermissionMessagesAccessUser")
-  PermissionMessagesAccessSupporter  PermissionMessagesAccess[]  @relation("PermissionMessagesAccessSupporter")
-  PermissionGalleryAccessUser        PermissionGalleryAccess[]   @relation("PermissionGalleryAccessUser")
+  id                                 String                      @id @unique @default(uuid())
+  provider                           String                      @default("credentials")
+  email                              String
+  password                           String?
+  otp                                String?
+  varify                             Boolean                     @default(false)
+  deactivate                         Boolean                     @default(false)
+  role                               Roles                       @default(user)
+  stripeAccountId                    String?
+  username                           String                      @unique
+  createdAt                          DateTime                    @default(now())
+  comments                           Comment[]
+  conversations1                     Conversation[]              @relation("User1Conversations")
+  conversations2                     Conversation[]              @relation("User2Conversations")
+  images                             Image[]
+  imagescomments                     ImageComment[]
+  imageslikes                        ImageLike[]
+  likes                              Like[]
+  memberships_owner                  Membership_owner?
+  receivedMessages                   Message[]                   @relation("ReceivedMessages")
+  sentMessages                       Message[]                   @relation("SentMessages")
+  orders                             Order[]
   PermissionGalleryAccessSupporter   PermissionGalleryAccess[]   @relation("PermissionGalleryAccessSupporter")
-  PermissionPostsAccessUser          PermissionPostsAccess[]     @relation("PermissionPostsAccessUser")
+  PermissionGalleryAccessUser        PermissionGalleryAccess[]   @relation("PermissionGalleryAccessUser")
+  PermissionMessagesAccessSupporter  PermissionMessagesAccess[]  @relation("PermissionMessagesAccessSupporter")
+  PermissionMessagesAccessUser       PermissionMessagesAccess[]  @relation("PermissionMessagesAccessUser")
   PermissionPostsAccessSupporter     PermissionPostsAccess[]     @relation("PermissionPostsAccessSupporter")
-
-  // zoom
-  zoomAccounts ZoomAccount?
-
-  createdAt DateTime @default(now())
+  PermissionPostsAccessUser          PermissionPostsAccess[]     @relation("PermissionPostsAccessUser")
+  PermissionvideoCallAccessSupporter PermissionVideoCallAccess[] @relation("PermissionVideoCallAccessSupporter")
+  PermissionvideoCallAccessUser      PermissionVideoCallAccess[] @relation("PermissionVideoCallAccessUser")
+  posts                              Post[]
+  productCategories                  ProductCategory[]
+  profile                            Profile?
+  invited                            Referral[]                  @relation("UserInvited")
+  inviter                            Referral[]                  @relation("UserInviter")
+  services                           Service[]
+  serviceOrders                      ServiceOrder[]              @relation("UserServiceOrders")
+  shop                               Shop?
+  support_cart_layout                SupportCartLayout?
+  author_supportor                   SupporterPay[]              @relation("author_supportor")
+  supporter                          SupporterPay[]
+  zoomAccounts                       ZoomAccount?
 }
 
 model Profile {
@@ -75,26 +54,24 @@ model Profile {
   country             String?
   postcode            String?
   cover_image         String?
-  cover_image_offsetY String? @default("0")
   description         String?
+  cover_image_offsetY String? @default("0")
   user                User    @relation(fields: [userid], references: [id], onDelete: Cascade)
+}
+
+model Referral {
+  id         String   @id @default(uuid())
+  inviterId  String
+  invitedId  String
+  createdAt  DateTime @default(now())
+  discount   Int      @default(5)
+  isReferral Boolean  @default(false)
+  invited    User     @relation("UserInvited", fields: [invitedId], references: [id])
+  inviter    User     @relation("UserInviter", fields: [inviterId], references: [id])
 }
 
 enum Roles {
   admin
   supporter
   user
-}
-
-model Referral {
-  id         String   @id @default(uuid())
-  discount   Int @default(5)
-  isReferral Boolean @default(false)
-  inviterId  String   
-  inviter    User     @relation("UserInviter", fields: [inviterId], references: [id])
-
-  invitedId  String   
-  invited    User     @relation("UserInvited", fields: [invitedId], references: [id])
-
-  createdAt  DateTime @default(now())
 }

@@ -2,17 +2,17 @@ model SupporterPay {
   id                String             @id @unique @default(uuid())
   user_id           String?
   author_id         String
-  pi_number         String?
-  paymemtStatus     PaymemtStatus      @default(pending)
   total_price       Float
   name              String
   country           String
   massage           String
-  author            User               @relation("author_supportor", fields: [author_id], references: [id])
-  user              User?              @relation(fields: [user_id], references: [id])
-  oder_package_name oder_package_name? @relation(name: "SupporterPayTooder_package_name")
   createAt          DateTime           @default(now())
   updateAt          DateTime           @updatedAt
+  paymemtStatus     PaymemtStatus      @default(pending)
+  pi_number         String?
+  author            User               @relation("author_supportor", fields: [author_id], references: [id])
+  user              User?              @relation(fields: [user_id], references: [id])
+  oder_package_name oder_package_name? @relation("SupporterPayTooder_package_name")
 }
 
 model oder_package_name {
@@ -24,18 +24,17 @@ model oder_package_name {
   complate         Boolean      @default(false)
   createAt         DateTime     @default(now())
   updateAt         DateTime     @updatedAt
-  SupporterPay     SupporterPay @relation(name: "SupporterPayTooder_package_name", fields: [supporter_pay_id], references: [id], onDelete: Cascade)
+  SupporterPay     SupporterPay @relation("SupporterPayTooder_package_name", fields: [supporter_pay_id], references: [id], onDelete: Cascade)
 }
 
-// root cart details
 model SupportCartLayout {
   id                       String                      @unique @default(uuid())
   author_id                String                      @unique
   choose_layout            LayoutType                  @default(standard)
   default_price            Int                         @default(5)
-  SuggestQuantity          SupportCartLayoutQuantity[]
   cheers_live_package_type Cheers_live_package_type[]
   author                   User                        @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  SuggestQuantity          SupportCartLayoutQuantity[]
 }
 
 model Cheers_live_package_type {
@@ -47,17 +46,15 @@ model Cheers_live_package_type {
   support_cart_layout    SupportCartLayout @relation(fields: [support_cart_layout_id], references: [id], onDelete: Cascade)
 }
 
+model SupportCartLayoutQuantity {
+  id                  String            @id @unique @default(uuid())
+  supportCartLayoutId String
+  choose_layout       LayoutType        @default(suggest)
+  quantity            Int
+  SupportCartLayout   SupportCartLayout @relation(fields: [supportCartLayoutId], references: [id])
+}
+
 enum LayoutType {
   standard
   suggest
 }
-
-model SupportCartLayoutQuantity {
-  id                  String            @id @unique @default(uuid())
-  SupportCartLayout   SupportCartLayout @relation(fields: [supportCartLayoutId], references: [id])
-  supportCartLayoutId String
-  choose_layout       LayoutType        @default(suggest)
-  quantity            Int
-}
-
-
