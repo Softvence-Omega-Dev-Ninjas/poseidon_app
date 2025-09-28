@@ -62,6 +62,7 @@ export class ServicePaymentService {
         },
         data: {
           pi_number: paymentIntent.id,
+          paymemtStatus: 'unpaid',
         },
       });
 
