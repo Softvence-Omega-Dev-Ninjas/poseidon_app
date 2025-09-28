@@ -18,8 +18,6 @@ model User {
   posts           Post[]
   profile         Profile?
   shop            Shop?
-  referralCode    String?    @unique @default(uuid())
-  referredBy      String?
   
 
   // supporter card system
@@ -90,6 +88,8 @@ enum Roles {
 
 model Referral {
   id         String   @id @default(uuid())
+  discount   Int @default(5)
+  isReferral Boolean @default(false)
   inviterId  String   
   inviter    User     @relation("UserInviter", fields: [inviterId], references: [id])
 
