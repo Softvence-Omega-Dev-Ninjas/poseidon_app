@@ -35,7 +35,7 @@ import { EntertainerModule } from './entertainer/entertainer.module';
     ZoomModule,
     PaymentModule,
     PermissionAccessModule,
-    EntertainerModule
+    EntertainerModule,
   ],
   controllers: [],
   providers: [],

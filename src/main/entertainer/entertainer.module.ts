@@ -1,11 +1,9 @@
-import { Module } from "@nestjs/common";
-import { EntertainerController } from "./entertainer.controller";
-import { EntertainerService } from "./entertainer.service";
-
+import { Module } from '@nestjs/common';
+import { EntertainerController } from './entertainer.controller';
+import { EntertainerService } from './entertainer.service';
 
 @Module({
-    controllers: [EntertainerController],
-    providers: [EntertainerService],
-
+  controllers: [EntertainerController],
+  providers: [EntertainerService],
 })
-export class EntertainerModule { }
+export class EntertainerModule {}
