@@ -37,7 +37,6 @@ model User {
   //services
   serviceOrders ServiceOrder[] @relation("UserServiceOrders")
 
-  //
 
   productCategories ProductCategory[]
 

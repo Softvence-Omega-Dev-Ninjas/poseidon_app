@@ -2,6 +2,8 @@ services:
   app:
     image: sharif780/drinkwithme:latest
     container_name: drinkwithme_app
+    profiles:
+      - prod
     ports:
       - '3000:3000'
     environment:
@@ -27,6 +29,9 @@ services:
     image: postgres
     container_name: drinkwithme_db
     restart: always
+    profiles:
+      - prod
+      - dev
     ports:
       - ':5434:5432'
     # or set shared memory limit when deploy via swarm stack
@@ -41,7 +46,16 @@ services:
     image: redis:7.2
     container_name: my_redis
     restart: always
+    profiles:
+      - prod
+      - dev
     ports:
       - '6379:6379'
     volumes:
-      - /home/drinkwithmedbset/redis:/data
+      - redis:/data
+
+volumes:
+  pgdata:
+  redis:
+networks:
+  default:

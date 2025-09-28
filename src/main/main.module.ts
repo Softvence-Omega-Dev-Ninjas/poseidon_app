@@ -15,10 +15,12 @@ import { ZoomModule } from './zoom/zoom.module';
 import { PaymentModule } from './payment/payment.module';
 import { UserDashboardModule } from './dashboard/user-dashboard/user-dashboard.module';
 import { PermissionAccessModule } from './permission-access/permission-access.module';
+import { AdminDashboardModule } from './dashboard/admin/admin.module';
 
 @Module({
   imports: [
     UserModule,
+    AdminDashboardModule,
     UserDashboardModule,
     SupporterProfileModule,
     SupporterModule,
