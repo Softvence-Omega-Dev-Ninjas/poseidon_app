@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Patch,
+  Post,
   Req,
   UploadedFile,
   UseInterceptors,
@@ -13,6 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Role } from 'src/auth/guard/role.enum';
 import { Roles } from 'src/auth/guard/roles.decorator';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @ApiTags('Profile Setting')
 @Controller('profile-setting')
@@ -44,5 +46,12 @@ export class ProfileSettingController {
     @UploadedFile() file?: Express.Multer.File,
   ) {
     return this.profileSettingService.updateProfile(req?.sub, dto, file);
+  }
+
+  @ApiOperation({ summary: 'Update password' })
+  @Roles(Role.Supporter, Role.User)
+  @Patch('update-password')
+  async updatePassword(@Req() req: any, @Body() dto: UpdatePasswordDto) {
+    return this.profileSettingService.updatePassword(req?.sub, dto);
   }
 }
