@@ -101,6 +101,12 @@ export class AuthController {
   async checkJwt(@Param('token') token: string) {
     return this.authService.checkJwt(token);
   }
+
+  @Public()
+  @Post('varify-email')
+  async varifyemail(@Body('email') email: string) {
+    return this.authUserService.isExestUser(email);
+  }
 }
 
 // auth.service.ts
