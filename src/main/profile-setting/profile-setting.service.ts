@@ -17,6 +17,22 @@ export class ProfileSettingService {
     private readonly cloudinary: CloudinaryService,
   ) {}
 
+  async getProfile(userId: string) {
+    try {
+      const profile = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: { profile: true },
+      });
+      return {
+        success: true,
+        message: 'Profile retrieved successfully',
+        data: profile,
+      };
+    } catch (err) {
+      throw new InternalServerErrorException('Failed to retrieve profile');
+    }
+  }
+
   async updateProfile(
     userId: string,
     updateData: UpdateProfileDto,
@@ -144,8 +160,11 @@ export class ProfileSettingService {
         throw new NotFoundException('User not found');
       }
 
-      // Delete user (Profile + other relations cascade automatically)
-      await this.prisma.user.delete({ where: { id: userId } });
+      // Deactivate account
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { deactivate: true },
+      });
 
       return {
         success: true,

@@ -28,15 +28,15 @@ services:
   db:
     image: postgres
     container_name: drinkwithme_db
+    restart: always
     profiles:
       - prod
       - dev
-    restart: always
     ports:
       - ':5434:5432'
     # or set shared memory limit when deploy via swarm stack
     volumes:
-      - /Users/mdsharif/docker_volumes/poseidon:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -45,11 +45,17 @@ services:
   redis:
     image: redis:7.2
     container_name: my_redis
+    restart: always
     profiles:
       - prod
       - dev
-    restart: always
     ports:
       - '6379:6379'
     volumes:
-      - /Users/mdsharif/docker_volumes/redis:/data
+      - redis:/data
+
+volumes:
+  pgdata:
+  redis:
+networks:
+  default:

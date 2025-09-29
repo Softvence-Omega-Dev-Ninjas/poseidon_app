@@ -15,13 +15,14 @@ export class AdminController {
   ) {}
 
   @Get('stats')
-  @Roles(Role.User)
+  @Roles(Role.Admin)
   getStats(@Req() res: Request) {
     return this.overviewService.getStats();
   }
 
   // Bar stars
   @Get('bar-stars')
+  @Roles(Role.Admin)
   @ApiQuery({
     name: 'page',
     required: false,
@@ -34,7 +35,6 @@ export class AdminController {
     type: Number,
     description: 'Number of items per page',
   })
-  @Roles(Role.User)
   getBarStars(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
@@ -43,15 +43,15 @@ export class AdminController {
     return this.barStarsService.findMany(page, limit);
   }
 
-  @Roles(Role.User)
   @Get('bar-stars/:id')
+  @Roles(Role.Admin)
   @ApiOperation({ summary: 'View by bar star id' })
   async getBarStar(@Param('id') id: string) {
     return this.barStarsService.findOne(id);
   }
 
-  @Roles(Role.User)
   @Delete('bar-stars/:id')
+  @Roles(Role.Admin)
   @ApiOperation({ summary: 'Delete a general user with id' })
   @ApiResponse({ status: 200, description: 'User deleted successfully.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
@@ -61,6 +61,7 @@ export class AdminController {
 
   // General user
   @Get('general-user')
+  @Roles(Role.Admin)
   @ApiQuery({
     name: 'page',
     required: false,
@@ -73,7 +74,6 @@ export class AdminController {
     type: Number,
     description: 'Number of items per page',
   })
-  @Roles(Role.User)
   getGeneralUsers(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
@@ -82,15 +82,15 @@ export class AdminController {
     return this.generalUserService.findMany(page, limit);
   }
 
-  @Roles(Role.User)
   @Get('general-user/:id')
+  @Roles(Role.Admin)
   @ApiOperation({ summary: 'View by general user id' })
   async getGeneralUser(@Param('id') id: string) {
     return this.generalUserService.fineOne(id);
   }
 
-  @Roles(Role.User)
   @Delete('general-user/:id')
+  @Roles(Role.Admin)
   @ApiOperation({ summary: 'Delete a general user by general user id' })
   @ApiResponse({ status: 200, description: 'User deleted successfully.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
