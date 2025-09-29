@@ -47,9 +47,12 @@ importers:
       '@prisma/client':
         specifier: 6.11.1
         version: 6.11.1(prisma@6.11.1(typescript@5.8.3))(typescript@5.8.3)
+<<<<<<< HEAD
       '@types/nodemailer':
         specifier: ^7.0.1
         version: 7.0.2
+=======
+>>>>>>> dev-sobuj
       '@types/passport-jwt':
         specifier: ^4.0.1
         version: 4.0.1
@@ -83,9 +86,12 @@ importers:
       ioredis:
         specifier: ^5.6.1
         version: 5.7.0
+<<<<<<< HEAD
       nodemailer:
         specifier: ^7.0.6
         version: 7.0.6
+=======
+>>>>>>> dev-sobuj
       passport-jwt:
         specifier: ^4.0.1
         version: 4.0.1
@@ -1551,9 +1557,12 @@ packages:
   '@types/node@22.16.2':
     resolution: {integrity: sha512-Cdqa/eJTvt4fC4wmq1Mcc0CPUjp/Qy2FGqLza3z3pKymsI969TcZ54diNJv8UYUgeWxyb8FSbCkhdR6WqmUFhA==}
 
+<<<<<<< HEAD
   '@types/nodemailer@7.0.2':
     resolution: {integrity: sha512-Zo6uOA9157WRgBk/ZhMpTQ/iCWLMk7OIs/Q9jvHarMvrzUUP/MDdPHL2U1zpf57HrrWGv4nYQn5uIxna0xY3xw==}
 
+=======
+>>>>>>> dev-sobuj
   '@types/passport-jwt@4.0.1':
     resolution: {integrity: sha512-Y0Ykz6nWP4jpxgEUYq8NoVZeCQPo1ZndJLfapI249g1jHChvRfZRO/LS3tqu26YgAS/laI1qx98sYGz0IalRXQ==}
 
@@ -6040,6 +6049,7 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
+<<<<<<< HEAD
   '@types/nodemailer@7.0.2':
     dependencies:
       '@aws-sdk/client-sesv2': 3.899.0
@@ -6047,6 +6057,8 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
+=======
+>>>>>>> dev-sobuj
   '@types/passport-jwt@4.0.1':
     dependencies:
       '@types/jsonwebtoken': 9.0.7
