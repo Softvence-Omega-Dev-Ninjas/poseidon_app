@@ -19,4 +19,12 @@ export class PayoutController {
   async checkoutAccount(@Req() req: Request) {
     return this.payoutService.checkoutAccount(req['stripeAccountId'] as string);
   }
+
+  @Roles(Role.Supporter)
+  @Get('sellerAccountSetupClientSecret')
+  async sellerAccountSetupClientSecret(@Req() req: Request) {
+    return this.payoutService.sellerAccountSetupClientSecret(
+      req['stripeAccountId'] as string,
+    );
+  }
 }
