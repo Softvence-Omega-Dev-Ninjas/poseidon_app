@@ -29,15 +29,15 @@ export class EntertainerController {
     );
   }
 // get supporter recent post...
-  @Get(':supporterId/recent-posts')
-  @Roles(Role.User, Role.Supporter)
-  async getSupporterPosts(@Req() req: Request,@Param('supporterId') supporterId: string) {
-     const userId = req['sub'];
-    return handleRequest(
-      () => this.entertainer.getSupporterRecentPosts(userId,supporterId),
-      'Fetched supporter recent post(s)',
-    );
-  }
+ @Get('recent-posts')
+@Roles(Role.User, Role.Supporter)
+async getAllSupportersRecentPosts(@Req() req: Request) {
+  const userId = req['sub'];
+  return handleRequest(
+    () => this.entertainer.getRecentSupporterPosts(userId),
+    'Fetched recent post(s) of all supporters',
+  );
+}
 
   // create follower..
   @Post('/follow/:supporterId')

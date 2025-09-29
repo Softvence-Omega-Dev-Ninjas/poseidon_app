@@ -14,7 +14,7 @@ export class EntertainerService {
   //   Get all entertainer or supporters...
   async getAllEntertainer(userId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!userId) {
+    if (!user) {
       throw new BadRequestException('Sorry Unauthorized Access');
     }
     return await this.prisma.user.findMany({
@@ -32,29 +32,45 @@ export class EntertainerService {
     });
   }
   // get supporter recent post...
-  async getSupporterRecentPosts(userId: string, supporterId: string) {
+ async getRecentSupporterPosts(userId: string) {
   const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new BadRequestException('Sorry Unauthorized Access');
     }
-    console.log(supporterId)
-    const supporterPost = await this.prisma.post.findMany({
-    where: { userId: supporterId}, 
-    orderBy: { createdAt: 'desc' },
-    take: 1, 
-     select:{
-      images:true,
-      user:{
-        select:{
-          profile:{
-            select:{name:true, image:true, description:true}
+  //  Get 5 supporters (can order by createdAt or any other field)
+  const supporters = await this.prisma.user.findMany({
+    where: { role: Roles.supporter },
+    orderBy: { createdAt: 'desc' }, // latest supporters
+    take: 5,
+    select: { id: true },
+  });
+
+  const supporterIds = supporters.map(s => s.id);
+
+  //  Get the most recent post of each supporter
+  const recentPosts = await Promise.all(
+    supporterIds.map(async (supporterId) => {
+      const post = await this.prisma.post.findFirst({
+        where: { userId: supporterId },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          images: true,
+          user: {
+            select: {
+              id: true,
+              profile: {
+                select: { name: true, image: true, description: true }
+              }
+            }
           }
         }
-      }
-     }
-  });
-  console.log(supporterId,"data", supporterPost)
-   return supporterPost
+      });
+      return post;
+    })
+  );
+
+  // Remove supporters without posts
+  return recentPosts.filter(p => p !== null);
 }
 
   // follow supporter...
@@ -65,6 +81,12 @@ export class EntertainerService {
     }
     if (userId === supporterId) {
       throw new ConflictException('You cannot follow yourself');
+    }
+    const existFollow = await this.prisma.follower.findFirst({
+      where:{followerId: userId}
+    })
+    if(existFollow){
+      throw new BadRequestException("User Already follow this supporter.")
     }
     return await this.prisma.follower.create({
       data: {
