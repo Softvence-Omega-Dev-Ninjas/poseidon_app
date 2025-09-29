@@ -45,4 +45,35 @@ export class PayoutService {
       success: true,
     });
   }
+
+  async sellerAccountSetupClientSecret(stripeAccountId: string) {
+    if (!stripeAccountId) {
+      return cResponseData({
+        message: 'Stripe account id is required',
+        data: null,
+        error: null,
+        success: false,
+      });
+    }
+    const clientSecret =
+      await this.sellerServiceStripe.sellerAccountSetupClientSecret(
+        stripeAccountId,
+      );
+
+    if (!clientSecret) {
+      return cResponseData({
+        message: 'Client secret not found',
+        data: null,
+        error: null,
+        success: false,
+      });
+    }
+
+    return cResponseData({
+      message: 'Client secret',
+      data: clientSecret,
+      error: null,
+      success: true,
+    });
+  }
 }

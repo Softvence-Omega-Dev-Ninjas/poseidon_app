@@ -174,19 +174,19 @@ export class SellerService {
     return true;
   }
 
-  // //
-  // async checkAccountsInfo(accountId: string) {
-  //   const account = await this.stripe.accounts.retrieve(accountId, {
-  //     expand: ['requirements'],
-  //     includeOnly: [
-  //       'details_submitted',
-  //       'charges_enabled',
-  //       'payouts_enabled',
-  //       'requirements',
-  //     ],
-  //   });
-  //   return account;
-  // }
+  // setup seller account with stripe
+  async sellerAccountSetupClientSecret(accountId: string) {
+    const intent = await this.stripe.accountSessions.create({
+      account: accountId,
+      components: {
+        account_onboarding: {
+          enabled: true,
+        },
+      },
+    });
+    console.log('accountSessions', intent);
+    return intent.client_secret;
+  }
 
   async deleteAccount(accountId: string) {
     try {
