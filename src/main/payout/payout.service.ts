@@ -25,4 +25,24 @@ export class PayoutService {
       success: true,
     });
   }
+
+  async checkoutAccount(stripeAccountId: string) {
+    if (!stripeAccountId) {
+      return cResponseData({
+        message: 'Stripe account id is required',
+        data: null,
+        error: null,
+        success: false,
+      });
+    }
+    const checkoutAccount =
+      await this.sellerServiceStripe.checkAccountsInfoSystem(stripeAccountId);
+
+    return cResponseData({
+      message: 'Checkout account',
+      data: checkoutAccount,
+      error: null,
+      success: true,
+    });
+  }
 }

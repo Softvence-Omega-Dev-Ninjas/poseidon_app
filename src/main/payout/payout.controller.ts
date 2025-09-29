@@ -13,4 +13,10 @@ export class PayoutController {
   async getBalanceSheet(@Req() req: Request) {
     return this.payoutService.balenceSheet(req['stripeAccountId'] as string);
   }
+
+  @Roles(Role.Supporter)
+  @Get('checkoutAccount')
+  async checkoutAccount(@Req() req: Request) {
+    return this.payoutService.checkoutAccount(req['stripeAccountId'] as string);
+  }
 }
