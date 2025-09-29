@@ -106,6 +106,7 @@ export class AuthUserService {
       success: true,
     };
   }
+
   //   async createUser(createUserDto: CreateUserDto, skip: boolean) {
   //   const userIsExest = await this.isExestUser(createUserDto.email);
   //   if (userIsExest) {
@@ -246,6 +247,7 @@ export class AuthUserService {
   // }
 
   // credentials login system
+ 
   async loginUser(loginUserDto: CredentialsSignInInfo) {
     const userIsExest = await this.isExestUser(loginUserDto.email);
     if (!userIsExest) {

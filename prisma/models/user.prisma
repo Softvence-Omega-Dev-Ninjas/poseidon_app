@@ -65,7 +65,7 @@ model Referral {
   invitedId  String
   createdAt  DateTime @default(now())
   discount   Int      @default(5)
-  isReferral Boolean  @default(false)
+  completed  Boolean  @default(false)
   invited    User     @relation("UserInvited", fields: [invitedId], references: [id])
   inviter    User     @relation("UserInviter", fields: [inviterId], references: [id])
 }
