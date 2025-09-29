@@ -1,15 +1,16 @@
 model Service {
-  id          String         @id @unique @default(uuid())
+  id          String   @id @unique @default(uuid())
   serviceName String
   description String
   images      String[]
   price       Float
   success     Success
   successPage String?
-  draft       Boolean        @default(true)
+  draft       Boolean  @default(true)
   orderNumber Int?
   lastOrderBy String?
-  orders      ServiceOrder[]
+
+  orders ServiceOrder[]
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
@@ -32,17 +33,6 @@ model ServiceOrder {
   createdAt DateTime @default(now())
 }
 
-enum Success {
-  message
-  redirect
-}
-
-enum ServiceOrderStatus {
-  pending
-  approved
-  rejected
-}
-
 model PaymentDetailsByServices {
   id            String        @id @default(uuid())
   amount        Float
@@ -52,4 +42,15 @@ model PaymentDetailsByServices {
 
   serviceOrderId   String?       @unique
   serviceOrderInfo ServiceOrder? @relation(fields: [serviceOrderId], references: [id])
+}
+
+enum Success {
+  message
+  redirect
+}
+
+enum ServiceOrderStatus {
+  pending
+  approved
+  rejected
 }

@@ -1,11 +1,11 @@
 model ZoomAccount {
-    id           String   @id @default(cuid())
-    providerId   String   @unique
-    provider     User     @relation(fields: [providerId], references: [id])
-    zoomUserId   String // Zoom user ID from API (used to create meetings)
-    email        String // Zoom user email
-    clientId     String
-    clientSecret String
-    apiBase      String
-    createdAt    DateTime @default(now())
+  id           String   @id @default(cuid())
+  providerId   String   @unique
+  zoomUserId   String
+  email        String
+  clientId     String
+  clientSecret String
+  apiBase      String
+  createdAt    DateTime @default(now())
+  provider     User     @relation(fields: [providerId], references: [id])
 }

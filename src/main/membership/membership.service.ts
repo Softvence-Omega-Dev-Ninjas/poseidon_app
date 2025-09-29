@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
@@ -186,6 +186,32 @@ export class MembershipService {
         },
       },
     });
+
+    const existingLavel = await this.prisma.membership_levels.findUnique({
+      where: { id: dto.id },
+      include: {
+        MembershipSubscriptionPlan: true,
+      },
+    });
+
+    // Check if the lavel before try to update entity
+    if (!existingLavel) {
+      throw new NotFoundException(
+        `Membership lavel with ID ${dto.id} not found`,
+      );
+    }
+
+    // TODO(coderboysobuj) handle image upload if file is provided
+    // let lavelImageUrl : string | undefined = undefined;
+    // if(dto.levelImage) {
+    //     try {
+    //         const uploadResult = await this.cloudinaryService.imageUpload(dto.levelImage)
+    //         lavelImageUrl = uploadResult.mediaId;
+    //     } catch (error: any) {
+    //          throw new BadRequestException('Failed to upload image');
+    //          console.error("Error upload image for `membership_levels` update", error);
+    //     }
+    // }
 
     return cResponseData({
       message: 'Membership level updated successfully',

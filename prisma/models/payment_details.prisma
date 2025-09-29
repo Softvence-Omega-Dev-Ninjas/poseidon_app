@@ -1,31 +1,29 @@
+model paymentDetails {
+  id                        String                     @id @unique @default(uuid())
+  buyerId                   String?
+  sellerId                  String
+  amount                    Float
+  serviceType               ServiceType
+  serviceId                 String
+  createAt                  DateTime                   @default(now())
+  cs_number                 String?
+  endDate                   DateTime
+  serviceName               String
+  paymemtStatus             PaymemtStatus              @default(pending)
+  PermissionGalleryAccess   PermissionGalleryAccess?
+  PermissionMessagesAccess  PermissionMessagesAccess?
+  PermissionPostsAccess     PermissionPostsAccess?
+  PermissionVideoCallAccess PermissionVideoCallAccess?
+}
+
 enum ServiceType {
-    membership
-    support
+  membership
+  support
 }
 
 enum PaymemtStatus {
-    pending
-    unpaid
-    paid
-    canceled
-}
-
-model paymentDetails {
-    id            String        @id @unique @default(uuid())
-    buyerId       String?
-    sellerId      String
-    serviceName   String
-    amount        Float
-    cs_number     String?
-    paymemtStatus PaymemtStatus @default(pending)
-    serviceType   ServiceType
-    serviceId     String
-    createAt      DateTime      @default(now())
-    endDate       DateTime
-
-    //access controller route
-    PermissionVideoCallAccess PermissionVideoCallAccess?
-    PermissionMessagesAccess  PermissionMessagesAccess?
-    PermissionGalleryAccess   PermissionGalleryAccess?
-    PermissionPostsAccess     PermissionPostsAccess?
+  pending
+  unpaid
+  paid
+  canceled
 }
