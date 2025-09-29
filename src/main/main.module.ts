@@ -17,6 +17,7 @@ import { UserDashboardModule } from './dashboard/user-dashboard/user-dashboard.m
 import { PermissionAccessModule } from './permission-access/permission-access.module';
 import { AdminDashboardModule } from './dashboard/admin/admin.module';
 import { EntertainerModule } from './entertainer/entertainer.module';
+import { PayoutModule } from './payout/payout.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { EntertainerModule } from './entertainer/entertainer.module';
     PaymentModule,
     PermissionAccessModule,
     EntertainerModule,
+    PayoutModule
   ],
   controllers: [],
   providers: [],

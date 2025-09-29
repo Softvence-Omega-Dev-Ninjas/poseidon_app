@@ -17,7 +17,7 @@ export class AuthUserService {
   ) {}
 
   // chack user db isExestUser - yes or not
-  private async isExestUser(email: string) {
+  async isExestUser(email: string) {
     const result = await this.prisma.user.findFirst({
       where: {
         email: email,
@@ -35,7 +35,7 @@ export class AuthUserService {
   // credentials register system
   async createUser(createUserDto: CreateUserDto, skip: boolean) {
     // const { skip, ...createUserDto } = data;
-    console.log('createUserDto ========++++++++000000', createUserDto);
+    // console.log('createUserDto ========++++++++000000', createUserDto);
     const userIsExest = await this.isExestUser(createUserDto.email);
     if (userIsExest) {
       throw new HttpException(

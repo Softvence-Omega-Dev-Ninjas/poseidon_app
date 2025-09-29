@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  HttpException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
@@ -17,12 +18,17 @@ import {
   UpdateServiceOrderStatusDto,
 } from './dto/create-services';
 import { UpdateservicesDto } from './dto/update-serviecs';
+import { ServicePaymentService } from 'src/utils/stripe/services.service';
+import { PiStripeId } from 'src/common/dto/pi_stripeId.dto';
+import { StripeService } from 'src/utils/stripe/stripe.service';
 
 @Injectable()
 export class ServiceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly servicePaymentService: ServicePaymentService,
+    private readonly stripeService: StripeService,
   ) {}
 
   async create(
@@ -306,15 +312,58 @@ export class ServiceService {
         },
         userId: userId,
         sellerId: service.userId,
+        serviceId: service.id,
       },
       include: {
         paymentDetails: true,
+        user: {
+          select: {
+            id: true,
+            profile: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
       },
     });
 
-    console.log('OderSerderSave', OderSerderSave);
+    const { id, serviceId, sellerId, createdAt, paymentDetails, user } =
+      OderSerderSave;
 
-    return OderSerderSave;
+    if (
+      !id ||
+      !user ||
+      !sellerId ||
+      !serviceId ||
+      !createdAt ||
+      !paymentDetails ||
+      !service.user.stripeAccountId
+    ) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Payment Method faild',
+          error: 'payment error',
+          data: null,
+          success: false,
+        }),
+        400,
+      );
+    }
+
+    const seripePaymentInfo = this.servicePaymentService.servicePaymentIntent({
+      id,
+      serviceId,
+      userId: user.id,
+      sellerId,
+      createdAt,
+      paymentDetails,
+      name: user.profile?.name,
+      stripeAccountId: service.user.stripeAccountId,
+    });
+
+    return seripePaymentInfo;
   }
 
   /** Get all service orders with optional pagination */
@@ -454,5 +503,196 @@ export class ServiceService {
       success: true,
       data: order,
     });
+  }
+
+  async getServicesBuyPayemtData(userId: string) {
+    console.log('user idsssss', userId);
+    const currentTime = new Date();
+    const top3cardData = await this.prisma.$transaction(async (tx) => {
+      const suportCount = await tx.serviceOrder.count({
+        where: {
+          sellerId: userId,
+          paymentDetails: {
+            paymemtStatus: 'paid',
+          },
+        },
+      });
+      const newSupport = await tx.serviceOrder.count({
+        where: {
+          sellerId: userId,
+          paymentDetails: {
+            paymemtStatus: 'paid',
+          },
+          createdAt: {
+            gte: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
+            lt: new Date(
+              currentTime.getFullYear(),
+              currentTime.getMonth() + 1,
+              1,
+            ),
+          },
+        },
+      });
+
+      const lastMonthTotalAmount = await tx.paymentDetailsByServices.aggregate({
+        where: {
+          serviceOrderInfo: {
+            sellerId: userId,
+          },
+          paymemtStatus: 'paid',
+          createAt: {
+            gte: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
+            lt: new Date(
+              currentTime.getFullYear(),
+              currentTime.getMonth() + 1,
+              1,
+            ),
+          },
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
+      const newSupportbuyService = await tx.serviceOrder.findMany({
+        where: {
+          sellerId: userId,
+          paymentDetails: {
+            paymemtStatus: 'paid',
+          },
+          createdAt: {
+            gte: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
+            lt: new Date(
+              currentTime.getFullYear(),
+              currentTime.getMonth() + 1,
+              1,
+            ),
+          },
+        },
+        distinct: ['userId'],
+        select: {
+          userId: true,
+        },
+      });
+
+      const allDay = await tx.paymentDetailsByServices.aggregate({
+        where: {
+          serviceOrderInfo: {
+            sellerId: userId,
+            paymentDetails: {
+              paymemtStatus: 'paid',
+            },
+          },
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
+      return {
+        supporters: {
+          suportCount,
+          newSupport,
+        },
+        last30day: {
+          lastMonthTotalAmount: lastMonthTotalAmount._sum.amount
+            ? lastMonthTotalAmount._sum.amount
+            : 0,
+          newSupportbuyService: newSupportbuyService.length,
+        },
+        allDay: {
+          totalAmount: allDay._sum.amount ? allDay._sum.amount : 0,
+        },
+      };
+    });
+
+    const services = await this.prisma.serviceOrder.findMany({
+      where: {
+        sellerId: userId,
+      },
+      select: {
+        id: true,
+        createdAt: true,
+        user: {
+          select: {
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        paymentDetails: {
+          select: {
+            id: true,
+            amount: true,
+            paymemtStatus: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return cResponseData({
+      message: 'get all services successfully.',
+      error: null,
+      success: true,
+      data: {
+        ...top3cardData,
+        supporterProfile: services,
+      },
+    });
+  }
+
+  async paymentStatusCheck(data: PiStripeId) {
+    const payStatus = await this.stripeService.paymentIntentCheck(
+      data.paymentIntentId,
+    );
+    if (!payStatus || payStatus.status !== 'succeeded' || !payStatus.id) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Payment failed',
+          error: 'Payment failed',
+          data: null,
+          success: false,
+        }),
+        400,
+      );
+    }
+    console.log('paymentIntent - pi checkout', payStatus);
+    if (payStatus.status === 'succeeded') {
+      const paymentIntentData =
+        await this.prisma.paymentDetailsByServices.update({
+          where: {
+            id: payStatus.metadata.paymentDetailsId,
+          },
+          data: {
+            paymemtStatus: 'paid',
+          },
+        });
+      return cResponseData({
+        message: 'Payment successfully complated',
+        data: paymentIntentData,
+        success: true,
+      });
+    }
+    if (payStatus.status === 'canceled') {
+      const paymentIntent = await this.prisma.paymentDetailsByServices.update({
+        where: {
+          id: payStatus.metadata.paymentDetailsId,
+        },
+        data: {
+          paymemtStatus: 'canceled',
+        },
+      });
+      return cResponseData({
+        message: 'payment canceled ',
+        data: paymentIntent,
+        success: false,
+      });
+    }
   }
 }

@@ -73,7 +73,6 @@ model Profile {
   country             String?
   postcode            String?
   cover_image         String?
-  cover_image_offsetY String? @default("0")
   description         String?
   user                User    @relation(fields: [userid], references: [id], onDelete: Cascade)
 }
