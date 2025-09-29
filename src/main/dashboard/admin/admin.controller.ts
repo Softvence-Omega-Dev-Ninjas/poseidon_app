@@ -1,10 +1,20 @@
-import { Controller, Delete, Get, Param, Query, Req } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  Param,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { AdminOverviewService } from './services/overview.service';
 import { AdminBarStarService } from './services/bar-stars.service';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { GeneralUserService } from './services/general-user.service';
+import { Public } from 'src/auth/guard/public.decorator';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Controller('admin-dashboard')
 export class AdminController {
@@ -15,9 +25,28 @@ export class AdminController {
   ) {}
 
   @Get('stats')
-  @Roles(Role.Admin)
+  @Public()
   getStats(@Req() res: Request) {
     return this.overviewService.getStats();
+  }
+  @Public()
+  @Get('income-stats')
+  @ApiQuery({
+    name: 'month',
+    required: true,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'year',
+    required: true,
+    type: Number,
+  })
+  async getIncomeStats(
+    @Query('month') month: number,
+    @Query('year') year: number,
+  ) {
+    // TODO(coderboysobu) validate params before continue
+    return this.overviewService.getIncomeStats(Number(month), Number(year));
   }
 
   // Bar stars
