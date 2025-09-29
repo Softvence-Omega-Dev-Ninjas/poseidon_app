@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Patch,
   Post,
   Req,
@@ -53,5 +54,12 @@ export class ProfileSettingController {
   @Patch('update-password')
   async updatePassword(@Req() req: any, @Body() dto: UpdatePasswordDto) {
     return this.profileSettingService.updatePassword(req?.sub, dto);
+  }
+
+  @ApiOperation({ summary: 'Delete account' })
+  @Roles(Role.Supporter, Role.User)
+  @Delete('delete-account')
+  async deleteAccount(@Req() req: any) {
+    return this.profileSettingService.deleteAccount(req?.sub);
   }
 }

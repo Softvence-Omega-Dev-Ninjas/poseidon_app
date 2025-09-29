@@ -132,4 +132,32 @@ export class ProfileSettingService {
       );
     }
   }
+
+  async deleteAccount(userId: string) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: { profile: true },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Delete user (Profile + other relations cascade automatically)
+      await this.prisma.user.delete({ where: { id: userId } });
+
+      return {
+        success: true,
+        message: 'Account deleted successfully',
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error?.message || 'Something went wrong while deleting account',
+      );
+    }
+  }
 }
