@@ -19,7 +19,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     profile: Profile,
     done: <U = any>(error: any, user?: U) => void,
   ) {
-    console.log(profile);
-    return done(null, profile);
+    console.log({ profile });
+    return done(null);
   }
 }

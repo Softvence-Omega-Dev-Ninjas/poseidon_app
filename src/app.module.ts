@@ -15,6 +15,7 @@ import { ContinueModule } from './continue/continue.module';
   imports: [
     PrismaClientModule,
     AuthModule,
+    ContinueModule,
     MainModule,
     ConfigModule.forRoot({
       isGlobal: true,
@@ -28,7 +29,6 @@ import { ContinueModule } from './continue/continue.module';
         signOptions: { expiresIn: '1d' },
       }),
     }),
-    ContinueModule,
   ],
   controllers: [AppController],
   providers: [

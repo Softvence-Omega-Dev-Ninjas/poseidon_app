@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-google-oauth20';
+import { Providers, GoogleStrategyUser } from '../type';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -9,20 +10,20 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       callbackURL: process.env.GOOGLE_CALLBACK_URL!,
-      scope: ['email', 'profile'],
+      passReqToCallback: true,
     });
   }
 
   async validate(
+    req: any,
     accessToken: string,
     refreshToken: string,
     profile: Profile,
-    done: <U = any>(error: any, user?: U) => void,
+    done: (err, user, info) => void,
   ) {
-    console.log('Google Profile:', profile);
-    console.log('Google Token:', accessToken);
-    console.log('Google Refresh Token:', refreshToken);
-    console.log('Twitter Profile:', profile);
-    return done(null, 'hello');
+    const from = req.query.state; // should now contain admin/user/student
+    console.log('Google from:', JSON.parse(from));
+
+    return 'hello';
   }
 }

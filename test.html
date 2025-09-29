@@ -51,7 +51,11 @@
       const baseUrl = 'http://localhost:3000';
 
       document.querySelector('#google').addEventListener('click', () => {
-        window.location.href = `${baseUrl}/auth/google`;
+        const obj = {
+          role: 'role_here',
+          from: 'from_here',
+        };
+        window.location.href = `${baseUrl}/auth/google?from=${JSON.stringify(obj)}`;
       });
 
       document.querySelector('#facebook').addEventListener('click', () => {

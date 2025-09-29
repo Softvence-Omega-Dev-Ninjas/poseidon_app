@@ -18,10 +18,7 @@ export class TwitterStrategy extends PassportStrategy(Strategy, 'twitter') {
     profile: Profile,
     done: (error: any, user?: any) => void,
   ): Promise<any> {
-    console.log('Twitter Profile:', profile);
-    const user = {
-      provider: 'twitter',
-    };
-    done(null, user);
+    // here i want to get the from=?
+    done(null);
   }
 }
