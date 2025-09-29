@@ -15,7 +15,7 @@ export class AuthUserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly stripe: SellerService,
-  ) { }
+  ) {}
 
   // chack user db isExestUser - yes or not
   async isExestUser(email: string) {
@@ -68,10 +68,10 @@ export class AuthUserService {
       refData = {
         invited: {
           create: {
-            inviterId: createUserDto.referralId
-          }
-        }
-      }
+            inviterId: createUserDto.referralId,
+          },
+        },
+      };
     }
     const newUser = await this.prisma.user.create({
       data: {
@@ -84,7 +84,7 @@ export class AuthUserService {
             ...createUserDto.profile,
           },
         },
-        ...refData
+        ...refData,
       },
       select: {
         id: true,
@@ -184,7 +184,6 @@ export class AuthUserService {
   //   };
   // }
 
-
   //   // const { skip, ...createUserDto } = data;
   //   console.log('createUserDto ========++++++++000000', createUserDto);
   //   const userIsExest = await this.isExestUser(createUserDto.email);
@@ -247,7 +246,7 @@ export class AuthUserService {
   // }
 
   // credentials login system
- 
+
   async loginUser(loginUserDto: CredentialsSignInInfo) {
     const userIsExest = await this.isExestUser(loginUserDto.email);
     if (!userIsExest) {
@@ -301,7 +300,6 @@ export class AuthUserService {
   ) {
     console.log('createUserDto =====++++++', createUserDto);
     try {
-
       // If the user is a supporter, create a support_cart_layout
       console.log('createSupporterAccount......');
       const newSupporter = await this.prisma.user.create({
