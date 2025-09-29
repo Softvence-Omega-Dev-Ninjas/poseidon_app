@@ -81,6 +81,15 @@ export class SellerService {
         stripeAccount: accountId,
       });
 
+      const payoutlist = await this.stripe.payouts.list(
+        {
+          limit: 10,
+        },
+        {
+          stripeAccount: accountId,
+        },
+      );
+
       function formatAmount(amount: number, currency: string) {
         // Convert cents to dollars
         return new Intl.NumberFormat('en-US', {
@@ -128,6 +137,7 @@ export class SellerService {
         Total_Earning: formatAmount(total, 'usd'),
         Crypto_balance: formatAmount(cryptoPending, 'usd'),
         payouts: payouts,
+        payoutlist,
         rowData: balance,
       };
     } catch (e: unknown) {
@@ -147,19 +157,36 @@ export class SellerService {
   // use to Auth login user system this function
   async checkAccountsInfoSystem(accountId: string) {
     const account = await this.stripe.accounts.retrieve(accountId);
-    console.log('checkAccountsInfoSystem', account);
+    console.log('checkAccountsInfoSystem ================== ', account);
     if (
       !account ||
       !account.external_accounts ||
       !account.external_accounts.data ||
       account.external_accounts.data.length < 1 ||
       !account.tos_acceptance ||
-      !account.tos_acceptance.date
+      !account.tos_acceptance.date ||
+      !account.charges_enabled ||
+      !account.payouts_enabled ||
+      account.requirements?.currently_due?.length !== 0
     ) {
       return false;
     }
     return true;
   }
+
+  // //
+  // async checkAccountsInfo(accountId: string) {
+  //   const account = await this.stripe.accounts.retrieve(accountId, {
+  //     expand: ['requirements'],
+  //     includeOnly: [
+  //       'details_submitted',
+  //       'charges_enabled',
+  //       'payouts_enabled',
+  //       'requirements',
+  //     ],
+  //   });
+  //   return account;
+  // }
 
   async deleteAccount(accountId: string) {
     try {

@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Get,
   Param,
@@ -84,14 +83,13 @@ export class SupporterProfileController {
   changeCoverPhoto(
     @UploadedFile(new ImageValidationPipe(20))
     image: Express.Multer.File,
-    @Body() data: ProfileCoverImageDto,
+    // @Body() data: ProfileCoverImageDto,
     @Req() req: Request,
   ) {
-    console.log('change cover images', data);
+    // console.log('change cover images', data);
     return this.coverPhotoChangeService.changeCoverPhotoSupporterProfile({
       userId: req['sub'] as string,
       image,
-      offsetY: data.offsetY,
     });
   }
 }

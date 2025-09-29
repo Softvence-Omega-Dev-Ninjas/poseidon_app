@@ -1,47 +1,45 @@
-// access models video call / gallery / post / message
-// this schema models the access controls for each membership level - create only supporter
 model MembershipAccessToVideoCall {
-    id                         String                       @id @default(uuid())
-    membership_ownerId         String
-    Membership_owner           Membership_owner             @relation("MembershipAccessToVideoCall", fields: [membership_ownerId], references: [id])
-    duration                   Duration
-    title                      String                       @default("Video Call Access")
-    description                String?                      @default("Access to video calls with the owner")
-    totalVideoCalls            Int                          @default(0) // total number of video calls allowed
-    unlimitedVideoCalls        Boolean                      @default(false) // if true, totalVideoCalls is ignored
-    updateUrl                  String                       @default("video_call_update")
+  id                  String           @id @default(uuid())
+  membership_ownerId  String
+  title               String           @default("Video Call Access")
+  description         String?          @default("Access to video calls with the owner")
+  totalVideoCalls     Int              @default(0)
+  unlimitedVideoCalls Boolean          @default(false)
+  duration            Duration
+  updateUrl           String           @default("video_call_update")
+  Membership_owner    Membership_owner @relation("MembershipAccessToVideoCall", fields: [membership_ownerId], references: [id])
 }
 
 model MembershipAccessToMessages {
-    id                         String                       @id @default(uuid())
-    membership_ownerId         String
-    Membership_owner           Membership_owner             @relation("AccessToMessages", fields: [membership_ownerId], references: [id])
-    duration                   Duration
-    title                      String                       @default("Messages Access")
-    description                String?                      @default("Access to messages with the owner")
-    totalMessages              Int                          @default(0) // total number of messages allowed
-    unlimitedMessages          Boolean                      @default(false) // if true, totalMessages is ignored
-    updateUrl                  String                       @default("messages_update")
+  id                 String           @id @default(uuid())
+  membership_ownerId String
+  title              String           @default("Messages Access")
+  description        String?          @default("Access to messages with the owner")
+  totalMessages      Int              @default(0)
+  unlimitedMessages  Boolean          @default(false)
+  duration           Duration
+  updateUrl          String           @default("messages_update")
+  Membership_owner   Membership_owner @relation("AccessToMessages", fields: [membership_ownerId], references: [id])
 }
 
 model MembershipAccessToGallery {
-    id                         String                       @id @default(uuid())
-    membership_ownerId         String
-    Membership_owner           Membership_owner             @relation("AccessToGallery", fields: [membership_ownerId], references: [id])
-    duration                   Duration
-    title                      String                       @default("Gallery Access")
-    description                String                       @default("Access to the gallery with the owner")
-    AccessToGallery            Boolean                      @default(true) // if true, access to gallery is granted
-    updateUrl                  String                       @default("gallery_update")
+  id                 String           @id @default(uuid())
+  membership_ownerId String
+  title              String           @default("Gallery Access")
+  description        String           @default("Access to the gallery with the owner")
+  AccessToGallery    Boolean          @default(true)
+  duration           Duration
+  updateUrl          String           @default("gallery_update")
+  Membership_owner   Membership_owner @relation("AccessToGallery", fields: [membership_ownerId], references: [id])
 }
 
 model MembershipAccessToPosts {
-    id                         String                       @id @default(uuid())
-    membership_ownerId         String
-    Membership_owner           Membership_owner             @relation("AccessToPosts", fields: [membership_ownerId], references: [id])
-    duration                   Duration
-    title                      String                       @default("Posts Access")
-    description                String                       @default("Access to the posts with the owner")
-    AccessToPosts              Boolean                      @default(true) // if true, access to posts is granted
-    updateUrl                  String                       @default("posts_update")
+  id                 String           @id @default(uuid())
+  membership_ownerId String
+  title              String           @default("Posts Access")
+  description        String           @default("Access to the posts with the owner")
+  AccessToPosts      Boolean          @default(true)
+  duration           Duration
+  updateUrl          String           @default("posts_update")
+  Membership_owner   Membership_owner @relation("AccessToPosts", fields: [membership_ownerId], references: [id])
 }

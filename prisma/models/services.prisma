@@ -1,33 +1,47 @@
-
-
 model Service {
-  id           String          @id @unique @default(uuid())
-  serviceName  String
-  description  String
-  images       String[]       
-  price        Float
-  success      Success
-  successPage  String?
-  draft        Boolean         @default(true)
-  orderNumber  Int?
-  lastOrderBy  String?        
-  orders       ServiceOrder[]
+  id          String   @id @unique @default(uuid())
+  serviceName String
+  description String
+  images      String[]
+  price       Float
+  success     Success
+  successPage String?
+  draft       Boolean  @default(true)
+  orderNumber Int?
+  lastOrderBy String?
 
-  
-  userId       String
-  user         User            @relation(fields: [userId], references: [id])
+  orders ServiceOrder[]
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model ServiceOrder {
-  id        String   @id @unique @default(uuid())
-  status ServiceOrderStatus @default(pending)
-  payment   PaymentDetailsByServices? @relation(fields: [paymentId], references: [id])
-  paymentId String? @unique
-  service   Service  @relation(fields: [serviceId], references: [id])
-  serviceId String
-   user      User     @relation("UserServiceOrders", fields: [userId], references: [id]) 
-  userId    String
+  id String @id @unique @default(uuid())
+
+  paymentDetails PaymentDetailsByServices?
+
+  serviceId String?
+  service   Service? @relation(fields: [serviceId], references: [id])
+
+  userId String
+  user   User   @relation("UserServiceOrders", fields: [userId], references: [id])
+
+  sellerId String
+  seller   User   @relation("ServiceSeller", fields: [sellerId], references: [id])
+
   createdAt DateTime @default(now())
+}
+
+model PaymentDetailsByServices {
+  id            String        @id @default(uuid())
+  amount        Float
+  pi_number     String?
+  paymemtStatus PaymemtStatus @default(pending)
+  createAt      DateTime      @default(now())
+
+  serviceOrderId   String?       @unique
+  serviceOrderInfo ServiceOrder? @relation(fields: [serviceOrderId], references: [id])
 }
 
 enum Success {
@@ -40,14 +54,3 @@ enum ServiceOrderStatus {
   approved
   rejected
 }
-
-model PaymentDetailsByServices {
-  id            String        @id @default(uuid())
-  amount        Float
-  pi_number     String?
-  paymemtStatus PaymemtStatus @default(pending)
-  createAt      DateTime      @default(now())
-
-  order ServiceOrder?
-}
-

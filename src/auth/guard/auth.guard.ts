@@ -68,6 +68,19 @@ export class AuthGuard implements CanActivate {
         request['stripeAccountId'] = payload.stripeAccountId ?? null;
       }
       if (isPublic) return true;
+      // Call trackVisit with request ip
+      const reqCopy = request as any;
+      const ip =
+        // X-Forwarded-For header (may contain a comma-separated list)
+        (reqCopy.headers['x-forwarded-for'] as string)
+          ?.split(',')
+          .map((s) => s.trim())[0] ||
+        // fallback to express connection info
+        reqCopy.ip ||
+        (reqCopy.connection && reqCopy.connection.remoteAddress) ||
+        reqCopy.socket?.remoteAddress ||
+        reqCopy.connection?.socket?.remoteAddress;
+
       console.log(payload.role, requiredRoles);
       return requiredRoles.some((role) => payload.role?.includes(role));
     } catch {

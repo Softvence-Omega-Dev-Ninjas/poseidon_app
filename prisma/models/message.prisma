@@ -4,22 +4,20 @@ model Conversation {
   user2Id       String
   createdAt     DateTime  @default(now())
   lastMessageAt DateTime? @default(now())
-
-  user1    User      @relation("User1Conversations", fields: [user1Id], references: [id])
-  user2    User      @relation("User2Conversations", fields: [user2Id], references: [id])
-  messages Message[]
+  user1         User      @relation("User1Conversations", fields: [user1Id], references: [id])
+  user2         User      @relation("User2Conversations", fields: [user2Id], references: [id])
+  messages      Message[]
 }
 
 model Message {
-  id             String   @id @default(uuid())
+  id             String       @id @default(uuid())
   text           String
   senderId       String
   receiverId     String
   conversationId String
-  isRead         Boolean  @default(false)
-  createdAt      DateTime @default(now())
-
-  sender       User         @relation("SentMessages", fields: [senderId], references: [id])
-  receiver     User         @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  conversation Conversation @relation(fields: [conversationId], references: [id])
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  receiver       User         @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
 }

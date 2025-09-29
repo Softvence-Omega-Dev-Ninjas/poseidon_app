@@ -47,6 +47,7 @@ export class AuthController {
       username,
       email,
       password,
+      referralId,
       ...profile
     } = createAuthDto;
 
@@ -62,6 +63,7 @@ export class AuthController {
           ...profile,
           image: imageUrl,
         },
+        referralId,
       },
       skip,
     );
@@ -80,7 +82,7 @@ export class AuthController {
     );
     res.cookie('accessToken', varifyUser.access_token, {
       httpOnly: true, // cannot be accessed via JS
-      secure: false, // set true if using HTTPS
+      secure: true, // set true if using HTTPS
       sameSite: 'none', // allow cross-site
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
       // partitioned: true,
@@ -100,3 +102,22 @@ export class AuthController {
     return this.authService.checkJwt(token);
   }
 }
+
+// auth.service.ts
+// async signup(dto: CreateUserDto, referralCode?: string) {
+//   const newUser = await this.prisma.user.create({
+//     data: {
+//       username: dto.username,
+//       email: dto.email,
+//       password: dto.password, // hash করতে ভুলো না
+//       referredBy: referralCode || null,
+//     },
+//   });
+
+//   // যদি referralCode থাকে তাহলে Referral টেবিলে রেকর্ড তৈরি করো
+//   if (referralCode) {
+//     await this.referralService.createReferral(referralCode, newUser.id);
+//   }
+
+//   return newUser;
+// }

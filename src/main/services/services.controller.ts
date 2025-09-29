@@ -35,6 +35,8 @@ import {
   UpdateServiceOrderStatusDto,
 } from './dto/create-services';
 import { Public } from 'src/auth/guard/public.decorator';
+import { Request } from 'express';
+import { PiStripeId } from 'src/common/dto/pi_stripeId.dto';
 
 @ApiTags('Service')
 @Controller('service')
@@ -88,12 +90,11 @@ export class ServiceController {
     return this.serviceService.findAllUser(req.sub, page, limit, draft);
   }
 
+  @Roles(Role.User, Role.Supporter)
   @Post('/createOrder')
-  @Roles(Role.Supporter)
   @ApiOperation({ summary: 'Create a new service order' })
-  async createOrder(@Body() dto: CreateServiceOrderDto, @Req() req: any) {
-    req.sub;
-    return this.serviceService.createOrder(dto, req.sub);
+  async createOrder(@Body() dto: CreateServiceOrderDto, @Req() req: Request) {
+    return this.serviceService.createOrder(dto, req['sub'] as string);
   }
 
   @Get('/getallservicesOrder')
@@ -195,5 +196,17 @@ export class ServiceController {
     @Body() dto: UpdateServiceOrderStatusDto,
   ) {
     return this.serviceService.updateOrderStatus(orderId, dto);
+  }
+
+  @Roles(Role.Supporter)
+  @Get('getServices/BuyPayemtData')
+  getServicesBuyPayemtData(@Req() req: Request) {
+    return this.serviceService.getServicesBuyPayemtData(req['sub'] as string);
+  }
+
+  @Roles(Role.User, Role.Supporter)
+  @Post('getServices/paymentStatusCheck')
+  paymentStatusCheck(@Body() body: PiStripeId) {
+    return this.serviceService.paymentStatusCheck(body);
   }
 }

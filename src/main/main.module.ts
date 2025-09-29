@@ -15,10 +15,17 @@ import { ZoomModule } from './zoom/zoom.module';
 import { PaymentModule } from './payment/payment.module';
 import { UserDashboardModule } from './dashboard/user-dashboard/user-dashboard.module';
 import { PermissionAccessModule } from './permission-access/permission-access.module';
+import { AdminDashboardModule } from './dashboard/admin/admin.module';
+import { EntertainerModule } from './entertainer/entertainer.module';
+import { PayoutModule } from './payout/payout.module';
+import { ReferralModule } from './dashboard/suppoter-dashboard/suppoter-dsahboard.module';
+import { ProfileSettingModule } from './profile-setting/profile-setting.module';
 
 @Module({
   imports: [
+    ProfileSettingModule,
     UserModule,
+    AdminDashboardModule,
     UserDashboardModule,
     SupporterProfileModule,
     SupporterModule,
@@ -34,6 +41,9 @@ import { PermissionAccessModule } from './permission-access/permission-access.mo
     ZoomModule,
     PaymentModule,
     PermissionAccessModule,
+    EntertainerModule,
+    PayoutModule,
+    ReferralModule,
   ],
   controllers: [],
   providers: [],
