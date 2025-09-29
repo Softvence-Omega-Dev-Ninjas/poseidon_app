@@ -52,4 +52,11 @@ services:
     ports:
       - '6379:6379'
     volumes:
+<<<<<<< HEAD
       - /Users/mdsharif/docker_volumes/redis:/data
+=======
+      - /home/drinkwithmedbset/redis:/data
+
+volumes:
+  pgdata:
+>>>>>>> dev-saiful

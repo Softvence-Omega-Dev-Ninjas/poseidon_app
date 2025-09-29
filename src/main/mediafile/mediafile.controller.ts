@@ -63,7 +63,7 @@ export class MediafileController {
         404,
       );
     const deletecloudinary: { result: string } =
-      await this.cloudinaryService.deleteFile(mediaData?.publicId as string);
+      await this.cloudinaryService.deleteFile(mediaData?.publicId);
     if (deletecloudinary.result == 'ok') {
       const dltFile = await this.mediafileService.deleteFile(mediaData.id);
       if (dltFile && dltFile.id) {

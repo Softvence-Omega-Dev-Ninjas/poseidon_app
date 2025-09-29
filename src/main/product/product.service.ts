@@ -193,11 +193,10 @@ export class ProductService {
     if (draft !== undefined) {
       where.draft = String(draft).toLowerCase() === 'true';
     }
-   
+
     if (userId) {
-  where.shop = { userId };
+      where.shop = { userId };
     }
-    
 
     const [products, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({

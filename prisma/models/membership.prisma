@@ -1,104 +1,91 @@
-enum Duration {
-    ONE_MONTH
-    ONE_YEAR
-}
-
-// create a per supporter with membership model - only create supporter
 model Membership_owner {
-    id                          String                        @id @default(uuid())
-    ownerId                     String                        @unique
-    owner                       User                          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-    enableMembership            Boolean                       @default(false)
-    createdAt                   DateTime                      @default(now())
-    updatedAt                   DateTime                      @updatedAt
-    Membership_levels           Membership_levels[]
-    MembershipAccessToVideoCall MembershipAccessToVideoCall[] @relation("MembershipAccessToVideoCall")
-    MembershipAccessToMessages  MembershipAccessToMessages[]  @relation("AccessToMessages")
-    MembershipAccessToGallery   MembershipAccessToGallery[]   @relation("AccessToGallery")
-    MembershipAccessToPosts     MembershipAccessToPosts[]     @relation("AccessToPosts")
+  id                          String                        @id @default(uuid())
+  ownerId                     String                        @unique
+  createdAt                   DateTime                      @default(now())
+  updatedAt                   DateTime                      @updatedAt
+  enableMembership            Boolean                       @default(false)
+  MembershipAccessToGallery   MembershipAccessToGallery[]   @relation("AccessToGallery")
+  MembershipAccessToMessages  MembershipAccessToMessages[]  @relation("AccessToMessages")
+  MembershipAccessToPosts     MembershipAccessToPosts[]     @relation("AccessToPosts")
+  MembershipAccessToVideoCall MembershipAccessToVideoCall[] @relation("MembershipAccessToVideoCall")
+  Membership_levels           Membership_levels[]
+  owner                       User                          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 }
 
-//create a membership model with plans levels cart with supporter - only create supporter
 model Membership_levels {
-    id               String           @id @default(uuid())
-    membershipId     String
-    membership       Membership_owner @relation(fields: [membershipId], references: [id], onDelete: Cascade)
-    levelName        String
-    titleName        String
-    levelDescription String?
-    levelImage       String
-    isPublic         Boolean          @default(false)
-
-    MembershipSubscriptionPlan MembershipSubscriptionPlan[]
-    Wellcome_note              String?
-    createdAt                  DateTime                     @default(now())
-    updatedAt                  DateTime                     @updatedAt
+  id                         String                       @id @default(uuid())
+  membershipId               String
+  levelName                  String
+  levelDescription           String?
+  createdAt                  DateTime                     @default(now())
+  updatedAt                  DateTime                     @updatedAt
+  levelImage                 String
+  Wellcome_note              String?
+  titleName                  String
+  isPublic                   Boolean                      @default(false)
+  MembershipSubscriptionPlan MembershipSubscriptionPlan[]
+  membership                 Membership_owner             @relation(fields: [membershipId], references: [id], onDelete: Cascade)
 }
 
-// 2 type subscription plans with duration and price connect to membership and membership_levels - create only supporter
 model MembershipSubscriptionPlan {
-    id                String            @id @default(uuid())
-    membershipLevelId String
-    membershipLevel   Membership_levels @relation(fields: [membershipLevelId], references: [id], onDelete: Cascade)
+  id                       String                    @id @default(uuid())
+  membershipLevelId        String
+  duration                 Duration
+  price                    Float
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  CalligSubscriptionPlan   CalligSubscriptionPlan?
+  GallerySubscriptionPlan  GallerySubscriptionPlan?
+  membershipLevel          Membership_levels         @relation(fields: [membershipLevelId], references: [id], onDelete: Cascade)
+  MessagesSubscriptionPlan MessagesSubscriptionPlan?
+  PostsSubscriptionPlan    PostsSubscriptionPlan?
 
-    duration Duration // ONE_MONTH or ONE_YEAR
-    price    Float // e.g., 5 or 50
-
-    // Access controls:
-    CalligSubscriptionPlan   CalligSubscriptionPlan?
-    MessagesSubscriptionPlan MessagesSubscriptionPlan?
-    GallerySubscriptionPlan  GallerySubscriptionPlan?
-    PostsSubscriptionPlan    PostsSubscriptionPlan?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@unique([membershipLevelId, duration]) // one plan per level+duration
+  @@unique([membershipLevelId, duration])
 }
 
-// Access details
 model CalligSubscriptionPlan {
-    id                           String                     @id @unique @default(uuid())
-    membershipSubscriptionPlanId String                     @unique
-    MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id], onDelete: Cascade)
-    // data
-    duration                     Duration
-    title                        String
-    description                  String
-    totalVideoCalls              Int                        @default(0)
-    unlimitedVideoCalls          Boolean                    @default(false)
+  id                           String                     @id @unique @default(uuid())
+  membershipSubscriptionPlanId String                     @unique
+  duration                     Duration
+  title                        String
+  description                  String
+  totalVideoCalls              Int                        @default(0)
+  unlimitedVideoCalls          Boolean                    @default(false)
+  MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id], onDelete: Cascade)
 }
 
 model MessagesSubscriptionPlan {
-    id                           String                     @id @unique @default(uuid())
-    membershipSubscriptionPlanId String                     @unique
-    MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id], onDelete: Cascade)
-    // data
-    duration                     Duration
-    title                        String
-    description                  String
-    totalMessages                Int                        @default(0) // total number of messages allowed
-    unlimitedMessages            Boolean                    @default(false) // if true, totalMessages is ignored
+  id                           String                     @id @unique @default(uuid())
+  membershipSubscriptionPlanId String                     @unique
+  duration                     Duration
+  title                        String
+  description                  String
+  totalMessages                Int                        @default(0)
+  unlimitedMessages            Boolean                    @default(false)
+  MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id], onDelete: Cascade)
 }
 
 model GallerySubscriptionPlan {
-    id                           String                     @id @unique @default(uuid())
-    membershipSubscriptionPlanId String                     @unique
-    MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id], onDelete: Cascade)
-    // data
-    duration                     Duration
-    title                        String
-    description                  String
-    AccessToGallery              Boolean                    @default(true) // if true, access to gallery is granted
+  id                           String                     @id @unique @default(uuid())
+  membershipSubscriptionPlanId String                     @unique
+  duration                     Duration
+  title                        String
+  description                  String
+  AccessToGallery              Boolean                    @default(true)
+  MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id], onDelete: Cascade)
 }
 
 model PostsSubscriptionPlan {
-    id                           String                     @id @unique @default(uuid())
-    membershipSubscriptionPlanId String                     @unique
-    MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id], onDelete: Cascade)
-    // data
-    duration                     Duration
-    title                        String
-    description                  String
-    AccessToPosts                Boolean                    @default(true) // if true, access to posts is granted
+  id                           String                     @id @unique @default(uuid())
+  membershipSubscriptionPlanId String                     @unique
+  duration                     Duration
+  title                        String
+  description                  String
+  AccessToPosts                Boolean                    @default(true)
+  MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id], onDelete: Cascade)
+}
+
+enum Duration {
+  ONE_MONTH
+  ONE_YEAR
 }

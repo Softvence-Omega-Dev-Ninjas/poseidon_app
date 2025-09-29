@@ -61,7 +61,7 @@ export class MediafileService {
         404,
       );
     const deletecloudinary: { result: string } =
-      await this.cloudinaryService.deleteFile(mediaData?.publicId as string);
+      await this.cloudinaryService.deleteFile(mediaData?.publicId);
     if (deletecloudinary.result == 'ok') {
       const dltFile = await this.deleteFile(mediaData.id);
       if (dltFile && dltFile.id) {
@@ -104,7 +104,7 @@ export class MediafileService {
     }
     console.log('mediaData >>>>>>>>', mediaData);
     const deletecloudinary: { result: string } =
-      await this.cloudinaryService.deleteFile(mediaData?.publicId as string);
+      await this.cloudinaryService.deleteFile(mediaData?.publicId);
     if (deletecloudinary.result == 'ok') {
       console.log('deletecloudinary ------- ok', deletecloudinary);
       const dltFile = await this.deleteFile(mediaData.id);
