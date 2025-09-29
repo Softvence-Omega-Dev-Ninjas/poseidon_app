@@ -39,7 +39,7 @@ import { PayoutModule } from './payout/payout.module';
     PaymentModule,
     PermissionAccessModule,
     EntertainerModule,
-    PayoutModule
+    PayoutModule,
   ],
   controllers: [],
   providers: [],
