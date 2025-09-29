@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { MainModule } from './main/main.module';
 import { AuthModule } from './auth/auth.module';
@@ -9,11 +9,14 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
 
 import { PrismaClientModule } from './prisma-client/prisma-client.module';
+import { TrackVisitMiddleware } from './main/middlewares/track.middleware';
+import { UserModule } from './main/user/user.module';
 
 @Module({
   imports: [
     PrismaClientModule,
     AuthModule,
+    UserModule,
     MainModule,
     ConfigModule.forRoot({
       isGlobal: true,
@@ -38,6 +41,14 @@ import { PrismaClientModule } from './prisma-client/prisma-client.module';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
+    TrackVisitMiddleware,
   ],
+  exports: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(TrackVisitMiddleware) // Apply the middleware here
+      .forRoutes('*'); // Apply to all routes or specify particular routes
+  }
+}
