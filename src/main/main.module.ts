@@ -15,11 +15,13 @@ import { ZoomModule } from './zoom/zoom.module';
 import { PaymentModule } from './payment/payment.module';
 import { UserDashboardModule } from './dashboard/user-dashboard/user-dashboard.module';
 import { PermissionAccessModule } from './permission-access/permission-access.module';
+import { AdminDashboardModule } from './dashboard/admin/admin.module';
 import { EntertainerModule } from './entertainer/entertainer.module';
 
 @Module({
   imports: [
     UserModule,
+    AdminDashboardModule,
     UserDashboardModule,
     SupporterProfileModule,
     SupporterModule,
@@ -35,7 +37,7 @@ import { EntertainerModule } from './entertainer/entertainer.module';
     ZoomModule,
     PaymentModule,
     PermissionAccessModule,
-    EntertainerModule
+    EntertainerModule,
   ],
   controllers: [],
   providers: [],
