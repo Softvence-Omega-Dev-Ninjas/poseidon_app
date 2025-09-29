@@ -11,6 +11,7 @@ import { AuthGuard } from 'src/auth/guard/auth.guard';
 import { PrismaClientModule } from './prisma-client/prisma-client.module';
 import { TrackVisitMiddleware } from './main/middlewares/track.middleware';
 import { UserModule } from './main/user/user.module';
+import { MailModule } from './utils/mail/mail.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { UserModule } from './main/user/user.module';
         signOptions: { expiresIn: '1d' },
       }),
     }),
+    MailModule,
   ],
   controllers: [AppController],
   providers: [
