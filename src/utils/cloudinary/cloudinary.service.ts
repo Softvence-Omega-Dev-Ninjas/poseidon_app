@@ -10,7 +10,7 @@ import * as streamifier from 'streamifier';
 @Injectable()
 export class CloudinaryService {
   constructor(
-    @Inject('CLOUDINARY') private cloudinary: Cloudina
+    @Inject('CLOUDINARY') private cloudinary: Cloudinary,
     private readonly prisma: PrismaService,
   ) {}
 

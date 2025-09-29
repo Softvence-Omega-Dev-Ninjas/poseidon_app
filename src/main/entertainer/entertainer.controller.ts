@@ -16,7 +16,7 @@ import { Roles } from 'src/auth/guard/roles.decorator';
 @ApiTags('Entertainer')
 @Controller('entertainer')
 export class EntertainerController {
-  constructor(private readonly entertainer: EntertainerService) {}
+  constructor(private readonly entertainer: EntertainerService) { }
 
   // get all entertainer
   @Get()
@@ -26,6 +26,16 @@ export class EntertainerController {
     return handleRequest(
       () => this.entertainer.getAllEntertainer(userId),
       'Get All Entertainer successfully',
+    );
+  }
+// get supporter recent post...
+  @Get(':supporterId/recent-posts')
+  @Roles(Role.User, Role.Supporter)
+  async getSupporterPosts(@Req() req: Request,@Param('supporterId') supporterId: string) {
+     const userId = req['sub'];
+    return handleRequest(
+      () => this.entertainer.getSupporterRecentPosts(userId,supporterId),
+      'Fetched supporter recent post(s)',
     );
   }
 
@@ -53,4 +63,15 @@ export class EntertainerController {
       'You unfollow supporter successfully',
     );
   }
+  // get my following id....
+  @Get('/following')
+  @Roles(Role.User, Role.Supporter)
+  async getFollowing(@Req() req: Request) {
+    const userId = req['sub'];
+    return handleRequest(
+      () => this.entertainer.getFollowingList(userId),
+      'Following list fetched successfully',
+    )
+  }
+
 }
