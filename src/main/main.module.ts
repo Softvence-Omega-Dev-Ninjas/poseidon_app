@@ -19,9 +19,11 @@ import { AdminDashboardModule } from './dashboard/admin/admin.module';
 import { EntertainerModule } from './entertainer/entertainer.module';
 import { PayoutModule } from './payout/payout.module';
 import { ReferralModule } from './dashboard/suppoter-dashboard/suppoter-dsahboard.module';
+import { ProfileSettingModule } from './profile-setting/profile-setting.module';
 
 @Module({
   imports: [
+    ProfileSettingModule,
     UserModule,
     AdminDashboardModule,
     UserDashboardModule,
