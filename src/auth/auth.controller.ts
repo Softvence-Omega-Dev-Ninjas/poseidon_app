@@ -80,7 +80,7 @@ export class AuthController {
     );
     res.cookie('accessToken', varifyUser.access_token, {
       httpOnly: true, // cannot be accessed via JS
-      secure: false, // set true if using HTTPS
+      secure: true, // set true if using HTTPS
       sameSite: 'none', // allow cross-site
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
       // partitioned: true,
