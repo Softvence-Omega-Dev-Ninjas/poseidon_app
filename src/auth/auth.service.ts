@@ -5,6 +5,9 @@ import * as argon2 from 'argon2';
 import { ConfigService } from '@nestjs/config';
 import { PayloadType } from './guard/jwtPayloadType';
 import { SellerService } from 'src/utils/stripe/seller.service';
+import { VarifyEmailDto } from './dto/varify.dto';
+import { generateCode } from 'src/common/utils/generateCode';
+import { MailService } from 'src/utils/mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +15,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly stripeSellerService: SellerService,
+    private readonly mailService: MailService,
   ) {}
 
   async userCredentialsAuthentication(
@@ -87,6 +91,94 @@ export class AuthService {
           error: 'UNAUTHORIZED',
           data: null,
           success: false,
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+  }
+
+  async varifyemail(data: VarifyEmailDto) {
+    const G4code = generateCode();
+    console.log('G4code', G4code);
+    const token = await this.jwtService.signAsync(
+      { email: data.email, code: G4code },
+      {
+        secret: this.configService.get<string>('AUTHSECRET'),
+        expiresIn: '1m',
+      },
+    );
+    const subject = 'Email Verification';
+    const message = `Your verification code is: ${G4code}`;
+
+    const resData = await this.mailService.sendEmail(
+      data.email,
+      subject,
+      message,
+    );
+
+    console.log('email resData', resData);
+    console.log('email resData', resData.response.includes('OK'));
+
+    if (resData.accepted.length < 1 || !resData.response.includes('OK')) {
+      throw new HttpException(
+        {
+          message: 'Email not sent',
+          error: 'BAD_REQUEST',
+          data: null,
+          success: false,
+          next_page: false,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return {
+      message: 'Email sent successfully',
+      error: null,
+      data: { sendCode: resData.messageId, token },
+      success: true,
+      next_page: true,
+    };
+  }
+
+  async checkVarifyEmail({
+    token,
+    email,
+    code,
+  }: {
+    token: string;
+    email: string;
+    code: number;
+  }) {
+    try {
+      const payload = await this.jwtService.verifyAsync<{
+        email: string;
+        code: number;
+      }>(token, {
+        secret: this.configService.get<string>('AUTHSECRET'),
+      });
+
+      if (payload.email != email || payload.code != code) {
+        return {
+          message: 'Incorrect OTP. Please try again.',
+          data: null,
+          success: false,
+        };
+      }
+      return {
+        message: 'Email verified successfully',
+        error: null,
+        data: payload.email,
+        success: true,
+        next_page: true,
+      };
+    } catch (err) {
+      console.log(err);
+      throw new HttpException(
+        {
+          message: 'Incorrect OTP. Please try again. ---- ',
+          data: null,
+          success: false,
+          next_page: false,
         },
         HttpStatus.UNAUTHORIZED,
       );
