@@ -45,6 +45,25 @@ export class EntertainerService {
         },
         whoCanSee: 'PUBLIC',
       },
+      select: {
+        id: true,
+        images: true,
+        description: true,
+        createdAt: true,
+        likeCount: true,
+        commentCount: true,
+        user: {
+          select: {
+            id: true,
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     // Remove supporters without posts
