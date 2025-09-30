@@ -19,11 +19,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     accessToken: string,
     refreshToken: string,
     profile: Profile,
-    done: (err, user, info) => void,
+    done: <T>(err: any, user: T) => void,
   ) {
-    const from = req.query.state; // should now contain admin/user/student
-    console.log('Google from:', JSON.parse(from));
+    const request = req.query.state;
+    // from the request
 
-    return 'hello';
+    return done(null, {
+      info: {
+        request: JSON.parse(request),
+      },
+    });
   }
 }

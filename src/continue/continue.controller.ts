@@ -34,21 +34,8 @@ export class ContinueController {
   googleAuthRedirect(@Req() req: Request) {
     const user = req.user;
     if (!user) throw new NotFoundException('Request user not found!');
-
-    // await this.authUserService.createUser(
-    //   {
-    //     role,
-    //     email,
-    //     username,
-    //     password,
-    //     profile: {
-    //       ...profile,
-    //       image: imageUrl,
-    //     },
-    //   },
-    //   skip: true,
-    // );
-
+    console.log(user);
+    console.log(user);
     return req.user;
   }
 
