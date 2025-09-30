@@ -20,6 +20,7 @@ import { EntertainerModule } from './entertainer/entertainer.module';
 import { PayoutModule } from './payout/payout.module';
 import { ReferralModule } from './dashboard/suppoter-dashboard/suppoter-dsahboard.module';
 import { ProfileSettingModule } from './profile-setting/profile-setting.module';
+import { PermissionModule } from './permission/permission.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ProfileSettingModule } from './profile-setting/profile-setting.module';
     EntertainerModule,
     PayoutModule,
     ReferralModule,
+    PermissionModule,
   ],
   controllers: [],
   providers: [],
