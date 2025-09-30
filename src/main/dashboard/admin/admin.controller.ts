@@ -5,8 +5,6 @@ import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { GeneralUserService } from './services/general-user.service';
-import { Public } from 'src/auth/guard/public.decorator';
-import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Controller('admin-dashboard')
 export class AdminController {
@@ -57,12 +55,19 @@ export class AdminController {
     type: Number,
     description: 'Number of items per page',
   })
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
   getBarStars(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
+    @Query('query') query: string,
     @Req() res: Request,
   ) {
-    return this.barStarsService.findMany(page, limit);
+    return this.barStarsService.findMany(page, limit, query);
   }
 
   @Get('bar-stars/:id')
@@ -83,8 +88,7 @@ export class AdminController {
 
   // General user
   @Get('general-user')
-  // @Roles(Role.Admin)
-  @Public()
+  @Roles(Role.Admin)
   @ApiQuery({
     name: 'page',
     required: false,
