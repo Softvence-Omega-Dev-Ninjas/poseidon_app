@@ -188,6 +188,17 @@ export class SellerService {
     return intent.client_secret;
   }
 
+  async sellerAccountSetupClientSecret2(accountId: string) {
+    const intent = await this.stripe.accountLinks.create({
+      account: accountId,
+      refresh_url: 'http://localhost:5173/dashboard/payout',
+      return_url: 'http://localhost:5173/dashboard/payout',
+      type: 'account_onboarding',
+    });
+    console.log('accountSessions', intent);
+    return intent;
+  }
+
   async deleteAccount(accountId: string) {
     try {
       const deleted = await this.stripe.accounts.del(accountId);

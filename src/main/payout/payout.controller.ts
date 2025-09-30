@@ -23,7 +23,23 @@ export class PayoutController {
   @Roles(Role.Supporter)
   @Get('sellerAccountSetupClientSecret')
   async sellerAccountSetupClientSecret(@Req() req: Request) {
+    console.log(
+      "console.log('sellerAccountSetupClientSecret', clientSecret); ",
+      req['stripeAccountId'],
+    );
     return this.payoutService.sellerAccountSetupClientSecret(
+      req['stripeAccountId'] as string,
+    );
+  }
+
+  @Roles(Role.Supporter)
+  @Get('sellerAccountSetupClientSecret-2')
+  async sellerAccountSetupClientSecret_2(@Req() req: Request) {
+    console.log(
+      "console.log('sellerAccountSetupClientSecret', clientSecret); ",
+      req['stripeAccountId'],
+    );
+    return this.payoutService.sellerAccountSetupClientSecret_2(
       req['stripeAccountId'] as string,
     );
   }

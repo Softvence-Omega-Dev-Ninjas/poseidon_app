@@ -8,6 +8,7 @@ import {
   UploadedFile,
   Get,
   Param,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CredentialsSignInInfo } from './dto/create-auth.dto';
@@ -20,6 +21,7 @@ import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
 import { SignUpUserDto } from './dto/signup-auth.dto';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { StringToBooleanPipe } from 'src/common/utils/stringToBoolean.pipe';
+import { CheckVarifyEmail, VarifyEmailDto } from './dto/varify.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -104,8 +106,17 @@ export class AuthController {
 
   @Public()
   @Post('varify-email')
-  async varifyemail(@Body('email') email: string) {
-    return this.authUserService.isExestUser(email);
+  varifyemail(
+    @Body(new ValidationPipe({ whitelist: true, transform: true }))
+    data: VarifyEmailDto,
+  ) {
+    return this.authService.varifyemail(data);
+  }
+
+  @Public()
+  @Post('checkVarifyEmail')
+  checkVarifyEmail(@Body() data: CheckVarifyEmail) {
+    return this.authService.checkVarifyEmail(data);
   }
 }
 
