@@ -7,9 +7,14 @@ import { cResponseData } from 'src/common/utils/common-responseData';
 export class AdminBarStarService {
   constructor(private readonly userService: UserService) {}
 
-  async findMany(currentPage: number, limit: number) {
+  async findMany(currentPage: number, limit: number, query?: string) {
     try {
-      return await this.userService.findAll(currentPage, limit, Role.Supporter);
+      return await this.userService.findAll(
+        Role.Supporter,
+        Number(currentPage),
+        Number(limit),
+        query,
+      );
     } catch (error: any) {
       throw new HttpException(
         cResponseData({

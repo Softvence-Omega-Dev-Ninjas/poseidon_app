@@ -13,7 +13,12 @@ export class UserService {
     private readonly httpService: HttpService,
   ) {}
 
-  async findAll(currentPage: number = 1, limit: number = 10, role: Role) {
+  async findAll(
+    role: Role,
+    currentPage: number = 1,
+    limit: number = 10,
+    query?: string,
+  ) {
     // Validate page and limit
     if (isNaN(currentPage) || currentPage < 1) {
       throw new Error('Invalid page number');
@@ -34,7 +39,16 @@ export class UserService {
       where: {
         role: role,
         deactivate: false,
+        OR: [
+          {
+            username: { contains: query },
+            profile: {
+              name: { contains: query },
+            },
+          },
+        ],
       },
+
       skip: (currentPage - 1) * limit,
       take: limit,
       omit: {

@@ -20,6 +20,26 @@ export class AdminController {
     return this.overviewService.getStats();
   }
 
+  @Get('income-stats')
+  @Roles(Role.Admin)
+  @ApiQuery({
+    name: 'month',
+    required: true,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'year',
+    required: true,
+    type: Number,
+  })
+  async getIncomeStats(
+    @Query('month') month: number,
+    @Query('year') year: number,
+  ) {
+    // TODO(coderboysobu) validate params before continue
+    return this.overviewService.getIncomeStats(Number(month), Number(year));
+  }
+
   // Bar stars
   @Get('bar-stars')
   @Roles(Role.Admin)
@@ -35,12 +55,19 @@ export class AdminController {
     type: Number,
     description: 'Number of items per page',
   })
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
   getBarStars(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
+    @Query('query') query: string,
     @Req() res: Request,
   ) {
-    return this.barStarsService.findMany(page, limit);
+    return this.barStarsService.findMany(page, limit, query);
   }
 
   @Get('bar-stars/:id')
@@ -74,12 +101,19 @@ export class AdminController {
     type: Number,
     description: 'Number of items per page',
   })
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
   getGeneralUsers(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
+    @Query('query') query: string,
     @Req() res: Request,
   ) {
-    return this.generalUserService.findMany(page, limit);
+    return this.generalUserService.findMany(page, limit, query);
   }
 
   @Get('general-user/:id')
