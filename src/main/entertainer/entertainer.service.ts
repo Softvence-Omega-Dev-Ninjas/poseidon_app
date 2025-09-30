@@ -3,8 +3,8 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
-import { profile } from 'console';
 import { Roles } from 'generated/prisma';
+import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 
 @Injectable()
@@ -37,40 +37,40 @@ export class EntertainerService {
     if (!user) {
       throw new BadRequestException('Sorry Unauthorized Access');
     }
-    //  Get 5 supporters (can order by createdAt or any other field)
-    const supporters = await this.prisma.user.findMany({
-      where: { role: Roles.supporter },
-      orderBy: { createdAt: 'desc' }, // latest supporters
-      take: 5,
-      select: { id: true },
-    });
 
-    const supporterIds = supporters.map((s) => s.id);
-
-    //  Get the most recent post of each supporter
-    const recentPosts = await Promise.all(
-      supporterIds.map(async (supporterId) => {
-        const post = await this.prisma.post.findFirst({
-          where: { userId: supporterId },
-          orderBy: { createdAt: 'desc' },
+    const recentPosts = await this.prisma.post.findMany({
+      where: {
+        userId: {
+          notIn: [userId],
+        },
+        whoCanSee: 'PUBLIC',
+      },
+      select: {
+        id: true,
+        images: true,
+        description: true,
+        createdAt: true,
+        likeCount: true,
+        commentCount: true,
+        user: {
           select: {
-            images: true,
-            user: {
+            id: true,
+            profile: {
               select: {
-                id: true,
-                profile: {
-                  select: { name: true, image: true, description: true },
-                },
+                name: true,
+                image: true,
               },
             },
           },
-        });
-        return post;
-      }),
-    );
+        },
+      },
+    });
 
     // Remove supporters without posts
-    return recentPosts.filter((p) => p !== null);
+    return cResponseData({
+      message: 'Recent posts fetched successfully',
+      data: recentPosts,
+    });
   }
 
   // follow supporter...
@@ -102,7 +102,7 @@ export class EntertainerService {
   // unfollow suporter..
   async unfollowSuporter(userId: string, supporterId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!userId) {
+    if (!user || !user.id) {
       throw new BadRequestException('Sorry Unauthorized Access');
     }
     return this.prisma.follower.delete({

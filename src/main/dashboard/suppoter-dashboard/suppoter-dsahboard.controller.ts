@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Put,
-  Req,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Get, Req } from '@nestjs/common';
 import { ReferralService } from './suppoter-dsahboard.service';
 
 import { Roles } from 'src/auth/guard/roles.decorator';

@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Query, Req } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Query } from '@nestjs/common';
 import { AdminOverviewService } from './services/overview.service';
 import { AdminBarStarService } from './services/bar-stars.service';
 import { Roles } from 'src/auth/guard/roles.decorator';
@@ -16,8 +16,31 @@ export class AdminController {
 
   @Get('stats')
   @Roles(Role.Admin)
-  getStats(@Req() res: Request) {
+  getStats() {
     return this.overviewService.getStats();
+  }
+
+  @Get('income-stats')
+  @Roles(Role.Admin)
+  @ApiQuery({
+    name: 'month',
+    required: true,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'year',
+    required: true,
+    type: Number,
+  })
+  async getIncomeStats(
+    @Query('month') month: number,
+    @Query('year') year: number,
+  ) {
+    // TODO(coderboysobu) validate params before continue
+    return await this.overviewService.getIncomeStats(
+      Number(month),
+      Number(year),
+    );
   }
 
   // Bar stars
@@ -35,12 +58,18 @@ export class AdminController {
     type: Number,
     description: 'Number of items per page',
   })
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
   getBarStars(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Req() res: Request,
+    @Query('query') query: string,
   ) {
-    return this.barStarsService.findMany(page, limit);
+    return this.barStarsService.findMany(page, limit, query);
   }
 
   @Get('bar-stars/:id')
@@ -74,12 +103,18 @@ export class AdminController {
     type: Number,
     description: 'Number of items per page',
   })
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
   getGeneralUsers(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Req() res: Request,
+    @Query('query') query: string,
   ) {
-    return this.generalUserService.findMany(page, limit);
+    return this.generalUserService.findMany(page, limit, query);
   }
 
   @Get('general-user/:id')
