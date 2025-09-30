@@ -7,14 +7,13 @@ import { cResponseData } from 'src/common/utils/common-responseData';
 export class GeneralUserService {
   constructor(private readonly userService: UserService) {}
 
-  async findMany(currentPage: number, limit: number) {
-    console.log('CurrentPage', currentPage);
-    console.log('limit', limit);
+  async findMany(currentPage: number, limit: number, query?: string) {
     try {
       return await this.userService.findAll(
+        Role.User,
         Number(currentPage),
         Number(limit),
-        Role.User,
+        query,
       );
     } catch (error: any) {
       console.log(error);

@@ -83,6 +83,7 @@ export class AdminController {
 
   // General user
   @Get('general-user')
+  // @Roles(Role.Admin)
   @Public()
   @ApiQuery({
     name: 'page',
@@ -96,12 +97,19 @@ export class AdminController {
     type: Number,
     description: 'Number of items per page',
   })
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
   getGeneralUsers(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
+    @Query('query') query: string,
     @Req() res: Request,
   ) {
-    return this.generalUserService.findMany(page, limit);
+    return this.generalUserService.findMany(page, limit, query);
   }
 
   @Get('general-user/:id')
