@@ -83,7 +83,7 @@ export class AdminController {
 
   // General user
   @Get('general-user')
-  @Roles(Role.Admin)
+  @Public()
   @ApiQuery({
     name: 'page',
     required: false,

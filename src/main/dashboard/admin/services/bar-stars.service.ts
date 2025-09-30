@@ -9,7 +9,11 @@ export class AdminBarStarService {
 
   async findMany(currentPage: number, limit: number) {
     try {
-      return await this.userService.findAll(currentPage, limit, Role.Supporter);
+      return await this.userService.findAll(
+        Number(currentPage),
+        Number(limit),
+        Role.Supporter,
+      );
     } catch (error: any) {
       throw new HttpException(
         cResponseData({

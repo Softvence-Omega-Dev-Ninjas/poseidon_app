@@ -8,9 +8,17 @@ export class GeneralUserService {
   constructor(private readonly userService: UserService) {}
 
   async findMany(currentPage: number, limit: number) {
+    console.log('CurrentPage', currentPage);
+    console.log('limit', limit);
     try {
-      return await this.userService.findAll(currentPage, limit, Role.User);
+      return await this.userService.findAll(
+        Number(currentPage),
+        Number(limit),
+        Role.User,
+      );
     } catch (error: any) {
+      console.log(error);
+
       throw new HttpException(
         cResponseData({
           success: false,
