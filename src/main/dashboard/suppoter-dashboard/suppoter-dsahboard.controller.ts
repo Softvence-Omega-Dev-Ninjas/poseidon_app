@@ -29,19 +29,9 @@ export class ReferralController {
     return this.referralService.getSignUps(req['sub'] as string);
   }
 
-  // update user account
-  // @Roles(Role.User, Role.Supporter)
-  // @Put('update-account')
-  // @UseInterceptors(FileInterceptor('image'))
-  // @ApiConsumes('multipart/form-data')
-  // async updateUser(@Req() req, @Body() dto: UpdateAccountDto,
-  //   @UploadedFile(new ImageValidationPipe()) image?: Express.Multer.File,) {
-  //   return this.referralService.updateUser(req.user.id, dto, image);
-  // }
-
-  // @Roles(Role.User, Role.Supporter)
-  // @Delete('delete-account')
-  // async deleteAccount(@Req() req) {
-  //   return this.referralService.deleteAccount(req.user.id);
-  // }
+  @Roles(Role.User, Role.Supporter)
+  @Get('total-purchases')
+  async getTotalPurchases(@Req() req: Request) {
+    return this.referralService.getTotalPurchases(req['sub'] as string);
+  }
 }
