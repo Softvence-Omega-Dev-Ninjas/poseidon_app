@@ -9,7 +9,7 @@ import { PrismaService } from 'src/prisma-client/prisma-client.service';
 
 @Injectable()
 export class EntertainerService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   //   Get all entertainer or supporters...
   async getAllEntertainer(userId: string) {
@@ -33,16 +33,16 @@ export class EntertainerService {
   }
   // get supporter recent post...
   async getRecentSupporterPosts(userId: string) {
+    // Verify user
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new BadRequestException('Sorry Unauthorized Access');
     }
 
-    const recentPosts = await this.prisma.post.findMany({
+    // Fetch posts
+    const posts = await this.prisma.post.findMany({
       where: {
-        userId: {
-          notIn: [userId],
-        },
+        userId: { notIn: [userId] },
         whoCanSee: 'PUBLIC',
       },
       select: {
@@ -66,10 +66,31 @@ export class EntertainerService {
       },
     });
 
-    // Remove supporters without posts
+    // Map images to actual URLs
+    const postsWithUrls = await Promise.all(
+      posts.map(async (post) => {
+        if (!post.images || post.images.length === 0) return { ...post, images: [] };
+
+        // Fetch all media URLs for the image IDs
+        const mediaRecords = await this.prisma.media.findMany({
+          where: {
+            id: { in: post.images }, // post.images contains Media IDs
+          },
+          select: {
+            imageUrl: true,
+          },
+        });
+
+        return {
+          ...post,
+          images: mediaRecords.map((m) => m.imageUrl),
+        };
+      }),
+    );
+
     return cResponseData({
       message: 'Recent posts fetched successfully',
-      data: recentPosts,
+      data: postsWithUrls,
     });
   }
 
