@@ -137,7 +137,7 @@ export class UserService {
     const updatedUser = await this.prisma.user.update({
       where: {
         id: id,
-        role: Role.User,
+        role: role,
       },
       data: {
         deactivate: true,
