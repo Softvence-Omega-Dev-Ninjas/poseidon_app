@@ -42,6 +42,8 @@ export class UserService {
         OR: [
           {
             username: { contains: query },
+          },
+          {
             profile: {
               name: { contains: query },
             },

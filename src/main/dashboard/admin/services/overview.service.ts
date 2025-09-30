@@ -46,7 +46,7 @@ export class AdminOverviewService {
     const income = await this.calculateIncome(month, year);
     const daysIncome = await this.calculateIncomeByDay(month, year);
     return {
-      netIncome: 5000,
+      netIncome: income.adminNetIncome,
       totalAmount: income.totalAmount,
       daysIncome: daysIncome,
     };
