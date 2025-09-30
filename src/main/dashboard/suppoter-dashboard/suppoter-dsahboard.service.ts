@@ -21,33 +21,38 @@ export class ReferralService {
     return { signUps: count };
   }
 
-// get earning, supporters, member, service.
- async getOverview(userId: string) {
+  // get earning, supporters, member, service.
+  async getOverview(userId: string) {
     // Earnings sum of all paid transactions for this seller
     const earnings = await this.prisma.paymentDetails.aggregate({
       where: { sellerId: userId, paymemtStatus: PaymemtStatus.paid },
       _sum: { amount: true },
     });
 
-
     // Supporters unique buyers who paid for support
     const supporters = await this.prisma.paymentDetails.findMany({
       where: { sellerId: userId, paymemtStatus: PaymemtStatus.paid },
       select: { buyerId: true },
     });
-    const supporterCount = new Set(supporters.map(s => s.buyerId)).size;
-   
+    const supporterCount = new Set(supporters.map((s) => s.buyerId)).size;
 
     // Memberships unique buyers who paid for membership
     const memberships = await this.prisma.paymentDetails.findMany({
-      where: { sellerId: userId, serviceType: ServiceType.membership, paymemtStatus: PaymemtStatus.paid },
+      where: {
+        sellerId: userId,
+        serviceType: ServiceType.membership,
+        paymemtStatus: PaymemtStatus.paid,
+      },
       select: { buyerId: true },
     });
-    const membershipCount = new Set(memberships.map(m => m.buyerId)).size;
+    const membershipCount = new Set(memberships.map((m) => m.buyerId)).size;
 
     // Services count how many service purchases completed
     const servicesCount = await this.prisma.serviceOrder.count({
-      where: { sellerId: userId, paymentDetails: { paymemtStatus: PaymemtStatus.paid } },
+      where: {
+        sellerId: userId,
+        paymentDetails: { paymemtStatus: PaymemtStatus.paid },
+      },
     });
 
     return {
@@ -69,55 +74,43 @@ export class ReferralService {
   //       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
   //     }
 
-  //     // console.log(user.)
-  //     // handle profile image upload
-  //     let imageUrl = user.profile?.image;
-  //     if (image) {
-  //       const { imageUrl: uploadedUrl } =
-  //         await this.cloudinaryService.profileImageUpload(image);
-  //       imageUrl = uploadedUrl;
-  //     }
+  async getTotalPurchases(userId: string) {
+    const supporterPayPurchases = await this.prisma.supporterPay.count({
+      where: {
+        user_id: userId,
+        paymemtStatus: 'paid',
+      },
+    });
+    const productPurchases = await this.prisma.order.count({
+      where: {
+        userId,
+        paymentDetailsByShop: {
+          paymemtStatus: 'paid',
+        },
+      },
+    });
 
-  //     // handle password update
-  //     let hashedPassword = user.password;
-  //     if (dto.password) {
-  //       if (dto.password !== dto.confirmPassword) {
-  //         throw new HttpException(
-  //           'Passwords do not match',
-  //           HttpStatus.BAD_REQUEST,
-  //         );
-  //       }
-  //       hashedPassword = await argon2.hash(dto.password);
-  //     }
+    const servicePurchases = await this.prisma.serviceOrder.count({
+      where: {
+        userId,
+        paymentDetails: {
+          paymemtStatus: 'paid',
+        },
+      },
+    });
 
-  //     const updatedUser = await this.prisma.user.update({
-  //       where: { id: userId },
-  //       data: {
-  //         email: dto.email || user.email,
-  //         password: hashedPassword,
-  //         profile: {
-  //           update: {
-  //             name: dto.name || user.profile?.name,
-  //             country: dto.country || user.profile?.country,
-  //             image: imageUrl,
-  //           },
-  //         },
-  //       },
-  //       select: {
-  //         id: true,
-  //         email: true,
-  //         profile: { select: { name: true, country: true, image: true } },
-  //       },
-  //     });
+    const paymentDetails = await this.prisma.paymentDetails.count({
+      where: {
+        buyerId: userId,
+        paymemtStatus: 'paid',
+      },
+    });
 
-  //     return {
-  //       message: 'Account updated successfully',
-  //       data: updatedUser,
-  //       success: true,
-  //     };
-  //   }
-
-  //   async deleteAccount(userId: string) {
-  //     return this.prisma.user.delete({ where: { id: userId } });
-  //   }
+    const totalPurchases =
+      supporterPayPurchases +
+      productPurchases +
+      servicePurchases +
+      paymentDetails;
+    return { totalPurchases };
+  }
 }

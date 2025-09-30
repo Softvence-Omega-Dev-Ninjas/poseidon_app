@@ -29,15 +29,13 @@ export class ReferralController {
     return this.referralService.getSignUps(req['sub'] as string);
   }
 
-
-   // Overview stats (earning, supporters, membership, services)
+  // Overview stats (earning, supporters, membership, services)
   @Roles(Role.Supporter)
   @Get('overview')
   async getOverview(@Req() req: Request) {
     const userId = req['sub'] as string; // logged in userId
     return this.referralService.getOverview(userId);
   }
-
 
   // update user account
   // @Roles(Role.User, Role.Supporter)
@@ -54,4 +52,10 @@ export class ReferralController {
   // async deleteAccount(@Req() req) {
   //   return this.referralService.deleteAccount(req.user.id);
   // }
+
+  @Roles(Role.User, Role.Supporter)
+  @Get('total-purchases')
+  async getTotalPurchases(@Req() req: Request) {
+    return this.referralService.getTotalPurchases(req['sub'] as string);
+  }
 }
