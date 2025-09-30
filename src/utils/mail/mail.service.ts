@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 @Injectable()
 export class MailService {
-  private transporter: nodemailer.Transporter;
+  private transporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo>;
 
   constructor(private configService: ConfigService) {
     this.transporter = nodemailer.createTransport({
@@ -17,19 +18,13 @@ export class MailService {
     });
   }
 
-
-  async sendEmail(
-    email: string,
-    subject: string,
-    message: string,
-  ): Promise<nodemailer.SentMessageInfo> {
+  async sendEmail(email: string, subject: string, message: string) {
     const mailOptions = {
-      from: `"No Reply" <${process.env.MAIL_USER}>`,
+      from: `"DrinkWithMe" <${process.env.MAIL_USER}>`,
       to: email,
       subject,
       html: message,
     };
-
-    return this.transporter.sendMail(mailOptions);
+    return await this.transporter.sendMail(mailOptions);
   }
 }

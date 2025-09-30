@@ -5,8 +5,6 @@ import { Public } from 'src/auth/guard/public.decorator';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { Request } from 'express';
-// import { CreateUserDto } from './dto/create-user.dto';
-// import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -14,16 +12,6 @@ export class UserController {
     private readonly userService: UserService,
     private readonly sellerService: SellerService,
   ) {}
-
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
 
   @Roles(Role.Supporter)
   @Get('supporter/financial')

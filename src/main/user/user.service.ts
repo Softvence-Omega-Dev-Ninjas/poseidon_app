@@ -2,10 +2,8 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UserVisit } from 'generated/prisma';
 import { firstValueFrom } from 'rxjs';
-// import { CreateUserDto } from './dto/create-user.dto';
+import { Role } from 'src/auth/guard/role.enum';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
-// import { CreateUserDto } from './dto/create-user.dto';
-// import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -15,13 +13,143 @@ export class UserService {
     private readonly httpService: HttpService,
   ) {}
 
-  async findAll() {
-    return await this.prisma.user.findMany();
+  async findAll(
+    role: Role,
+    currentPage: number = 1,
+    limit: number = 10,
+    query?: string,
+  ) {
+    // Validate page and limit
+    if (isNaN(currentPage) || currentPage < 1) {
+      throw new Error('Invalid page number');
+    }
+
+    // Fetch total count of users with the Supporter role
+    const totalItemCount = await this.prisma.user.count({
+      where: {
+        role: role,
+        deactivate: false,
+      },
+    });
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(totalItemCount / limit);
+
+    // Fetch users based on pagination
+    const users = await this.prisma.user.findMany({
+      where: {
+        role: role,
+        deactivate: false,
+        OR: [
+          {
+            username: { contains: query },
+            profile: {
+              name: { contains: query },
+            },
+          },
+        ],
+      },
+
+      skip: (currentPage - 1) * limit,
+      take: limit,
+      omit: {
+        password: true,
+        deactivate: true,
+        otp: true,
+        stripeAccountId: true,
+      },
+      include: {
+        profile: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // Prepare the pagination response object
+    const paginationResponse = {
+      currentPage,
+      pageSize: limit,
+      totalItems: totalItemCount,
+      totalPages,
+      nextPage: currentPage < totalPages ? currentPage + 1 : null,
+      prevPage: currentPage > 1 ? currentPage - 1 : null,
+      hasNextPage: currentPage < totalPages,
+      hasPrevPage: currentPage > 1,
+      users, // Users for the current page
+    };
+    return paginationResponse;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string, role: Role) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+        role,
+        deactivate: false,
+      },
+      omit: {
+        password: true,
+        otp: true,
+        stripeAccountId: true,
+        deactivate: true,
+      },
+      include: {
+        profile: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+            city: true,
+            address: true,
+            country: true,
+            description: true,
+          },
+        },
+      },
+    });
+    if (!user) throw new Error('User not found');
+
+    return user;
   }
+
+  async softDelete(id: string, role: Role) {
+    let user = await this.prisma.user.findUnique({
+      where: {
+        id,
+        role,
+        deactivate: false,
+      },
+      omit: {
+        password: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error(`Invalid user ID`);
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: {
+        id: id,
+        role: Role.User,
+      },
+      data: {
+        deactivate: true,
+      },
+      omit: {
+        password: true,
+      },
+    });
+
+    return updatedUser;
+  }
+
   // Track a user's visit
   async trackVisit(ip: string): Promise<UserVisit> {
     const today = new Date(); // Get current date and time

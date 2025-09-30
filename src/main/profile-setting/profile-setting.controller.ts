@@ -3,8 +3,8 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Patch,
-  Post,
   Req,
   UploadedFile,
   UseInterceptors,
@@ -21,6 +21,13 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 @Controller('profile-setting')
 export class ProfileSettingController {
   constructor(private readonly profileSettingService: ProfileSettingService) {}
+
+  @ApiOperation({ summary: 'Get profile' })
+  @Roles(Role.Supporter, Role.User)
+  @Get()
+  getProfile(@Req() req: any) {
+    return this.profileSettingService.getProfile(req?.sub);
+  }
 
   @ApiOperation({ summary: 'Update profile' })
   @ApiConsumes('multipart/form-data')

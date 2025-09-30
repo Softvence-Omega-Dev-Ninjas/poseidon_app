@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Query, Req } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Query } from '@nestjs/common';
 import { AdminOverviewService } from './services/overview.service';
 import { AdminBarStarService } from './services/bar-stars.service';
 import { Roles } from 'src/auth/guard/roles.decorator';
@@ -15,13 +15,37 @@ export class AdminController {
   ) {}
 
   @Get('stats')
-  @Roles(Role.User)
-  getStats(@Req() res: Request) {
+  @Roles(Role.Admin)
+  getStats() {
     return this.overviewService.getStats();
+  }
+
+  @Get('income-stats')
+  @Roles(Role.Admin)
+  @ApiQuery({
+    name: 'month',
+    required: true,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'year',
+    required: true,
+    type: Number,
+  })
+  async getIncomeStats(
+    @Query('month') month: number,
+    @Query('year') year: number,
+  ) {
+    // TODO(coderboysobu) validate params before continue
+    return await this.overviewService.getIncomeStats(
+      Number(month),
+      Number(year),
+    );
   }
 
   // Bar stars
   @Get('bar-stars')
+  @Roles(Role.Admin)
   @ApiQuery({
     name: 'page',
     required: false,
@@ -34,24 +58,29 @@ export class AdminController {
     type: Number,
     description: 'Number of items per page',
   })
-  @Roles(Role.User)
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
   getBarStars(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Req() res: Request,
+    @Query('query') query: string,
   ) {
-    return this.barStarsService.findMany(page, limit);
+    return this.barStarsService.findMany(page, limit, query);
   }
 
-  @Roles(Role.User)
   @Get('bar-stars/:id')
+  @Roles(Role.Admin)
   @ApiOperation({ summary: 'View by bar star id' })
   async getBarStar(@Param('id') id: string) {
     return this.barStarsService.findOne(id);
   }
 
-  @Roles(Role.User)
   @Delete('bar-stars/:id')
+  @Roles(Role.Admin)
   @ApiOperation({ summary: 'Delete a general user with id' })
   @ApiResponse({ status: 200, description: 'User deleted successfully.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
@@ -61,6 +90,7 @@ export class AdminController {
 
   // General user
   @Get('general-user')
+  @Roles(Role.Admin)
   @ApiQuery({
     name: 'page',
     required: false,
@@ -73,24 +103,29 @@ export class AdminController {
     type: Number,
     description: 'Number of items per page',
   })
-  @Roles(Role.User)
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
   getGeneralUsers(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Req() res: Request,
+    @Query('query') query: string,
   ) {
-    return this.generalUserService.findMany(page, limit);
+    return this.generalUserService.findMany(page, limit, query);
   }
 
-  @Roles(Role.User)
   @Get('general-user/:id')
+  @Roles(Role.Admin)
   @ApiOperation({ summary: 'View by general user id' })
   async getGeneralUser(@Param('id') id: string) {
     return this.generalUserService.fineOne(id);
   }
 
-  @Roles(Role.User)
   @Delete('general-user/:id')
+  @Roles(Role.Admin)
   @ApiOperation({ summary: 'Delete a general user by general user id' })
   @ApiResponse({ status: 200, description: 'User deleted successfully.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
