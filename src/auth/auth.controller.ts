@@ -103,7 +103,6 @@ export class AuthController {
   }
 }
 
-
 // auth.service.ts
 // async signup(dto: CreateUserDto, referralCode?: string) {
 //   const newUser = await this.prisma.user.create({
