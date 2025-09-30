@@ -22,7 +22,7 @@ export class PermissionService {
             { unlimitedMessages: true },
             {
               paymentDetails: {
-                paymemtStatus: 'paid', 
+                paymemtStatus: 'paid',
                 endDate: { gte: now },
               },
             },
@@ -172,7 +172,7 @@ export class PermissionService {
         success: true,
         data: results.filter((r) => r !== null),
         message: 'Users fetched successfully',
-      }
+      };
     } catch (err) {
       this.logger.error(`Failed to fetch users for supporter ${authId}`, err);
       throw new InternalServerErrorException(
