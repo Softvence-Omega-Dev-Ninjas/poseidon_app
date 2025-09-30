@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Delete,
-  Get,
-  HttpException,
-  Param,
-  Query,
-  Req,
-} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Query, Req } from '@nestjs/common';
 import { AdminOverviewService } from './services/overview.service';
 import { AdminBarStarService } from './services/bar-stars.service';
 import { Roles } from 'src/auth/guard/roles.decorator';
@@ -25,12 +17,13 @@ export class AdminController {
   ) {}
 
   @Get('stats')
-  @Public()
+  @Roles(Role.Admin)
   getStats(@Req() res: Request) {
     return this.overviewService.getStats();
   }
-  @Public()
+
   @Get('income-stats')
+  @Roles(Role.Admin)
   @ApiQuery({
     name: 'month',
     required: true,
