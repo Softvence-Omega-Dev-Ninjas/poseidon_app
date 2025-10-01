@@ -201,4 +201,8 @@ export class AdminOverviewService {
       membershipPayments: paymentDetails._sum.amount || 0,
     };
   }
+
+  async visitorChart() {
+    return await this.userService.getVisitsByCountry();
+  }
 }

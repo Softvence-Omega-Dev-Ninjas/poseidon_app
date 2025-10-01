@@ -43,6 +43,12 @@ export class AdminController {
     );
   }
 
+  @Get('visitor-by-country')
+  @Roles(Role.Admin)
+  async visitorByCountry() {
+    return await this.overviewService.visitorChart();
+  }
+
   // Bar stars
   @Get('bar-stars')
   @Roles(Role.Admin)
