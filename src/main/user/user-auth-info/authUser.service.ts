@@ -32,6 +32,48 @@ export class AuthUserService {
     });
     return !!result;
   }
+
+  //get user info
+  async getUserInfo(email: string) {
+    return this.prisma.user.findFirst({
+      where: {
+        email: email,
+        deactivate: false,
+      },
+      select: {
+        id: true,
+        email: true,
+        deactivate: true,
+        role: true,
+        varify: true,
+      },
+    });
+  }
+
+  async varifyUser(id: string) {
+    return await this.prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        varify: true,
+      },
+    });
+  }
+
+  // chnages password update
+  async updatePassword(id: string, password: string) {
+    const hashedPassword = await argon2.hash(password);
+    return this.prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+  }
+
   // credentials register system
   async createUser(createUserDto: CreateUserDto, skip: boolean) {
     // const { skip, ...createUserDto } = data;

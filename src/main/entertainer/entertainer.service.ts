@@ -9,7 +9,7 @@ import { PrismaService } from 'src/prisma-client/prisma-client.service';
 
 @Injectable()
 export class EntertainerService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   //   Get all entertainer or supporters...
   async getAllEntertainer(userId: string) {
@@ -69,7 +69,8 @@ export class EntertainerService {
     // Map images to actual URLs
     const postsWithUrls = await Promise.all(
       posts.map(async (post) => {
-        if (!post.images || post.images.length === 0) return { ...post, images: [] };
+        if (!post.images || post.images.length === 0)
+          return { ...post, images: [] };
 
         // Fetch all media URLs for the image IDs
         const mediaRecords = await this.prisma.media.findMany({

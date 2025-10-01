@@ -2,11 +2,15 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import Stripe from 'stripe';
 import { ExpreeAccountDto } from './dto/createAccout.dto';
+import { PrismaService } from 'src/prisma-client/prisma-client.service';
 // import cc from 'country-list';
 
 @Injectable()
 export class SellerService {
-  constructor(@Inject('STRIPE_CLIENT') private stripe: Stripe) {}
+  constructor(
+    @Inject('STRIPE_CLIENT') private stripe: Stripe,
+    private readonly prisma: PrismaService,
+  ) {}
 
   // create connected account for seller or supporter
   async createConnectedAccount(user: ExpreeAccountDto) {
@@ -174,7 +178,7 @@ export class SellerService {
     return true;
   }
 
-  // setup seller account with stripe
+  // setup seller account with stripe Use UI api mount
   async sellerAccountSetupClientSecret(accountId: string) {
     const intent = await this.stripe.accountSessions.create({
       account: accountId,
@@ -188,15 +192,90 @@ export class SellerService {
     return intent.client_secret;
   }
 
-  async sellerAccountSetupClientSecret2(accountId: string) {
-    const intent = await this.stripe.accountLinks.create({
-      account: accountId,
-      refresh_url: 'http://localhost:5173/dashboard/payout',
-      return_url: 'http://localhost:5173/dashboard/payout',
-      type: 'account_onboarding',
+  // redirect stripe onDeshboard setup page option 2222 client Not be to requere
+  async sellerAccountSetupClientSecret2(userid: string, redirect_url?: string) {
+    const userInfo = await this.prisma.user.findFirst({
+      where: {
+        id: userid,
+      },
+      include: {
+        profile: true,
+      },
     });
-    console.log('accountSessions', intent);
-    return intent;
+
+    if (!userInfo) {
+      return cResponseData({
+        message: 'user not found',
+        data: null,
+        error: null,
+        success: false,
+      });
+    }
+    if (userInfo.stripeAccountId) {
+      const check = await this.checkAccountsInfoSystem(
+        userInfo.stripeAccountId,
+      );
+      if (!check)
+        await this.createOnboardingAccountLink(
+          userInfo.stripeAccountId,
+          redirect_url,
+        );
+    }
+
+    const createUserData = {
+      id: userInfo.id,
+      email: userInfo.email,
+      url: `viewpage/${userInfo.username}`,
+      createProfileDto: {
+        name: userInfo.profile?.name ?? '',
+        username: userInfo.username,
+        address: userInfo.profile?.address ?? '',
+        state: userInfo.profile?.state ?? '',
+        city: userInfo.profile?.city ?? '',
+        country: userInfo.profile?.country ?? '',
+        postcode: userInfo.profile?.postcode ?? '',
+        description: userInfo.profile?.description ?? '',
+      },
+    };
+
+    const accountId = await this.createConnectedAccount(createUserData);
+
+    if (!accountId || !accountId.id) {
+      return cResponseData({
+        message: 'Failed to create Stripe account',
+        data: null,
+        error: null,
+        success: false,
+      });
+    }
+    const user = await this.prisma.user.update({
+      where: {
+        id: userInfo.id,
+      },
+      data: {
+        stripeAccountId: accountId.id,
+      },
+    });
+
+    if (!user || !user.stripeAccountId) {
+      return cResponseData({
+        message: 'Failed to create Stripe account',
+        data: null,
+        error: null,
+        success: false,
+      });
+    }
+
+    const intent = await this.createOnboardingAccountLink(
+      user.stripeAccountId,
+      redirect_url,
+    );
+    return cResponseData({
+      message: 'Stripe account created successfully',
+      data: intent,
+      error: null,
+      success: true,
+    });
   }
 
   async deleteAccount(accountId: string) {

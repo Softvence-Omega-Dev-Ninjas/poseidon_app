@@ -1,8 +1,9 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Controller, Get, Post, Req, Body } from '@nestjs/common';
 import { PayoutService } from './payout.service';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { Request } from 'express';
+import { RedirectUrlDto } from './dto/create-payout.dto';
 
 @Controller('payout')
 export class PayoutController {
@@ -33,14 +34,14 @@ export class PayoutController {
   }
 
   @Roles(Role.Supporter)
-  @Get('sellerAccountSetupClientSecret-2')
-  async sellerAccountSetupClientSecret_2(@Req() req: Request) {
-    console.log(
-      "console.log('sellerAccountSetupClientSecret', clientSecret); ",
-      req['stripeAccountId'],
-    );
+  @Post('sellerAccountSetupClientSecret-2')
+  async sellerAccountSetupClientSecret_2(
+    @Body() body: RedirectUrlDto,
+    @Req() req: Request,
+  ) {
     return this.payoutService.sellerAccountSetupClientSecret_2(
-      req['stripeAccountId'] as string,
+      req['sub'] as string,
+      body.redirect_url,
     );
   }
 }

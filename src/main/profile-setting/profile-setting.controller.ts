@@ -16,6 +16,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Role } from 'src/auth/guard/role.enum';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { Request } from 'express';
 
 @ApiTags('Profile Setting')
 @Controller('profile-setting')
@@ -23,10 +24,10 @@ export class ProfileSettingController {
   constructor(private readonly profileSettingService: ProfileSettingService) {}
 
   @ApiOperation({ summary: 'Get profile' })
-  @Roles(Role.Supporter, Role.User)
+  @Roles(Role.Admin, Role.Supporter, Role.User)
   @Get()
-  getProfile(@Req() req: any) {
-    return this.profileSettingService.getProfile(req?.sub);
+  getProfile(@Req() req: Request) {
+    return this.profileSettingService.getProfile(req['sub'] as string);
   }
 
   @ApiOperation({ summary: 'Update profile' })
@@ -46,27 +47,31 @@ export class ProfileSettingController {
       },
     }),
   )
-  @Roles(Role.Supporter, Role.User)
+  @Roles(Role.Admin, Role.Supporter, Role.User)
   @Patch()
   update(
     @Body() dto: UpdateProfileDto,
-    @Req() req: any,
+    @Req() req: Request,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.profileSettingService.updateProfile(req?.sub, dto, file);
+    return this.profileSettingService.updateProfile(
+      req['sub'] as string,
+      dto,
+      file,
+    );
   }
 
   @ApiOperation({ summary: 'Update password' })
-  @Roles(Role.Supporter, Role.User)
+  @Roles(Role.Admin, Role.Supporter, Role.User)
   @Patch('update-password')
-  async updatePassword(@Req() req: any, @Body() dto: UpdatePasswordDto) {
-    return this.profileSettingService.updatePassword(req?.sub, dto);
+  async updatePassword(@Req() req: Request, @Body() dto: UpdatePasswordDto) {
+    return this.profileSettingService.updatePassword(req['sub'] as string, dto);
   }
 
   @ApiOperation({ summary: 'Delete account' })
-  @Roles(Role.Supporter, Role.User)
+  @Roles(Role.Admin, Role.Supporter, Role.User)
   @Delete('delete-account')
-  async deleteAccount(@Req() req: any) {
-    return this.profileSettingService.deleteAccount(req?.sub);
+  async deleteAccount(@Req() req: Request) {
+    return this.profileSettingService.deleteAccount(req['sub'] as string);
   }
 }

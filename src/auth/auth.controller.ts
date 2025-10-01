@@ -9,6 +9,7 @@ import {
   Get,
   Param,
   ValidationPipe,
+  HttpException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CredentialsSignInInfo } from './dto/create-auth.dto';
@@ -21,7 +22,14 @@ import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
 import { SignUpUserDto } from './dto/signup-auth.dto';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { StringToBooleanPipe } from 'src/common/utils/stringToBoolean.pipe';
-import { CheckVarifyEmail, VarifyEmailDto } from './dto/varify.dto';
+import {
+  CheckVarifyEmail,
+  ForgetPasswordCodeCheck,
+  ForgetPasswordSendEmail,
+  ForgetPasswordToken,
+  VarifyEmailDto,
+} from './dto/varify.dto';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Controller('auth')
 export class AuthController {
@@ -38,8 +46,8 @@ export class AuthController {
   @ApiBody({ type: SignUpUserDto })
   async signup(
     @Body('skip', StringToBooleanPipe) skip: boolean,
-    @Body() createAuthDto: SignUpUserDto,
     @UploadedFile(new ImageValidationPipe()) image: Express.Multer.File,
+    @Body(new ValidationPipe()) createAuthDto: SignUpUserDto,
   ) {
     // call cloudinary profile image upload - this area
     const { imageUrl } = await this.cloudinaryService.profileImageUpload(image);
@@ -53,7 +61,7 @@ export class AuthController {
       ...profile
     } = createAuthDto;
 
-    console.log('skip ------------+++', skip);
+    console.log('skip ------------+++', skipAuth);
 
     return this.authUserService.createUser(
       {
@@ -74,9 +82,21 @@ export class AuthController {
   @Public()
   @Post('signin')
   async signin(
-    @Body() createAuthDto: CredentialsSignInInfo,
+    @Body(new ValidationPipe()) createAuthDto: CredentialsSignInInfo,
     @Res() res: Response,
   ) {
+    if (!createAuthDto.email || !createAuthDto.password) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Email and password are required',
+          error: null,
+          data: null,
+          success: false,
+        }),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const userDto = await this.authUserService.loginUser(createAuthDto);
     const varifyUser = await this.authService.userCredentialsAuthentication(
       userDto,
@@ -103,6 +123,25 @@ export class AuthController {
   async checkJwt(@Param('token') token: string) {
     return this.authService.checkJwt(token);
   }
+  // chack DB user email
+
+  @Public()
+  @Get('check-email/:email')
+  async checkEmail(@Param('email') email: string) {
+    const checkEmail = await this.authUserService.isExestUser(email);
+    if (checkEmail) {
+      return {
+        message: 'Email already exists',
+        success: false,
+      };
+    }
+    return {
+      message: 'Ok',
+      success: true,
+    };
+  }
+
+  // signup varify email
 
   @Public()
   @Post('varify-email')
@@ -117,6 +156,38 @@ export class AuthController {
   @Post('checkVarifyEmail')
   checkVarifyEmail(@Body() data: CheckVarifyEmail) {
     return this.authService.checkVarifyEmail(data);
+  }
+
+  // change password
+
+  @Public()
+  @Post('forget-password')
+  async forgetPassword(@Body() data: ForgetPasswordSendEmail) {
+    const isExestUser = await this.authUserService.isExestUser(data.email);
+    if (!isExestUser) {
+      throw new HttpException(
+        cResponseData({
+          message: 'User not found',
+          error: null,
+          data: null,
+          success: false,
+        }),
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return this.authService.forgetPasswordGenaredCode(data);
+  }
+
+  @Public()
+  @Post('forget-password-varify')
+  async forgetPasswordVarify(@Body() data: ForgetPasswordCodeCheck) {
+    return this.authService.checkForgetPasswordCode(data);
+  }
+
+  @Public()
+  @Post('change-password')
+  async changePassword(@Body() data: ForgetPasswordToken) {
+    return this.authService.changePassword(data);
   }
 }
 
