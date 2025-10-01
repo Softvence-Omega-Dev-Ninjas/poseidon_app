@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
 
 export class SignUpUserDto {
   // referral
@@ -26,12 +26,24 @@ export class SignUpUserDto {
     required: true,
     example: 'user@gmail.com',
   })
+  @IsEmail({}, { message: 'Invalid email format' })
+  @Matches(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/, {
+    message: 'Invalid email format',
+  })
   email: string;
 
   @ApiProperty({
     required: true,
     example: 'User345@#$',
   })
+  @IsNotEmpty({ message: 'Password should not be empty' })
+  @Matches(
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+={}[\]|:;"'<>,.?/~`]).{6,15}$/,
+    {
+      message:
+        'Password must be 6-15 characters long, include at least 1 uppercase letter, 1 number, and 1 special character',
+    },
+  )
   password: string;
 
   /// profile
@@ -48,8 +60,8 @@ export class SignUpUserDto {
   name: string;
 
   @ApiProperty({ type: 'string', format: 'binary' })
-  @IsString()
-  @IsNotEmpty()
+  // @IsString()
+  // @IsNotEmpty()
   image: Express.Multer.File;
 
   @ApiProperty({
