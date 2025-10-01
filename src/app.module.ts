@@ -12,6 +12,7 @@ import { ContinueModule } from './continue/continue.module';
 import { TrackVisitMiddleware } from './main/middlewares/track.middleware';
 import { UserModule } from './main/user/user.module';
 import { MailModule } from './utils/mail/mail.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { MailModule } from './utils/mail/mail.module';
       }),
     }),
     MailModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [

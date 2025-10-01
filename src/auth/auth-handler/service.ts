@@ -1,0 +1,127 @@
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { authProviders, CreateLoginDto, RefDto } from '../dto/create-or-login';
+import { JwtService } from '@nestjs/jwt';
+import { AuthHandlerRepository } from './repository';
+import argon2 from 'argon2';
+import { SellerService } from 'src/utils/stripe/seller.service';
+
+type GenerateOptions = {
+  a?: string;
+  b?: string;
+};
+
+@Injectable()
+export class AuthHandlerService {
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly repository: AuthHandlerRepository,
+    private readonly stripeSellerService: SellerService,
+  ) {}
+
+  async store(query?: RefDto, input?: Partial<CreateLoginDto>) {
+    // if query has refId then work with ref -> query?.refId
+    if (query?.refId) {
+      // handle refferel system
+      await this.handleRefferel(query.refId);
+    }
+    // if provider include with our array then
+    if (input?.provider && authProviders.includes(input?.provider)) {
+      // handle with provider
+      // make password optional and make sure that it has email
+      // if (!input.email)
+      //   throw new BadRequestException(
+      //     'Email should be verified for continue with auth provider!',
+      //   );
+
+      // alternative if email not found then it will generate a username based on their first name and lastname from their email
+      const username = input.email
+        ? this.generator(input.email)
+        : this.generator({ a: input.name });
+
+      if (!username.length)
+        throw new InternalServerErrorException('Fail to extract username');
+      // check this username is already exist or not
+      const isUser = await this.repository.findByUsername(username);
+      if (!isUser) {
+        // if user not found & (make it's provider include with our auth) then create account and send them a token
+        const user = await this.repository.createAuthProvider(
+          {
+            ...input,
+          },
+          query?.refId,
+        );
+        // user created so, now create token and check strip and then return for sending response from controller
+        const token = await this.generateToken({
+          ...user,
+        });
+        const isStrip =
+          user.role === 'supporter' && user.stripeAccountId
+            ? await this.stripeSellerService.checkAccountsInfoSystem(
+                user.stripeAccountId,
+              )
+            : false;
+
+        return {
+          access_token: `Bearer ${token}`,
+          user: {
+            ...user,
+            profile_varify: user.varify,
+            financial_account:
+              user?.role == 'user' || user?.role == 'admin' ? true : isStrip,
+          },
+        };
+      } else {
+        // if user found then based on the page ref send them the response
+        // user created so, now create token and check strip and then return for sending response from controller
+        const token = await this.generateToken({
+          ...isUser,
+        });
+        const isStrip =
+          isUser.role === 'supporter' && isUser.stripeAccountId
+            ? await this.stripeSellerService.checkAccountsInfoSystem(
+                isUser.stripeAccountId,
+              )
+            : false;
+
+        return {
+          access_token: `Bearer ${token}`,
+          user: {
+            ...isUser,
+            profile_varify: isUser.varify,
+            financial_account:
+              isUser?.role == 'user' || isUser?.role == 'admin'
+                ? true
+                : isStrip,
+          },
+        };
+      }
+    } else {
+      // handle generel creating accocunt or login
+      // TODO: call the sarif vaiyer service
+    }
+  }
+  async handleRefferel(id: string) {
+    // find user with that id (because referral is a user id)
+    const user = await this.repository.findById(id);
+    if (!user)
+      throw new NotFoundException('User not found with that referral ID');
+
+    return user;
+  }
+  private generator<I extends string | GenerateOptions>(input: I): string {
+    // if it is not string then we can just merge the value1 and value2 with lowercase
+    return typeof input === 'string'
+      ? input.split('@')[0]
+      : typeof input === 'object'
+        ? `${input.a?.toLowerCase() ?? ''}-${input.b?.toLowerCase() ?? ''}`
+        : '';
+  }
+  private async generateToken<P extends object>(payload: P): Promise<string> {
+    return this.jwtService.signAsync({ ...payload });
+  }
+}

@@ -10,6 +10,7 @@ import {
   Param,
   ValidationPipe,
   HttpException,
+  Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CredentialsSignInInfo } from './dto/create-auth.dto';
@@ -30,6 +31,8 @@ import {
   VarifyEmailDto,
 } from './dto/varify.dto';
 import { cResponseData } from 'src/common/utils/common-responseData';
+import { CreateLoginDto, RefDto } from './dto/create-or-login';
+import { AuthHandlerService } from './auth-handler/service';
 
 @Controller('auth')
 export class AuthController {
@@ -37,6 +40,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly authUserService: AuthUserService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly authHandlerService: AuthHandlerService,
   ) {}
 
   @Public()
@@ -86,6 +90,7 @@ export class AuthController {
     @Res() res: Response,
   ) {
     const userDto = await this.authUserService.loginUser(createAuthDto);
+
     const varifyUser = await this.authService.userCredentialsAuthentication(
       userDto,
       createAuthDto.password,
@@ -176,6 +181,19 @@ export class AuthController {
   @Post('change-password')
   async changePassword(@Body() data: ForgetPasswordToken) {
     return this.authService.changePassword(data);
+  }
+
+  @Public()
+  @Post('create-login-ref')
+  async createLoginRef(@Body() body: CreateLoginDto, @Query() query?: RefDto) {
+    try {
+      const res = await this.authHandlerService.store(query, body);
+      console.log(res);
+      return 'hello';
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
   }
 }
 

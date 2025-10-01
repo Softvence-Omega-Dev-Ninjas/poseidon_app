@@ -53,6 +53,7 @@ export class AuthService {
       shop_id: user?.shop?.id || '',
       memberships_owner_id: user?.memberships_owner?.id || '',
     };
+
     const access_token = await this.jwtService.signAsync({
       ...payload,
       stripeAccountId: user?.stripeAccountId || '',
