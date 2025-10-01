@@ -104,7 +104,7 @@ export class EntertainerService {
     if (userId === supporterId) {
       throw new ConflictException('You cannot follow yourself');
     }
-   
+  //  user checking following condition remove ....
     return await this.prisma.follower.create({
       data: {
         follower: {
