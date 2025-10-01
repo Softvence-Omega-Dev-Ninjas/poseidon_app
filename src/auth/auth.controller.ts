@@ -33,6 +33,7 @@ import {
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { CreateLoginDto, RefDto } from './dto/create-or-login';
 import { AuthHandlerService } from './auth-handler/service';
+import { cookieHandler } from 'src/common/utils/cookie-handler';
 
 @Controller('auth')
 export class AuthController {
@@ -185,11 +186,15 @@ export class AuthController {
 
   @Public()
   @Post('create-login-ref')
-  async createLoginRef(@Body() body: CreateLoginDto, @Query() query?: RefDto) {
+  async createLoginRef(
+    @Res() response: Response,
+    @Body() body: CreateLoginDto,
+    @Query() query?: RefDto,
+  ) {
     try {
       const res = await this.authHandlerService.store(query, body);
-      console.log(res);
-      return 'hello';
+      cookieHandler(response, 'set', res?.access_token);
+      return response.status(HttpStatus.OK).json(res);
     } catch (err) {
       console.log(err);
       return err;

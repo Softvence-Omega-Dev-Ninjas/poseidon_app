@@ -49,14 +49,14 @@ export class AuthHandlerRepository {
     tx: PrismaTx,
     refUserId?: string,
   ) {
+    console.log(input);
     // extract profile
-    const { ...profile } = input;
-    console.log('profile only: ', profile);
+    const profile = input.profile;
     if (refUserId && input.role === 'user') {
       return await tx.user.create({
         data: {
           ...input,
-          username: input.username!,
+          username: input.username ?? '',
           email: input.email ?? '',
           password: '',
           role: input.role,
@@ -64,8 +64,8 @@ export class AuthHandlerRepository {
           profile: {
             create: {
               ...profile,
-              image: input.image ?? '',
-              name: input.name ?? '',
+              image: (profile && profile.image) ?? '',
+              name: (profile && profile.name) ?? '',
             },
           },
           invited: {
@@ -88,8 +88,8 @@ export class AuthHandlerRepository {
         profile: {
           create: {
             ...profile,
-            image: input.image ?? '',
-            name: input.name ?? '',
+            image: (profile && profile.image) ?? '',
+            name: (profile && profile.name) ?? '',
           },
         },
         support_cart_layout: {

@@ -1,13 +1,11 @@
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CookieOptions, Request, Response } from 'express';
 
-export interface RequestWithUser extends Request {
-  user?: UserTokenPayload;
-}
-export interface UserTokenPayload {
-  email: string;
-  [key: string]: unknown;
-}
+export interface RequestWithUser extends Request {}
+// export interface UserTokenPayload {
+//   email: string;
+//   [key: string]: unknown;
+// }
 
 export const COOKIE_KEY = 'accessToken';
 export function cookieHandler(
@@ -29,7 +27,7 @@ export function cookieHandler(
   options: CookieOptions = {},
 ) {
   const defaultOptions: CookieOptions = {
-    maxAge: 90 * 24 * 60 * 60 * 1000, // 90days
+    maxAge: 1 * 24 * 60 * 60 * 1000, // 90days
     httpOnly: true,
     secure: process.env.ENV_MODE === 'production',
     sameSite: 'lax',

@@ -9,11 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthHandlerRepository } from './repository';
 import argon2 from 'argon2';
 import { SellerService } from 'src/utils/stripe/seller.service';
-
-type GenerateOptions = {
-  a?: string;
-  b?: string;
-};
+import { omit, slugify } from './utils';
 
 @Injectable()
 export class AuthHandlerService {
@@ -31,17 +27,17 @@ export class AuthHandlerService {
     }
     // if provider include with our array then
     if (input?.provider && authProviders.includes(input?.provider)) {
-      // handle with provider
-      // make password optional and make sure that it has email
-      // if (!input.email)
-      //   throw new BadRequestException(
-      //     'Email should be verified for continue with auth provider!',
-      //   );
-
       // alternative if email not found then it will generate a username based on their first name and lastname from their email
+      if (!input.profile?.name && !input.email) {
+        throw new BadRequestException(
+          'Profile name or email must needed to creating account',
+        );
+      }
       const username = input.email
-        ? this.generator(input.email)
-        : this.generator({ a: input.name });
+        ? this.generator(input.email, 'email')
+        : input.profile
+          ? this.generator(input.profile.name || '', 'name')
+          : '';
 
       if (!username.length)
         throw new InternalServerErrorException('Fail to extract username');
@@ -52,6 +48,7 @@ export class AuthHandlerService {
         const user = await this.repository.createAuthProvider(
           {
             ...input,
+            username,
           },
           query?.refId,
         );
@@ -66,10 +63,11 @@ export class AuthHandlerService {
               )
             : false;
 
+        const userObj = omit(user, ['stripeAccountId']);
         return {
           access_token: `Bearer ${token}`,
           user: {
-            ...user,
+            ...userObj,
             profile_varify: user.varify,
             financial_account:
               user?.role == 'user' || user?.role == 'admin' ? true : isStrip,
@@ -88,10 +86,11 @@ export class AuthHandlerService {
               )
             : false;
 
+        const userObj = omit(isUser, ['stripeAccountId']);
         return {
           access_token: `Bearer ${token}`,
           user: {
-            ...isUser,
+            ...userObj,
             profile_varify: isUser.varify,
             financial_account:
               isUser?.role == 'user' || isUser?.role == 'admin'
@@ -113,14 +112,14 @@ export class AuthHandlerService {
 
     return user;
   }
-  private generator<I extends string | GenerateOptions>(input: I): string {
-    // if it is not string then we can just merge the value1 and value2 with lowercase
-    return typeof input === 'string'
+  private generator(input: string, type: 'email' | 'name'): string {
+    return type === 'email'
       ? input.split('@')[0]
-      : typeof input === 'object'
-        ? `${input.a?.toLowerCase() ?? ''}-${input.b?.toLowerCase() ?? ''}`
+      : type === 'name'
+        ? slugify(input, '-')
         : '';
   }
+
   private async generateToken<P extends object>(payload: P): Promise<string> {
     return this.jwtService.signAsync({ ...payload });
   }

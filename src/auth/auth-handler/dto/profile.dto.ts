@@ -7,14 +7,6 @@ import {
 import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class ProfileDto {
-  @ApiProperty({
-    description: 'User ID (relation with User table)',
-    example: '8c6a0d7d-4f63-4d91-82b2-dc7c2c9b7c53',
-  })
-  @IsUUID()
-  @IsNotEmpty()
-  userid: string;
-
   @ApiPropertyOptional({
     description: 'Full name of the user',
     example: 'John Doe',
