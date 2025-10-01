@@ -104,12 +104,7 @@ export class EntertainerService {
     if (userId === supporterId) {
       throw new ConflictException('You cannot follow yourself');
     }
-    const existFollow = await this.prisma.follower.findFirst({
-      where: { followerId: userId },
-    });
-    if (existFollow) {
-      throw new BadRequestException('User Already follow this supporter.');
-    }
+  //  user checking following condition remove ....
     return await this.prisma.follower.create({
       data: {
         follower: {
