@@ -78,7 +78,10 @@ export class PayoutService {
       success: true,
     });
   }
-  async sellerAccountSetupClientSecret_2(userid: string) {
+  async sellerAccountSetupClientSecret_2(
+    userid: string,
+    redirect_url?: string,
+  ) {
     if (!userid) {
       return cResponseData({
         message: 'user not found',
@@ -87,26 +90,9 @@ export class PayoutService {
         success: false,
       });
     }
-
-    const clientSecret =
-      await this.sellerServiceStripe.sellerAccountSetupClientSecret2(userid);
-
-    if (!clientSecret) {
-      return cResponseData({
-        message: 'Client secret not found',
-        data: null,
-        error: null,
-        success: false,
-      });
-    }
-
-    console.log('sellerAccountSetupClientSecret', clientSecret);
-
-    return cResponseData({
-      message: 'Client secret',
-      data: clientSecret,
-      error: null,
-      success: true,
-    });
+    return await this.sellerServiceStripe.sellerAccountSetupClientSecret2(
+      userid,
+      redirect_url,
+    );
   }
 }
