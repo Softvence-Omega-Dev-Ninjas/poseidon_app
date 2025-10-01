@@ -40,7 +40,7 @@ export class PayoutController {
       req['stripeAccountId'],
     );
     return this.payoutService.sellerAccountSetupClientSecret_2(
-      req['stripeAccountId'] as string,
+      req['sub'] as string,
     );
   }
 }

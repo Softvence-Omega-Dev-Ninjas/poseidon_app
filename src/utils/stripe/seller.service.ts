@@ -2,11 +2,15 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import Stripe from 'stripe';
 import { ExpreeAccountDto } from './dto/createAccout.dto';
+import { PrismaService } from 'src/prisma-client/prisma-client.service';
 // import cc from 'country-list';
 
 @Injectable()
 export class SellerService {
-  constructor(@Inject('STRIPE_CLIENT') private stripe: Stripe) {}
+  constructor(
+    @Inject('STRIPE_CLIENT') private stripe: Stripe,
+    private readonly prisma: PrismaService,
+  ) {}
 
   // create connected account for seller or supporter
   async createConnectedAccount(user: ExpreeAccountDto) {
@@ -188,9 +192,64 @@ export class SellerService {
     return intent.client_secret;
   }
 
-  async sellerAccountSetupClientSecret2(accountId: string) {
+  async sellerAccountSetupClientSecret2(userid: string) {
+    const userInfo = await this.prisma.user.findFirst({
+      where: {
+        id: userid,
+      },
+      include: {
+        profile: true,
+      },
+    });
+
+    if (!userInfo) {
+      return cResponseData({
+        message: 'user not found',
+        data: null,
+        error: null,
+        success: false,
+      });
+    }
+
+    const createUserData = {
+      id: userInfo.id,
+
+      email: userInfo.email,
+
+      url: `viewpage/${userInfo.username}`,
+
+      createProfileDto: {
+        name: userInfo.profile?.name ?? '',
+
+        username: userInfo.username,
+
+        address: userInfo.profile?.address ?? '',
+
+        state: userInfo.profile?.state ?? '',
+
+        city: userInfo.profile?.city ?? '',
+
+        country: userInfo.profile?.country ?? '',
+
+        postcode: userInfo.profile?.postcode ?? '',
+
+        description: userInfo.profile?.description ?? '',
+      },
+    };
+
+    const accountId = await this.createConnectedAccount(createUserData);
+
+    if (!accountId) {
+      return cResponseData({
+        message: 'Failed to create Stripe account',
+        data: null,
+        error: null,
+        success: false,
+      });
+    }
+
     const intent = await this.stripe.accountLinks.create({
-      account: accountId,
+      account: accountId.id,
       refresh_url: 'http://localhost:5173/dashboard/payout',
       return_url: 'http://localhost:5173/dashboard/payout',
       type: 'account_onboarding',

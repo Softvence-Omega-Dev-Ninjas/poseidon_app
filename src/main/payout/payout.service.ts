@@ -78,19 +78,18 @@ export class PayoutService {
       success: true,
     });
   }
-  async sellerAccountSetupClientSecret_2(stripeAccountId: string) {
-    if (!stripeAccountId) {
+  async sellerAccountSetupClientSecret_2(userid: string) {
+    if (!userid) {
       return cResponseData({
-        message: 'Stripe account id is required',
+        message: 'user not found',
         data: null,
         error: null,
         success: false,
       });
     }
+
     const clientSecret =
-      await this.sellerServiceStripe.sellerAccountSetupClientSecret2(
-        stripeAccountId,
-      );
+      await this.sellerServiceStripe.sellerAccountSetupClientSecret2(userid);
 
     if (!clientSecret) {
       return cResponseData({
