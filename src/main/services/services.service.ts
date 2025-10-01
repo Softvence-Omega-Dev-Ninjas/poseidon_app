@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  HttpException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
@@ -17,12 +18,17 @@ import {
   UpdateServiceOrderStatusDto,
 } from './dto/create-services';
 import { UpdateservicesDto } from './dto/update-serviecs';
+import { ServicePaymentService } from 'src/utils/stripe/services.service';
+import { PiStripeId } from 'src/common/dto/pi_stripeId.dto';
+import { StripeService } from 'src/utils/stripe/stripe.service';
 
 @Injectable()
 export class ServiceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly servicePaymentService: ServicePaymentService,
+    private readonly stripeService: StripeService,
   ) {}
 
   async create(
@@ -310,10 +316,54 @@ export class ServiceService {
       },
       include: {
         paymentDetails: true,
+        user: {
+          select: {
+            id: true,
+            profile: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
       },
     });
 
-    return OderSerderSave;
+    const { id, serviceId, sellerId, createdAt, paymentDetails, user } =
+      OderSerderSave;
+
+    if (
+      !id ||
+      !user ||
+      !sellerId ||
+      !serviceId ||
+      !createdAt ||
+      !paymentDetails ||
+      !service.user.stripeAccountId
+    ) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Payment Method faild',
+          error: 'payment error',
+          data: null,
+          success: false,
+        }),
+        400,
+      );
+    }
+
+    const seripePaymentInfo = this.servicePaymentService.servicePaymentIntent({
+      id,
+      serviceId,
+      userId: user.id,
+      sellerId,
+      createdAt,
+      paymentDetails,
+      name: user.profile?.name,
+      stripeAccountId: service.user.stripeAccountId,
+    });
+
+    return seripePaymentInfo;
   }
 
   /** Get all service orders with optional pagination */
@@ -456,13 +506,14 @@ export class ServiceService {
   }
 
   async getServicesBuyPayemtData(userId: string) {
+    console.log('user idsssss', userId);
     const currentTime = new Date();
     const top3cardData = await this.prisma.$transaction(async (tx) => {
       const suportCount = await tx.serviceOrder.count({
         where: {
           sellerId: userId,
           paymentDetails: {
-            paymemtStatus: 'pending',
+            paymemtStatus: 'paid',
           },
         },
       });
@@ -470,7 +521,7 @@ export class ServiceService {
         where: {
           sellerId: userId,
           paymentDetails: {
-            paymemtStatus: 'pending',
+            paymemtStatus: 'paid',
           },
           createdAt: {
             gte: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
@@ -487,21 +538,15 @@ export class ServiceService {
         where: {
           serviceOrderInfo: {
             sellerId: userId,
-            paymentDetails: {
-              paymemtStatus: 'paid',
-            },
-            createdAt: {
-              gte: new Date(
-                currentTime.getFullYear(),
-                currentTime.getMonth(),
-                1,
-              ),
-              lt: new Date(
-                currentTime.getFullYear(),
-                currentTime.getMonth() + 1,
-                1,
-              ),
-            },
+          },
+          paymemtStatus: 'paid',
+          createAt: {
+            gte: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
+            lt: new Date(
+              currentTime.getFullYear(),
+              currentTime.getMonth() + 1,
+              1,
+            ),
           },
         },
         _sum: {
@@ -513,7 +558,7 @@ export class ServiceService {
         where: {
           sellerId: userId,
           paymentDetails: {
-            paymemtStatus: 'pending',
+            paymemtStatus: 'paid',
           },
           createdAt: {
             gte: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
@@ -600,5 +645,54 @@ export class ServiceService {
         supporterProfile: services,
       },
     });
+  }
+
+  async paymentStatusCheck(data: PiStripeId) {
+    const payStatus = await this.stripeService.paymentIntentCheck(
+      data.paymentIntentId,
+    );
+    if (!payStatus || payStatus.status !== 'succeeded' || !payStatus.id) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Payment failed',
+          error: 'Payment failed',
+          data: null,
+          success: false,
+        }),
+        400,
+      );
+    }
+    console.log('paymentIntent - pi checkout', payStatus);
+    if (payStatus.status === 'succeeded') {
+      const paymentIntentData =
+        await this.prisma.paymentDetailsByServices.update({
+          where: {
+            id: payStatus.metadata.paymentDetailsId,
+          },
+          data: {
+            paymemtStatus: 'paid',
+          },
+        });
+      return cResponseData({
+        message: 'Payment successfully complated',
+        data: paymentIntentData,
+        success: true,
+      });
+    }
+    if (payStatus.status === 'canceled') {
+      const paymentIntent = await this.prisma.paymentDetailsByServices.update({
+        where: {
+          id: payStatus.metadata.paymentDetailsId,
+        },
+        data: {
+          paymemtStatus: 'canceled',
+        },
+      });
+      return cResponseData({
+        message: 'payment canceled ',
+        data: paymentIntent,
+        success: false,
+      });
+    }
   }
 }

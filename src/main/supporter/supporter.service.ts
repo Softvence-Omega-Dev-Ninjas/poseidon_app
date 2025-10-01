@@ -358,6 +358,7 @@ export class SupporterService {
         name: true,
         user_id: true,
         massage: true,
+        paymemtStatus: true,
         country: true,
         createAt: true,
         total_price: true,

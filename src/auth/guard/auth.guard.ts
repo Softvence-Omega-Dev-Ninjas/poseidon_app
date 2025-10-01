@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -12,6 +13,7 @@ import { IS_PUBLIC_KEY } from './public.decorator';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PayloadType } from './jwtPayloadType';
+import { PrismaService } from 'src/prisma-client/prisma-client.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -19,6 +21,7 @@ export class AuthGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async canActivate(context: ExecutionContext) {
@@ -68,7 +71,28 @@ export class AuthGuard implements CanActivate {
         request['stripeAccountId'] = payload.stripeAccountId ?? null;
       }
       if (isPublic) return true;
-      console.log(payload.role, requiredRoles);
+      // Call trackVisit with request ip
+      const reqCopy = request as any;
+      const ip =
+        // X-Forwarded-For header (may contain a comma-separated list)
+        (reqCopy.headers['x-forwarded-for'] as string)
+          ?.split(',')
+          .map((s) => s.trim())[0] ||
+        // fallback to express connection info
+        reqCopy.ip ||
+        (reqCopy.connection && reqCopy.connection.remoteAddress) ||
+        reqCopy.socket?.remoteAddress ||
+        reqCopy.connection?.socket?.remoteAddress;
+
+      const user = await this.prisma.user.findFirst({
+        where: { id: payload.id },
+      });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      if (user.deactivate) throw new NotFoundException('User not found');
+
       return requiredRoles.some((role) => payload.role?.includes(role));
     } catch {
       if (isPublicCatchBlock.isPublic) return true;

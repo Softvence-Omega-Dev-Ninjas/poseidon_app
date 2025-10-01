@@ -8,6 +8,8 @@ import {
   UploadedFile,
   Get,
   Param,
+  ValidationPipe,
+  HttpException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CredentialsSignInInfo } from './dto/create-auth.dto';
@@ -20,6 +22,14 @@ import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
 import { SignUpUserDto } from './dto/signup-auth.dto';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { StringToBooleanPipe } from 'src/common/utils/stringToBoolean.pipe';
+import {
+  CheckVarifyEmail,
+  ForgetPasswordCodeCheck,
+  ForgetPasswordSendEmail,
+  ForgetPasswordToken,
+  VarifyEmailDto,
+} from './dto/varify.dto';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Controller('auth')
 export class AuthController {
@@ -47,10 +57,11 @@ export class AuthController {
       username,
       email,
       password,
+      referralId,
       ...profile
     } = createAuthDto;
 
-    console.log('skip ------------+++', skip);
+    console.log('skip ------------+++', skipAuth);
 
     return this.authUserService.createUser(
       {
@@ -62,6 +73,7 @@ export class AuthController {
           ...profile,
           image: imageUrl,
         },
+        referralId,
       },
       skip,
     );
@@ -70,9 +82,21 @@ export class AuthController {
   @Public()
   @Post('signin')
   async signin(
-    @Body() createAuthDto: CredentialsSignInInfo,
+    @Body(new ValidationPipe()) createAuthDto: CredentialsSignInInfo,
     @Res() res: Response,
   ) {
+    if (!createAuthDto.email || !createAuthDto.password) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Email and password are required',
+          error: null,
+          data: null,
+          success: false,
+        }),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const userDto = await this.authUserService.loginUser(createAuthDto);
     const varifyUser = await this.authService.userCredentialsAuthentication(
       userDto,
@@ -80,7 +104,7 @@ export class AuthController {
     );
     res.cookie('accessToken', varifyUser.access_token, {
       httpOnly: true, // cannot be accessed via JS
-      secure: false, // set true if using HTTPS
+      secure: true, // set true if using HTTPS
       sameSite: 'none', // allow cross-site
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
       // partitioned: true,
@@ -99,4 +123,89 @@ export class AuthController {
   async checkJwt(@Param('token') token: string) {
     return this.authService.checkJwt(token);
   }
+  // chack DB user email
+
+  @Public()
+  @Get('check-email/:email')
+  async checkEmail(@Param('email') email: string) {
+    const checkEmail = await this.authUserService.isExestUser(email);
+    if (checkEmail) {
+      return {
+        message: 'Email already exists',
+        success: false,
+      };
+    }
+    return {
+      message: 'Ok',
+      success: true,
+    };
+  }
+
+  // signup varify email
+
+  @Public()
+  @Post('varify-email')
+  varifyemail(
+    @Body(new ValidationPipe({ whitelist: true, transform: true }))
+    data: VarifyEmailDto,
+  ) {
+    return this.authService.varifyemail(data);
+  }
+
+  @Public()
+  @Post('checkVarifyEmail')
+  checkVarifyEmail(@Body() data: CheckVarifyEmail) {
+    return this.authService.checkVarifyEmail(data);
+  }
+
+  // change password
+
+  @Public()
+  @Post('forget-password')
+  async forgetPassword(@Body() data: ForgetPasswordSendEmail) {
+    const isExestUser = await this.authUserService.isExestUser(data.email);
+    if (!isExestUser) {
+      throw new HttpException(
+        cResponseData({
+          message: 'User not found',
+          error: null,
+          data: null,
+          success: false,
+        }),
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return this.authService.forgetPasswordGenaredCode(data);
+  }
+
+  @Public()
+  @Post('forget-password-varify')
+  async forgetPasswordVarify(@Body() data: ForgetPasswordCodeCheck) {
+    return this.authService.checkForgetPasswordCode(data);
+  }
+
+  @Public()
+  @Post('change-password')
+  async changePassword(@Body() data: ForgetPasswordToken) {
+    return this.authService.changePassword(data);
+  }
 }
+
+// auth.service.ts
+// async signup(dto: CreateUserDto, referralCode?: string) {
+//   const newUser = await this.prisma.user.create({
+//     data: {
+//       username: dto.username,
+//       email: dto.email,
+//       password: dto.password, // hash করতে ভুলো না
+//       referredBy: referralCode || null,
+//     },
+//   });
+
+//   // যদি referralCode থাকে তাহলে Referral টেবিলে রেকর্ড তৈরি করো
+//   if (referralCode) {
+//     await this.referralService.createReferral(referralCode, newUser.id);
+//   }
+
+//   return newUser;
+// }

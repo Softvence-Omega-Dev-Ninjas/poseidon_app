@@ -36,7 +36,7 @@ export class StripeService {
       currency: 'usd',
       // payment_method_types: ['card', 'us_bank_account', 'crypto'],
       automatic_payment_methods: { enabled: true },
-      application_fee_amount: platformFee(data.amount),
+      application_fee_amount: platformFee(data.amount), //20%
       metadata: {
         paymentDetails: data.payment_info_id,
         buyerId: data.buyerId,

@@ -114,7 +114,6 @@ export class ProductController {
     );
   }
 
-  
   @Get(':id')
   @Public()
   findOne(@Param('id') id: string) {

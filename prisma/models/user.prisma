@@ -38,8 +38,6 @@ model User {
   serviceOrders ServiceOrder[] @relation("UserServiceOrders")
   serviceSeller ServiceOrder[] @relation("ServiceSeller")
 
-  //
-
   productCategories ProductCategory[]
 
   services Service[]
@@ -61,6 +59,8 @@ model User {
 
   followers Follower[] @relation("UserFollowing")
   following Follower[] @relation("UserFollowers")
+  invited   Referral[] @relation("UserInvited")
+  inviter   Referral[] @relation("UserInviter")
 }
 
 model Profile {
@@ -74,9 +74,20 @@ model Profile {
   country             String?
   postcode            String?
   cover_image         String?
-  cover_image_offsetY String? @default("0")
   description         String?
+  cover_image_offsetY String? @default("0")
   user                User    @relation(fields: [userid], references: [id], onDelete: Cascade)
+}
+
+model Referral {
+  id        String   @id @default(uuid())
+  inviterId String
+  invitedId String
+  createdAt DateTime @default(now())
+  discount  Int      @default(5)
+  completed Boolean  @default(false)
+  invited   User     @relation("UserInvited", fields: [invitedId], references: [id])
+  inviter   User     @relation("UserInviter", fields: [inviterId], references: [id])
 }
 
 enum Roles {

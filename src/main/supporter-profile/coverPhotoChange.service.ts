@@ -12,11 +12,9 @@ export class CoverPhotoChangeService {
   async changeCoverPhotoSupporterProfile({
     userId,
     image,
-    offsetY,
   }: {
     userId: string;
     image?: Express.Multer.File;
-    offsetY: string;
   }) {
     if (!image)
       return cResponseData({
@@ -73,7 +71,6 @@ export class CoverPhotoChangeService {
         },
         data: {
           cover_image: uploadImage.id,
-          cover_image_offsetY: offsetY,
         },
         select: {
           cover_image: true,
@@ -134,7 +131,6 @@ export class CoverPhotoChangeService {
       },
       data: {
         cover_image: uploadImage.id,
-        cover_image_offsetY: offsetY,
       },
       select: {
         cover_image: true,

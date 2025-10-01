@@ -2,11 +2,15 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import Stripe from 'stripe';
 import { ExpreeAccountDto } from './dto/createAccout.dto';
+import { PrismaService } from 'src/prisma-client/prisma-client.service';
 // import cc from 'country-list';
 
 @Injectable()
 export class SellerService {
-  constructor(@Inject('STRIPE_CLIENT') private stripe: Stripe) {}
+  constructor(
+    @Inject('STRIPE_CLIENT') private stripe: Stripe,
+    private readonly prisma: PrismaService,
+  ) {}
 
   // create connected account for seller or supporter
   async createConnectedAccount(user: ExpreeAccountDto) {
@@ -81,6 +85,15 @@ export class SellerService {
         stripeAccount: accountId,
       });
 
+      const payoutlist = await this.stripe.payouts.list(
+        {
+          limit: 10,
+        },
+        {
+          stripeAccount: accountId,
+        },
+      );
+
       function formatAmount(amount: number, currency: string) {
         // Convert cents to dollars
         return new Intl.NumberFormat('en-US', {
@@ -128,6 +141,7 @@ export class SellerService {
         Total_Earning: formatAmount(total, 'usd'),
         Crypto_balance: formatAmount(cryptoPending, 'usd'),
         payouts: payouts,
+        payoutlist,
         rowData: balance,
       };
     } catch (e: unknown) {
@@ -147,18 +161,101 @@ export class SellerService {
   // use to Auth login user system this function
   async checkAccountsInfoSystem(accountId: string) {
     const account = await this.stripe.accounts.retrieve(accountId);
-    console.log('checkAccountsInfoSystem', account);
+    console.log('checkAccountsInfoSystem ================== ', account);
     if (
       !account ||
       !account.external_accounts ||
       !account.external_accounts.data ||
       account.external_accounts.data.length < 1 ||
       !account.tos_acceptance ||
-      !account.tos_acceptance.date
+      !account.tos_acceptance.date ||
+      !account.charges_enabled ||
+      !account.payouts_enabled ||
+      account.requirements?.currently_due?.length !== 0
     ) {
       return false;
     }
     return true;
+  }
+
+  // setup seller account with stripe
+  async sellerAccountSetupClientSecret(accountId: string) {
+    const intent = await this.stripe.accountSessions.create({
+      account: accountId,
+      components: {
+        account_onboarding: {
+          enabled: true,
+        },
+      },
+    });
+    console.log('accountSessions', intent);
+    return intent.client_secret;
+  }
+
+  async sellerAccountSetupClientSecret2(userid: string) {
+    const userInfo = await this.prisma.user.findFirst({
+      where: {
+        id: userid,
+      },
+      include: {
+        profile: true,
+      },
+    });
+
+    if (!userInfo) {
+      return cResponseData({
+        message: 'user not found',
+        data: null,
+        error: null,
+        success: false,
+      });
+    }
+
+    const createUserData = {
+      id: userInfo.id,
+
+      email: userInfo.email,
+
+      url: `viewpage/${userInfo.username}`,
+
+      createProfileDto: {
+        name: userInfo.profile?.name ?? '',
+
+        username: userInfo.username,
+
+        address: userInfo.profile?.address ?? '',
+
+        state: userInfo.profile?.state ?? '',
+
+        city: userInfo.profile?.city ?? '',
+
+        country: userInfo.profile?.country ?? '',
+
+        postcode: userInfo.profile?.postcode ?? '',
+
+        description: userInfo.profile?.description ?? '',
+      },
+    };
+
+    const accountId = await this.createConnectedAccount(createUserData);
+
+    if (!accountId) {
+      return cResponseData({
+        message: 'Failed to create Stripe account',
+        data: null,
+        error: null,
+        success: false,
+      });
+    }
+
+    const intent = await this.stripe.accountLinks.create({
+      account: accountId.id,
+      refresh_url: 'http://localhost:5173/dashboard/payout',
+      return_url: 'http://localhost:5173/dashboard/payout',
+      type: 'account_onboarding',
+    });
+    console.log('accountSessions', intent);
+    return intent;
   }
 
   async deleteAccount(accountId: string) {

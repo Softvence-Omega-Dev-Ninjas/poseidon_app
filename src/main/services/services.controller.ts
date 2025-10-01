@@ -36,6 +36,7 @@ import {
 } from './dto/create-services';
 import { Public } from 'src/auth/guard/public.decorator';
 import { Request } from 'express';
+import { PiStripeId } from 'src/common/dto/pi_stripeId.dto';
 
 @ApiTags('Service')
 @Controller('service')
@@ -198,8 +199,14 @@ export class ServiceController {
   }
 
   @Roles(Role.Supporter)
-  @Get('getServicesBuyPayemtData')
+  @Get('getServices/BuyPayemtData')
   getServicesBuyPayemtData(@Req() req: Request) {
     return this.serviceService.getServicesBuyPayemtData(req['sub'] as string);
+  }
+
+  @Roles(Role.User, Role.Supporter)
+  @Post('getServices/paymentStatusCheck')
+  paymentStatusCheck(@Body() body: PiStripeId) {
+    return this.serviceService.paymentStatusCheck(body);
   }
 }
