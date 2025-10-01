@@ -78,10 +78,13 @@ export class PayoutService {
       success: true,
     });
   }
-  async sellerAccountSetupClientSecret_2(
-    userid: string,
-    redirect_url?: string,
-  ) {
+  async sellerAccountSetupClientSecret_2({
+    userid,
+    redirect_url,
+  }: {
+    userid: string;
+    redirect_url: string;
+  }) {
     if (!userid) {
       return cResponseData({
         message: 'user not found',
@@ -92,7 +95,7 @@ export class PayoutService {
     }
     return await this.sellerServiceStripe.sellerAccountSetupClientSecret2(
       userid,
-      redirect_url,
+      redirect_url ? redirect_url : '',
     );
   }
 }

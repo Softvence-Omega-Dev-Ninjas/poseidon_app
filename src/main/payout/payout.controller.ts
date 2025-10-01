@@ -39,9 +39,9 @@ export class PayoutController {
     @Body() body: RedirectUrlDto,
     @Req() req: Request,
   ) {
-    return this.payoutService.sellerAccountSetupClientSecret_2(
-      req['sub'] as string,
-      body.redirect_url,
-    );
+    return this.payoutService.sellerAccountSetupClientSecret_2({
+      userid: req['sub'] as string,
+      redirect_url: body.redirect_url ? body.redirect_url : '',
+    });
   }
 }

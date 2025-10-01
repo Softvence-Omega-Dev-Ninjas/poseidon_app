@@ -8,5 +8,5 @@ export class RedirectUrlDto {
     description: 'redirect url',
     example: 'dashboard/payout/.....',
   })
-  redirect_url?: string;
+  redirect_url?: string | undefined | null;
 }
