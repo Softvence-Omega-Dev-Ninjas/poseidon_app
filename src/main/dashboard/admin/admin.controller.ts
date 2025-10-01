@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Query, Req } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Query } from '@nestjs/common';
 import { AdminOverviewService } from './services/overview.service';
 import { AdminBarStarService } from './services/bar-stars.service';
 import { Roles } from 'src/auth/guard/roles.decorator';
@@ -16,7 +16,7 @@ export class AdminController {
 
   @Get('stats')
   @Roles(Role.Admin)
-  getStats(@Req() res: Request) {
+  getStats() {
     return this.overviewService.getStats();
   }
 
@@ -37,7 +37,10 @@ export class AdminController {
     @Query('year') year: number,
   ) {
     // TODO(coderboysobu) validate params before continue
-    return this.overviewService.getIncomeStats(Number(month), Number(year));
+    return await this.overviewService.getIncomeStats(
+      Number(month),
+      Number(year),
+    );
   }
 
   // Bar stars
@@ -65,7 +68,6 @@ export class AdminController {
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Query('query') query: string,
-    @Req() res: Request,
   ) {
     return this.barStarsService.findMany(page, limit, query);
   }
@@ -111,7 +113,6 @@ export class AdminController {
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Query('query') query: string,
-    @Req() res: Request,
   ) {
     return this.generalUserService.findMany(page, limit, query);
   }
