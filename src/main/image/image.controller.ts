@@ -34,6 +34,7 @@ import { CreateImageCommentDto } from './dto/create-image-comment.dto';
 import { FindAllImageCommentsDto } from './dto/find-all-image-comments.dto';
 import { Visibility } from '../../../generated/prisma';
 import { Public } from 'src/auth/guard/public.decorator';
+import { Request } from 'express';
 
 @ApiTags('images')
 @Roles(Role.Admin, Role.Supporter, Role.User)
@@ -124,11 +125,16 @@ export class ImageController {
     @Param('id') id: string,
     @Body() updateImageDto: UpdateImageDto,
     @UploadedFile() newImage: Express.Multer.File,
-    @Req() req,
+    @Req() req: Request,
   ) {
     console.log(updateImageDto);
     console.log(newImage);
-    return this.imageService.update(id, updateImageDto, newImage, req.sub);
+    return this.imageService.update(
+      id,
+      updateImageDto,
+      newImage,
+      req['sub'] as string,
+    );
   }
 
   @Delete(':id')

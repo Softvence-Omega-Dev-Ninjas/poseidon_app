@@ -21,10 +21,10 @@ export class UpdateImageDto extends PartialType(CreateImageDto) {
   })
   @IsOptional()
   @IsEnum(Visibility)
-  @Transform(({ value }) => {
-    if (!value || value === '--') return undefined;
-    return value.toLowerCase();
-  })
+  // @Transform(({ value }: { value: string }) => {
+  //   if (!value || value === '--') return undefined;
+  //   return value.toLowerCase();
+  // })
   visibility?: Visibility;
 
   @ApiProperty({
