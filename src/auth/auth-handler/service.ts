@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthHandlerRepository } from './repository';
 import { SellerService } from 'src/utils/stripe/seller.service';
 import { omit, slugify } from './utils';
+import { profileRequiments } from './utils/constants';
 
 @Injectable()
 export class AuthHandlerService {
@@ -19,7 +20,6 @@ export class AuthHandlerService {
   ) {}
 
   async store(input: Partial<CreateLoginDto>, query?: RefDto) {
-    console.log('input: ', input);
     // if query has refId then work with ref -> query?.refId
     if (query?.refId) {
       // handle refferel system
@@ -64,15 +64,21 @@ export class AuthHandlerService {
             : false;
 
         const userObj = omit(user, ['stripeAccountId']);
+        if (!userObj.profile)
+          throw new InternalServerErrorException(
+            'Something went wrong! Fail to create user profile',
+          );
         return {
           access_token: `Bearer ${token}`,
           user: {
             ...userObj,
             profile_varify: user.varify,
             financial_account:
-              user?.role == 'user' || user?.role == 'admin' ? true : isStrip,
+              ['user', 'admin'].includes(user?.role) || isStrip,
+            isFirst: !profileRequiments.every(
+              (field) => field in userObj.profile!,
+            ), // if all is include then return false otherwise return true
           },
-          isFirst: true,
         };
       } else {
         // if user found then based on the page ref send them the response
@@ -98,7 +104,9 @@ export class AuthHandlerService {
                 ? true
                 : isStrip,
           },
-          isFirst: true,
+          isFirst: !profileRequiments.every(
+            (field) => field in userObj.profile!,
+          ), // if all is include then return false otherwise return true
         };
       }
     } else {
