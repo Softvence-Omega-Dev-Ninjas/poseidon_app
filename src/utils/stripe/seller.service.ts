@@ -3,6 +3,8 @@ import { cResponseData } from 'src/common/utils/common-responseData';
 import Stripe from 'stripe';
 import { ExpreeAccountDto } from './dto/createAccout.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
+import { calculateStripeBalances } from 'src/common/utils/stripeAmountCalculation';
+// import { calculateStripeBalances } from 'src/common/utils/stripeAmountCalculation';
 // import cc from 'country-list';
 
 @Injectable()
@@ -102,16 +104,7 @@ export class SellerService {
         }).format(amount / 100);
       }
 
-      const available = balance.available.reduce(
-        (sum, b) => (b.currency == 'usd' ? sum + b.amount : 0),
-        0,
-      );
-      const pending = balance.pending.reduce(
-        (sum, b) => (b.currency == 'usd' ? sum + b.amount : 0),
-        0,
-      );
-      const total = available + pending;
-
+      // cryptoTotal
       const cCurrency = ['usdc', 'usdp', 'usdg'];
 
       const cryptoAvailable = balance.available.reduce(
@@ -126,21 +119,44 @@ export class SellerService {
 
       console.log('cryptoTotal', cryptoTotal);
 
-      const payouts = await this.stripe.payouts.list(
-        {
-          limit: 10,
-        },
-        {
-          stripeAccount: accountId,
-        },
+      //////
+      const sumAmounts = (arr: { amount: number }[] = []) =>
+        arr.reduce((total, item) => total + item.amount, 0);
+
+      const available = sumAmounts(balance.available);
+      const instantAvailable = sumAmounts(balance.instant_available);
+      const pending = sumAmounts(balance.pending);
+
+      const refundAvailable = sumAmounts(
+        balance.refund_and_dispute_prefunding?.available || [],
+      );
+      const refundPending = sumAmounts(
+        balance.refund_and_dispute_prefunding?.pending || [],
       );
 
       return {
         // Withdraw: formatAmount(available, 'usd'),
-        Available_for_Payout: formatAmount(pending, 'usd'),
-        Total_Earning: formatAmount(total, 'usd'),
+        Available_for_Payout: formatAmount(
+          calculateStripeBalances({
+            available,
+            pending,
+            refundAvailable,
+            refundPending,
+            instantAvailable,
+          }).totalAvailableBalance,
+          'usd',
+        ),
+        Total_Earning: formatAmount(
+          calculateStripeBalances({
+            available,
+            pending,
+            refundAvailable,
+            refundPending,
+            instantAvailable,
+          }).totalEarningBalance,
+          'usd',
+        ),
         Crypto_balance: formatAmount(cryptoPending, 'usd'),
-        payouts: payouts,
         payoutlist,
         rowData: balance,
       };
@@ -215,11 +231,18 @@ export class SellerService {
       const check = await this.checkAccountsInfoSystem(
         userInfo.stripeAccountId,
       );
-      if (!check)
-        await this.createOnboardingAccountLink(
+      if (!check) {
+        const intent = await this.createOnboardingAccountLink(
           userInfo.stripeAccountId,
           redirect_url,
         );
+        return cResponseData({
+          message: 'Stripe account created successfully',
+          data: intent,
+          error: null,
+          success: true,
+        });
+      }
     }
 
     const createUserData = {
@@ -275,6 +298,88 @@ export class SellerService {
       data: intent,
       error: null,
       success: true,
+    });
+  }
+
+  async sellerPayoutSystem(stripeAccountId: string, amount: number) {
+    if (!stripeAccountId)
+      return cResponseData({
+        message: 'Stripe account Setup',
+        data: null,
+        error: null,
+        success: false,
+      });
+    const checkAcount = await this.checkAccountsInfoSystem(stripeAccountId);
+    if (!checkAcount)
+      return cResponseData({
+        message: 'Stripe account Setup',
+        data: null,
+        error: null,
+        success: false,
+      });
+
+    const balance = await this.stripe.balance.retrieve({
+      stripeAccount: stripeAccountId,
+    });
+
+    const sumAmounts = (arr: { amount: number }[] = []) =>
+      arr.reduce((total, item) => total + item.amount, 0);
+
+    const available = sumAmounts(balance.available);
+    const instantAvailable = sumAmounts(balance.instant_available);
+    const pending = sumAmounts(balance.pending);
+
+    const refundAvailable = sumAmounts(
+      balance.refund_and_dispute_prefunding?.available || [],
+    );
+    const refundPending = sumAmounts(
+      balance.refund_and_dispute_prefunding?.pending || [],
+    );
+
+    const availableBalance = calculateStripeBalances({
+      available,
+      pending,
+      refundAvailable,
+      refundPending,
+      instantAvailable,
+    }).totalAvailableBalance;
+
+    function formatAmount(amount: number, currency: string) {
+      // Convert cents to dollars
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency,
+      }).format(amount / 100);
+    }
+
+    if (availableBalance / 100 < amount) {
+      return cResponseData({
+        message: 'Your Balance Is Low',
+        data: {
+          balance: formatAmount(availableBalance, 'usd'),
+        },
+        error: null,
+        success: false,
+      });
+    }
+
+    // const payOut = await this.stripe.payouts.retrieve(stripeAccountId);
+    const payOut = await this.stripe.payouts.create(
+      {
+        amount: amount * 100,
+        currency: 'usd',
+        destination: stripeAccountId,
+      },
+      {
+        stripeAccount: stripeAccountId,
+      },
+    );
+
+    return cResponseData({
+      message: 'Your Payout successfuly tranfrom',
+      data: payOut,
+      error: null,
+      success: false,
     });
   }
 

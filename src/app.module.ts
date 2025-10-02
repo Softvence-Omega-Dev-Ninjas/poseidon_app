@@ -28,7 +28,8 @@ import { GlobalMailModule } from './common/mail/global-mail.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('AUTHSECRET'),
+        secret:
+          configService.get<string>('AUTHSECRET') || process.env.AUTHSECRET,
         signOptions: { expiresIn: '1d' },
       }),
     }),

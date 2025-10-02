@@ -3,11 +3,15 @@ import { PayoutService } from './payout.service';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { Request } from 'express';
-import { RedirectUrlDto } from './dto/create-payout.dto';
+import { RedirectUrlDto, SellerPayoutAmount } from './dto/create-payout.dto';
+import { SellerService } from 'src/utils/stripe/seller.service';
 
 @Controller('payout')
 export class PayoutController {
-  constructor(private readonly payoutService: PayoutService) {}
+  constructor(
+    private readonly payoutService: PayoutService,
+    private readonly sellerServiceStripe: SellerService,
+  ) {}
 
   @Roles(Role.Supporter)
   @Get('balance-sheet')
@@ -43,5 +47,24 @@ export class PayoutController {
       userid: req['sub'] as string,
       redirect_url: body.redirect_url ? body.redirect_url : '',
     });
+  }
+
+  @Roles(Role.Supporter)
+  @Get('checkVerify-StripeAcount')
+  async checkVarifyStripeAcount(@Req() req: Request) {
+    console.log(req['sub']);
+    return await this.payoutService.checkoutAccount(req['sub'] as string);
+  }
+
+  @Roles(Role.Supporter)
+  @Post('sellerPayoutSystem')
+  async sellerPayoutSystem(
+    @Body() body: SellerPayoutAmount,
+    @Req() req: Request,
+  ) {
+    return this.sellerServiceStripe.sellerPayoutSystem(
+      req['stripeAccountId'] as string,
+      body.amount,
+    );
   }
 }
