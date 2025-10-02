@@ -5,6 +5,7 @@ import { Role } from 'src/auth/guard/role.enum';
 import { Request } from 'express';
 import { RedirectUrlDto, SellerPayoutAmount } from './dto/create-payout.dto';
 import { SellerService } from 'src/utils/stripe/seller.service';
+import { Public } from 'src/auth/guard/public.decorator';
 
 @Controller('payout')
 export class PayoutController {
@@ -65,6 +66,7 @@ export class PayoutController {
   ) {
     return this.sellerServiceStripe.sellerPayoutSystem(
       req['stripeAccountId'] as string,
+      body.amount,
     );
   }
 }
