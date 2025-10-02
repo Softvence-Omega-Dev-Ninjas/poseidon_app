@@ -52,9 +52,8 @@ export class PayoutController {
   @Roles(Role.Supporter)
   @Get('checkVerify-StripeAcount')
   async checkVarifyStripeAcount(@Req() req: Request) {
-    return await this.payoutService.checkoutAccount(
-      req['stripeAccountId'] as string,
-    );
+    console.log(req['sub']);
+    return await this.payoutService.checkoutAccount(req['sub'] as string);
   }
 
   @Roles(Role.Supporter)
