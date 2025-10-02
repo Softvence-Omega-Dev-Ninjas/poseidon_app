@@ -5,10 +5,13 @@ import { UserModule } from 'src/main/user/user.module';
 import { CloudinaryModule } from 'src/utils/cloudinary/cloudinary.module';
 import { StripeModule } from 'src/utils/stripe/stripe.module';
 import { MailModule } from 'src/utils/mail/mail.module';
+import { AuthHandlerRepository } from './auth-handler/repository';
+import { AuthHandlerService } from './auth-handler/service';
 
 @Module({
   imports: [UserModule, CloudinaryModule, StripeModule, MailModule],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, AuthHandlerRepository, AuthHandlerService],
+  exports: [],
 })
 export class AuthModule {}

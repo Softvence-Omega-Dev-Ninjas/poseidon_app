@@ -10,11 +10,12 @@ import {
   Param,
   ValidationPipe,
   HttpException,
+  Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CredentialsSignInInfo } from './dto/create-auth.dto';
 import { AuthUserService } from 'src/main/user/user-auth-info/authUser.service';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { Public } from './guard/public.decorator';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -30,6 +31,9 @@ import {
   VarifyEmailDto,
 } from './dto/varify.dto';
 import { cResponseData } from 'src/common/utils/common-responseData';
+import { CreateLoginDto, RefDto } from './dto/create-or-login';
+import { AuthHandlerService } from './auth-handler/service';
+import { cookieHandler } from 'src/common/utils/cookie-handler';
 
 @Controller('auth')
 export class AuthController {
@@ -37,6 +41,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly authUserService: AuthUserService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly authHandlerService: AuthHandlerService,
   ) {}
 
   @Public()
@@ -98,6 +103,7 @@ export class AuthController {
     }
 
     const userDto = await this.authUserService.loginUser(createAuthDto);
+
     const varifyUser = await this.authService.userCredentialsAuthentication(
       userDto,
       createAuthDto.password,
@@ -188,6 +194,26 @@ export class AuthController {
   @Post('change-password')
   async changePassword(@Body() data: ForgetPasswordToken) {
     return this.authService.changePassword(data);
+  }
+
+  @Public()
+  @Post('create-login-ref')
+  async createLoginRef(
+    @Res() response: Response,
+    @Body() body: CreateLoginDto,
+    @Query() query?: RefDto,
+  ) {
+    try {
+      const res = await this.authHandlerService.store(body, query);
+      cookieHandler(response, 'set', res?.access_token);
+      return response.status(HttpStatus.OK).json(res);
+    } catch (err: any) {
+      console.log(err);
+      // return err;
+      return response
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: err.message || 'something went wrong!' });
+    }
   }
 }
 

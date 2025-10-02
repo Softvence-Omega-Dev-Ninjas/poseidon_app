@@ -6,6 +6,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
@@ -19,7 +20,9 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "src/*": ["src/*"],
-      "generated/*": ["generated/*"]
+      "generated/*": ["generated/*"],
+      "@app/*": ["src/app-metadata/*"],
+      "@constant/*": ["src/constants/*"]
     }
   }
 }

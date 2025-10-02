@@ -7,11 +7,12 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { HttpExceptionFiller } from './common/fillters/http-exception.fillter';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
-
 import { PrismaClientModule } from './prisma-client/prisma-client.module';
 import { TrackVisitMiddleware } from './main/middlewares/track.middleware';
 import { UserModule } from './main/user/user.module';
 import { MailModule } from './utils/mail/mail.module';
+import { UploadsModule } from './uploads/uploads.module';
+import { GlobalMailModule } from './common/mail/global-mail.module';
 
 @Module({
   imports: [
@@ -31,7 +32,9 @@ import { MailModule } from './utils/mail/mail.module';
         signOptions: { expiresIn: '1d' },
       }),
     }),
+    GlobalMailModule,
     MailModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [
