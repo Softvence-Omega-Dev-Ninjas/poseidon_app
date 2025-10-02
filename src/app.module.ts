@@ -8,7 +8,6 @@ import { HttpExceptionFiller } from './common/fillters/http-exception.fillter';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
 import { PrismaClientModule } from './prisma-client/prisma-client.module';
-import { ContinueModule } from './continue/continue.module';
 import { TrackVisitMiddleware } from './main/middlewares/track.middleware';
 import { UserModule } from './main/user/user.module';
 import { MailModule } from './utils/mail/mail.module';
@@ -19,7 +18,6 @@ import { GlobalMailModule } from './common/mail/global-mail.module';
   imports: [
     PrismaClientModule,
     AuthModule,
-    ContinueModule,
     UserModule,
     MainModule,
     ConfigModule.forRoot({
