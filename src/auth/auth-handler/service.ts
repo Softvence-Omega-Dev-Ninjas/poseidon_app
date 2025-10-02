@@ -7,7 +7,6 @@ import {
 import { authProviders, CreateLoginDto, RefDto } from '../dto/create-or-login';
 import { JwtService } from '@nestjs/jwt';
 import { AuthHandlerRepository } from './repository';
-import argon2 from 'argon2';
 import { SellerService } from 'src/utils/stripe/seller.service';
 import { omit, slugify } from './utils';
 
@@ -19,7 +18,7 @@ export class AuthHandlerService {
     private readonly stripeSellerService: SellerService,
   ) {}
 
-  async store(query?: RefDto, input?: Partial<CreateLoginDto>) {
+  async store(input: Partial<CreateLoginDto>, query?: RefDto) {
     // if query has refId then work with ref -> query?.refId
     if (query?.refId) {
       // handle refferel system
@@ -72,6 +71,7 @@ export class AuthHandlerService {
             financial_account:
               user?.role == 'user' || user?.role == 'admin' ? true : isStrip,
           },
+          isFirst: true,
         };
       } else {
         // if user found then based on the page ref send them the response
@@ -97,12 +97,18 @@ export class AuthHandlerService {
                 ? true
                 : isStrip,
           },
+          isFirst: true,
         };
       }
     } else {
+      // creatdential login/signup system
       // handle generel creating accocunt or login
       // TODO: call the sarif vaiyer service
+      await this.handleCreadential(input, query);
     }
+  }
+  async handleCreadential(input: Partial<CreateLoginDto>, ref?: RefDto) {
+    // credential handle from here...
   }
   async handleRefferel(id: string) {
     // find user with that id (because referral is a user id)

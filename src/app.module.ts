@@ -13,6 +13,7 @@ import { TrackVisitMiddleware } from './main/middlewares/track.middleware';
 import { UserModule } from './main/user/user.module';
 import { MailModule } from './utils/mail/mail.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { GlobalMailModule } from './common/mail/global-mail.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { UploadsModule } from './uploads/uploads.module';
         signOptions: { expiresIn: '1d' },
       }),
     }),
+    GlobalMailModule,
     MailModule,
     UploadsModule,
   ],

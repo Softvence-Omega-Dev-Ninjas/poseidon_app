@@ -192,7 +192,7 @@ export class AuthController {
     @Query() query?: RefDto,
   ) {
     try {
-      const res = await this.authHandlerService.store(query, body);
+      const res = await this.authHandlerService.store(body, query);
       cookieHandler(response, 'set', res?.access_token);
       return response.status(HttpStatus.OK).json(res);
     } catch (err: any) {

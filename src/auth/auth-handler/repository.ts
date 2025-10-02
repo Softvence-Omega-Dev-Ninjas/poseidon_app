@@ -44,12 +44,12 @@ export class AuthHandlerRepository {
     });
   }
   async create(input: CreateLoginDto) {}
+
   private async createSuppporter(
     input: CreateLoginDto,
     tx: PrismaTx,
     refUserId?: string,
   ) {
-    console.log(input);
     // extract profile
     const profile = input.profile;
     if (refUserId && input.role === 'user') {

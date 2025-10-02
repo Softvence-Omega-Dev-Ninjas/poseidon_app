@@ -7,6 +7,9 @@ export const userSelect = {
   profile: {
     select: {
       name: true,
+      image: true,
+      cover_image: true,
+      cover_image_offsetY: true,
       address: true,
       city: true,
       country: true,
