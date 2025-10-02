@@ -19,6 +19,7 @@ export class AuthHandlerService {
   ) {}
 
   async store(input: Partial<CreateLoginDto>, query?: RefDto) {
+    console.log('input: ', input);
     // if query has refId then work with ref -> query?.refId
     if (query?.refId) {
       // handle refferel system
