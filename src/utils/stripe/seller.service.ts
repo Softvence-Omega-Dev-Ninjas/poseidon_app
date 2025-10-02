@@ -112,6 +112,7 @@ export class SellerService {
       );
       const total = available + pending;
 
+      // cryptoTotal
       const cCurrency = ['usdc', 'usdp', 'usdg'];
 
       const cryptoAvailable = balance.available.reduce(
@@ -275,6 +276,28 @@ export class SellerService {
       data: intent,
       error: null,
       success: true,
+    });
+  }
+
+  async sellerPayoutSystem(stripeAccountId: string) {
+    if (!stripeAccountId)
+      return cResponseData({
+        message: 'Stripe account Setup',
+        data: null,
+        error: null,
+        success: false,
+      });
+    const checkAcount = await this.checkAccountsInfoSystem(stripeAccountId);
+    if (!checkAcount)
+      return cResponseData({
+        message: 'Stripe account Setup',
+        data: null,
+        error: null,
+        success: false,
+      });
+
+    return await this.stripe.balance.retrieve({
+      stripeAccount: stripeAccountId,
     });
   }
 
