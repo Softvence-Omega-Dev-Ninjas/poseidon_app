@@ -8,9 +8,9 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
-import { SuccessPage } from 'generated/prisma';
 import { ApiProperty } from '@nestjs/swagger';
 import { StructuredArrayItemDto } from 'src/common/dto/structured-array.dto';
+import { SuccessPage } from '@prisma/client';
 
 export class UpdateProductDto {
   @ApiProperty({ required: false })

@@ -6,9 +6,9 @@ import {
   FindAllProductCategoriesDto,
   ProductCategorySortBy,
 } from './dto/find-all-product-categories.dto';
-import { Prisma } from 'generated/prisma';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { cResponseData } from 'src/common/utils/common-responseData';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProductCategoryService {

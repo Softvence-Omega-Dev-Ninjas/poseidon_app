@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { LayoutType } from '@prisma/client';
 import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { LayoutType } from 'generated/prisma';
 
 export class CheersLivePackageType {
   @ApiProperty({

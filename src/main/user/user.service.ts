@@ -1,11 +1,9 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { AxiosError } from 'axios';
-import { UserVisit } from 'generated/prisma';
-import { catchError, firstValueFrom } from 'rxjs';
+import { Injectable } from '@nestjs/common';
 import { Role } from 'src/auth/guard/role.enum';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 import * as geoip from 'geoip-lite';
+import { UserVisit } from '@prisma/client';
 
 @Injectable()
 export class UserService {

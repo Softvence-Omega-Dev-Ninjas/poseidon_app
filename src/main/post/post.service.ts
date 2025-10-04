@@ -9,10 +9,10 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { FindAllPostsDto, PostSortBy } from './dto/find-all-posts.dto';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
-import { Post, Prisma } from '../../../generated/prisma';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { FindAllCommentsDto } from './dto/find-all-comments.dto';
 import { cResponseData } from 'src/common/utils/common-responseData';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PostService {

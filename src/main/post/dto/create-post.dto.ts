@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { WhoCanSee } from 'generated/prisma';
+import { WhoCanSee } from '@prisma/client';
 
 export class CreatePostDto {
   @ApiProperty({ example: true, description: 'Whether the post is drafted' })
