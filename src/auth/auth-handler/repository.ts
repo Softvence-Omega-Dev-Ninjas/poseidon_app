@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
-import { CreateLoginDto } from '../dto/create-or-login';
+import { CreateLoginDto, roles } from '../dto/create-or-login';
 import { PrismaTx } from 'src/@types';
 import { userSelect } from './utils/select';
 
@@ -29,7 +29,7 @@ export class AuthHandlerRepository {
   }
   async createAuthProvider(input: CreateLoginDto, refUserId?: string) {
     return await this.prisma.$transaction(async (tx: PrismaTx) => {
-      if (input.role === 'supporter' || input.role === 'user') {
+      if (['user', 'supporter'].includes(input.role!)) {
         // if user role is supporter then create supporter account with profile, support_cart_layout, shop, memberships_owner
         const user = this.createSuppporter(input, tx, refUserId);
         if (!user)

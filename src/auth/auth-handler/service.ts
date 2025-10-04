@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -43,7 +44,10 @@ export class AuthHandlerService {
         throw new InternalServerErrorException('Fail to extract username');
       // check this username is already exist or not
       const isUser = await this.repository.findByUsername(username);
+
       if (!isUser) {
+        if (!input.role) throw new ConflictException('Please signup first!');
+
         // if user not found & (make it's provider include with our auth) then create account and send them a token
         const user = await this.repository.createAuthProvider(
           {

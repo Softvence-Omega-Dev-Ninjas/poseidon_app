@@ -6,5 +6,6 @@ model UserAvailability {
 
   startTime DateTime
   endTime   DateTime
+
   isBooked  Boolean  @default(false)
 }
