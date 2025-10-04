@@ -89,7 +89,6 @@ export class CreateUserDto {
   })
   referralId?: string;
 
-
   @ApiProperty({
     required: false,
     type: () => CreateUserProfileDto,

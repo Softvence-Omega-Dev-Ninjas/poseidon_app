@@ -208,7 +208,8 @@ export class ImageService {
       const updatedImage = await this.prisma.image.update({
         where: { id },
         data: {
-          ...updateImageDto,
+          title: updateImageDto.title,
+          visibility: updateImageDto.visibility,
           mediaId: updatedMediaId,
         },
       });

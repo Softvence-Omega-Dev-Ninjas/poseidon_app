@@ -51,8 +51,8 @@ export class AuthController {
   @ApiBody({ type: SignUpUserDto })
   async signup(
     @Body('skip', StringToBooleanPipe) skip: boolean,
-    @Body() createAuthDto: SignUpUserDto,
     @UploadedFile(new ImageValidationPipe()) image: Express.Multer.File,
+    @Body(new ValidationPipe()) createAuthDto: SignUpUserDto,
   ) {
     // call cloudinary profile image upload - this area
     const { imageUrl } = await this.cloudinaryService.profileImageUpload(image);
@@ -87,9 +87,21 @@ export class AuthController {
   @Public()
   @Post('signin')
   async signin(
-    @Body() createAuthDto: CredentialsSignInInfo,
+    @Body(new ValidationPipe()) createAuthDto: CredentialsSignInInfo,
     @Res() res: Response,
   ) {
+    if (!createAuthDto.email || !createAuthDto.password) {
+      throw new HttpException(
+        cResponseData({
+          message: 'Email and password are required',
+          error: null,
+          data: null,
+          success: false,
+        }),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const userDto = await this.authUserService.loginUser(createAuthDto);
 
     const varifyUser = await this.authService.userCredentialsAuthentication(

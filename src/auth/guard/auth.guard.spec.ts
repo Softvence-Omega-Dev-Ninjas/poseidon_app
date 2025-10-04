@@ -7,7 +7,12 @@ import { PrismaService } from 'src/prisma-client/prisma-client.service';
 describe('AuthGuard', () => {
   it('should be defined', () => {
     expect(
-      new AuthGuard(new Reflector(), new JwtService({}), new ConfigService(), new PrismaService()),
+      new AuthGuard(
+        new Reflector(),
+        new JwtService({}),
+        new ConfigService(),
+        new PrismaService(),
+      ),
     ).toBeDefined();
   });
 });

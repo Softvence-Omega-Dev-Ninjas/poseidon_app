@@ -46,7 +46,7 @@ export class AdminOverviewService {
     const income = await this.calculateIncome(month, year);
     const daysIncome = await this.calculateIncomeByDay(month, year);
     return {
-      netIncome: 5000,
+      netIncome: income.adminNetIncome,
       totalAmount: income.totalAmount,
       daysIncome: daysIncome,
     };
@@ -200,5 +200,9 @@ export class AdminOverviewService {
       supporterPayments: supporterPayments._sum.total_price || 0,
       membershipPayments: paymentDetails._sum.amount || 0,
     };
+  }
+
+  async visitorChart() {
+    return await this.userService.getVisitsByCountry();
   }
 }
