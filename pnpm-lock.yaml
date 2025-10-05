@@ -45,13 +45,8 @@ importers:
         specifier: ^11.1.5
         version: 11.1.5(@nestjs/common@11.1.3(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.3)(@nestjs/platform-socket.io@11.1.5)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@prisma/client':
-<<<<<<< HEAD
-        specifier: 6.11.1
-        version: 6.11.1(prisma@6.11.1(typescript@5.8.3))(typescript@5.8.3)
-=======
         specifier: 6.16.3
         version: 6.16.3(prisma@6.16.3(typescript@5.8.3))(typescript@5.8.3)
->>>>>>> dev
       '@types/nodemailer':
         specifier: ^7.0.1
         version: 7.0.2
@@ -91,11 +86,6 @@ importers:
       ioredis:
         specifier: ^5.6.1
         version: 5.7.0
-<<<<<<< HEAD
-      nodemailer:
-        specifier: ^7.0.6
-        version: 7.0.6
-=======
       multer:
         specifier: ^2.0.2
         version: 2.0.2
@@ -111,7 +101,6 @@ importers:
       passport-google-oauth20:
         specifier: ^2.0.0
         version: 2.0.0
->>>>>>> dev
       passport-jwt:
         specifier: ^4.0.1
         version: 4.0.1
@@ -1616,8 +1605,6 @@ packages:
   '@types/nodemailer@7.0.2':
     resolution: {integrity: sha512-Zo6uOA9157WRgBk/ZhMpTQ/iCWLMk7OIs/Q9jvHarMvrzUUP/MDdPHL2U1zpf57HrrWGv4nYQn5uIxna0xY3xw==}
 
-<<<<<<< HEAD
-=======
   '@types/oauth@0.9.6':
     resolution: {integrity: sha512-H9TRCVKBNOhZZmyHLqFt9drPM9l+ShWiqqJijU1B8P3DX3ub84NjxDuy+Hjrz+fEca5Kwip3qPMKNyiLgNJtIA==}
 
@@ -1627,7 +1614,6 @@ packages:
   '@types/passport-google-oauth20@2.0.16':
     resolution: {integrity: sha512-ayXK2CJ7uVieqhYOc6k/pIr5pcQxOLB6kBev+QUGS7oEZeTgIs1odDobXRqgfBPvXzl0wXCQHftV5220czZCPA==}
 
->>>>>>> dev
   '@types/passport-jwt@4.0.1':
     resolution: {integrity: sha512-Y0Ykz6nWP4jpxgEUYq8NoVZeCQPo1ZndJLfapI249g1jHChvRfZRO/LS3tqu26YgAS/laI1qx98sYGz0IalRXQ==}
 
@@ -3732,7 +3718,6 @@ packages:
     engines: {node: '>=0.6.0', teleport: '>=0.2.0'}
     deprecated: |-
       You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
-
       (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
 
   qs@6.14.0:
