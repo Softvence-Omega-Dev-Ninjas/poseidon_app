@@ -1,5 +1,8 @@
 export type MakeRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 
+export const locale = ['en', 'fr', 'es', 'de', 'nl', 'pt', 'it', 'uk'] as const;
+export type Locale = (typeof locale)[number];
+
 export type Location = {
   kind: 'zoom_conference'; // You can expand this if other kinds are expected
 };
@@ -15,10 +18,9 @@ export type CalendlyPayload = {
   timezone: string;
   description?: string;
   scheduling_url: string | null; // Can be a string or null
-  locale: string;
+  locale: Locale;
   visibility: 'public' | 'private'; // You can adjust this based on possible values
   active: boolean;
-  duration_options?: number[]; // Uncomment if duration_options is needed in the future
 };
 
 // evnet

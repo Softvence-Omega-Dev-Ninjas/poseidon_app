@@ -3,8 +3,8 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
-import axios from 'axios';
 import {
   CalendlyEvent,
   CalendlyEventCollection,
@@ -14,24 +14,21 @@ import {
 import { defaultCalendlyPayload } from './constants';
 import { slugify } from 'src/auth/auth-handler/utils';
 import { ConfigService } from '@nestjs/config';
+import { UpdateCalendlyEventDto } from './dto/create-event.dto';
+import { axios } from './utils';
 
 @Injectable()
 export class CalendlyService {
-  private CALENDLY_API = 'https://api.calendly.com';
-  private AUTH_HEADER = {};
+  protected CALENDLY_AUTH_URI: string;
 
-  constructor(private readonly config: ConfigService) {
-    this.AUTH_HEADER = {
-      Authorization: `Bearer ${this.config.getOrThrow<string>('CALENDLY_PERSONAL_ACCESS_TOKEN')}`,
-      'Content-Type': 'application/json',
-    };
+  constructor(protected readonly config: ConfigService) {
+    this.CALENDLY_AUTH_URI = config.getOrThrow('CALENDLY_AUTH_URI');
   }
 
-  async createEvent(input: CalendlyPayload) {
+  public async createEvent(input: CalendlyPayload) {
     if (!input.name || !input.duration)
-      throw new BadRequestException('name and duration required');
+      throw new BadRequestException('Event name and duration is required');
 
-    // Step 1: Get authenticated user (to assign event under their profile)
     // const uri = await this.getme();
     const uri = this.config.getOrThrow<string>('CALENDLY_AUTH_URI');
 
@@ -40,46 +37,47 @@ export class CalendlyService {
     const payload = this.generatePayload({ ...input, owner: uri }); // generate payload
     this.isEventExist(collections, { ...payload, slug: payload.slug! }); // if evnet is already exist then throw error
 
-    // Step 2: Create event type
-    const { data } = await axios.post(
-      `${this.CALENDLY_API}/event_types`,
-      payload,
-      {
-        headers: this.AUTH_HEADER,
-      },
-    );
-    console.log('data: ', data);
+    // create event
+    const { data } = await axios.post(`/event_types`, payload);
     return {
       message: 'Event type created successfully',
       event: data.resource, // we jsut need scheduling_url <-> resource.scheduling_url
     };
   }
 
-  private async getme<T extends string>(): Promise<T> {
+  public async getEventById(uuid: string) {
+    if (!uuid) throw new NotFoundException('Event uuid is required!');
+
+    const { data } = await axios.get(`/event_types/${uuid}`);
+    return data;
+  }
+
+  public async updateEventType(uuid: string, input: UpdateCalendlyEventDto) {
+    if (!uuid) throw new NotFoundException('Event uuid is required!');
+
+    const { data } = await axios.put(`/event_types/${uuid}`, { ...input });
+    return data;
+  }
+  public async getme<T extends object>(): Promise<T> {
     // need to store me in redis db
-    const { data } = await axios.get(`${this.CALENDLY_API}/users/me`, {
-      headers: this.AUTH_HEADER,
-    });
-    const uri = data.resource.uri;
-    if (!uri)
+    const { data } = await axios.get(`/users/me`);
+    console.log(data.resource);
+    const { uri, current_organization } = data.resource;
+    if (!uri || !current_organization)
       throw new InternalServerErrorException('Fail to retrive system auth');
-    return uri as T;
+    return { uri, current_organization } as T;
   }
 
   async getEventCollections<T = CalendlyEventCollection['collection']>(
-    uri: string,
+    uri?: string,
   ): Promise<T> {
-    const { data } = await axios.get(
-      `${this.CALENDLY_API}/event_types?user=${uri}`,
-      {
-        headers: this.AUTH_HEADER,
-      },
-    );
+    const url = uri ?? this.CALENDLY_AUTH_URI;
+    const { data } = await axios.get(`/event_types?user=${url}`);
 
     return data.collection ?? [];
   }
 
-  private isEventExist(
+  protected isEventExist(
     collections: CalendlyEvent[],
     payload: MakeRequired<CalendlyPayload, 'slug'>,
   ) {
@@ -91,7 +89,11 @@ export class CalendlyService {
     }
   }
 
-  private generatePayload(
+  protected extractEventUUID(url: string) {
+    return url.split('/').pop() as string;
+  }
+
+  protected generatePayload(
     input: MakeRequired<CalendlyPayload, 'owner'>,
   ): CalendlyPayload {
     const slug = input.username
