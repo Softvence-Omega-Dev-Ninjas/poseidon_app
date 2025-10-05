@@ -5,6 +5,7 @@ import * as nodemailer from 'nodemailer';
 import { MailContext, MailTemplateType } from './global.mail-context.type';
 import { generateFriendRequestEmail } from './templates/friend-request.template';
 import { generateOtpEmail } from './templates/otp.template';
+import generateBaseLayout from './templates/base-layout';
 
 @Injectable()
 export class GlobalMailService {
@@ -29,7 +30,7 @@ export class GlobalMailService {
   }
 
   public async sendMail(
-    to: string,
+    to: string | string[],
     subject: string,
     type: MailTemplateType,
     context: MailContext = {},
@@ -61,6 +62,8 @@ export class GlobalMailService {
           context.senderName!,
           context.avatarUrl!,
         );
+      case 'none':
+        return generateBaseLayout('test mail', context['data']);
       // if we have then make case here...
       default:
         throw new Error(`Unknown email template type: ${type}`);
