@@ -28,6 +28,6 @@ async function bootstrap() {
     origin: true, // 🔑 allow any origin dynamically
     credentials: true,
   });
-  await app.listen(process.env.PORT ?? 3001);
+  await app.listen(process.env.PORT ?? 3000);
 }
 void bootstrap();
