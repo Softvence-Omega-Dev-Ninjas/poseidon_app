@@ -208,8 +208,6 @@ export class AuthController {
       cookieHandler(response, 'set', res?.access_token);
       return response.status(HttpStatus.OK).json(res);
     } catch (err: any) {
-      console.log(err);
-      // return err;
       return response
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: err.message || 'something went wrong!' });

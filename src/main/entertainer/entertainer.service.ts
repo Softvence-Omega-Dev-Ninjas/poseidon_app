@@ -3,7 +3,7 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
-import { Roles } from 'generated/prisma';
+import { Roles } from '@prisma/client';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 
@@ -104,7 +104,7 @@ export class EntertainerService {
     if (userId === supporterId) {
       throw new ConflictException('You cannot follow yourself');
     }
-  //  user checking following condition remove ....
+    //  user checking following condition remove ....
     return await this.prisma.follower.create({
       data: {
         follower: {

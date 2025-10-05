@@ -4,8 +4,8 @@ model Follower {
   followingId String
   createdAt   DateTime @default(now())
 
-  follower    User     @relation("UserFollowers", fields: [followerId], references: [id])
-  following   User     @relation("UserFollowing", fields: [followingId], references: [id])
+  follower  User @relation("UserFollowers", fields: [followerId], references: [id])
+  following User @relation("UserFollowing", fields: [followingId], references: [id])
 
   @@unique([followerId, followingId]) // prevent duplicate follows
 }

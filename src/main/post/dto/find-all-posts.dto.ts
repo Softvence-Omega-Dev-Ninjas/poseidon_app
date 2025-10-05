@@ -1,7 +1,7 @@
 import { IsOptional, IsInt, Min, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { WhoCanSee } from 'generated/prisma';
+import { WhoCanSee } from '@prisma/client';
 
 export enum PostSortBy {
   VIEWED = 'viewed',

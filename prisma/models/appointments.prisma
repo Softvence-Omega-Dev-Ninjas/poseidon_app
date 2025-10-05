@@ -1,0 +1,17 @@
+model Appointment {
+  id String @id @unique @default(uuid())
+
+  user   User   @relation("UserAppointments", fields: [userId], references: [id])
+  userId String
+
+  supporter     User              @relation("SupporterAppointments", fields: [supporterId], references: [id])
+  supporterId   String
+  requestedTime DateTime
+  confirmedTime DateTime?
+  status        AppointmentStatus
+  notes         String?
+  created_at    DateTime          @default(now())
+
+  // Relations
+  rescheduleRequests RescheduleRequest[]
+}

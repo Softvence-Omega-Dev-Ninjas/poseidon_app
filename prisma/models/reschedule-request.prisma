@@ -1,0 +1,12 @@
+model RescheduleRequest {
+  id String @id @default(uuid())
+
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  appointmentId String
+
+  suggestedTime DateTime
+  suggestedBy   Roles
+  status        RescheduleStatus
+
+  created_at DateTime @default(now())
+}

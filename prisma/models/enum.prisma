@@ -1,0 +1,13 @@
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  RESCHEDULED
+  REJECTED
+  CANCELLED
+}
+
+enum RescheduleStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}

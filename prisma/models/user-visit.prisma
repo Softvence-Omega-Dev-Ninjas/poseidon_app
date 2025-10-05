@@ -2,7 +2,7 @@ model UserVisit {
   id        String   @id @default(uuid())
   ip        String
   visitDate DateTime @db.Date // Stores full timestamp; we'll truncate to date for daily counts
-  country   String  // Nullable country code (e.g., 'US', 'IN')
+  country   String // Nullable country code (e.g., 'US', 'IN')
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
