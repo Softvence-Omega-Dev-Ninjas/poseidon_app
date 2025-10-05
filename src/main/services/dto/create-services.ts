@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { ServiceOrderStatus } from 'generated/prisma';
+import { ServiceOrderStatus } from '@prisma/client';
 
 export class CreateServicesDto {
   @ApiProperty()

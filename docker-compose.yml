@@ -1,5 +1,9 @@
 services:
   app:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: sharif780/drinkwithme:latest
     container_name: drinkwithme_app
     profiles:
@@ -21,6 +25,18 @@ services:
       ZOOM_CLIENT_SECRET: 8yWkiv3PyQOY2YCB8Bxnjow63St4NgJF
       ZOOM_ACCOUNT_ID: p79SDRYlRb-x1C3_WUK6yA
       ZOOM_API_BASE: https://api.zoom.us/v2
+
+      # mail sender
+      MAIL_USER: 'saifulislam106915@gmail.com'
+      MAIL_PASS: 'lrftntftmlaofsqc'
+
+      # Calendly
+      CALENDLY_CLIENT_ID: 'PSFYyptvZvnjMyZf4GIRH7mP4zgWmWikUEznH3jCu10'
+      CALENDLY_CLIENT_SECRET: '_S1geGz7RVmDmA9vSwZwjmKzmhAZbxN7t7i_zCE_2jw'
+      CALENDLY_WEB_HOOK: 'BIIRIHAOhS4qd-6P7Nk8FZ7iWNcwWYJzhym4XJWW32Y'
+
+      CALENDLY_AUTH_URI: 'https://api.calendly.com/users/e59e9c05-97c6-42a4-8378-36ea32772384'
+      CALENDLY_PERSONAL_ACCESS_TOKEN: 'eyJraWQiOiIxY2UxZTEzNjE3ZGNmNzY2YjNjZWJjY2Y4ZGM1YmFmYThhNjVlNjg0MDIzZjdjMzJiZTgzNDliMjM4MDEzNWI0IiwidHlwIjoiUEFUIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL2F1dGguY2FsZW5kbHkuY29tIiwiaWF0IjoxNzU5NTQ5OTgxLCJqdGkiOiJiMWY4NjA1NC0yODM4LTQxYmMtYTIyNy1hNDFlYmU2YjJiN2UiLCJ1c2VyX3V1aWQiOiJlNTllOWMwNS05N2M2LTQyYTQtODM3OC0zNmVhMzI3NzIzODQifQ.EcMARJhj_MjzTY-_iqg8xHRE9BQ6HaRPtJGplPDuj9Ix0JTzsnfrKPizvRLeLBL-TyBUHav_VRswlZy9S1on6g'
     depends_on:
       - db
       - redis
@@ -33,14 +49,14 @@ services:
       - prod
       - dev
     ports:
-      - ':5434:5432'
+      - '5434:5432'
     # or set shared memory limit when deploy via swarm stack
     volumes:
-      - /Users/mdsharif/docker_volumes/poseidon:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: drinkwithme
+      POSTGRES_DB: poseidon
 
   redis:
     image: redis:7.2
@@ -52,4 +68,10 @@ services:
     ports:
       - '6379:6379'
     volumes:
-      - /Users/mdsharif/docker_volumes/redis:/data
+      - redis:/data
+
+volumes:
+  pgdata:
+  redis:
+networks:
+  default:

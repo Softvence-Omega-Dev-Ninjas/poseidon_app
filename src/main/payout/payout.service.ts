@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { SellerService } from 'src/utils/stripe/seller.service';
 import { cResponseData } from 'src/common/utils/common-responseData';
+import { PrismaService } from 'src/prisma-client/prisma-client.service';
 
 @Injectable()
 export class PayoutService {
-  constructor(private readonly sellerServiceStripe: SellerService) {}
+  constructor(
+    private readonly sellerServiceStripe: SellerService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async balenceSheet(stripeAccountId: string) {
     if (!stripeAccountId) {
@@ -26,21 +30,37 @@ export class PayoutService {
     });
   }
 
-  async checkoutAccount(stripeAccountId: string) {
-    if (!stripeAccountId) {
+  async checkoutAccount(userid: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userid,
+      },
+      select: {
+        stripeAccountId: true,
+      },
+    });
+    console.log(user?.stripeAccountId);
+    const financial_account_check: { stripe: boolean } = {
+      stripe: false,
+    };
+    if (!user || !user.stripeAccountId) {
       return cResponseData({
         message: 'Stripe account id is required',
-        data: null,
+        data: financial_account_check,
         error: null,
         success: false,
       });
     }
     const checkoutAccount =
-      await this.sellerServiceStripe.checkAccountsInfoSystem(stripeAccountId);
+      await this.sellerServiceStripe.checkAccountsInfoSystem(
+        user.stripeAccountId,
+      );
+
+    financial_account_check.stripe = checkoutAccount;
 
     return cResponseData({
       message: 'Checkout account',
-      data: checkoutAccount,
+      data: financial_account_check,
       error: null,
       success: true,
     });
@@ -78,7 +98,13 @@ export class PayoutService {
       success: true,
     });
   }
-  async sellerAccountSetupClientSecret_2(userid: string) {
+  async sellerAccountSetupClientSecret_2({
+    userid,
+    redirect_url,
+  }: {
+    userid: string;
+    redirect_url: string;
+  }) {
     if (!userid) {
       return cResponseData({
         message: 'user not found',
@@ -87,26 +113,9 @@ export class PayoutService {
         success: false,
       });
     }
-
-    const clientSecret =
-      await this.sellerServiceStripe.sellerAccountSetupClientSecret2(userid);
-
-    if (!clientSecret) {
-      return cResponseData({
-        message: 'Client secret not found',
-        data: null,
-        error: null,
-        success: false,
-      });
-    }
-
-    console.log('sellerAccountSetupClientSecret', clientSecret);
-
-    return cResponseData({
-      message: 'Client secret',
-      data: clientSecret,
-      error: null,
-      success: true,
-    });
+    return await this.sellerServiceStripe.sellerAccountSetupClientSecret2(
+      userid,
+      redirect_url ? redirect_url : '',
+    );
   }
 }

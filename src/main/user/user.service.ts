@@ -1,9 +1,9 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { UserVisit } from 'generated/prisma';
-import { firstValueFrom } from 'rxjs';
+import { Injectable } from '@nestjs/common';
 import { Role } from 'src/auth/guard/role.enum';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
+import * as geoip from 'geoip-lite';
+import { UserVisit } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -42,6 +42,8 @@ export class UserService {
         OR: [
           {
             username: { contains: query },
+          },
+          {
             profile: {
               name: { contains: query },
             },
@@ -137,7 +139,7 @@ export class UserService {
     const updatedUser = await this.prisma.user.update({
       where: {
         id: id,
-        role: Role.User,
+        role: role,
       },
       data: {
         deactivate: true,
@@ -151,41 +153,18 @@ export class UserService {
   }
 
   // Track a user's visit
-  async trackVisit(ip: string): Promise<UserVisit> {
-    const today = new Date(); // Get current date and time
-    const visitDate = new Date(
-      Date.UTC(
-        today.getUTCFullYear(),
-        today.getUTCMonth(),
-        today.getUTCDate(),
-        0,
-        0,
-        0,
-        0,
-      ),
-    ); // Normalize to the start of the day in UTC (00:00:00.000Z)
-
-    // Check if the user has already visited today
-    const existingVisit = await this.prisma.userVisit.findUnique({
-      where: {
-        ip_visitDate: {
-          ip,
-          visitDate: visitDate,
-        },
-      },
-    });
-
-    if (existingVisit) {
-      return existingVisit; // Return existing visit if already recorded
-    }
-
+  async trackVisit(
+    ip: string,
+    country: string,
+    visitDate: Date,
+  ): Promise<UserVisit> {
     // TODO(coderboysobuj) get country from request ip using Geolocation
     // Create a new visit record
     return this.prisma.userVisit.create({
       data: {
         ip: ip,
         visitDate: visitDate,
-        country: 'Unknown/Unknown', // Country logic here
+        country: country,
       },
     });
   }
@@ -285,41 +264,51 @@ export class UserService {
     return { data: trafficStats };
   }
 
+  // Check visitor exist with ip
+  async existingVisitor(ip: string, visitDate: Date) {
+    const existingVisit = await this.prisma.userVisit.findUnique({
+      where: {
+        ip_visitDate: {
+          ip,
+          visitDate: visitDate,
+        },
+      },
+    });
+    return existingVisit;
+  }
+
   // Get visits by country (group by country)
   async getVisitsByCountry(): Promise<any> {
-    return this.prisma.userVisit.groupBy({
+    const visitorDate = await this.prisma.userVisit.groupBy({
       by: ['country'],
       _count: {
         ip: true, // Count number of visits per country
       },
-      orderBy: {
-        _count: {
-          ip: 'desc',
-        },
-      },
     });
+
+    const totalVisitor = visitorDate.reduce(
+      (sum, item) => sum + item._count.ip,
+      0,
+    );
+
+    const charData = {
+      labels: visitorDate.map((item) => item.country),
+      data: visitorDate.map((item) => (item._count.ip / totalVisitor) * 100),
+    };
+
+    return charData;
   }
 
   // Fetch the country based on the IP address
   async getCountryFromIP(ip: string): Promise<string> {
-    try {
-      // Make a GET request to the GeoIP API with the IP address
-      const response = await firstValueFrom(
-        this.httpService.get(`${this.IP_API_URL}${ip}`),
-      );
-
-      // Check the response status and handle it accordingly
-      if (response.data.status === 'fail') {
-        throw new InternalServerErrorException('Failed to fetch GeoIP data');
-      }
-
-      // Return the country from the API response
-      return response.data.country;
-    } catch (error) {
-      console.error('GeoIP API request failed', error);
-      throw new InternalServerErrorException(
-        'Error fetching country data from GeoIP',
-      );
+    if (ip === '127.0.0.1' || ip === '::1') {
+      return 'Bangladesh';
     }
+    const location = geoip.lookup(ip);
+    if (location) {
+      return location.country;
+    }
+
+    return 'unknown';
   }
 }

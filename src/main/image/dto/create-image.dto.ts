@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Visibility } from 'generated/prisma';
+import { Visibility } from '@prisma/client';
 
 export class CreateImageDto {
   @ApiProperty({

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PaymemtStatus, ServiceType } from 'generated/prisma/client';
+import { PaymemtStatus, ServiceType } from '@prisma/client';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
 
 // import * as argon2 from 'argon2';

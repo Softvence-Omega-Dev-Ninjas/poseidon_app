@@ -21,6 +21,8 @@ import { PayoutModule } from './payout/payout.module';
 import { ReferralModule } from './dashboard/suppoter-dashboard/suppoter-dsahboard.module';
 import { ProfileSettingModule } from './profile-setting/profile-setting.module';
 import { PermissionModule } from './permission/permission.module';
+import { AppoinmentGroupModule } from './appoiments-group/appoinments.group.module';
+import { CalendlyModule } from './calendly/calendly.module';
 
 @Module({
   imports: [
@@ -46,6 +48,9 @@ import { PermissionModule } from './permission/permission.module';
     PayoutModule,
     ReferralModule,
     PermissionModule,
+    // appointment group module
+    AppoinmentGroupModule,
+    CalendlyModule,
   ],
   controllers: [],
   providers: [],

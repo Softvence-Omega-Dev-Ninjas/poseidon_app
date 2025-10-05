@@ -1,8 +1,7 @@
 import { PartialType, ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsEnum, IsString } from 'class-validator';
-import { Transform } from 'class-transformer';
 import { CreateImageDto } from './create-image.dto';
-import { Visibility } from 'generated/prisma';
+import { Visibility } from '@prisma/client';
 
 export class UpdateImageDto extends PartialType(CreateImageDto) {
   @ApiProperty({
@@ -21,10 +20,10 @@ export class UpdateImageDto extends PartialType(CreateImageDto) {
   })
   @IsOptional()
   @IsEnum(Visibility)
-  @Transform(({ value }) => {
-    if (!value || value === '--') return undefined;
-    return value.toLowerCase();
-  })
+  // @Transform(({ value }: { value: string }) => {
+  //   if (!value || value === '--') return undefined;
+  //   return value.toLowerCase();
+  // })
   visibility?: Visibility;
 
   @ApiProperty({

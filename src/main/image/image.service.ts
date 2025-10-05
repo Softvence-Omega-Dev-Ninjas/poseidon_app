@@ -9,10 +9,10 @@ import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { FindAllImagesDto, ImageSortBy } from './dto/find-all-images.dto';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
-import { Image, Prisma, Roles, Visibility } from '../../../generated/prisma';
 import { CreateImageCommentDto } from './dto/create-image-comment.dto';
 import { FindAllImageCommentsDto } from './dto/find-all-image-comments.dto';
 import { cResponseData } from 'src/common/utils/common-responseData';
+import { Prisma, Visibility } from '@prisma/client';
 
 @Injectable()
 export class ImageService {
@@ -208,7 +208,8 @@ export class ImageService {
       const updatedImage = await this.prisma.image.update({
         where: { id },
         data: {
-          ...updateImageDto,
+          title: updateImageDto.title,
+          visibility: updateImageDto.visibility,
           mediaId: updatedMediaId,
         },
       });
