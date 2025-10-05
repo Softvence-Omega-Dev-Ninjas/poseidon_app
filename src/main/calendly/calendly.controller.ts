@@ -37,18 +37,22 @@ export class CalendlyController {
     @Headers('x-calendly-signature') signature: string,
   ) {
     console.log('Webhook received:', payload);
+    console.log('invitees:', payload.invitees_counter);
+    console.log('memberships: ', payload.event_memberships);
+    console.log('membershipobject: ', payload.event_memberships[0]);
+    console.log('location: ', payload.location);
     this.resData = payload;
     console.log('sig', signature);
-    this.mailService.sendMail(
-      [
-        'devlopersabbir@gmail.com',
-        'srka780@gmail.com',
-        'coderboysobuj@gmail.com',
-      ],
-      'web hook',
-      'none',
-      { data: JSON.parse(payload) },
-    );
+    // this.mailService.sendMail(
+    //   [
+    //     'devlopersabbir@gmail.com',
+    //     'srka780@gmail.com',
+    //     'coderboysobuj@gmail.com',
+    //   ],
+    //   'web hook',
+    //   'none',
+    //   { data: JSON.parse(payload) },
+    // );
     this.mailService.sendMail(
       [
         'devlopersabbir@gmail.com',
