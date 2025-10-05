@@ -52,6 +52,18 @@ export class AuthHandlerRepository {
     console.log(input);
     // extract profile
     const profile = input.profile;
+
+    let refData = {};
+    if (refUserId) {
+      refData = {
+        invited: {
+          create: {
+            inviterId: refUserId,
+          },
+        },
+      };
+    }
+
     if (refUserId && input.role === 'user') {
       return await tx.user.create({
         data: {
@@ -68,11 +80,7 @@ export class AuthHandlerRepository {
               name: (profile && profile.name) ?? '',
             },
           },
-          invited: {
-            create: {
-              inviterId: refUserId,
-            },
-          },
+          ...refData,
         },
         select: userSelect,
       });
@@ -92,6 +100,7 @@ export class AuthHandlerRepository {
             name: (profile && profile.name) ?? '',
           },
         },
+        ...refData,
         support_cart_layout: {
           create: {},
         },

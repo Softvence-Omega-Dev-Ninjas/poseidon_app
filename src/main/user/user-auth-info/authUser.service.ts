@@ -105,6 +105,7 @@ export class AuthUserService {
     }
     // create new user
     // create a hash password
+    // create a user ref system
     let refData = {};
     if (createUserDto.referralId) {
       refData = {
@@ -115,6 +116,7 @@ export class AuthUserService {
         },
       };
     }
+
     const newUser = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
@@ -344,6 +346,20 @@ export class AuthUserService {
     try {
       // If the user is a supporter, create a support_cart_layout
       console.log('createSupporterAccount......');
+      // return { ...createUserDto, skip };
+
+      // create a user ref system
+      let refData = {};
+      if (createUserDto.referralId) {
+        refData = {
+          invited: {
+            create: {
+              inviterId: createUserDto.referralId,
+            },
+          },
+        };
+      }
+
       const newSupporter = await this.prisma.user.create({
         data: {
           email: createUserDto.email,
@@ -355,6 +371,7 @@ export class AuthUserService {
               ...createUserDto.profile,
             },
           },
+          ...refData,
           support_cart_layout: {
             create: {},
           },

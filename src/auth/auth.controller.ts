@@ -68,6 +68,18 @@ export class AuthController {
 
     console.log('skip ------------+++', skipAuth);
 
+    console.log({
+      role,
+      email,
+      username,
+      password,
+      profile: {
+        ...profile,
+        image: imageUrl,
+      },
+      referralId,
+    });
+
     return this.authUserService.createUser(
       {
         role,
