@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
-import { CreateLoginDto, roles } from '../dto/create-or-login';
+import { CreateLoginDto } from '../dto/create-or-login';
 import { PrismaTx } from 'src/@types';
 import { userSelect } from './utils/select';
 

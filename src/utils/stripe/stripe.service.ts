@@ -18,6 +18,10 @@ export class StripeService {
   async checkOutPaymentSessionsMembership(data: CheckOutPaymentSessionsDto) {
     const seller = await this.prisma.user.findFirst({
       where: { id: data.sellerId, role: 'supporter' },
+      select: {
+        id: true,
+        stripeAccountId: true,
+      },
     });
     if (!seller?.stripeAccountId)
       throw new HttpException(
@@ -50,6 +54,22 @@ export class StripeService {
         destination: seller.stripeAccountId,
       },
     });
+
+    if (seller && seller.id) {
+      const inviterInfo = await this.prisma.referral.findFirst({
+        where: {
+          invitedId: seller.id,
+        },
+        select: {
+          inviter: {
+            select: {
+              id: true,
+              stripeAccountId: true,
+            },
+          },
+        },
+      });
+    }
 
     if (!paymentAction.id || !paymentAction.client_secret) {
       throw new HttpException(
