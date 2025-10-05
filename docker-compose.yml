@@ -52,7 +52,7 @@ services:
       - '5434:5432'
     # or set shared memory limit when deploy via swarm stack
     volumes:
-      - /Users/mdsharif/docker_volumes/poseidon:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -68,4 +68,10 @@ services:
     ports:
       - '6379:6379'
     volumes:
-      - /Users/mdsharif/docker_volumes/redis:/data
+      - redis:/data
+
+volumes:
+  pgdata:
+  redis:
+networks:
+  default:

@@ -2,6 +2,8 @@ import {
   ApiHideProperty,
   ApiProperty,
   ApiPropertyOptional,
+  IntersectionType,
+  PartialType,
 } from '@nestjs/swagger';
 import {
   IsArray,
@@ -16,6 +18,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { LocationDto } from './location.dto';
+import { Locale, locale } from '../types/calendly.types';
 
 export class CreateCalendlyEventDto {
   @ApiPropertyOptional({ example: 'CheersLIVE' })
@@ -92,11 +95,13 @@ export class CreateCalendlyEventDto {
   scheduling_url: string | null;
 
   @ApiProperty({
+    enum: locale,
     example: 'en',
-    description: 'Locale of the event (e.g., en, fr, es)',
+    description: 'Preferred language of the user',
   })
-  @IsString()
-  locale: string;
+  @IsNotEmpty()
+  @IsIn(locale)
+  locale: Locale;
 
   @ApiHideProperty()
   // @ApiProperty({
@@ -117,11 +122,26 @@ export class CreateCalendlyEventDto {
   @IsBoolean()
   active: boolean;
 
-  @ApiPropertyOptional({
-    example: [15, 30, 45],
-    description: 'Optional array of alternate duration options in minutes',
-  })
+  @ApiHideProperty()
+  // @ApiPropertyOptional({
+  //   example: [15, 30, 45],
+  //   description: 'Optional array of alternate duration options in minutes',
+  // })
   @IsOptional()
   @IsArray()
   duration_options?: number[];
 }
+
+class UpdateEventDto {
+  @ApiHideProperty()
+  @ApiProperty({
+    example: false,
+    description: 'Whether the event is active or not',
+  })
+  @IsOptional()
+  @IsBoolean()
+  active: boolean;
+}
+export class UpdateCalendlyEventDto extends IntersectionType(
+  PartialType(UpdateEventDto),
+) {}
