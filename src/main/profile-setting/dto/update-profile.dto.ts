@@ -22,6 +22,15 @@ export class UpdateProfileDto {
 
   @ApiPropertyOptional({
     type: 'string',
+    example: 'Description',
+    description: 'Optional description',
+  })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional({
+    type: 'string',
     format: 'binary',
     description: 'Optional product image',
   })
