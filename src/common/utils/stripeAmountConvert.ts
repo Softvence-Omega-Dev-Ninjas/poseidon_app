@@ -1,5 +1,6 @@
-export function platformFee(amount: number) {
-  return Math.floor(amount * 0.02) * 100;
+export function platformFee(amount: number, tranAmount?: number) {
+  const free = tranAmount || 0.2;
+  return Math.floor(amount * free) * 100;
 }
 
 export function converAmountStripe(amount: number) {

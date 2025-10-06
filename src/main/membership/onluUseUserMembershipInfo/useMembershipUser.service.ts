@@ -7,6 +7,7 @@ import {
 import { StripeService } from 'src/utils/stripe/stripe.service';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { PaymentInfoService } from './paymentDetails.service';
+import { RefferEarningService } from 'src/utils/stripe/refferEarning.service';
 
 @Injectable()
 export class MembershipServiceUseToUserOnly {
@@ -14,6 +15,7 @@ export class MembershipServiceUseToUserOnly {
     private readonly prisma: PrismaService,
     private readonly stripeService: StripeService,
     private readonly paymentInfoService: PaymentInfoService,
+    private readonly refferEarningService: RefferEarningService,
   ) {}
 
   async buyMembership(
@@ -203,7 +205,7 @@ export class MembershipServiceUseToUserOnly {
         400,
       );
     }
-    console.log('paymentIntent - pi checkout', payStatus);
+    // console.log('paymentIntent - pi checkout', payStatus);
     if (payStatus.status === 'succeeded') {
       const paymentIntentData = await this.prisma.paymentDetails.update({
         where: {
@@ -213,6 +215,15 @@ export class MembershipServiceUseToUserOnly {
           paymemtStatus: 'paid',
         },
       });
+      console.log('paymentIntentData = succeeded', paymentIntentData);
+
+      if (paymentIntentData.sellerId) {
+        await this.refferEarningService.refferEarningBySeller(
+          paymentIntentData.sellerId,
+          paymentIntentData.amount,
+        );
+      }
+
       return cResponseData({
         message: 'Payment successfully complated',
         data: paymentIntentData,
