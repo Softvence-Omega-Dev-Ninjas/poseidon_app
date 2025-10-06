@@ -38,6 +38,7 @@ export class MembershipServiceUseToUserOnly {
             },
           },
         },
+        zoomUrl: true,
         MembershipSubscriptionPlan: {
           where: {
             duration: membershipLevelInfo.durationType,
