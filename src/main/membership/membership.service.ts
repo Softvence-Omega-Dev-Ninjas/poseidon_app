@@ -156,7 +156,7 @@ export class MembershipService {
       newMembershipLevel.MembershipSubscriptionPlan[1].CalligSubscriptionPlan
     ) {
       // TODO: zoom video call link create this area
-      const zoomUrls = 'zoom url';
+      const zoomUrls = 'zoom url ========<<<<<<<<<<<<';
       await this.prisma.membership_levels.update({
         where: { id: newMembershipLevel.id },
         data: {

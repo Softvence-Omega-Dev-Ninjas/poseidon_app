@@ -127,6 +127,7 @@ export class MembershipServiceUseToUserOnly {
                 unlimitedVideoCalls: membershipLevel
                   ?.MembershipSubscriptionPlan[0].CalligSubscriptionPlan
                   ?.unlimitedVideoCalls as boolean,
+                zoomUrl: membershipLevel?.zoomUrl ?? '',
               },
             }
           : undefined,
