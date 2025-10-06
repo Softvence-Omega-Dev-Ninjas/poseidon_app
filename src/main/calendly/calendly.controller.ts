@@ -43,17 +43,8 @@ export class CalendlyController {
     console.log('location: ', payload.location);
     this.resData = payload;
     console.log('sig', signature);
-    // this.mailService.sendMail(
-    //   [
-    //     'devlopersabbir@gmail.com',
-    //     'srka780@gmail.com',
-    //     'coderboysobuj@gmail.com',
-    //   ],
-    //   'web hook',
-    //   'none',
-    //   { data: JSON.parse(payload) },
-    // );
-    this.mailService.sendMail(
+
+    await this.mailService.sendMail(
       [
         'devlopersabbir@gmail.com',
         'srka780@gmail.com',
@@ -63,7 +54,8 @@ export class CalendlyController {
       'none',
       { data: JSON.stringify(payload) },
     );
-    return res.redirect(`${process.env.LIVE_BACKEND_URL}/calendly`);
+    // return res.redirect(`${process.env.LIVE_BACKEND_URL}/calendly`);
+    return payload;
   }
 
   @Public()
