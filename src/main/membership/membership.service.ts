@@ -139,7 +139,31 @@ export class MembershipService {
           })),
         },
       },
+      include: {
+        MembershipSubscriptionPlan: {
+          include: {
+            CalligSubscriptionPlan: true,
+            MessagesSubscriptionPlan: true,
+            GallerySubscriptionPlan: true,
+            PostsSubscriptionPlan: true,
+          },
+        },
+      },
     });
+
+    if (
+      newMembershipLevel.MembershipSubscriptionPlan[0].CalligSubscriptionPlan ||
+      newMembershipLevel.MembershipSubscriptionPlan[1].CalligSubscriptionPlan
+    ) {
+      // TODO: zoom video call link create this area
+      const zoomUrls = 'zoom url ========<<<<<<<<<<<<';
+      await this.prisma.membership_levels.update({
+        where: { id: newMembershipLevel.id },
+        data: {
+          zoomUrl: zoomUrls,
+        },
+      });
+    }
 
     return cResponseData({
       message: 'Membership level created successfully',

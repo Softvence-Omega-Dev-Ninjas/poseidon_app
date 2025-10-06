@@ -25,6 +25,7 @@ model Membership_levels {
   isPublic                   Boolean                      @default(false)
   MembershipSubscriptionPlan MembershipSubscriptionPlan[]
   membership                 Membership_owner             @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  zoomUrl                    String?
 }
 
 model MembershipSubscriptionPlan {

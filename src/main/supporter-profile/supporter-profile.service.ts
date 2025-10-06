@@ -106,6 +106,14 @@ export class SupporterProfileService {
       //   // profileInfo.cover_image = coverImageMap.get(profileInfo.cover_image);
       // }
 
+      // total supporter count
+      const totalSupporter = await tx.supporterPay.count({
+        where: {
+          author_id: userid,
+          paymemtStatus: 'paid',
+        },
+      });
+
       const supporte_card = await tx.supportCartLayout.findFirst({
         where: {
           author_id: userid,
@@ -168,6 +176,7 @@ export class SupporterProfileService {
               id: true,
               levelName: true,
               levelImage: true,
+              titleName: true,
               MembershipSubscriptionPlan: {
                 select: {
                   id: true,
@@ -217,6 +226,7 @@ export class SupporterProfileService {
       return {
         userid: userid,
         username: user.username,
+        totalSupporter,
         profileInfo: {
           ...profileInfo,
           cover_image: profileInfo?.cover_image

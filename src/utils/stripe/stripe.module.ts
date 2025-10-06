@@ -8,6 +8,7 @@ import { CheckOutService } from './checkOut.service';
 import { ShopPaymentService } from './shopPayment.service';
 import { SupporterCardPaymentService } from './supporterCard.service';
 import { ServicePaymentService } from './services.service';
+import { RefferEarningService } from './refferEarning.service';
 
 @Module({
   imports: [ConfigModule, PrismaClientModule],
@@ -28,6 +29,7 @@ import { ServicePaymentService } from './services.service';
     ShopPaymentService,
     SupporterCardPaymentService,
     ServicePaymentService,
+    RefferEarningService,
   ],
   exports: [
     'STRIPE_CLIENT',
@@ -37,6 +39,7 @@ import { ServicePaymentService } from './services.service';
     ShopPaymentService,
     SupporterCardPaymentService,
     ServicePaymentService,
+    RefferEarningService,
   ],
 })
 export class StripeModule {}

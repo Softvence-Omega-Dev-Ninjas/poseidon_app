@@ -19,6 +19,7 @@ export class MembershipUseToUserOnly {
   @Public()
   @Get('get_all_levels/:membershipId')
   getMembership(@Param('membershipId') membershipId: string) {
+    console.log(membershipId);
     return this.membershipServiceUser.getMembershipLevels(membershipId);
   }
 
@@ -48,5 +49,11 @@ export class MembershipUseToUserOnly {
   @Post('payment-Status')
   paymentStatus(@Body() data: BuyMembershipResponseDto) {
     return this.membershipServiceUser.paymentStatus(data);
+  }
+
+  @Roles(Role.User, Role.Supporter)
+  @Get('get_video_calling_list')
+  getVideoCallingList(@Req() req: Request) {
+    return this.membershipServiceUser.getVideoCallingList(req['sub'] as string);
   }
 }
