@@ -262,6 +262,7 @@ export class MembershipServiceUseToUserOnly {
           membershipId: true,
           levelName: true,
           levelImage: true,
+          titleName: true,
           levelDescription: true,
           isPublic: true,
           MembershipSubscriptionPlan: {
@@ -286,6 +287,7 @@ export class MembershipServiceUseToUserOnly {
           },
         },
       });
+      console.log('allLevels', allLevels);
       return cResponseData({
         message: 'Membership level created successfully',
         data:

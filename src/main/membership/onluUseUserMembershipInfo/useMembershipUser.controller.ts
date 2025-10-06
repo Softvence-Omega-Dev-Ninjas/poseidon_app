@@ -19,6 +19,7 @@ export class MembershipUseToUserOnly {
   @Public()
   @Get('get_all_levels/:membershipId')
   getMembership(@Param('membershipId') membershipId: string) {
+    console.log(membershipId);
     return this.membershipServiceUser.getMembershipLevels(membershipId);
   }
 
