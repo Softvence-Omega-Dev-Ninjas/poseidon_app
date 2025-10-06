@@ -334,4 +334,24 @@ export class MembershipServiceUseToUserOnly {
     });
     return { ...level, levelImage: imageMedia };
   }
+
+  async getVideoCallingList(userid: string) {
+    const callingList = await this.prisma.permissionVideoCallAccess.findMany({
+      where: {
+        user_id: userid,
+        paymentDetails: {
+          paymemtStatus: 'paid',
+          endDate: {
+            gte: new Date(),
+          },
+        },
+        OR: [{ unlimitedVideoCalls: true }, { totalVideoCalls: { gt: 0 } }],
+      },
+    });
+    return cResponseData({
+      message: 'Video calling list',
+      data: callingList,
+      success: true,
+    });
+  }
 }

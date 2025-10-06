@@ -49,4 +49,10 @@ export class MembershipUseToUserOnly {
   paymentStatus(@Body() data: BuyMembershipResponseDto) {
     return this.membershipServiceUser.paymentStatus(data);
   }
+
+  @Roles(Role.User, Role.Supporter)
+  @Get('get_video_calling_list')
+  getVideoCallingList(@Req() req: Request) {
+    return this.membershipServiceUser.getVideoCallingList(req['sub'] as string);
+  }
 }
