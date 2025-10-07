@@ -79,10 +79,7 @@ services:
     ports:
       - '6379:6379'
     volumes:
-      - redis:/data
+      - /Users/mdsharif/docker_volumes/redis:/data
 
 volumes:
   pgdata:
-  redis:
-networks:
-  default:

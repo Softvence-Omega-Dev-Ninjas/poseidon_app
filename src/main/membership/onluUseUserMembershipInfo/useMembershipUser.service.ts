@@ -352,9 +352,33 @@ export class MembershipServiceUseToUserOnly {
         OR: [{ unlimitedVideoCalls: true }, { totalVideoCalls: { gt: 0 } }],
       },
     });
+
+    // get user
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: {
+          in: [...new Set(callingList.map((item) => item.supporter_id))],
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+        profile: {
+          select: {
+            name: true,
+            image: true,
+          },
+        },
+      },
+    });
+    const userObject = Object.fromEntries(users.map((user) => [user.id, user]));
+
     return cResponseData({
       message: 'Video calling list',
-      data: callingList,
+      data: callingList.map((item) => ({
+        ...item,
+        bergirlInfo: userObject[item.supporter_id],
+      })),
       success: true,
     });
   }
