@@ -173,8 +173,8 @@ export class MembershipService {
       await this.prisma.membership_levels.update({
         where: { id: newMembershipLevel.id },
         data: {
-          scheduling_url: eventData.resource.scheduling_url,
-          url: eventData.resource.uri,
+          scheduling_url: eventData.resource.scheduling_url ?? '',
+          url: eventData.resource.uri ?? '',
         },
       });
     }
