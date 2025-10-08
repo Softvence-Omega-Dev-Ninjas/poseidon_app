@@ -184,6 +184,16 @@ export class MembershipServiceUseToUserOnly {
 
     console.log('membership - checkout', checkout);
 
+    // TODO: get the schedule url and also uri from the
+    //   const obj = {
+    //     url: "",
+    //     supporterUuid: "",
+    //     packageUuid: "",
+
+    //   }
+    //   const generateUrl = `${url}?salesforce_uuid=${supporterUuid}&utm_campaign=",
+    // "utm_source": "dashboard",`;
+
     return cResponseData({
       message: 'Membership payment info created successfully',
       data: checkout,

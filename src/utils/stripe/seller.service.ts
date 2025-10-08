@@ -89,7 +89,7 @@ export class SellerService {
 
       const payoutlist = await this.stripe.payouts.list(
         {
-          limit: 10,
+          limit: 100,
         },
         {
           stripeAccount: accountId,
@@ -368,7 +368,6 @@ export class SellerService {
       {
         amount: amount * 100,
         currency: 'usd',
-        destination: stripeAccountId,
       },
       {
         stripeAccount: stripeAccountId,

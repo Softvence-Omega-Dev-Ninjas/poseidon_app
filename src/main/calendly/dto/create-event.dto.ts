@@ -19,6 +19,7 @@ import {
 import { Type } from 'class-transformer';
 import { LocationDto } from './location.dto';
 import { Locale, locale } from '../types/calendly.types';
+import { CreateQuestionDto } from './create-question.dto';
 
 export class CreateCalendlyEventDto {
   @ApiPropertyOptional({ example: 'CheersLIVE' })
@@ -130,6 +131,26 @@ export class CreateCalendlyEventDto {
   @IsOptional()
   @IsArray()
   duration_options?: number[];
+
+  //  custom question
+  @ApiProperty({
+    example: [
+      {
+        answer_choices: [],
+        enabled: false,
+        include_other: false,
+        name: 'Please share anything that will help prepare for our meeting.',
+        position: 0,
+        required: false,
+        type: 'text',
+      },
+    ],
+    type: [CreateQuestionDto],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateQuestionDto)
+  custom_questions?: CreateQuestionDto[];
 }
 
 class UpdateEventDto {
