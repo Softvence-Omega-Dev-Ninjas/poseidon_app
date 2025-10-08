@@ -43,6 +43,15 @@ export class CalendlyController {
     console.log('params: ', req.params);
     this.resData = payload;
     console.log('payload: ------->>> ', payload);
+    console.log('===============================');
+    console.log('payload: ------->>> ', JSON.stringify(payload, null, 2));
+    console.log('===============================');
+    console.log('payload: ------->>> ', payload?.payload?.scheduled_event);
+    console.log('===============================');
+    console.log(
+      'payload: ------->>> ',
+      payload?.payload?.scheduled_event?.location,
+    );
     console.log('sig', signature);
 
     return payload;
