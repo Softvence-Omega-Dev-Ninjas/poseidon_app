@@ -8,6 +8,6 @@ import { CalendlyWebhook } from './calendly.webhook';
   imports: [],
   controllers: [CalendlyController],
   providers: [CalendlyRepository, CalendlyService, CalendlyWebhook],
-  exports: [],
+  exports: [CalendlyService],
 })
 export class CalendlyModule {}

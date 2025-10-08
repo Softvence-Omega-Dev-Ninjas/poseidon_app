@@ -9,8 +9,7 @@ import {
 } from './dto/update-membership-level.dto';
 import { MediafileService } from '../mediafile/mediafile.service';
 import { CalendlyService } from '../calendly/calendly.service';
-import { CalendlyWebhook } from '../calendly/calendly.webhook';
-import { EventResponse } from '../calendly/types/event.response.types';
+// import { CalendlyWebhook } from '../calendly/calendly.webhook';
 
 @Injectable()
 export class MembershipService {
@@ -19,7 +18,6 @@ export class MembershipService {
     private readonly cloudinaryService: CloudinaryService,
     private readonly mediafileService: MediafileService,
     private readonly calendlyService: CalendlyService,
-    private readonly calendlyWebHooksService: CalendlyWebhook,
   ) {}
 
   private async checkEnableMembership(id: string) {
@@ -161,31 +159,30 @@ export class MembershipService {
       newMembershipLevel.MembershipSubscriptionPlan[1].CalligSubscriptionPlan
     ) {
       // TODO: zoom video call link create this area
-      const zoomUrls = 'zoom url ========<<<<<<<<<<<<';
+      // create schedule event from here...
+      const eventData = await this.calendlyService.createEvent({
+        name: newMembershipLevel.titleName,
+        description: newMembershipLevel.levelDescription as string,
+        duration: 30, // need to be get form input
+      });
+
+      // TODO: scheduling_url -> need to be store in db for booking event
+      console.log('scheduling_url ->', eventData);
+      // TODO: uri -> also need to be store in our db for monitor the event_type /uuid
+      // const { scheduling_url, uri } = eventData.resource;
       await this.prisma.membership_levels.update({
         where: { id: newMembershipLevel.id },
         data: {
-          zoomUrl: zoomUrls,
+          scheduling_url: eventData.resource.scheduling_url,
+          url: eventData.resource.uri,
         },
       });
     }
-
-    // create schedule event from here...
-    const eventData = await this.calendlyService.createEvent({
-      name: newMembershipLevel.titleName,
-      duration: 30, // need to be get form input
-    });
-
-    // TODO: scheduling_url -> need to be store in db for booking event
-    // TODO: uri -> also need to be store in our db for monitor the event_type /uuid
-    const { scheduling_url, uri } = eventData.resource;
 
     return cResponseData({
       message: 'Membership level created successfully',
       data: newMembershipLevel,
       success: true,
-      scheduling_url,
-      uri,
     });
   }
 

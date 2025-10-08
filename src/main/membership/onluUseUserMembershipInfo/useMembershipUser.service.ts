@@ -38,7 +38,8 @@ export class MembershipServiceUseToUserOnly {
             },
           },
         },
-        zoomUrl: true,
+        scheduling_url: true,
+        url: true,
         MembershipSubscriptionPlan: {
           where: {
             duration: membershipLevelInfo.durationType,
@@ -68,7 +69,7 @@ export class MembershipServiceUseToUserOnly {
       );
     }
 
-    console.log({ membershipLevel });
+    // console.log({ membershipLevel });
 
     let endDate: Date = new Date();
     const plan = membershipLevel?.MembershipSubscriptionPlan[0]
@@ -127,7 +128,8 @@ export class MembershipServiceUseToUserOnly {
                 unlimitedVideoCalls: membershipLevel
                   ?.MembershipSubscriptionPlan[0].CalligSubscriptionPlan
                   ?.unlimitedVideoCalls as boolean,
-                zoomUrl: membershipLevel?.zoomUrl ?? '',
+                scheduling_url: membershipLevel?.scheduling_url ?? '',
+                url: membershipLevel?.url ?? '',
               },
             }
           : undefined,
@@ -362,9 +364,33 @@ export class MembershipServiceUseToUserOnly {
         OR: [{ unlimitedVideoCalls: true }, { totalVideoCalls: { gt: 0 } }],
       },
     });
+
+    // get user
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: {
+          in: [...new Set(callingList.map((item) => item.supporter_id))],
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+        profile: {
+          select: {
+            name: true,
+            image: true,
+          },
+        },
+      },
+    });
+    const userObject = Object.fromEntries(users.map((user) => [user.id, user]));
+
     return cResponseData({
       message: 'Video calling list',
-      data: callingList,
+      data: callingList.map((item) => ({
+        ...item,
+        bergirlInfo: userObject[item.supporter_id],
+      })),
       success: true,
     });
   }
