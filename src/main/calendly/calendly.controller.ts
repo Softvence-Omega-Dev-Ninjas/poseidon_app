@@ -36,14 +36,15 @@ export class CalendlyController {
   async handleInvite(
     @Req() req: Request,
     @Res() res: Response,
-    @Body() payload: CalendlyWebhookPayload,
+    @Body() payload: any, //CalendlyWebhookPayload
     @Headers('x-calendly-signature') signature: string,
   ) {
     console.log('query: ', req.query);
     console.log('params: ', req.params);
     this.resData = payload;
-    console.log('payload: ', payload);
+    console.log('payload: ------->>> ', payload);
     console.log('sig', signature);
+
     return payload;
   }
 
@@ -55,27 +56,28 @@ export class CalendlyController {
   // IMPORTANT WEB-HOOK ENDPOINT
 
   // OPTIONAL // -> this is only one time
-  // @Public()
-  // @Post('create-webhook')
-  // async createWebHook() {
-  //   try {
-  //     const hook = await this.webhook.CreateWebHookSubcription();
-  //     return hook;
-  //   } catch (err) {
-  //     return err;
-  //   }
-  // }
+  @Public()
+  @Post('create-webhook')
+  async createWebHook() {
+    try {
+      const hook = await this.webhook.CreateWebHookSubcription();
+      console.log('web hook payload', hook);
+      return hook;
+    } catch (err) {
+      return err;
+    }
+  }
 
-  // @Public()
-  // @Get('web-hooks')
-  // async getWebhooks() {
-  //   try {
-  //     const hook = await this.webhook.GetWebHooks();
-  //     return hook;
-  //   } catch (err) {
-  //     return err;
-  //   }
-  // }
+  @Public()
+  @Get('web-hooks')
+  async getWebhooks() {
+    try {
+      const hook = await this.webhook.GetWebHooks();
+      return hook;
+    } catch (err) {
+      return err;
+    }
+  }
 
   @Public()
   @Post('create-event-type')
@@ -101,7 +103,6 @@ export class CalendlyController {
       return err;
     }
   }
-
 
   @Public()
   @ApiParam({ name: 'uuid', required: true, type: String })
