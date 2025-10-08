@@ -186,10 +186,17 @@ export class SupporterProfileService {
                     select: {
                       id: true,
                       title: true,
+                      unlimitedVideoCalls: true,
+                      totalVideoCalls: true,
                     },
                   },
                   MessagesSubscriptionPlan: {
-                    select: { id: true, title: true },
+                    select: {
+                      id: true,
+                      title: true,
+                      unlimitedMessages: true,
+                      totalMessages: true,
+                    },
                   },
                   GallerySubscriptionPlan: {
                     select: { id: true, title: true },
