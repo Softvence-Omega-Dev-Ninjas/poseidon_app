@@ -77,17 +77,17 @@ export class CalendlyController {
   //   }
   // }
 
-  // @Public()
-  // @Post('create-event-type')
-  // async handleCreate(@Body() body: CreateCalendlyEventDto) {
-  //   try {
-  //     const event = await this.service.createEvent(body);
-  //     return event;
-  //   } catch (err) {
-  //     console.log(err);
-  //     return err;
-  //   }
-  // }
+  @Public()
+  @Post('create-event-type')
+  async handleCreate(@Body() body: CreateCalendlyEventDto) {
+    try {
+      const event = await this.service.createEvent(body);
+      return event;
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+  }
   // OPTIONAL //
 
   @Public()

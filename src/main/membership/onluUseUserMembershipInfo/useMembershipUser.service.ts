@@ -38,7 +38,8 @@ export class MembershipServiceUseToUserOnly {
             },
           },
         },
-        zoomUrl: true,
+        scheduling_url: true,
+        url: true,
         MembershipSubscriptionPlan: {
           where: {
             duration: membershipLevelInfo.durationType,
@@ -68,7 +69,7 @@ export class MembershipServiceUseToUserOnly {
       );
     }
 
-    console.log({ membershipLevel });
+    // console.log({ membershipLevel });
 
     let endDate: Date = new Date();
     const plan = membershipLevel?.MembershipSubscriptionPlan[0]
@@ -127,7 +128,8 @@ export class MembershipServiceUseToUserOnly {
                 unlimitedVideoCalls: membershipLevel
                   ?.MembershipSubscriptionPlan[0].CalligSubscriptionPlan
                   ?.unlimitedVideoCalls as boolean,
-                zoomUrl: membershipLevel?.zoomUrl ?? '',
+                scheduling_url: membershipLevel?.scheduling_url ?? '',
+                url: membershipLevel?.url ?? '',
               },
             }
           : undefined,

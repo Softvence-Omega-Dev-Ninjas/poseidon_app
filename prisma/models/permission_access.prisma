@@ -9,7 +9,8 @@ model PermissionVideoCallAccess {
   paymentDetails      paymentDetails @relation(fields: [paymentId], references: [id], onDelete: Cascade)
   supporter           User           @relation("PermissionVideoCallAccessSupporter", fields: [supporter_id], references: [id])
   user                User           @relation("PermissionVideoCallAccessUser", fields: [user_id], references: [id])
-  zoomUrl             String?
+  scheduling_url      String?
+  url                 String?
 }
 
 model PermissionMessagesAccess {
