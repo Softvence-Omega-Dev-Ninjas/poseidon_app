@@ -156,7 +156,6 @@ export class MembershipService {
       },
     });
 
-<<<<<<< HEAD
     if (
       newMembershipLevel.MembershipSubscriptionPlan[0].CalligSubscriptionPlan ||
       newMembershipLevel.MembershipSubscriptionPlan[1].CalligSubscriptionPlan
@@ -170,7 +169,7 @@ export class MembershipService {
         },
       });
     }
-=======
+
     // create schedule event from here...
     const eventData = await this.calendlyService.createEvent({
       name: newMembershipLevel.titleName,
@@ -180,7 +179,6 @@ export class MembershipService {
     // TODO: scheduling_url -> need to be store in db for booking event
     // TODO: uri -> also need to be store in our db for monitor the event_type /uuid
     const { scheduling_url, uri } = eventData.resource;
->>>>>>> sabbir
 
     return cResponseData({
       message: 'Membership level created successfully',
