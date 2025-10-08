@@ -16,6 +16,7 @@ import { slugify } from 'src/auth/auth-handler/utils';
 import { ConfigService } from '@nestjs/config';
 import { UpdateCalendlyEventDto } from './dto/create-event.dto';
 import { axios } from './utils';
+import { EventResponse } from './types/event.response.types';
 
 @Injectable()
 export class CalendlyService {
@@ -25,7 +26,7 @@ export class CalendlyService {
     this.CALENDLY_AUTH_URI = config.getOrThrow('CALENDLY_AUTH_URI');
   }
 
-  public async createEvent(input: CalendlyPayload) {
+  public async createEvent(input: Partial<CalendlyPayload>) {
     if (!input.name || !input.duration)
       throw new BadRequestException('Event name and duration is required');
 
@@ -34,14 +35,19 @@ export class CalendlyService {
 
     // check event already has or not if already has then no need to create event type
     const collections = await this.getEventCollections(uri); // list of collections of the system admin
-    const payload = this.generatePayload({ ...input, owner: uri }); // generate payload
+    const payload = this.generatePayload({
+      ...input,
+      owner: uri,
+      kind: 'solo',
+      duration: input.duration,
+    }); // generate payload
     this.isEventExist(collections, { ...payload, slug: payload.slug! }); // if evnet is already exist then throw error
 
     // create event
     const { data } = await axios.post(`/event_types`, payload);
     return {
-      message: 'Event type created successfully',
-      event: data.resource, // we jsut need scheduling_url <-> resource.scheduling_url
+      message: 'Event type created successfully' as string,
+      resource: data.resource as EventResponse['event'], // we jsut need scheduling_url <-> resource.scheduling_url
     };
   }
 
@@ -116,6 +122,7 @@ export class CalendlyService {
       locations: input.locations ?? defaultCalendlyPayload.locations,
       visibility: input.visibility ?? defaultCalendlyPayload.visibility,
       scheduling_url: input.visibility ?? defaultCalendlyPayload.visibility,
+      custom_questions: input.custom_questions,
     };
 
     return payload;

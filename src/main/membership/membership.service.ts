@@ -8,6 +8,9 @@ import {
   UpdateMembershipLevelDto,
 } from './dto/update-membership-level.dto';
 import { MediafileService } from '../mediafile/mediafile.service';
+import { CalendlyService } from '../calendly/calendly.service';
+import { CalendlyWebhook } from '../calendly/calendly.webhook';
+import { EventResponse } from '../calendly/types/event.response.types';
 
 @Injectable()
 export class MembershipService {
@@ -15,6 +18,8 @@ export class MembershipService {
     private readonly prisma: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
     private readonly mediafileService: MediafileService,
+    private readonly calendlyService: CalendlyService,
+    private readonly calendlyWebHooksService: CalendlyWebhook,
   ) {}
 
   private async checkEnableMembership(id: string) {
@@ -151,6 +156,7 @@ export class MembershipService {
       },
     });
 
+<<<<<<< HEAD
     if (
       newMembershipLevel.MembershipSubscriptionPlan[0].CalligSubscriptionPlan ||
       newMembershipLevel.MembershipSubscriptionPlan[1].CalligSubscriptionPlan
@@ -164,11 +170,24 @@ export class MembershipService {
         },
       });
     }
+=======
+    // create schedule event from here...
+    const eventData = await this.calendlyService.createEvent({
+      name: newMembershipLevel.titleName,
+      duration: 30, // need to be get form input
+    });
+
+    // TODO: scheduling_url -> need to be store in db for booking event
+    // TODO: uri -> also need to be store in our db for monitor the event_type /uuid
+    const { scheduling_url, uri } = eventData.resource;
+>>>>>>> sabbir
 
     return cResponseData({
       message: 'Membership level created successfully',
       data: newMembershipLevel,
       success: true,
+      scheduling_url,
+      uri,
     });
   }
 

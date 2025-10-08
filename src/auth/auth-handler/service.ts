@@ -56,9 +56,20 @@ export class AuthHandlerService {
           },
           query?.refId,
         );
+
+        const payload = {
+          id: user?.id,
+          username: user?.username,
+          provider: user?.provider,
+          email: user?.email,
+          role: user?.role,
+          profile: user?.profile,
+          shop_id: user?.shop?.id || '',
+          memberships_owner_id: user?.memberships_owner?.id || '',
+        };
         // user created so, now create token and check strip and then return for sending response from controller
         const token = await this.generateToken({
-          ...user,
+          ...payload,
         });
         const isStrip =
           user.role === 'supporter' && user.stripeAccountId
