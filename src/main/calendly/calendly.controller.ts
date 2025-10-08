@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   Res,
 } from '@nestjs/common';
 import { CalendlyService } from './calendly.service';
@@ -17,7 +18,7 @@ import { Public } from 'src/auth/guard/public.decorator';
 import { ApiParam } from '@nestjs/swagger';
 import { CalendlyWebhook } from './calendly.webhook';
 import { GlobalMailService } from 'src/common/mail/global-mail.service';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 @Controller('calendly')
 export class CalendlyController {
@@ -32,29 +33,16 @@ export class CalendlyController {
   @Public()
   @Post('invite')
   async handleInvite(
+    @Req() req: Request,
     @Res() res: Response,
     @Body() payload: any,
     @Headers('x-calendly-signature') signature: string,
   ) {
-    console.log('Webhook received:', payload);
-    console.log('invitees:', payload.invitees_counter);
-    console.log('memberships: ', payload.event_memberships);
-    console.log('membershipobject: ', payload.event_memberships[0]);
-    console.log('location: ', payload.location);
+    console.log('query: ', req.query);
+    console.log('params: ', req.params);
     this.resData = payload;
+    console.log('payload: ', payload);
     console.log('sig', signature);
-
-    await this.mailService.sendMail(
-      [
-        'devlopersabbir@gmail.com',
-        'srka780@gmail.com',
-        'coderboysobuj@gmail.com',
-      ],
-      'web hook',
-      'none',
-      { data: JSON.stringify(payload) },
-    );
-    // return res.redirect(`${process.env.LIVE_BACKEND_URL}/calendly`);
     return payload;
   }
 
