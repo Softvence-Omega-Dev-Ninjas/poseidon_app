@@ -475,7 +475,7 @@ export class ServiceService {
       limit: take,
       data: orders,
     };
-    console.log('hit here for single order');
+    // console.log('hit here for single order');
     return cResponseData({
       message: ' Get a single service order by ID successfully.',
       error: null,
@@ -506,7 +506,7 @@ export class ServiceService {
   }
 
   async getServicesBuyPayemtData(userId: string) {
-    console.log('user idsssss', userId);
+    // console.log('user idsssss', userId);
     const currentTime = new Date();
     const top3cardData = await this.prisma.$transaction(async (tx) => {
       const suportCount = await tx.serviceOrder.count({
@@ -662,7 +662,7 @@ export class ServiceService {
         400,
       );
     }
-    console.log('paymentIntent - pi checkout', payStatus);
+    // console.log('paymentIntent - pi checkout', payStatus);
     if (payStatus.status === 'succeeded') {
       const paymentIntentData =
         await this.prisma.paymentDetailsByServices.update({

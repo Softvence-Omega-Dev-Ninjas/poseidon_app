@@ -23,7 +23,7 @@ export class PaymentService {
         cs_number: true,
       },
     });
-    console.log('unpaid Data with payment', unpaid);
+    // console.log('unpaid Data with payment', unpaid);
     if (!unpaid?.cs_number) throw new HttpException('Payment not found', 404);
     const checkoutSession = await this.checkOutService.checkPayment(
       unpaid.cs_number,
@@ -38,7 +38,7 @@ export class PaymentService {
       where: { ownerId: unpaid.sellerId },
       select: { id: true },
     });
-    console.log('membershipId', membershipId);
+    // console.log('membershipId', membershipId);
     return membershipId?.id
       ? `${process.env.FRONTEND_URL}/success` //${process.env.FRONTEND_URL}/membership/${membershipId?.id}
       : `${process.env.FRONTEND_URL}`;

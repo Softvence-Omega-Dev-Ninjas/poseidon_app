@@ -31,10 +31,6 @@ export class ShopPaymentService {
           destination: data.stripeAccountId,
         },
       });
-      console.log(
-        'shop payment paymentIntent ===================== ',
-        paymentIntent,
-      );
 
       await this.prisma.paymentDetailsByShop.update({
         where: {
@@ -47,7 +43,7 @@ export class ShopPaymentService {
 
       return paymentIntent;
     } catch (e) {
-      console.log('shop payment error ===================== ', e);
+      // console.log('shop payment error ===================== ', e);
       throw new HttpException(
         cResponseData({
           message: 'Payment Method faild',

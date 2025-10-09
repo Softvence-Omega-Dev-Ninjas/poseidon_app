@@ -20,6 +20,7 @@ import { CalendlyWebhook } from './calendly.webhook';
 import { GlobalMailService } from 'src/common/mail/global-mail.service';
 import { Request, Response } from 'express';
 import { CalendlyWebhookPayload } from './types/webhookPayload';
+import { SchedulService } from './schedul.service';
 
 @Controller('calendly')
 export class CalendlyController {
@@ -28,6 +29,7 @@ export class CalendlyController {
     private readonly service: CalendlyService,
     private readonly webhook: CalendlyWebhook,
     private readonly mailService: GlobalMailService,
+    private readonly schedulService: SchedulService,
   ) {}
 
   // IMPORTANT WEB-HOOK ENDPOINT
@@ -39,20 +41,18 @@ export class CalendlyController {
     @Body() payload: any, //CalendlyWebhookPayload
     @Headers('x-calendly-signature') signature: string,
   ) {
-    console.log('query: ', req.query);
-    console.log('params: ', req.params);
+    // console.log('query: ', req.query);
+    // console.log('params: ', req.params);
     this.resData = payload;
-    console.log('payload: ------->>> ', payload);
-    console.log('===============================');
-    console.log('payload: ------->>> ', JSON.stringify(payload, null, 2));
-    console.log('===============================');
-    console.log('payload: ------->>> ', payload?.payload?.scheduled_event);
-    console.log('===============================');
-    console.log(
-      'payload: ------->>> ',
-      payload?.payload?.scheduled_event?.location,
-    );
-    console.log('sig', signature);
+    // console.log('payload: ------->>> ', payload);
+    // console.log('===============================');
+    // console.log('payload: ------->>> ', JSON.stringify(payload, null, 2));
+    // console.log('===============================');
+    console.log('payload: ------->>> ', payload?.payload);
+    // console.log('===============================');
+    // console.log('sig', signature);
+
+    // await this.schedulService.setSchedulSystem(payload?.payload);
 
     return payload;
   }
@@ -70,7 +70,7 @@ export class CalendlyController {
   async createWebHook() {
     try {
       const hook = await this.webhook.CreateWebHookSubcription();
-      console.log('web hook payload', hook);
+      // console.log('web hook payload', hook);
       return hook;
     } catch (err) {
       return err;
@@ -95,7 +95,7 @@ export class CalendlyController {
       const event = await this.service.createEvent(body);
       return event;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       return err;
     }
   }
@@ -135,7 +135,7 @@ export class CalendlyController {
       const event = await this.service.getEventCollections();
       return event;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       return err;
     }
   }
@@ -143,7 +143,7 @@ export class CalendlyController {
   @Public()
   @Get('redireact')
   async oauthRedicreat(@Param() param: any) {
-    console.log(param);
+    // console.log(param);
     return 'hello';
   }
 

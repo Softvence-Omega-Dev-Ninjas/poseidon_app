@@ -19,7 +19,7 @@ export class MembershipUseToUserOnly {
   @Public()
   @Get('get_all_levels/:membershipId')
   getMembership(@Param('membershipId') membershipId: string) {
-    console.log(membershipId);
+    // console.log(membershipId);
     return this.membershipServiceUser.getMembershipLevels(membershipId);
   }
 
@@ -37,7 +37,7 @@ export class MembershipUseToUserOnly {
     @Query('buyforce', StringToBooleanPipe) buyforce: boolean,
   ) {
     // buyforce = buyforce === true ? true : false;
-    console.log({ buyforce, data });
+    // console.log({ buyforce, data });
     return this.membershipServiceUser.buyMembership(
       req['sub'] as string,
       data,

@@ -67,7 +67,7 @@ export class CalendlyService {
   public async getme<T extends object>(): Promise<T> {
     // need to store me in redis db
     const { data } = await axios.get(`/users/me`);
-    console.log(data.resource);
+    // console.log(data.resource);
     const { uri, current_organization } = data.resource;
     if (!uri || !current_organization)
       throw new InternalServerErrorException('Fail to retrive system auth');

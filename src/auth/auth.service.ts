@@ -66,7 +66,7 @@ export class AuthService {
       const result = await this.stripeSellerService.checkAccountsInfoSystem(
         user.stripeAccountId,
       );
-      console.log('varify stripe ', result);
+      // console.log('varify stripe ', result);
       financial_account_check.stripe = result;
     }
 
@@ -91,7 +91,7 @@ export class AuthService {
       });
       return payload;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       throw new HttpException(
         {
           message: 'Incorrect credentials. Please try again.',
@@ -109,7 +109,7 @@ export class AuthService {
 
   async varifyemail(data: VarifyEmailDto) {
     const G4code = generateCode();
-    console.log('G4code', G4code);
+    // console.log('G4code', G4code);
     const token = await this.jwtService.signAsync(
       { email: data.email, code: G4code },
       {
@@ -126,8 +126,8 @@ export class AuthService {
       message,
     );
 
-    console.log('email resData', resData);
-    console.log('email resData', resData.response.includes('OK'));
+    // console.log('email resData', resData);
+    // console.log('email resData', resData.response.includes('OK'));
 
     if (resData.accepted.length < 1 || !resData.response.includes('OK')) {
       throw new HttpException(
@@ -172,7 +172,7 @@ export class AuthService {
         next_page: true,
       };
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       throw new HttpException(
         {
           message: 'Incorrect OTP. Please try again.',
@@ -314,7 +314,7 @@ export class AuthService {
         success: true,
       };
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       throw new HttpException(
         {
           message: ' Response time out ',

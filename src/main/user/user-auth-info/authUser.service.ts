@@ -77,7 +77,7 @@ export class AuthUserService {
   // credentials register system
   async createUser(createUserDto: CreateUserDto, skip: boolean) {
     // const { skip, ...createUserDto } = data;
-    // console.log('createUserDto ========++++++++000000', createUserDto);
+    // // console.log('createUserDto ========++++++++000000', createUserDto);
     const userIsExest = await this.isExestUser(createUserDto.email);
     if (userIsExest) {
       throw new HttpException(
@@ -229,7 +229,7 @@ export class AuthUserService {
   // }
 
   //   // const { skip, ...createUserDto } = data;
-  //   console.log('createUserDto ========++++++++000000', createUserDto);
+  //   // console.log('createUserDto ========++++++++000000', createUserDto);
   //   const userIsExest = await this.isExestUser(createUserDto.email);
   //   if (userIsExest) {
   //     throw new HttpException(
@@ -342,10 +342,10 @@ export class AuthUserService {
     createUserDto: CreateUserDto,
     skip: boolean,
   ) {
-    console.log('createUserDto =====++++++', createUserDto);
+    // console.log('createUserDto =====++++++', createUserDto);
     try {
       // If the user is a supporter, create a support_cart_layout
-      console.log('createSupporterAccount......');
+      // console.log('createSupporterAccount......');
       // return { ...createUserDto, skip };
 
       // create a user ref system
@@ -427,7 +427,7 @@ export class AuthUserService {
           description: newSupporter.profile?.description as string,
         },
       });
-      console.log(createAccountStripe);
+      // console.log(createAccountStripe);
       if (!createAccountStripe || !createAccountStripe.id) {
         throw new HttpException(
           cResponseData({

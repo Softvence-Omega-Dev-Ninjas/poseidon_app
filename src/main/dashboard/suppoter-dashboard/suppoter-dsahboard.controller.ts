@@ -4,13 +4,18 @@ import { ReferralService } from './suppoter-dsahboard.service';
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { cResponseData } from 'src/common/utils/common-responseData';
+import { VideoCallChatService } from './videocall.service';
+import { Public } from 'src/auth/guard/public.decorator';
 // import { FileInterceptor } from '@nestjs/platform-express';
 // import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 // import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
 
 @Controller('suppoter-dashboard')
 export class ReferralController {
-  constructor(private referralService: ReferralService) {}
+  constructor(
+    private readonly referralService: ReferralService,
+    private readonly videoCallChatService: VideoCallChatService,
+  ) {}
 
   // Referral link
   @Roles(Role.User, Role.Supporter)
@@ -37,21 +42,18 @@ export class ReferralController {
     return this.referralService.getOverview(userId);
   }
 
-  // update user account
   // @Roles(Role.User, Role.Supporter)
-  // @Put('update-account')
-  // @UseInterceptors(FileInterceptor('image'))
-  // @ApiConsumes('multipart/form-data')
-  // async updateUser(@Req() req, @Body() dto: UpdateAccountDto,
-  //   @UploadedFile(new ImageValidationPipe()) image?: Express.Multer.File,) {
-  //   return this.referralService.updateUser(req.user.id, dto, image);
-  // }
+  @Public()
+  @Get('videoCallChatList')
+  async getVideoCallChatList(@Req() req: Request) {
+    return this.videoCallChatService.getVideoCallChatList(req['sub'] as string);
+  }
 
-  // @Roles(Role.User, Role.Supporter)
-  // @Delete('delete-account')
-  // async deleteAccount(@Req() req) {
-  //   return this.referralService.deleteAccount(req.user.id);
-  // }
+  @Public()
+  @Get('videoCall_schedul')
+  async getVideoCallSchedul(@Req() req: Request) {
+    return this.videoCallChatService.getVideoCallSchedul(req['sub'] as string);
+  }
 
   @Roles(Role.User, Role.Supporter)
   @Get('total-purchases')

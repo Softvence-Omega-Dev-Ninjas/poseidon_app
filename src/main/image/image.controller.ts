@@ -127,8 +127,8 @@ export class ImageController {
     @UploadedFile() newImage: Express.Multer.File,
     @Req() req: Request,
   ) {
-    console.log(updateImageDto);
-    console.log(newImage);
+    // console.log(updateImageDto);
+    // console.log(newImage);
     return this.imageService.update(
       id,
       updateImageDto,

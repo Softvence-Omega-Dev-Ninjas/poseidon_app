@@ -47,4 +47,4 @@ const obj = {
   age: 25,
 };
 omit(obj, ['age']);
-console.log();
+// console.log();

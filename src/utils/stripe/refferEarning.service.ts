@@ -38,6 +38,6 @@ export class RefferEarningService {
       currency: 'usd',
       destination: inviterInfo.inviter.stripeAccountId,
     });
-    console.log('reffEarn >>>>>>>>>>>>>>>=======', reffEarn);
+    // console.log('reffEarn >>>>>>>>>>>>>>>=======', reffEarn);
   }
 }

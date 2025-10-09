@@ -49,7 +49,7 @@ export class AuthHandlerRepository {
     tx: PrismaTx,
     refUserId?: string,
   ) {
-    console.log(input);
+    // console.log(input);
     // extract profile
     const profile = input.profile;
 

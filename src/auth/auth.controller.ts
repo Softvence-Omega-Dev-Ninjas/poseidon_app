@@ -66,19 +66,7 @@ export class AuthController {
       ...profile
     } = createAuthDto;
 
-    console.log('skip ------------+++', skipAuth);
-
-    console.log({
-      role,
-      email,
-      username,
-      password,
-      profile: {
-        ...profile,
-        image: imageUrl,
-      },
-      referralId,
-    });
+    // console.log('skip ------------+++', skipAuth);
 
     return this.authUserService.createUser(
       {

@@ -220,7 +220,7 @@ export class SupporterService {
         400,
       );
     }
-    console.log('paymentIntent - pi checkout', payStatus);
+    // console.log('paymentIntent - pi checkout', payStatus);
     if (payStatus.status === 'succeeded') {
       const paymentIntentData = await this.prisma.supporterPay.update({
         where: {
@@ -254,7 +254,7 @@ export class SupporterService {
   }
 
   async get3topCard(author_id: string) {
-    console.log(author_id, '2eb5c09d-fe1e-45c5-afc9-d9cb7ff023f2');
+    // console.log(author_id, '2eb5c09d-fe1e-45c5-afc9-d9cb7ff023f2');
     const currentTime = new Date();
     return await this.prisma.$transaction(async (tx) => {
       const TotalSupportersCount =

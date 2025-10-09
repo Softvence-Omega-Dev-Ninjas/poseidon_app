@@ -93,8 +93,8 @@ export class SupporterController {
     @Body() createSupporterDto: CreateSupporterPayDto,
     @Req() req: Request,
   ) {
-    // console.log('order_package_name ===========> ', typeof order_package_name);
-    console.log('login user ===========>>>>>>>>>>>>>>>>>>', req['sub']);
+    // // console.log('order_package_name ===========> ', typeof order_package_name);
+    // console.log('login user ===========>>>>>>>>>>>>>>>>>>', req['sub']);
     return this.supporterService.create(
       createSupporterDto,
       req['sub'] as string,
@@ -111,9 +111,9 @@ export class SupporterController {
   @Public()
   @Post('checkout-acccount-this')
   async payment(@Body() data: any) {
-    console.log(data);
+    // console.log(data);
     const acc = await this.stripe.supporterCardPaymentIntents();
-    console.log(acc.requirements);
+    // console.log(acc.requirements);
     return acc;
   }
 

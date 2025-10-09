@@ -34,10 +34,6 @@ export class ServicePaymentService {
           destination: stripeAccountId,
         },
       });
-      console.log(
-        'service payment paymentIntent ===================== ',
-        paymentIntent,
-      );
 
       if (
         !paymentIntent ||
@@ -71,7 +67,7 @@ export class ServicePaymentService {
         id: paymentIntent.id,
       };
     } catch (e) {
-      console.log('shop payment error ===================== ', e);
+      // console.log('shop payment error ===================== ', e);
       throw new HttpException(
         cResponseData({
           message: 'Payment Method faild',

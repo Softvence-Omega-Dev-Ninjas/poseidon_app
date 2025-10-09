@@ -190,7 +190,7 @@ export class MembershipRewardService {
   }
 
   async deleteMessagesAccessReward(id: string) {
-    console.log('deleteMessagesAccessReward', id);
+    // console.log('deleteMessagesAccessReward', id);
     const newData = await this.prisma.membershipAccessToMessages.delete({
       where: {
         id,

@@ -51,7 +51,7 @@ export class MediafileService {
   // use to Only for membership levels card by delete apis
   async deleteMembershipImage(id: string) {
     const mediaData = await this.findById(id);
-    // console.log(mediaData);
+    // // console.log(mediaData);
     if (!(mediaData && mediaData.id) || !(mediaData && mediaData.publicId))
       throw new HttpException(
         cResponseData({
@@ -85,7 +85,7 @@ export class MediafileService {
 
   async fullDeleteFileSystem(id: string) {
     const mediaData = await this.findById(id);
-    console.log('mediaData', mediaData);
+    // console.log('mediaData', mediaData);
     if (!mediaData)
       return {
         massage: 'file not Found',
@@ -102,14 +102,14 @@ export class MediafileService {
         };
       }
     }
-    console.log('mediaData >>>>>>>>', mediaData);
+    // console.log('mediaData >>>>>>>>', mediaData);
     const deletecloudinary: { result: string } =
       await this.cloudinaryService.deleteFile(mediaData?.publicId);
     if (deletecloudinary.result == 'ok') {
-      console.log('deletecloudinary ------- ok', deletecloudinary);
+      // console.log('deletecloudinary ------- ok', deletecloudinary);
       const dltFile = await this.deleteFile(mediaData.id);
       if (dltFile && dltFile.id) {
-        console.log('deletecloudinary ------- ok 22222', dltFile);
+        // console.log('deletecloudinary ------- ok 22222', dltFile);
         return {
           message: 'File deleted successfully',
           data: id,
@@ -125,7 +125,7 @@ export class MediafileService {
     if (deletecloudinary.result == 'not found') {
       const dltFile = await this.deleteFile(mediaData.id);
       if (dltFile && dltFile.id) {
-        console.log('deletecloudinary ------- ok 44444', dltFile);
+        // console.log('deletecloudinary ------- ok 44444', dltFile);
         return {
           message: 'File deleted successfully',
           data: id,

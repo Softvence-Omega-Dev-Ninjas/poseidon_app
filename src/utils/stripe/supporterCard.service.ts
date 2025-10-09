@@ -20,7 +20,7 @@ export class SupporterCardPaymentService {
       },
     });
 
-    console.log('supporter paymentIntent', paymentIntent);
+    // console.log('supporter paymentIntent', paymentIntent);
 
     return { client_secret: paymentIntent.client_secret, id: paymentIntent.id };
   }

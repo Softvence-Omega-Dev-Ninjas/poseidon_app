@@ -34,7 +34,7 @@ export class TrackVisitMiddleware implements NestMiddleware {
         } else {
         }
       } catch (error: any) {
-        console.log('Error: getCountryFromIP() ', error);
+        // console.log('Error: getCountryFromIP() ', error);
       }
     }
 

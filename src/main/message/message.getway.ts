@@ -115,7 +115,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       receiver,
     );
 
-    console.log(receiverActiveWith, 'receiverActiveWith');
+    // console.log(receiverActiveWith, 'receiverActiveWith');
 
     let savedMessage;
 
@@ -579,7 +579,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleBlurChat(@MessageBody() data: { userId: string }) {
     // userId left the active chat view
     await this.redisService.hDel('userActiveChatMap', data.userId);
-    console.log('hite here successfully blurchat');
+    // console.log('hite here successfully blurchat');
   }
 
   @SubscribeMessage('isUserActive')

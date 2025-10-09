@@ -133,26 +133,26 @@ export class MembershipRewardController {
   async deleteReward(@Query('type') type: string, @Query('id') id: string) {
     // const [type, id] = params.split('/');
     if (type == 'videoCallReward') {
-      console.log({ type, id });
+      // console.log({ type, id });
       // return 'videoCallReward';
       return await this.membershipRewardService.deleteVideoCallReward(id);
     }
     if (type == 'messagesReward') {
-      console.log({ type, id });
+      // console.log({ type, id });
       // return 'messagesReward';
       return await this.membershipRewardService.deleteMessagesAccessReward(id);
     }
     if (type == 'galleryReward') {
-      console.log({ type, id });
+      // console.log({ type, id });
       // return 'galleryReward';
       return await this.membershipRewardService.deleteGalleryAccessReward(id);
     }
     if (type == 'postsReward') {
-      console.log({ type, id });
+      // console.log({ type, id });
       // return 'postsReward';
       return await this.membershipRewardService.deletePostsAccessReward(id);
     }
-    console.log({ type, id });
+    // console.log({ type, id });
     return cResponseData({
       message: 'Invalid type Url',
       data: null,

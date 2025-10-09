@@ -53,7 +53,7 @@ export class MediafileController {
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<any> {
     const mediaData = await this.mediafileService.findById(id);
-    // console.log(mediaData);
+    // // console.log(mediaData);
     if (!(mediaData && mediaData.id) || !(mediaData && mediaData.publicId))
       throw new HttpException(
         cResponseData({

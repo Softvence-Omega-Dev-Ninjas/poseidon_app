@@ -144,7 +144,7 @@ export class CloudinaryService {
         fileName.join('') + new Date().toISOString() + '.' + extentionName;
       file.originalname = updateName;
 
-      console.log('uperror -------------- ');
+      // console.log('uperror -------------- ');
 
       const uploadRes = await new Promise<any>((resolve, reject) => {
         const uploadStream = this.cloudinary.uploader.upload_stream(
@@ -161,7 +161,7 @@ export class CloudinaryService {
         streamifier.createReadStream(file.buffer).pipe(uploadStream);
       });
 
-      console.log('uperror -------------- media');
+      // console.log('uperror -------------- media');
 
       const media = await this.prisma.media.create({
         data: {

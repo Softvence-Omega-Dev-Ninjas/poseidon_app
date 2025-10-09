@@ -69,7 +69,7 @@ export class MembershipServiceUseToUserOnly {
       );
     }
 
-    // console.log({ membershipLevel });
+    // // console.log({ membershipLevel });
 
     let endDate: Date = new Date();
     const plan = membershipLevel?.MembershipSubscriptionPlan[0]
@@ -90,8 +90,8 @@ export class MembershipServiceUseToUserOnly {
         serviceId: membershipLevel?.id as string,
       });
 
-    // console.log('===== existingPaymentInfo ======', existingPaymentInfo);
-    // console.log('===== buyforce >>>>>>>>>>>>>>>>>>>> ======', buyforce);
+    // // console.log('===== existingPaymentInfo ======', existingPaymentInfo);
+    // // console.log('===== buyforce >>>>>>>>>>>>>>>>>>>> ======', buyforce);
     const existingService = await this.prisma.membership_levels.findFirst({
       where: { id: existingPaymentInfo?.serviceId },
     });
@@ -184,7 +184,7 @@ export class MembershipServiceUseToUserOnly {
       },
     );
 
-    console.log('membership - checkout', checkout);
+    // console.log('membership - checkout', checkout);
 
     // TODO: get the schedule url and also uri from the
     //   const obj = {
@@ -219,7 +219,7 @@ export class MembershipServiceUseToUserOnly {
         400,
       );
     }
-    // console.log('paymentIntent - pi checkout', payStatus);
+    // // console.log('paymentIntent - pi checkout', payStatus);
     if (payStatus.status === 'succeeded') {
       const paymentIntentData = await this.prisma.paymentDetails.update({
         where: {
@@ -229,7 +229,7 @@ export class MembershipServiceUseToUserOnly {
           paymemtStatus: 'paid',
         },
       });
-      console.log('paymentIntentData = succeeded', paymentIntentData);
+      // console.log('paymentIntentData = succeeded', paymentIntentData);
 
       if (paymentIntentData.sellerId) {
         await this.refferEarningService.refferEarningBySeller(
@@ -261,7 +261,7 @@ export class MembershipServiceUseToUserOnly {
     }
   }
 
-  // get all membership levels use to user and suupoter
+  // get all membership levels use to user
   async getMembershipLevels(mId: string) {
     return await this.prisma.$transaction(async (tx) => {
       const allLevels = await tx.membership_levels.findMany({
@@ -299,7 +299,7 @@ export class MembershipServiceUseToUserOnly {
           },
         },
       });
-      console.log('allLevels', allLevels);
+      // console.log('allLevels', allLevels);
       return cResponseData({
         message: 'Membership level created successfully',
         data:

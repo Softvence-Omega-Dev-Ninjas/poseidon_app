@@ -43,7 +43,7 @@ export class ProductCategoryController {
     @Req() req: any,
     @UploadedFile() image?: Express.Multer.File,
   ) {
-    console.log(req?.sub);
+    // console.log(req?.sub);
     return this.productCategoryService.create(
       createProductCategoryDto,
       req?.sub,

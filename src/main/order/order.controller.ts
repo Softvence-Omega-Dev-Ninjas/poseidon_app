@@ -42,7 +42,7 @@ export class OrderController {
     @Req() req: Request,
     @Query() query: GetOrderItemWithBerGirl,
   ) {
-    console.log('getOrders-bg');
+    // console.log('getOrders-bg');
     return this.orderService.getAllOrderWithBerGirl(
       req['sub'] as string,
       query,
