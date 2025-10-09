@@ -38,7 +38,7 @@ export class CalendlyController {
   async handleInvite(
     @Req() req: Request,
     @Res() res: Response,
-    @Body() payload: any, //CalendlyWebhookPayload
+    @Body() payload: CalendlyWebhookPayload, //CalendlyWebhookPayload
     @Headers('x-calendly-signature') signature: string,
   ) {
     // console.log('query: ', req.query);
@@ -48,11 +48,11 @@ export class CalendlyController {
     // console.log('===============================');
     // console.log('payload: ------->>> ', JSON.stringify(payload, null, 2));
     // console.log('===============================');
-    console.log('payload: ------->>> ', payload?.payload);
+    // console.log('payload: ------->>> ', payload?.payload);
     // console.log('===============================');
     // console.log('sig', signature);
 
-    // await this.schedulService.setSchedulSystem(payload?.payload);
+    await this.schedulService.setSchedulSystem(payload);
 
     return payload;
   }

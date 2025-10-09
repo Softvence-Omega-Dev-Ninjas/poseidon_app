@@ -5,7 +5,7 @@ import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { VideoCallChatService } from './videocall.service';
-import { Public } from 'src/auth/guard/public.decorator';
+// import { Public } from 'src/auth/guard/public.decorator';
 // import { FileInterceptor } from '@nestjs/platform-express';
 // import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 // import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
@@ -42,14 +42,13 @@ export class ReferralController {
     return this.referralService.getOverview(userId);
   }
 
-  // @Roles(Role.User, Role.Supporter)
-  @Public()
+  @Roles(Role.User, Role.Supporter)
   @Get('videoCallChatList')
   async getVideoCallChatList(@Req() req: Request) {
     return this.videoCallChatService.getVideoCallChatList(req['sub'] as string);
   }
 
-  @Public()
+  @Roles(Role.User, Role.Supporter)
   @Get('videoCall_schedul')
   async getVideoCallSchedul(@Req() req: Request) {
     return this.videoCallChatService.getVideoCallSchedul(req['sub'] as string);
