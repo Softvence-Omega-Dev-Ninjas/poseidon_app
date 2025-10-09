@@ -11,4 +11,4 @@ import { VideoCallChatService } from './videocall.service';
   providers: [ReferralService, PrismaService, VideoCallChatService],
   exports: [ReferralService, VideoCallChatService],
 })
-export class ReferralModule {}
+export class SuppoterModule {}

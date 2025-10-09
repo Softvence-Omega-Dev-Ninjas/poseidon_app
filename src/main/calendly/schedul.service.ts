@@ -41,6 +41,20 @@ export class SchedulService {
       if (newdata?.membershipTbId_utm_medium)
         await this.membershipCallDataUpdate(newdata.membershipTbId_utm_medium);
     }
+    // service
+    if (data.payload.tracking?.utm_medium == 'service') {
+      await this.prisma.scheduledEvent.create({
+        data: {
+          utm_term_userId: trck.utm_term,
+          salesforce_uuid_bergirlId: trck.salesforce_uuid,
+          schedulType_utm_source: 'service', //trck.utm_source,
+          serviceOrderTbId_utm_medium: trck.utm_medium,
+          start_time: data.payload.scheduled_event.start_time,
+          end_time: data.payload.scheduled_event.end_time,
+          join_url: data.payload.scheduled_event.location.join_url,
+        },
+      });
+    }
   }
 
   private async membershipCallDataUpdate(id: string) {

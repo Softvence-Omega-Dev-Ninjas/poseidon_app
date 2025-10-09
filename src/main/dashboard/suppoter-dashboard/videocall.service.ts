@@ -21,6 +21,16 @@ export class VideoCallChatService {
             endDate: true,
           },
         },
+        supporter: {
+          select: {
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         paymentDetails: {
@@ -47,7 +57,7 @@ export class VideoCallChatService {
     });
 
     return cResponseData({
-      message: 'Video calling list',
+      message: 'Video calling list - membership',
       data: addUrlQure,
       success: true,
     });
@@ -61,6 +71,18 @@ export class VideoCallChatService {
           gt: new Date(),
         },
       },
+      include: {
+        bergirl: {
+          select: {
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+      },
       orderBy: {
         start_time: 'desc',
       },
@@ -68,6 +90,53 @@ export class VideoCallChatService {
     return cResponseData({
       message: 'Video calling Schedul',
       data: getCallSchedul,
+      success: true,
+    });
+  }
+
+  // get VideoCallSchedul ServiceOrder
+  async getVideoCallSchedulServiceOrder(userid: string) {
+    const getCallSchedul = await this.prisma.serviceOrder.findMany({
+      where: {
+        userId: userid,
+        paymentDetails: {
+          paymemtStatus: 'paid',
+        },
+        scheduledEvent: { is: null },
+      },
+      include: {
+        paymentDetails: true,
+        service: true,
+        seller: {
+          select: {
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    //   utm_source -> membership / service / supportercard
+    //   utm_medium -> id
+    //   utm_term -> userId
+    //   salesforce_uuid -> bergirlId
+
+    const setUrlCallSchedul = getCallSchedul.map((item) => {
+      return {
+        ...item,
+        scheduling_url: `${item.scheduling_url}?utm_term=${item.userId}&salesforce_uuid=${item.sellerId}&utm_medium=${item.id}&utm_source=${'service'}`,
+      };
+    });
+    return cResponseData({
+      message: 'Video calling Schedul by ServiceOrder',
+      data: setUrlCallSchedul,
       success: true,
     });
   }

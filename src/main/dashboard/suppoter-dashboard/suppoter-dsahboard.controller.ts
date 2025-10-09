@@ -43,7 +43,7 @@ export class ReferralController {
   }
 
   @Roles(Role.User, Role.Supporter)
-  @Get('videoCallChatList')
+  @Get('membershipVideoCallChatList')
   async getVideoCallChatList(@Req() req: Request) {
     return this.videoCallChatService.getVideoCallChatList(req['sub'] as string);
   }
@@ -52,6 +52,14 @@ export class ReferralController {
   @Get('videoCall_schedul')
   async getVideoCallSchedul(@Req() req: Request) {
     return this.videoCallChatService.getVideoCallSchedul(req['sub'] as string);
+  }
+
+  @Roles(Role.User, Role.Supporter)
+  @Get('serviceOrder_videoCall_schedul')
+  async getVideoCallSchedulServiceOrder(@Req() req: Request) {
+    return this.videoCallChatService.getVideoCallSchedulServiceOrder(
+      req['sub'] as string,
+    );
   }
 
   @Roles(Role.User, Role.Supporter)
