@@ -1,16 +1,17 @@
 model PermissionVideoCallAccess {
-  id                  String         @id @unique @default(uuid())
+  id                  String          @id @unique @default(uuid())
   user_id             String
   supporter_id        String
   totalVideoCalls     Int
   unlimitedVideoCalls Boolean
-  createAt            DateTime       @default(now())
-  paymentId           String         @unique
-  paymentDetails      paymentDetails @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-  supporter           User           @relation("PermissionVideoCallAccessSupporter", fields: [supporter_id], references: [id])
-  user                User           @relation("PermissionVideoCallAccessUser", fields: [user_id], references: [id])
+  createAt            DateTime        @default(now())
+  paymentId           String          @unique
+  paymentDetails      paymentDetails  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  supporter           User            @relation("PermissionVideoCallAccessSupporter", fields: [supporter_id], references: [id])
+  user                User            @relation("PermissionVideoCallAccessUser", fields: [user_id], references: [id])
   scheduling_url      String?
   url                 String?
+  scheduledEvent      ScheduledEvent? @relation(name: "membershipScheduledEvent")
 }
 
 model PermissionMessagesAccess {

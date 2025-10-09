@@ -65,6 +65,10 @@ model User {
   following Follower[] @relation("UserFollowers")
   invited   Referral[] @relation("UserInvited")
   inviter   Referral[] @relation("UserInviter")
+
+  // 
+  scheduledEvent_user    ScheduledEvent[] @relation(name: "scheduledEventToUser")
+  scheduledEvent_bergirl ScheduledEvent[] @relation(name: "scheduledEventToBergirl")
 }
 
 model Profile {

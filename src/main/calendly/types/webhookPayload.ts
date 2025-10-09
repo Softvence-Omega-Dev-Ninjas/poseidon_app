@@ -45,9 +45,9 @@ export interface CalendlyWebhookPayload {
       utm_campaign?: string | null;
       utm_source?: string | null; // membership / service / supporter card
       utm_medium?: string | null; // service table Id - uuid
-      utm_content?: string | null;
-      utm_term?: string | null;
-      salesforce_uuid?: string | null;
+      utm_content?: string | null; // duration
+      utm_term?: string | null; //userid
+      salesforce_uuid?: string | null; //bergirlid
     };
 
     /**
