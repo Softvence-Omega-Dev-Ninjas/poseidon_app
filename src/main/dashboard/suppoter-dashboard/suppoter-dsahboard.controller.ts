@@ -42,25 +42,25 @@ export class SuppoterDashboardController {
     return this.referralService.getOverview(userId);
   }
 
-  @Roles(Role.User, Role.Supporter)
+  @Roles(Role.User)
   @Get('membershipVideoCallChatList')
   async getVideoCallChatList(@Req() req: Request) {
     return this.videoCallChatService.getVideoCallChatList(req['sub'] as string);
   }
 
-  @Roles(Role.User, Role.Supporter)
+  @Roles(Role.User)
   @Get('videoCall_scheduls')
   async getVideoCallSchedul(@Req() req: Request) {
     return this.videoCallChatService.getVideoCallSchedul(req['sub'] as string);
   }
 
-  @Roles(Role.User, Role.Supporter)
+  @Roles(Role.User)
   @Get('videoCall_schedul/:id')
   async getVideoCallSingleData(@Param('id') id: string) {
     return this.videoCallChatService.getVideoCallSingleData(id);
   }
 
-  @Roles(Role.User, Role.Supporter)
+  @Roles(Role.User)
   @Get('serviceOrder_videoCall_schedul')
   async getVideoCallSchedulServiceOrder(@Req() req: Request) {
     return this.videoCallChatService.getVideoCallSchedulServiceOrder(
