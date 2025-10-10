@@ -22,6 +22,7 @@ import { SuppoterModule } from './dashboard/suppoter-dashboard/suppoter-dsahboar
 import { ProfileSettingModule } from './profile-setting/profile-setting.module';
 import { PermissionModule } from './permission/permission.module';
 import { CalendlyModule } from './calendly/calendly.module';
+import { VideoCallSchedulHistoryModule } from './video-call-schedul-history/video-call-schedul-history.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { CalendlyModule } from './calendly/calendly.module';
     PermissionModule,
     // appointment group module
     CalendlyModule,
+    VideoCallSchedulHistoryModule,
   ],
   controllers: [],
   providers: [],

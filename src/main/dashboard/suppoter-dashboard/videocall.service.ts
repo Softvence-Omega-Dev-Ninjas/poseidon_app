@@ -94,6 +94,43 @@ export class VideoCallChatService {
     });
   }
 
+  async getVideoCallSingleData(id: string) {
+    const getCallSchedul = await this.prisma.scheduledEvent.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        bergirl: {
+          select: {
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        membershipVideoCallAccessTb: true,
+        serviceOrderTb: true,
+      },
+    });
+    return cResponseData({
+      message: 'Video calling Schedul',
+      data: { ...getCallSchedul, join_url: '' },
+      success: true,
+    });
+  }
+
   // get VideoCallSchedul ServiceOrder
   async getVideoCallSchedulServiceOrder(userid: string) {
     const getCallSchedul = await this.prisma.serviceOrder.findMany({

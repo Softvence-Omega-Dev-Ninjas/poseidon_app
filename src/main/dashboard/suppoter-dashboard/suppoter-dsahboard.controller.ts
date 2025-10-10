@@ -1,4 +1,4 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Controller, Get, Param, Req } from '@nestjs/common';
 import { ReferralService } from './suppoter-dsahboard.service';
 
 import { Roles } from 'src/auth/guard/roles.decorator';
@@ -11,7 +11,7 @@ import { VideoCallChatService } from './videocall.service';
 // import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
 
 @Controller('suppoter-dashboard')
-export class ReferralController {
+export class SuppoterDashboardController {
   constructor(
     private readonly referralService: ReferralService,
     private readonly videoCallChatService: VideoCallChatService,
@@ -49,9 +49,15 @@ export class ReferralController {
   }
 
   @Roles(Role.User, Role.Supporter)
-  @Get('videoCall_schedul')
+  @Get('videoCall_scheduls')
   async getVideoCallSchedul(@Req() req: Request) {
     return this.videoCallChatService.getVideoCallSchedul(req['sub'] as string);
+  }
+
+  @Roles(Role.User, Role.Supporter)
+  @Get('videoCall_schedul/:id')
+  async getVideoCallSingleData(@Param('id') id: string) {
+    return this.videoCallChatService.getVideoCallSingleData(id);
   }
 
   @Roles(Role.User, Role.Supporter)
