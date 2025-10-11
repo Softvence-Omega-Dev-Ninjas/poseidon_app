@@ -39,7 +39,7 @@ export class CalendlyController {
     @Req() req: Request,
     @Res() res: Response,
     @Body() payload: any, //CalendlyWebhookPayload
-    @Headers('x-calendly-signature') signature: string,
+    // @Headers('x-calendly-signature') signature: string,
   ) {
     // console.log('query: ', req.query);
     // console.log('params: ', req.params);
@@ -52,7 +52,7 @@ export class CalendlyController {
     // console.log('===============================');
     // console.log('sig', signature);
 
-    await this.schedulService.setSchedulSystem(payload);
+    // await this.schedulService.setSchedulSystem(payload);
 
     return payload;
   }
