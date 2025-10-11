@@ -9,7 +9,9 @@ describe('VideoCallSchedulHistoryService', () => {
       providers: [VideoCallSchedulHistoryService],
     }).compile();
 
-    service = module.get<VideoCallSchedulHistoryService>(VideoCallSchedulHistoryService);
+    service = module.get<VideoCallSchedulHistoryService>(
+      VideoCallSchedulHistoryService,
+    );
   });
 
   it('should be defined', () => {

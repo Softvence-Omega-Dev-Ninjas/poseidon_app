@@ -11,7 +11,9 @@ describe('VideoCallSchedulHistoryController', () => {
       providers: [VideoCallSchedulHistoryService],
     }).compile();
 
-    controller = module.get<VideoCallSchedulHistoryController>(VideoCallSchedulHistoryController);
+    controller = module.get<VideoCallSchedulHistoryController>(
+      VideoCallSchedulHistoryController,
+    );
   });
 
   it('should be defined', () => {
