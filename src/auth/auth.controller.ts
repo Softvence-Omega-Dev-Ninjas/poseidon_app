@@ -151,7 +151,6 @@ export class AuthController {
   }
 
   // signup varify email
-
   @Public()
   @Post('varify-email')
   varifyemail(

@@ -9,10 +9,10 @@ export class MailService {
 
   constructor(private configService: ConfigService) {
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      // host: process.env.SMTP_HOST, // e.g., 'smtp.hostinger.com'
-      // port: 465,
-      // secure: false,
+      // service: 'gmail',
+      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
@@ -22,7 +22,7 @@ export class MailService {
 
   async sendEmail(email: string, subject: string, message: string) {
     const mailOptions = {
-      from: `"DrinkWithMe" <${process.env.MAIL_USER}>`,
+      from: `"DrinkWithMe Support" <${process.env.MAIL_USER}>`,
       to: email,
       subject,
       html: message,
