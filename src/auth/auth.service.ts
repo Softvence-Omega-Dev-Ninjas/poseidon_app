@@ -77,7 +77,7 @@ export class AuthService {
       access_token: `Bearer ${access_token}`,
       user: {
         ...payload,
-        profile_varify: user?.varify,
+        // profile_varify: user?.varify,
         financial_account:
           user?.role == 'user' || user?.role == 'admin'
             ? true
@@ -223,7 +223,7 @@ export class AuthService {
         message: 'Email verified successfully',
         data: 'Email verified successfully',
         success: true,
-        profile_varify: checkVarify,
+        varify: checkVarify,
         next_page: true,
       };
     } catch (err) {
