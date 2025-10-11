@@ -36,7 +36,7 @@ export function cookieHandler(
 
   switch (mode) {
     case 'set': {
-      if (!token) throw new NotFoundException('Cookie required!');
+      if (!token) throw new NotFoundException('Generated token not found!');
       (ctx as Response).cookie(COOKIE_KEY, token, margedOptions);
       break;
     }
