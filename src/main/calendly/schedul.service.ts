@@ -16,7 +16,6 @@ export class SchedulService {
   constructor(private readonly prisma: PrismaService) {}
 
   async setSchedulSystem(data: any) {
-    console.log('setSchedulSystem in look - web hook ', data);
     const trck: trck = data.payload.tracking;
     if (
       !trck.utm_term ||
@@ -41,10 +40,6 @@ export class SchedulService {
       });
       if (newdata?.membershipTbId_utm_medium)
         await this.membershipCallDataUpdate(newdata.membershipTbId_utm_medium);
-      console.log(
-        'scheduls event save -------------------------------->>>>>',
-        newdata,
-      );
     }
     // service
     if (data.payload.tracking?.utm_source == 'service') {
