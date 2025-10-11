@@ -38,7 +38,7 @@ export class CalendlyController {
   async handleInvite(
     @Req() req: Request,
     @Res() res: Response,
-    @Body() payload: CalendlyWebhookPayload, //CalendlyWebhookPayload
+    @Body() payload: any, //CalendlyWebhookPayload
     @Headers('x-calendly-signature') signature: string,
   ) {
     // console.log('query: ', req.query);

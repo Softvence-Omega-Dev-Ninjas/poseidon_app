@@ -15,7 +15,8 @@ interface trck {
 export class SchedulService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async setSchedulSystem(data: CalendlyWebhookPayload) {
+  async setSchedulSystem(data: any) {
+    console.log('setSchedulSystem - web hook ', data);
     const trck: trck = data.payload.tracking;
     if (
       !trck.utm_term ||

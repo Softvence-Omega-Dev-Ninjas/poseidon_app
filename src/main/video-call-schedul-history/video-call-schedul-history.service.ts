@@ -30,6 +30,8 @@ export class VideoCallSchedulHistoryService {
         start_time: 'desc',
       },
     });
+
+    console.log('getCallSchedul use to bergirl', getCallSchedul);
     return cResponseData({
       message: 'Video calling Schedul',
       data: getCallSchedul,

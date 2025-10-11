@@ -87,6 +87,8 @@ export class VideoCallChatService {
         start_time: 'desc',
       },
     });
+
+    console.log('getCallSchedul =>>>>>>', getCallSchedul);
     return cResponseData({
       message: 'Video calling Schedul',
       data: getCallSchedul,
