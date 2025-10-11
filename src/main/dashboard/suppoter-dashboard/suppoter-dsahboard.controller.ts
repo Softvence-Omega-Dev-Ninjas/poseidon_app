@@ -5,6 +5,7 @@ import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { VideoCallChatService } from './videocall.service';
+import { Public } from 'src/auth/guard/public.decorator';
 // import { Public } from 'src/auth/guard/public.decorator';
 // import { FileInterceptor } from '@nestjs/platform-express';
 // import { ApiBody, ApiConsumes } from '@nestjs/swagger';
@@ -52,6 +53,12 @@ export class SuppoterDashboardController {
   @Get('videoCall_scheduls')
   async getVideoCallSchedul(@Req() req: Request) {
     return this.videoCallChatService.getVideoCallSchedul(req['sub'] as string);
+  }
+
+  @Public()
+  @Get('get_all_videoCall_scheduls')
+  async getAllVideoCallSchedul() {
+    return this.videoCallChatService.getAllVideoCallSchedul();
   }
 
   @Roles(Role.User)

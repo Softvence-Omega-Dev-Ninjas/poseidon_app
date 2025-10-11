@@ -22,6 +22,8 @@ async function bootstrap() {
   // });
 
   // // console.log(new Date('2025-09-18'));
+  // console.log('test env ----', process);
+  // console.log('test env ----', );
 
   SwaggerSetting(app);
   app.enableCors({
