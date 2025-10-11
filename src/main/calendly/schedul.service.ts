@@ -27,7 +27,7 @@ export class SchedulService {
       return;
 
     // membership
-    if (data.payload.tracking?.utm_medium == 'membership') {
+    if (data.payload.tracking?.utm_source == 'membership') {
       const newdata = await this.prisma.scheduledEvent.create({
         data: {
           utm_term_userId: trck.utm_term,
@@ -47,7 +47,7 @@ export class SchedulService {
       );
     }
     // service
-    if (data.payload.tracking?.utm_medium == 'service') {
+    if (data.payload.tracking?.utm_source == 'service') {
       await this.prisma.scheduledEvent.create({
         data: {
           utm_term_userId: trck.utm_term,
