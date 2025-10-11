@@ -16,7 +16,7 @@ export class SchedulService {
   constructor(private readonly prisma: PrismaService) {}
 
   async setSchedulSystem(data: any) {
-    console.log('setSchedulSystem - web hook ', data);
+    console.log('setSchedulSystem in look - web hook ', data);
     const trck: trck = data.payload.tracking;
     if (
       !trck.utm_term ||
