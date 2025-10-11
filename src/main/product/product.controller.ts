@@ -49,7 +49,7 @@ export class ProductController {
     @Body() createProductDto: CreateProductDto,
     @UploadedFiles() files?: Array<Express.Multer.File>,
   ) {
-    console.log('Files received:', createProductDto);
+    // console.log('Files received:', createProductDto);
     if (
       createProductDto.categoryIds &&
       createProductDto.categoryIds.length === 0
@@ -172,7 +172,7 @@ export class ProductController {
     @UploadedFiles() newImages: Express.Multer.File[],
   ) {
     const updateProductDto = new UpdateProductDto();
-    console.log(body);
+    // console.log(body);
     for (const key in body) {
       if (Object.prototype.hasOwnProperty.call(body, key)) {
         if (['images', 'categoryIds', 'color', 'features'].includes(key)) {
@@ -198,9 +198,7 @@ export class ProductController {
             .filter((item) => item !== '') // Filter out empty strings
             .map((item: string) => {
               const [value, actionString] = item.split(':');
-              console.log(
-                `Parsing item: ${item}, Value: ${value}, ActionString: ${actionString}`,
-              );
+
               const action =
                 actionString === 'add' ? Action.ADD : Action.DELETE;
               return { value, action };

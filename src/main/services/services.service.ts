@@ -21,6 +21,7 @@ import { UpdateservicesDto } from './dto/update-serviecs';
 import { ServicePaymentService } from 'src/utils/stripe/services.service';
 import { PiStripeId } from 'src/common/dto/pi_stripeId.dto';
 import { StripeService } from 'src/utils/stripe/stripe.service';
+import { CalendlyService } from '../calendly/calendly.service';
 
 @Injectable()
 export class ServiceService {
@@ -29,6 +30,7 @@ export class ServiceService {
     private readonly cloudinaryService: CloudinaryService,
     private readonly servicePaymentService: ServicePaymentService,
     private readonly stripeService: StripeService,
+    private readonly calendlyService: CalendlyService,
   ) {}
 
   async create(
@@ -44,7 +46,7 @@ export class ServiceService {
       }
     }
 
-    const service = await this.prisma.service.create({
+    const createService = await this.prisma.service.create({
       data: {
         ...createServiceDto,
         userId,
@@ -52,11 +54,32 @@ export class ServiceService {
       },
     });
 
+    if (!createService || !createService.id)
+      return cResponseData({
+        message: 'Service not created.',
+        error: 'Service not created.',
+        data: null,
+        success: false,
+      });
+
+    const eventData = await this.calendlyService.createEvent({
+      name: createService.serviceName,
+      description: createService.description,
+      duration: 30, // calendlyService duration
+    });
+    const updateData = await this.prisma.service.update({
+      where: { id: createService.id },
+      data: {
+        scheduling_url: eventData.resource.scheduling_url ?? '',
+        uri: eventData.resource.uri ?? '',
+      },
+    });
+
     return cResponseData({
       message: 'Service created successfully.',
       error: null,
       success: true,
-      data: service,
+      data: updateData,
     });
   }
 
@@ -313,6 +336,8 @@ export class ServiceService {
         userId: userId,
         sellerId: service.userId,
         serviceId: service.id,
+        scheduling_url: service.scheduling_url,
+        uri: service.uri,
       },
       include: {
         paymentDetails: true,
@@ -352,16 +377,20 @@ export class ServiceService {
       );
     }
 
-    const seripePaymentInfo = this.servicePaymentService.servicePaymentIntent({
-      id,
-      serviceId,
-      userId: user.id,
-      sellerId,
-      createdAt,
-      paymentDetails,
-      name: user.profile?.name,
-      stripeAccountId: service.user.stripeAccountId,
-    });
+    const seripePaymentInfo =
+      await this.servicePaymentService.servicePaymentIntent({
+        id,
+        serviceId,
+        userId: user.id,
+        sellerId,
+        createdAt,
+        paymentDetails,
+        name: user.profile?.name,
+        stripeAccountId: service.user.stripeAccountId,
+      });
+
+    // if (seripePaymentInfo.id || seripePaymentInfo.client_secret) {
+    // }
 
     return seripePaymentInfo;
   }
@@ -475,7 +504,7 @@ export class ServiceService {
       limit: take,
       data: orders,
     };
-    console.log('hit here for single order');
+    // console.log('hit here for single order');
     return cResponseData({
       message: ' Get a single service order by ID successfully.',
       error: null,
@@ -506,7 +535,7 @@ export class ServiceService {
   }
 
   async getServicesBuyPayemtData(userId: string) {
-    console.log('user idsssss', userId);
+    // console.log('user idsssss', userId);
     const currentTime = new Date();
     const top3cardData = await this.prisma.$transaction(async (tx) => {
       const suportCount = await tx.serviceOrder.count({
@@ -662,7 +691,7 @@ export class ServiceService {
         400,
       );
     }
-    console.log('paymentIntent - pi checkout', payStatus);
+    // console.log('paymentIntent - pi checkout', payStatus);
     if (payStatus.status === 'succeeded') {
       const paymentIntentData =
         await this.prisma.paymentDetailsByServices.update({

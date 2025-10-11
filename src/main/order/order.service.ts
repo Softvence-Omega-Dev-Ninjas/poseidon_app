@@ -111,8 +111,8 @@ export class OrderService {
         400,
       );
 
-    console.log('shop paydata =====>>>>>', paydata);
-    console.log('createPiStrpekey ======>>>>>', createPiStrpekey);
+    // console.log('shop paydata =====>>>>>', paydata);
+    // console.log('createPiStrpekey ======>>>>>', createPiStrpekey);
 
     return {
       client_secret: createPiStrpekey.client_secret,
@@ -182,7 +182,7 @@ export class OrderService {
     const parsedLimit = Number(limit);
     const skip = (parsedPage - 1) * parsedLimit;
 
-    console.log('ber girl id', id);
+    // console.log('ber girl id', id);
     const orders = await this.prisma.order.findMany({
       where: {
         product: {
@@ -241,7 +241,7 @@ export class OrderService {
     });
     const totalPages = Math.ceil(totalItems / parsedLimit);
 
-    // console.log(orders);
+    // // console.log(orders);
     const allData = orders.map((order) => {
       const { paymentDetailsByShop, product, user, createdAt, id, ...address } =
         order;
@@ -293,7 +293,7 @@ export class OrderService {
         400,
       );
     }
-    console.log('paymentIntent - pi checkout', payStatus);
+    // console.log('paymentIntent - pi checkout', payStatus);
     if (payStatus.status === 'succeeded') {
       const paymentIntentData = await this.prisma.paymentDetailsByShop.update({
         where: {

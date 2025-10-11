@@ -19,6 +19,8 @@ import { ApiParam } from '@nestjs/swagger';
 import { CalendlyWebhook } from './calendly.webhook';
 import { GlobalMailService } from 'src/common/mail/global-mail.service';
 import { Request, Response } from 'express';
+import { CalendlyWebhookPayload } from './types/webhookPayload';
+import { SchedulService } from './schedul.service';
 
 @Controller('calendly')
 export class CalendlyController {
@@ -27,6 +29,7 @@ export class CalendlyController {
     private readonly service: CalendlyService,
     private readonly webhook: CalendlyWebhook,
     private readonly mailService: GlobalMailService,
+    private readonly schedulService: SchedulService,
   ) {}
 
   // IMPORTANT WEB-HOOK ENDPOINT
@@ -35,14 +38,22 @@ export class CalendlyController {
   async handleInvite(
     @Req() req: Request,
     @Res() res: Response,
-    @Body() payload: any,
+    @Body() payload: CalendlyWebhookPayload, //CalendlyWebhookPayload
     @Headers('x-calendly-signature') signature: string,
   ) {
-    console.log('query: ', req.query);
-    console.log('params: ', req.params);
+    // console.log('query: ', req.query);
+    // console.log('params: ', req.params);
     this.resData = payload;
-    console.log('payload: ', payload);
-    console.log('sig', signature);
+    // console.log('payload: ------->>> ', payload);
+    // console.log('===============================');
+    // console.log('payload: ------->>> ', JSON.stringify(payload, null, 2));
+    // console.log('===============================');
+    // console.log('payload: ------->>> ', payload?.payload);
+    // console.log('===============================');
+    // console.log('sig', signature);
+
+    await this.schedulService.setSchedulSystem(payload);
+
     return payload;
   }
 
@@ -59,11 +70,13 @@ export class CalendlyController {
   async createWebHook() {
     try {
       const hook = await this.webhook.CreateWebHookSubcription();
+      // console.log('web hook payload', hook);
       return hook;
     } catch (err) {
       return err;
     }
   }
+
   @Public()
   @Get('web-hooks')
   async getWebhooks() {
@@ -75,8 +88,6 @@ export class CalendlyController {
     }
   }
 
-  // OPTIONAL //
-
   @Public()
   @Post('create-event-type')
   async handleCreate(@Body() body: CreateCalendlyEventDto) {
@@ -84,10 +95,11 @@ export class CalendlyController {
       const event = await this.service.createEvent(body);
       return event;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       return err;
     }
   }
+  // OPTIONAL //
 
   @Public()
   @ApiParam({ name: 'uuid', required: true, type: String })
@@ -115,6 +127,7 @@ export class CalendlyController {
       return err;
     }
   }
+
   @Public()
   @Get('events-collections')
   async getEvents() {
@@ -122,14 +135,15 @@ export class CalendlyController {
       const event = await this.service.getEventCollections();
       return event;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       return err;
     }
   }
+
   @Public()
   @Get('redireact')
   async oauthRedicreat(@Param() param: any) {
-    console.log(param);
+    // console.log(param);
     return 'hello';
   }
 

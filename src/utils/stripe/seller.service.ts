@@ -16,7 +16,7 @@ export class SellerService {
 
   // create connected account for seller or supporter
   async createConnectedAccount(user: ExpreeAccountDto) {
-    console.log(user.createProfileDto);
+    // console.log(user.createProfileDto);
     try {
       const account = await this.stripe.accounts.create({
         type: 'express',
@@ -89,7 +89,7 @@ export class SellerService {
 
       const payoutlist = await this.stripe.payouts.list(
         {
-          limit: 10,
+          limit: 100,
         },
         {
           stripeAccount: accountId,
@@ -117,7 +117,7 @@ export class SellerService {
       );
       const cryptoTotal = cryptoAvailable + cryptoPending;
 
-      console.log('cryptoTotal', cryptoTotal);
+      // console.log('cryptoTotal', cryptoTotal);
 
       //////
       const sumAmounts = (arr: { amount: number }[] = []) =>
@@ -177,7 +177,7 @@ export class SellerService {
   // use to Auth login user system this function
   async checkAccountsInfoSystem(accountId: string) {
     const account = await this.stripe.accounts.retrieve(accountId);
-    console.log('checkAccountsInfoSystem ================== ', account);
+    // console.log('checkAccountsInfoSystem ================== ', account);
     if (
       !account ||
       !account.external_accounts ||
@@ -204,7 +204,7 @@ export class SellerService {
         },
       },
     });
-    console.log('accountSessions', intent);
+    // console.log('accountSessions', intent);
     return intent.client_secret;
   }
 
@@ -368,7 +368,6 @@ export class SellerService {
       {
         amount: amount * 100,
         currency: 'usd',
-        destination: stripeAccountId,
       },
       {
         stripeAccount: stripeAccountId,

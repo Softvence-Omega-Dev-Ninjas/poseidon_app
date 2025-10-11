@@ -52,7 +52,7 @@ export class ImageService {
         success: true,
       });
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return cResponseData({
         message: 'Failed to create image.',
         error: error,
@@ -172,10 +172,10 @@ export class ImageService {
     newImage: Express.Multer.File,
     userId: string,
   ): Promise<any> {
-    console.log('id', id);
-    console.log('updatemageDto', updateImageDto);
-    console.log('newImage', newImage);
-    console.log('userId', userId);
+    // console.log('id', id);
+    // console.log('updatemageDto', updateImageDto);
+    // console.log('newImage', newImage);
+    // console.log('userId', userId);
     try {
       const image = await this.prisma.image.findUnique({ where: { id } });
 

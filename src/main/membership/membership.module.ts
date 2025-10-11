@@ -11,16 +11,14 @@ import { StripeModule } from 'src/utils/stripe/stripe.module';
 import { PaymentInfoService } from './onluUseUserMembershipInfo/paymentDetails.service';
 import { MediafileModule } from '../mediafile/mediafile.module';
 import { CalendlyModule } from '../calendly/calendly.module';
-import { CalendlyService } from '../calendly/calendly.service';
-import { CalendlyWebhook } from '../calendly/calendly.webhook';
 
 @Module({
   imports: [
-    CalendlyModule,
     PrismaClientModule,
     CloudinaryModule,
     StripeModule,
     MediafileModule,
+    CalendlyModule,
   ],
   controllers: [
     MembershipUseToUserOnly,
@@ -28,8 +26,6 @@ import { CalendlyWebhook } from '../calendly/calendly.webhook';
     MembershipRewardController,
   ],
   providers: [
-    CalendlyService,
-    CalendlyWebhook,
     MembershipService,
     MembershipRewardService,
     MembershipServiceUseToUserOnly,

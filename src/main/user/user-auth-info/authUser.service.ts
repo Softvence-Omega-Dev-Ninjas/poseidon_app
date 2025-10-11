@@ -77,7 +77,7 @@ export class AuthUserService {
   // credentials register system
   async createUser(createUserDto: CreateUserDto, skip: boolean) {
     // const { skip, ...createUserDto } = data;
-    // console.log('createUserDto ========++++++++000000', createUserDto);
+    // // console.log('createUserDto ========++++++++000000', createUserDto);
     const userIsExest = await this.isExestUser(createUserDto.email);
     if (userIsExest) {
       throw new HttpException(
@@ -105,6 +105,7 @@ export class AuthUserService {
     }
     // create new user
     // create a hash password
+    // create a user ref system
     let refData = {};
     if (createUserDto.referralId) {
       refData = {
@@ -115,6 +116,7 @@ export class AuthUserService {
         },
       };
     }
+
     const newUser = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
@@ -227,7 +229,7 @@ export class AuthUserService {
   // }
 
   //   // const { skip, ...createUserDto } = data;
-  //   console.log('createUserDto ========++++++++000000', createUserDto);
+  //   // console.log('createUserDto ========++++++++000000', createUserDto);
   //   const userIsExest = await this.isExestUser(createUserDto.email);
   //   if (userIsExest) {
   //     throw new HttpException(
@@ -340,10 +342,24 @@ export class AuthUserService {
     createUserDto: CreateUserDto,
     skip: boolean,
   ) {
-    console.log('createUserDto =====++++++', createUserDto);
+    // console.log('createUserDto =====++++++', createUserDto);
     try {
       // If the user is a supporter, create a support_cart_layout
-      console.log('createSupporterAccount......');
+      // console.log('createSupporterAccount......');
+      // return { ...createUserDto, skip };
+
+      // create a user ref system
+      let refData = {};
+      if (createUserDto.referralId) {
+        refData = {
+          invited: {
+            create: {
+              inviterId: createUserDto.referralId,
+            },
+          },
+        };
+      }
+
       const newSupporter = await this.prisma.user.create({
         data: {
           email: createUserDto.email,
@@ -355,6 +371,7 @@ export class AuthUserService {
               ...createUserDto.profile,
             },
           },
+          ...refData,
           support_cart_layout: {
             create: {},
           },
@@ -410,7 +427,7 @@ export class AuthUserService {
           description: newSupporter.profile?.description as string,
         },
       });
-      console.log(createAccountStripe);
+      // console.log(createAccountStripe);
       if (!createAccountStripe || !createAccountStripe.id) {
         throw new HttpException(
           cResponseData({

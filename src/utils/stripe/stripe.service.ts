@@ -7,17 +7,25 @@ import {
   converAmountStripe,
   platformFee,
 } from 'src/common/utils/stripeAmountConvert';
+import { SellerService } from './seller.service';
+import { RefferEarningService } from './refferEarning.service';
 
 @Injectable()
 export class StripeService {
   constructor(
     @Inject('STRIPE_CLIENT') private stripe: Stripe,
     private readonly prisma: PrismaService,
+    private readonly sellerService: SellerService,
+    private readonly refferEarningService: RefferEarningService,
   ) {}
 
   async checkOutPaymentSessionsMembership(data: CheckOutPaymentSessionsDto) {
     const seller = await this.prisma.user.findFirst({
       where: { id: data.sellerId, role: 'supporter' },
+      select: {
+        id: true,
+        stripeAccountId: true,
+      },
     });
     if (!seller?.stripeAccountId)
       throw new HttpException(
@@ -50,6 +58,14 @@ export class StripeService {
         destination: seller.stripeAccountId,
       },
     });
+
+    // if (seller && seller.id && data.amount) {
+    //   ///
+    //   await this.refferEarningService.refferEarningBySeller(
+    //     seller.id,
+    //     data.amount,
+    //   );
+    // }
 
     if (!paymentAction.id || !paymentAction.client_secret) {
       throw new HttpException(

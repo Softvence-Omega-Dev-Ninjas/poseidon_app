@@ -53,7 +53,7 @@ export class ServiceController {
     @Req() req,
     @UploadedFiles() files?: Array<Express.Multer.File>,
   ) {
-    console.log('Files received:', createProductDto);
+    // console.log('Files received:', createProductDto);
 
     const { ...restOfProductData } = createProductDto;
     return this.serviceService.create(createProductDto, req.sub, files);
@@ -128,7 +128,7 @@ export class ServiceController {
   @Roles(Role.Supporter)
   @UsePipes(new ValidationPipe({ transform: true }))
   remove(@Param('id') id: string) {
-    console.log(id);
+    // console.log(id);
     return this.serviceService.remove(id);
   }
 
@@ -172,8 +172,8 @@ export class ServiceController {
     @Body() dto: UpdateservicesDto,
     @UploadedFiles() newImages?: Express.Multer.File[],
   ) {
-    console.log(id, dto);
-    console.log(newImages);
+    // console.log(id, dto);
+    // console.log(newImages);
     return this.serviceService.update(id, dto, newImages);
   }
 

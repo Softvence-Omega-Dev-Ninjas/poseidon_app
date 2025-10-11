@@ -50,7 +50,7 @@ export class CloudinaryService {
 
     try {
       const uploadRes = await this.uploadToCloudinary(file, publicId);
-      console.log(uploadRes);
+      // console.log(uploadRes);
       if (!uploadRes.secure_url)
         throw new ConflictException('Fail to upload file!');
 

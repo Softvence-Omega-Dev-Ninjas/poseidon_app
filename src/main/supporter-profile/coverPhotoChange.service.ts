@@ -94,8 +94,8 @@ export class CoverPhotoChangeService {
       });
     }
 
-    console.log('upppppp');
-    console.log('upppppp=========', user);
+    // console.log('upppppp');
+    // console.log('upppppp=========', user);
     //   remove images with coudinary and media tb
     const mediaData = await this.mediafileService.fullDeleteFileSystem(
       user.profile?.cover_image as string,
@@ -111,7 +111,7 @@ export class CoverPhotoChangeService {
         400,
       );
     }
-    console.log('upppppp-----------');
+    // console.log('upppppp-----------');
     const uploadImage = await this.mediafileService.fullUploadFileSystem(image);
     if (!uploadImage || !uploadImage.id) {
       throw new HttpException(
@@ -124,7 +124,7 @@ export class CoverPhotoChangeService {
         400,
       );
     }
-    console.log('upppppp==================');
+    // console.log('upppppp==================');
     const profile = await this.prisma.profile.update({
       where: {
         userid: userId,

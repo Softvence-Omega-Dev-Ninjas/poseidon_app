@@ -86,7 +86,7 @@ export class SupporterProfileController {
     // @Body() data: ProfileCoverImageDto,
     @Req() req: Request,
   ) {
-    // console.log('change cover images', data);
+    // // console.log('change cover images', data);
     return this.coverPhotoChangeService.changeCoverPhotoSupporterProfile({
       userId: req['sub'] as string,
       image,

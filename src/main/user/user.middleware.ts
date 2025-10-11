@@ -4,7 +4,7 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 export class UserMiddleware implements NestMiddleware {
   use(req: any, res: any, next: () => void) {
     const user = req.user;
-    console.log('User', user);
+    // console.log('User', user);
     next();
   }
 }

@@ -4,7 +4,7 @@ model Shop {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   products  Product[]
-  user      User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Product {
@@ -24,7 +24,7 @@ model Product {
   successPage       SuccessPage
   successPagefield  String
   orders            Order[]
-  shop              Shop                       @relation(fields: [shopId], references: [id])
+  shop              Shop                       @relation(fields: [shopId], references: [id], onDelete: Cascade)
   productCategories ProductCategoryOnProduct[]
 }
 

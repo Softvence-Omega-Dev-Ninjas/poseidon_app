@@ -1,16 +1,21 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Controller, Get, Param, Req } from '@nestjs/common';
 import { ReferralService } from './suppoter-dsahboard.service';
 
 import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { cResponseData } from 'src/common/utils/common-responseData';
+import { VideoCallChatService } from './videocall.service';
+// import { Public } from 'src/auth/guard/public.decorator';
 // import { FileInterceptor } from '@nestjs/platform-express';
 // import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 // import { ImageValidationPipe } from 'src/common/utils/image-validation.pipe';
 
 @Controller('suppoter-dashboard')
-export class ReferralController {
-  constructor(private referralService: ReferralService) {}
+export class SuppoterDashboardController {
+  constructor(
+    private readonly referralService: ReferralService,
+    private readonly videoCallChatService: VideoCallChatService,
+  ) {}
 
   // Referral link
   @Roles(Role.User, Role.Supporter)
@@ -37,21 +42,31 @@ export class ReferralController {
     return this.referralService.getOverview(userId);
   }
 
-  // update user account
-  // @Roles(Role.User, Role.Supporter)
-  // @Put('update-account')
-  // @UseInterceptors(FileInterceptor('image'))
-  // @ApiConsumes('multipart/form-data')
-  // async updateUser(@Req() req, @Body() dto: UpdateAccountDto,
-  //   @UploadedFile(new ImageValidationPipe()) image?: Express.Multer.File,) {
-  //   return this.referralService.updateUser(req.user.id, dto, image);
-  // }
+  @Roles(Role.User)
+  @Get('membershipVideoCallChatList')
+  async getVideoCallChatList(@Req() req: Request) {
+    return this.videoCallChatService.getVideoCallChatList(req['sub'] as string);
+  }
 
-  // @Roles(Role.User, Role.Supporter)
-  // @Delete('delete-account')
-  // async deleteAccount(@Req() req) {
-  //   return this.referralService.deleteAccount(req.user.id);
-  // }
+  @Roles(Role.User)
+  @Get('videoCall_scheduls')
+  async getVideoCallSchedul(@Req() req: Request) {
+    return this.videoCallChatService.getVideoCallSchedul(req['sub'] as string);
+  }
+
+  @Roles(Role.User)
+  @Get('videoCall_schedul/:id')
+  async getVideoCallSingleData(@Param('id') id: string) {
+    return this.videoCallChatService.getVideoCallSingleData(id);
+  }
+
+  @Roles(Role.User)
+  @Get('serviceOrder_videoCall_schedul')
+  async getVideoCallSchedulServiceOrder(@Req() req: Request) {
+    return this.videoCallChatService.getVideoCallSchedulServiceOrder(
+      req['sub'] as string,
+    );
+  }
 
   @Roles(Role.User, Role.Supporter)
   @Get('total-purchases')

@@ -14,14 +14,14 @@ export class PrismaService
     try {
       await this.$connect();
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   }
   async onModuleDestroy() {
     try {
       await this.$disconnect();
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   }
 }

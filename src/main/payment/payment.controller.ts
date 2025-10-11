@@ -20,7 +20,7 @@ export class PaymentController {
     @Query('paymentId') paymentId: string,
     @Res() res: Response,
   ) {
-    console.log({ paymentType, paymentId });
+    // console.log({ paymentType, paymentId });
     // Buy a membership
     if (paymentType === 'membership') {
       const mpco =

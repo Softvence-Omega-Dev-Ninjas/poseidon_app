@@ -9,8 +9,7 @@ import {
 } from './dto/update-membership-level.dto';
 import { MediafileService } from '../mediafile/mediafile.service';
 import { CalendlyService } from '../calendly/calendly.service';
-import { CalendlyWebhook } from '../calendly/calendly.webhook';
-import { EventResponse } from '../calendly/types/event.response.types';
+// import { CalendlyWebhook } from '../calendly/calendly.webhook';
 
 @Injectable()
 export class MembershipService {
@@ -19,7 +18,6 @@ export class MembershipService {
     private readonly cloudinaryService: CloudinaryService,
     private readonly mediafileService: MediafileService,
     private readonly calendlyService: CalendlyService,
-    private readonly calendlyWebHooksService: CalendlyWebhook,
   ) {}
 
   private async checkEnableMembership(id: string) {
@@ -92,14 +90,12 @@ export class MembershipService {
         404,
       );
 
-    console.log('images uploading - host......');
+    // console.log('images uploading - host......');
 
     const { mediaId } = await this.cloudinaryService.imageUpload(
       createMembershipLevelDto.levelImage,
     );
     const { MembershipSubscriptionPlan, ...data } = createMembershipLevelDto;
-
-    console.log('images upload - successfull......');
 
     const newMembershipLevel = await this.prisma.membership_levels.create({
       data: {
@@ -114,6 +110,8 @@ export class MembershipService {
                   create: {
                     ...plan.CalligSubscriptionPlan,
                     duration: plan.duration,
+                    totalVideoCalls:
+                      plan.CalligSubscriptionPlan.totalVideoCalls,
                   },
                 }
               : undefined,
@@ -144,24 +142,47 @@ export class MembershipService {
           })),
         },
       },
+      include: {
+        MembershipSubscriptionPlan: {
+          include: {
+            CalligSubscriptionPlan: true,
+            MessagesSubscriptionPlan: true,
+            GallerySubscriptionPlan: true,
+            PostsSubscriptionPlan: true,
+          },
+        },
+      },
     });
 
-    // create schedule event from here...
-    const eventData = await this.calendlyService.createEvent({
-      name: newMembershipLevel.titleName,
-      duration: 30, // need to be get form input
-    });
+    if (
+      newMembershipLevel.MembershipSubscriptionPlan[0].CalligSubscriptionPlan ||
+      newMembershipLevel.MembershipSubscriptionPlan[1].CalligSubscriptionPlan
+    ) {
+      // TODO: zoom video call link create this area
+      // create schedule event from here...
+      const eventData = await this.calendlyService.createEvent({
+        name: newMembershipLevel.titleName,
+        description: newMembershipLevel.levelDescription as string,
+        duration: 30, // need to be get form input
+      });
 
-    // TODO: scheduling_url -> need to be store in db for booking event
-    // TODO: uri -> also need to be store in our db for monitor the event_type /uuid
-    const { scheduling_url, uri } = eventData.resource;
+      // TODO: scheduling_url -> need to be store in db for booking event
+      // console.log('scheduling_url ->', eventData);
+      // TODO: uri -> also need to be store in our db for monitor the event_type /uuid
+      // const { scheduling_url, uri } = eventData.resource;
+      await this.prisma.membership_levels.update({
+        where: { id: newMembershipLevel.id },
+        data: {
+          scheduling_url: eventData.resource.scheduling_url ?? '',
+          url: eventData.resource.uri ?? '',
+        },
+      });
+    }
 
     return cResponseData({
       message: 'Membership level created successfully',
       data: newMembershipLevel,
       success: true,
-      scheduling_url,
-      uri,
     });
   }
 
@@ -234,6 +255,61 @@ export class MembershipService {
       message: 'Membership level updated successfully',
       data: updateNewData,
       success: true,
+    });
+  }
+
+  // user for only bergirl
+  async getMembershipLevelsUseForbergirl(mId: string) {
+    return await this.prisma.$transaction(async (tx) => {
+      const allLevels = await tx.membership_levels.findMany({
+        where: {
+          membershipId: mId,
+        },
+        select: {
+          id: true,
+          membershipId: true,
+          levelName: true,
+          levelImage: true,
+          titleName: true,
+          levelDescription: true,
+          isPublic: true,
+          MembershipSubscriptionPlan: {
+            select: {
+              id: true,
+              duration: true,
+              price: true,
+              CalligSubscriptionPlan: true,
+              MessagesSubscriptionPlan: true,
+              GallerySubscriptionPlan: true,
+              PostsSubscriptionPlan: true,
+            },
+          },
+        },
+      });
+      const imageIds = allLevels.map((level) => level.levelImage);
+      // call media tb
+      const imageurl = await tx.media.findMany({
+        where: {
+          id: {
+            in: imageIds,
+          },
+        },
+      });
+      // console.log('allLevels', allLevels);
+      return cResponseData({
+        message: 'Membership level created successfully',
+        data:
+          allLevels.map((level) => {
+            const levelImage = imageurl.find(
+              (image) => image.id === level.levelImage,
+            );
+            return {
+              ...level,
+              levelImage: levelImage ? levelImage : null,
+            };
+          }) || [],
+        success: true,
+      });
     });
   }
 

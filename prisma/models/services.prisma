@@ -10,6 +10,9 @@ model Service {
   orderNumber Int?
   lastOrderBy String?
 
+  scheduling_url String?
+  uri            String?
+
   orders ServiceOrder[]
 
   userId String
@@ -31,6 +34,11 @@ model ServiceOrder {
   seller   User   @relation("ServiceSeller", fields: [sellerId], references: [id])
 
   createdAt DateTime @default(now())
+
+  scheduling_url String?
+  uri            String?
+
+  scheduledEvent ScheduledEvent? @relation(name: "serviceOrderScheduledEvent")
 }
 
 model PaymentDetailsByServices {

@@ -18,11 +18,11 @@ import { PermissionAccessModule } from './permission-access/permission-access.mo
 import { AdminDashboardModule } from './dashboard/admin/admin.module';
 import { EntertainerModule } from './entertainer/entertainer.module';
 import { PayoutModule } from './payout/payout.module';
-import { ReferralModule } from './dashboard/suppoter-dashboard/suppoter-dsahboard.module';
+import { SuppoterModule } from './dashboard/suppoter-dashboard/suppoter-dsahboard.module';
 import { ProfileSettingModule } from './profile-setting/profile-setting.module';
 import { PermissionModule } from './permission/permission.module';
-import { AppoinmentGroupModule } from './appoiments-group/appoinments.group.module';
 import { CalendlyModule } from './calendly/calendly.module';
+import { VideoCallSchedulHistoryModule } from './video-call-schedul-history/video-call-schedul-history.module';
 
 @Module({
   imports: [
@@ -46,11 +46,11 @@ import { CalendlyModule } from './calendly/calendly.module';
     PermissionAccessModule,
     EntertainerModule,
     PayoutModule,
-    ReferralModule,
+    SuppoterModule,
     PermissionModule,
     // appointment group module
-    AppoinmentGroupModule,
     CalendlyModule,
+    VideoCallSchedulHistoryModule,
   ],
   controllers: [],
   providers: [],

@@ -7,6 +7,7 @@ import {
 import { StripeService } from 'src/utils/stripe/stripe.service';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { PaymentInfoService } from './paymentDetails.service';
+import { RefferEarningService } from 'src/utils/stripe/refferEarning.service';
 
 @Injectable()
 export class MembershipServiceUseToUserOnly {
@@ -14,6 +15,7 @@ export class MembershipServiceUseToUserOnly {
     private readonly prisma: PrismaService,
     private readonly stripeService: StripeService,
     private readonly paymentInfoService: PaymentInfoService,
+    private readonly refferEarningService: RefferEarningService,
   ) {}
 
   async buyMembership(
@@ -36,6 +38,8 @@ export class MembershipServiceUseToUserOnly {
             },
           },
         },
+        scheduling_url: true,
+        url: true,
         MembershipSubscriptionPlan: {
           where: {
             duration: membershipLevelInfo.durationType,
@@ -65,7 +69,7 @@ export class MembershipServiceUseToUserOnly {
       );
     }
 
-    console.log({ membershipLevel });
+    // // console.log({ membershipLevel });
 
     let endDate: Date = new Date();
     const plan = membershipLevel?.MembershipSubscriptionPlan[0]
@@ -86,8 +90,8 @@ export class MembershipServiceUseToUserOnly {
         serviceId: membershipLevel?.id as string,
       });
 
-    // console.log('===== existingPaymentInfo ======', existingPaymentInfo);
-    // console.log('===== buyforce >>>>>>>>>>>>>>>>>>>> ======', buyforce);
+    // // console.log('===== existingPaymentInfo ======', existingPaymentInfo);
+    // // console.log('===== buyforce >>>>>>>>>>>>>>>>>>>> ======', buyforce);
     const existingService = await this.prisma.membership_levels.findFirst({
       where: { id: existingPaymentInfo?.serviceId },
     });
@@ -124,6 +128,8 @@ export class MembershipServiceUseToUserOnly {
                 unlimitedVideoCalls: membershipLevel
                   ?.MembershipSubscriptionPlan[0].CalligSubscriptionPlan
                   ?.unlimitedVideoCalls as boolean,
+                scheduling_url: membershipLevel?.scheduling_url ?? '',
+                url: membershipLevel?.url ?? '',
               },
             }
           : undefined,
@@ -178,7 +184,7 @@ export class MembershipServiceUseToUserOnly {
       },
     );
 
-    console.log('membership - checkout', checkout);
+    // console.log('membership - checkout', checkout);
 
     // TODO: get the schedule url and also uri from the
     //   const obj = {
@@ -213,7 +219,7 @@ export class MembershipServiceUseToUserOnly {
         400,
       );
     }
-    console.log('paymentIntent - pi checkout', payStatus);
+    // // console.log('paymentIntent - pi checkout', payStatus);
     if (payStatus.status === 'succeeded') {
       const paymentIntentData = await this.prisma.paymentDetails.update({
         where: {
@@ -223,6 +229,15 @@ export class MembershipServiceUseToUserOnly {
           paymemtStatus: 'paid',
         },
       });
+      // console.log('paymentIntentData = succeeded', paymentIntentData);
+
+      if (paymentIntentData.sellerId) {
+        await this.refferEarningService.refferEarningBySeller(
+          paymentIntentData.sellerId,
+          paymentIntentData.amount,
+        );
+      }
+
       return cResponseData({
         message: 'Payment successfully complated',
         data: paymentIntentData,
@@ -246,7 +261,7 @@ export class MembershipServiceUseToUserOnly {
     }
   }
 
-  // get all membership levels use to user and suupoter
+  // get all membership levels use to user
   async getMembershipLevels(mId: string) {
     return await this.prisma.$transaction(async (tx) => {
       const allLevels = await tx.membership_levels.findMany({
@@ -259,6 +274,7 @@ export class MembershipServiceUseToUserOnly {
           membershipId: true,
           levelName: true,
           levelImage: true,
+          titleName: true,
           levelDescription: true,
           isPublic: true,
           MembershipSubscriptionPlan: {
@@ -283,6 +299,7 @@ export class MembershipServiceUseToUserOnly {
           },
         },
       });
+      // console.log('allLevels', allLevels);
       return cResponseData({
         message: 'Membership level created successfully',
         data:
@@ -332,5 +349,49 @@ export class MembershipServiceUseToUserOnly {
       },
     });
     return { ...level, levelImage: imageMedia };
+  }
+
+  async getVideoCallingList(userid: string) {
+    const callingList = await this.prisma.permissionVideoCallAccess.findMany({
+      where: {
+        user_id: userid,
+        paymentDetails: {
+          paymemtStatus: 'paid',
+          endDate: {
+            gte: new Date(),
+          },
+        },
+        OR: [{ unlimitedVideoCalls: true }, { totalVideoCalls: { gt: 0 } }],
+      },
+    });
+
+    // get user
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: {
+          in: [...new Set(callingList.map((item) => item.supporter_id))],
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+        profile: {
+          select: {
+            name: true,
+            image: true,
+          },
+        },
+      },
+    });
+    const userObject = Object.fromEntries(users.map((user) => [user.id, user]));
+
+    return cResponseData({
+      message: 'Video calling list',
+      data: callingList.map((item) => ({
+        ...item,
+        bergirlInfo: userObject[item.supporter_id],
+      })),
+      success: true,
+    });
   }
 }

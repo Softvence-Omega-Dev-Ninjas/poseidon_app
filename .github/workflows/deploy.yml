@@ -44,7 +44,7 @@ jobs:
             cd ../home/drinkwithme
 
             echo "Stopping and removing old containers..."
-            docker compose down --remove-orphans
+            docker compose --profile prod down --remove-orphans
 
             echo "Removing old images..."
             docker compose rm -f
@@ -53,7 +53,7 @@ jobs:
             docker compose pull
 
             echo "Starting new containers..."
-            docker compose up -d
+            docker compose --profile prod up -d
 
             echo "Waiting for containers remove unused images"
             docker image prune -f

@@ -9,3 +9,27 @@ model ZoomAccount {
   createdAt    DateTime @default(now())
   provider     User     @relation(fields: [providerId], references: [id])
 }
+
+model ScheduledEvent {
+  id                        String      @id @unique @default(uuid())
+  utm_term_userId           String //utm_term
+  salesforce_uuid_bergirlId String // salesforce_uuid
+  user                      User        @relation(name: "scheduledEventToUser", fields: [utm_term_userId], references: [id], onDelete: Cascade)
+  bergirl                   User        @relation(name: "scheduledEventToBergirl", fields: [salesforce_uuid_bergirlId], references: [id], onDelete: Cascade)
+  // calendy
+  schedulType_utm_source    SchedulType // utm_source  
+  start_time                DateTime
+  end_time                  DateTime
+  join_url                  String
+
+  membershipTbId_utm_medium   String?                    @unique // utm_medium
+  membershipVideoCallAccessTb PermissionVideoCallAccess? @relation(name: "membershipScheduledEvent", fields: [membershipTbId_utm_medium], references: [id])
+  serviceOrderTbId_utm_medium String?                    @unique // utm_medium
+  serviceOrderTb              ServiceOrder?              @relation(name: "serviceOrderScheduledEvent", fields: [serviceOrderTbId_utm_medium], references: [id])
+}
+
+enum SchedulType {
+  membership
+  service
+  supportercard
+}

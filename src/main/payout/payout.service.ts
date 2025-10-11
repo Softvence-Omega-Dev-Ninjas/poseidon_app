@@ -21,7 +21,7 @@ export class PayoutService {
     }
     const balanceSheet =
       await this.sellerServiceStripe.financialServices(stripeAccountId);
-    console.log('balanceSheet', balanceSheet);
+    // console.log('balanceSheet', balanceSheet);
     return cResponseData({
       message: 'Balance sheet',
       data: balanceSheet,
@@ -39,7 +39,7 @@ export class PayoutService {
         stripeAccountId: true,
       },
     });
-    console.log(user?.stripeAccountId);
+    // console.log(user?.stripeAccountId);
     const financial_account_check: { stripe: boolean } = {
       stripe: false,
     };
@@ -89,7 +89,7 @@ export class PayoutService {
       });
     }
 
-    console.log('sellerAccountSetupClientSecret', clientSecret);
+    // console.log('sellerAccountSetupClientSecret', clientSecret);
 
     return cResponseData({
       message: 'Client secret',

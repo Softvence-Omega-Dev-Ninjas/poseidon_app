@@ -25,21 +25,17 @@ import {
   LevelImageUpdateDto,
   UpdateMembershipLevelDto,
 } from './dto/update-membership-level.dto';
-import { MembershipServiceUseToUserOnly } from './onluUseUserMembershipInfo/useMembershipUser.service';
 import { StringToBooleanPipe } from 'src/common/utils/stringToBoolean.pipe';
 
 @Controller('membership')
 export class MembershipController {
-  constructor(
-    private readonly membershipService: MembershipService,
-    private readonly membershipServiceUser: MembershipServiceUseToUserOnly,
-  ) {}
+  constructor(private readonly membershipService: MembershipService) {}
 
   // supporter Apis
   @Roles(Role.Supporter)
   @Get('enable-membership')
   enableMembership(@Req() req: Request) {
-    console.log("req['memberships_owner_id']", req['memberships_owner_id']);
+    // console.log("req['memberships_owner_id']", req['memberships_owner_id']);
     return this.membershipService.enableMembership(
       req['memberships_owner_id'] as string,
     );
@@ -109,7 +105,7 @@ export class MembershipController {
     // @Param('membershipId') membershipId: string,
     @Req() req: Request,
   ) {
-    return this.membershipServiceUser.getMembershipLevels(
+    return this.membershipService.getMembershipLevelsUseForbergirl(
       req['memberships_owner_id'] as string,
     );
   }

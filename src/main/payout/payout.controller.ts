@@ -28,10 +28,6 @@ export class PayoutController {
   @Roles(Role.Supporter)
   @Get('sellerAccountSetupClientSecret')
   async sellerAccountSetupClientSecret(@Req() req: Request) {
-    console.log(
-      "console.log('sellerAccountSetupClientSecret', clientSecret); ",
-      req['stripeAccountId'],
-    );
     return this.payoutService.sellerAccountSetupClientSecret(
       req['stripeAccountId'] as string,
     );
@@ -52,7 +48,7 @@ export class PayoutController {
   @Roles(Role.Supporter)
   @Get('checkVerify-StripeAcount')
   async checkVarifyStripeAcount(@Req() req: Request) {
-    console.log(req['sub']);
+    // console.log(req['sub']);
     return await this.payoutService.checkoutAccount(req['sub'] as string);
   }
 

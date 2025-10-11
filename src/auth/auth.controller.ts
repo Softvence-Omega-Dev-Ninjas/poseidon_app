@@ -66,7 +66,7 @@ export class AuthController {
       ...profile
     } = createAuthDto;
 
-    console.log('skip ------------+++', skipAuth);
+    // console.log('skip ------------+++', skipAuth);
 
     return this.authUserService.createUser(
       {

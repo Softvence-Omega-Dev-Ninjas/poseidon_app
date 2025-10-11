@@ -78,7 +78,7 @@ export class SupporterProfileService {
         );
       }
       const userid = user.id;
-      // console.log('userssssssssssss ', user);
+      // // console.log('userssssssssssss ', user);
       const profileInfo = await tx.profile.findUnique({
         where: {
           userid: userid,
@@ -105,6 +105,14 @@ export class SupporterProfileService {
       //   // const coverImageMap = new Map(coverImages.map((m) => [m.id, m]));
       //   // profileInfo.cover_image = coverImageMap.get(profileInfo.cover_image);
       // }
+
+      // total supporter count
+      const totalSupporter = await tx.supporterPay.count({
+        where: {
+          author_id: userid,
+          paymemtStatus: 'paid',
+        },
+      });
 
       const supporte_card = await tx.supportCartLayout.findFirst({
         where: {
@@ -168,6 +176,7 @@ export class SupporterProfileService {
               id: true,
               levelName: true,
               levelImage: true,
+              titleName: true,
               MembershipSubscriptionPlan: {
                 select: {
                   id: true,
@@ -177,10 +186,17 @@ export class SupporterProfileService {
                     select: {
                       id: true,
                       title: true,
+                      unlimitedVideoCalls: true,
+                      totalVideoCalls: true,
                     },
                   },
                   MessagesSubscriptionPlan: {
-                    select: { id: true, title: true },
+                    select: {
+                      id: true,
+                      title: true,
+                      unlimitedMessages: true,
+                      totalMessages: true,
+                    },
                   },
                   GallerySubscriptionPlan: {
                     select: { id: true, title: true },
@@ -217,6 +233,7 @@ export class SupporterProfileService {
       return {
         userid: userid,
         username: user.username,
+        totalSupporter,
         profileInfo: {
           ...profileInfo,
           cover_image: profileInfo?.cover_image
