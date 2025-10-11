@@ -491,4 +491,29 @@ export class AuthUserService {
       success: !user,
     };
   }
+
+  async afterLoginVarifyAccountSystem(username: string) {
+    const result = await this.prisma.user.findFirst({
+      where: {
+        username,
+        deactivate: false,
+      },
+      select: {
+        id: true,
+        email: true,
+        deactivate: true,
+      },
+    });
+    if (!result || !result.id) return false;
+    const updateVarify = await this.prisma.user.update({
+      where: {
+        id: result.id,
+      },
+      data: {
+        varify: true,
+      },
+    });
+    if (!updateVarify || !updateVarify.varify) return false;
+    return true;
+  }
 }

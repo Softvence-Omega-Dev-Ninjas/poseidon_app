@@ -10,10 +10,12 @@ import {
   ForgetPasswordToken,
   ForgetPasswordCodeCheck,
   CheckVarifyEmail,
+  CheckVarifyEmailAfterLogin,
 } from './dto/varify.dto';
 import { generateCode } from 'src/common/utils/generateCode';
 import { MailService } from 'src/utils/mail/mail.service';
 import { AuthUserService } from 'src/main/user/user-auth-info/authUser.service';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Injectable()
 export class AuthService {
@@ -169,6 +171,59 @@ export class AuthService {
         message: 'Email verified successfully',
         data: 'Email verified successfully',
         success: true,
+        next_page: true,
+      };
+    } catch (err) {
+      // console.log(err);
+      throw new HttpException(
+        {
+          message: 'Incorrect OTP. Please try again.',
+          data: null,
+          success: false,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async checkVarifyEmailAfterLogin(data: CheckVarifyEmailAfterLogin) {
+    if (!data.username)
+      return cResponseData({
+        message: 'Username is required',
+        data: null,
+        success: false,
+        error: 'BAD_REQUEST',
+        next_page: false,
+      });
+    try {
+      const payload = await this.jwtService.verifyAsync<{
+        email: string;
+        code: number;
+      }>(data.token, {
+        secret: this.configService.get<string>('AUTHSECRET'),
+      });
+      if (payload.code != Number(data.code)) {
+        return {
+          message: 'Incorrect OTP. Please try again.',
+          data: null,
+          success: false,
+        };
+      }
+      const checkVarify =
+        await this.authUserService.afterLoginVarifyAccountSystem(data.username);
+      if (!checkVarify)
+        return cResponseData({
+          message: 'Account not found',
+          data: null,
+          success: false,
+          error: 'BAD_REQUEST',
+          next_page: false,
+        });
+      return {
+        message: 'Email verified successfully',
+        data: 'Email verified successfully',
+        success: true,
+        profile_varify: checkVarify,
         next_page: true,
       };
     } catch (err) {
