@@ -52,7 +52,7 @@ export class CalendlyController {
     // console.log('===============================');
     // console.log('sig', signature);
 
-    // await this.schedulService.setSchedulSystem(payload);
+    await this.schedulService.setSchedulSystem(payload);
 
     return payload;
   }
