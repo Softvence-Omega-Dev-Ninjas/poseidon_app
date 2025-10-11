@@ -16,11 +16,7 @@ export class VideoCallChatService {
         OR: [{ unlimitedVideoCalls: true }, { totalVideoCalls: { gt: 0 } }],
       },
       include: {
-        paymentDetails: {
-          select: {
-            endDate: true,
-          },
-        },
+        paymentDetails: true,
         supporter: {
           select: {
             profile: {
