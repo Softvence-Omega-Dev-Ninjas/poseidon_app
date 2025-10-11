@@ -41,6 +41,10 @@ export class SchedulService {
       });
       if (newdata?.membershipTbId_utm_medium)
         await this.membershipCallDataUpdate(newdata.membershipTbId_utm_medium);
+      console.log(
+        'scheduls event save -------------------------------->>>>>',
+        newdata,
+      );
     }
     // service
     if (data.payload.tracking?.utm_medium == 'service') {
