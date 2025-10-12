@@ -48,7 +48,7 @@ export class CalendlyController {
     // console.log('===============================');
     // console.log('payload: ------->>> ', JSON.stringify(payload, null, 2));
     // console.log('===============================');
-    // console.log('payload out look: ------->>> ', payload);
+    console.log('payload out look: ------->>> ', payload);
     // console.log('===============================');
     // console.log('sig', signature);
 
