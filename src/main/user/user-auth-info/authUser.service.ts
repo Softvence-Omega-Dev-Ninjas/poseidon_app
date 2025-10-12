@@ -123,6 +123,7 @@ export class AuthUserService {
         username: createUserDto.username,
         password: hashedPassword,
         role: createUserDto.role as 'user',
+        varify: true,
         profile: {
           create: {
             ...createUserDto.profile,
@@ -366,6 +367,7 @@ export class AuthUserService {
           username: createUserDto.username,
           password: createUserDto.password,
           role: createUserDto.role as 'supporter',
+          varify: true,
           profile: {
             create: {
               ...createUserDto.profile,

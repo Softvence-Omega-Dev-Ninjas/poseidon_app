@@ -53,6 +53,7 @@ export class AuthService {
       role: user?.role,
       profile: user?.profile,
       shop_id: user?.shop?.id || '',
+      varify: user?.varify,
       memberships_owner_id: user?.memberships_owner?.id || '',
     };
 

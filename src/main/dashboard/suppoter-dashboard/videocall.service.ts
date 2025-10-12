@@ -19,6 +19,8 @@ export class VideoCallChatService {
         paymentDetails: true,
         supporter: {
           select: {
+            id: true,
+            username: true,
             profile: {
               select: {
                 name: true,
@@ -70,6 +72,8 @@ export class VideoCallChatService {
       include: {
         bergirl: {
           select: {
+            id: true,
+            username: true,
             profile: {
               select: {
                 name: true,
@@ -127,6 +131,8 @@ export class VideoCallChatService {
       include: {
         bergirl: {
           select: {
+            id: true,
+            username: true,
             profile: {
               select: {
                 name: true,
@@ -137,6 +143,8 @@ export class VideoCallChatService {
         },
         user: {
           select: {
+            id: true,
+            username: true,
             profile: {
               select: {
                 name: true,
@@ -171,6 +179,8 @@ export class VideoCallChatService {
         service: true,
         seller: {
           select: {
+            id: true,
+            username: true,
             profile: {
               select: {
                 name: true,
@@ -217,6 +227,7 @@ export class VideoCallChatService {
       },
       include: {
         oder_package_name: true,
+        author: true,
       },
     });
     return cResponseData({
