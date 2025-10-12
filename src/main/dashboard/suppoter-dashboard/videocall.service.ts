@@ -227,7 +227,18 @@ export class VideoCallChatService {
       },
       include: {
         oder_package_name: true,
-        author: true,
+        author: {
+          select: {
+            id: true,
+            username: true,
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
       },
     });
     return cResponseData({

@@ -95,6 +95,8 @@ export class SupporterService {
       duration: Number(createNewData.package_time), // need to be get form input
     });
 
+    console.log('==========================', eventData);
+
     await this.prisma.cheers_live_package_type.update({
       where: {
         id: createNewData.id,
@@ -202,6 +204,8 @@ export class SupporterService {
       schedullink.uri = cheerslivepackagetype.uri;
     }
 
+    console.log('schedullink----------------->>>>>', schedullink);
+
     const paymentPandingData = await this.prisma.supporterPay.create({
       data: {
         author_id: supporterCardInfo.author_id,
@@ -219,6 +223,8 @@ export class SupporterService {
         author_id: true,
       },
     });
+
+    console.log('paymentPandingData----------------->>>>>', paymentPandingData);
 
     if (
       order_package_name &&
