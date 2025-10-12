@@ -27,7 +27,9 @@ async function main() {
     data: {
       email: process.env.MAIL_USER!,
       username: process.env.MAIL_USER!.split('@')[1],
+      role: 'admin',
       password: pass,
+      varify: true,
     },
   });
   // ============LIST OF SEED END============= //
@@ -37,4 +39,6 @@ async function main() {
 
 main()
   .catch((e) => console.error(e))
-  .finally(async () => { await prisma.$disconnect(); });
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
