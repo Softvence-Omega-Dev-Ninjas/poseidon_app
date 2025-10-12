@@ -75,6 +75,12 @@ export class SuppoterDashboardController {
     );
   }
 
+  @Roles(Role.User)
+  @Get('drinks_cheers_live')
+  async drinksCheersLive(@Req() req: Request) {
+    return this.videoCallChatService.drinksCheersLive(req['sub'] as string);
+  }
+
   @Roles(Role.User, Role.Supporter)
   @Get('total-purchases')
   async getTotalPurchases(@Req() req: Request) {

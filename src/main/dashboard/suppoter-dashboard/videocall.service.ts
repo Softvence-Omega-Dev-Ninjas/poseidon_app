@@ -202,4 +202,27 @@ export class VideoCallChatService {
       success: true,
     });
   }
+
+  async drinksCheersLive(userId: string) {
+    const supporter = await this.prisma.supporterPay.findMany({
+      where: {
+        paymemtStatus: 'paid',
+        user_id: userId,
+        oder_package_name: {
+          isNot: null,
+        },
+        scheduledEvent: {
+          is: null,
+        },
+      },
+      include: {
+        oder_package_name: true,
+      },
+    });
+    return cResponseData({
+      message: 'drinksCheersLive',
+      data: supporter,
+      success: true,
+    });
+  }
 }

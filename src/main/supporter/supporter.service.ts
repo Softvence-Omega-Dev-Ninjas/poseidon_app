@@ -150,14 +150,25 @@ export class SupporterService {
       };
     }
     // const newSupport: any = await this.prisma.$transaction(async (tx) => {
-    const supporterCardInfo = await this.prisma.supportCartLayout.findUnique({
+    const supporterCardInfo = await this.prisma.supportCartLayout.findFirst({
       where: { id: pkId },
+      // include: {},
       select: {
         id: true,
         author_id: true,
         author: {
           select: {
             stripeAccountId: true,
+          },
+        },
+        cheers_live_package_type: {
+          select: {
+            id: true,
+            package_name: true,
+            package_price: true,
+            package_time: true,
+            scheduling_url: true,
+            uri: true,
           },
         },
       },
@@ -170,6 +181,27 @@ export class SupporterService {
       });
     }
 
+    const cheerslivepackagetype =
+      await this.prisma.cheers_live_package_type.findFirst({
+        where: {
+          support_cart_layout_id: supporterCardInfo.id,
+        },
+      });
+
+    const schedullink = {
+      scheduling_url: '',
+      uri: '',
+    };
+
+    if (
+      cheerslivepackagetype &&
+      cheerslivepackagetype?.scheduling_url &&
+      cheerslivepackagetype.uri
+    ) {
+      schedullink.scheduling_url = `${cheerslivepackagetype.scheduling_url}?utm_term=${userid}&salesforce_uuid=${supporterCardInfo.author_id}&utm_medium=${supporterCardInfo.id}&utm_source=${'supportercard'}`;
+      schedullink.uri = cheerslivepackagetype.uri;
+    }
+
     const paymentPandingData = await this.prisma.supporterPay.create({
       data: {
         author_id: supporterCardInfo.author_id,
@@ -178,6 +210,8 @@ export class SupporterService {
         name: rootData.name,
         country: rootData.country,
         massage: rootData.message,
+        scheduling_url: schedullink.scheduling_url,
+        uri: schedullink.uri,
       },
       select: {
         id: true,
