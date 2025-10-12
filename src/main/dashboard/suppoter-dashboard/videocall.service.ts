@@ -92,32 +92,32 @@ export class VideoCallChatService {
     });
   }
 
-  async getAllVideoCallSchedul() {
-    const getCallSchedul = await this.prisma.scheduledEvent.findMany({
-      include: {
-        bergirl: {
-          select: {
-            profile: {
-              select: {
-                name: true,
-                image: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: {
-        start_time: 'desc',
-      },
-    });
+  // async getAllVideoCallSchedul() {
+  //   const getCallSchedul = await this.prisma.scheduledEvent.findMany({
+  //     include: {
+  //       bergirl: {
+  //         select: {
+  //           profile: {
+  //             select: {
+  //               name: true,
+  //               image: true,
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //     orderBy: {
+  //       start_time: 'desc',
+  //     },
+  //   });
 
-    console.log('getCallSchedul =>>>>>>', getCallSchedul);
-    return cResponseData({
-      message: 'Video calling Schedul',
-      data: getCallSchedul,
-      success: true,
-    });
-  }
+  //   console.log('getCallSchedul =>>>>>>', getCallSchedul);
+  //   return cResponseData({
+  //     message: 'Video calling Schedul',
+  //     data: getCallSchedul,
+  //     success: true,
+  //   });
+  // }
 
   async getVideoCallSingleData(id: string) {
     const getCallSchedul = await this.prisma.scheduledEvent.findUnique({

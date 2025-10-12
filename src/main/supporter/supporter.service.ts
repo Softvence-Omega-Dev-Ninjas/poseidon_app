@@ -8,6 +8,7 @@ import { UpdateSupporterLayputDto } from './dto/update-supporter.dto';
 import { SupporterCardPaymentService } from 'src/utils/stripe/supporterCard.service';
 import { BuyMembershipResponseDto } from '../membership/onluUseUserMembershipInfo/dto/buyMembership.dto';
 import { StripeService } from 'src/utils/stripe/stripe.service';
+import { CalendlyService } from '../calendly/calendly.service';
 // import { UpdateSupporterDto } from './dto/update-supporter.dto';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class SupporterService {
     private readonly prisma: PrismaService,
     private readonly supporterCardPaymentService: SupporterCardPaymentService,
     private readonly stripeService: StripeService,
+    private readonly calendlyService: CalendlyService,
   ) {}
 
   async getSupporterCartLayout(userId: string) {
@@ -79,6 +81,30 @@ export class SupporterService {
         support_cart_layout_id: id,
       },
     });
+
+    if (!createNewData || !createNewData.id)
+      return cResponseData({
+        message: 'Create Failed',
+        error: 'Create Failed',
+        success: false,
+      });
+
+    const eventData = await this.calendlyService.createEvent({
+      name: createNewData.package_name,
+      description: createNewData.package_name,
+      duration: Number(createNewData.package_time), // need to be get form input
+    });
+
+    await this.prisma.cheers_live_package_type.update({
+      where: {
+        id: createNewData.id,
+      },
+      data: {
+        scheduling_url: eventData.resource.scheduling_url,
+        uri: eventData.resource.uri,
+      },
+    });
+
     return cResponseData({
       message: 'Create Success',
       data: createNewData,
@@ -229,7 +255,21 @@ export class SupporterService {
         data: {
           paymemtStatus: 'paid',
         },
+        include: {
+          oder_package_name: true,
+        },
       });
+
+      if (paymentIntentData && paymentIntentData.oder_package_name) {
+        const scheduling_url = `${paymentIntentData.scheduling_url}?utm_term=${paymentIntentData.user_id}&salesforce_uuid=${paymentIntentData.author_id}&utm_medium=${paymentIntentData.id}&utm_source=${'supportercard'}`;
+        return cResponseData({
+          message: 'Payment successfully complated',
+          data: paymentIntentData,
+          scheduling_url,
+          success: true,
+        });
+      }
+
       return cResponseData({
         message: 'Payment successfully complated',
         data: paymentIntentData,

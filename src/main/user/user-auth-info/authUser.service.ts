@@ -398,6 +398,11 @@ export class AuthUserService {
               description: true,
             },
           },
+          support_cart_layout: {
+            select: {
+              id: true,
+            },
+          },
         },
       });
 

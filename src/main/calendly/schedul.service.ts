@@ -55,6 +55,19 @@ export class SchedulService {
         },
       });
     }
+    if (data.payload.tracking?.utm_source == 'supportercard') {
+      await this.prisma.scheduledEvent.create({
+        data: {
+          utm_term_userId: trck.utm_term,
+          salesforce_uuid_bergirlId: trck.salesforce_uuid,
+          schedulType_utm_source: 'supportercard', //trck.utm_source,
+          supporterPayId__utm_medium: trck.utm_medium,
+          start_time: data.payload.scheduled_event.start_time,
+          end_time: data.payload.scheduled_event.end_time,
+          join_url: data.payload.scheduled_event.location.join_url,
+        },
+      });
+    }
   }
 
   private async membershipCallDataUpdate(id: string) {
