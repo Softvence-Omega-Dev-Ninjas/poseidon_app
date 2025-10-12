@@ -492,7 +492,7 @@ export class AuthUserService {
     };
   }
 
-  async afterLoginVarifyAccountSystem(username: string) {
+  async afterLoginVarifyAccountSystem(username: string, email: string) {
     const result = await this.prisma.user.findFirst({
       where: {
         username,
@@ -511,6 +511,7 @@ export class AuthUserService {
       },
       data: {
         varify: true,
+        email: email,
       },
     });
     if (!updateVarify || !updateVarify.varify) return false;

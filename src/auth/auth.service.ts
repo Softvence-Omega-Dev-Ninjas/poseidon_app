@@ -187,7 +187,7 @@ export class AuthService {
   }
 
   async checkVarifyEmailAfterLogin(data: CheckVarifyEmailAfterLogin) {
-    if (!data.username)
+    if (!data.username || !data.email)
       return cResponseData({
         message: 'Username is required',
         data: null,
@@ -210,7 +210,7 @@ export class AuthService {
         };
       }
       const checkVarify =
-        await this.authUserService.afterLoginVarifyAccountSystem(data.username);
+        await this.authUserService.afterLoginVarifyAccountSystem(data.username, data.email);
       if (!checkVarify)
         return cResponseData({
           message: 'Account not found',
