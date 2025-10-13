@@ -190,20 +190,6 @@ export class SupporterService {
         },
       });
 
-    const schedullink = {
-      scheduling_url: '',
-      uri: '',
-    };
-
-    if (
-      cheerslivepackagetype &&
-      cheerslivepackagetype?.scheduling_url &&
-      cheerslivepackagetype.uri
-    ) {
-      schedullink.scheduling_url = `${cheerslivepackagetype.scheduling_url}?utm_term=${userid}&salesforce_uuid=${supporterCardInfo.author_id}&utm_medium=${supporterCardInfo.id}&utm_source=${'supportercard'}`;
-      schedullink.uri = cheerslivepackagetype.uri;
-    }
-
     console.log('schedullink----------------->>>>>', schedullink);
 
     const paymentPandingData = await this.prisma.supporterPay.create({
@@ -214,8 +200,6 @@ export class SupporterService {
         name: rootData.name,
         country: rootData.country,
         massage: rootData.message,
-        scheduling_url: schedullink.scheduling_url,
-        uri: schedullink.uri,
       },
       select: {
         id: true,
@@ -223,6 +207,32 @@ export class SupporterService {
         author_id: true,
       },
     });
+
+    const schedullink = {
+      scheduling_url: '',
+      uri: '',
+    };
+
+    if (
+      paymentPandingData &&
+      paymentPandingData.id &&
+      cheerslivepackagetype &&
+      cheerslivepackagetype?.scheduling_url &&
+      cheerslivepackagetype.uri
+    ) {
+      schedullink.scheduling_url = `${cheerslivepackagetype.scheduling_url}?utm_term=${userid}&salesforce_uuid=${paymentPandingData.author_id}&utm_medium=${paymentPandingData.id}&utm_source=${'supportercard'}`;
+      schedullink.uri = cheerslivepackagetype.uri;
+
+      await this.prisma.supporterPay.update({
+        where: {
+          id: paymentPandingData.id,
+        },
+        data: {
+          scheduling_url: schedullink.scheduling_url,
+          uri: schedullink.uri,
+        },
+      });
+    }
 
     console.log('paymentPandingData----------------->>>>>', paymentPandingData);
 
