@@ -277,10 +277,9 @@ export class AuthService {
       message,
     );
 
-    if (
-      resData.accepted.length < 1 ||
-      !resData.response.includes('250 2.0.0')
-    ) {
+    console.log('forget pass ', resData);
+
+    if (!resData.response.includes('250 2.0.0')) {
       throw new HttpException(
         {
           message: 'Email not sent',
