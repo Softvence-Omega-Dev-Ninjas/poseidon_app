@@ -56,6 +56,7 @@ export class SchedulService {
       });
     }
     if (data.payload.tracking?.utm_source == 'supportercard') {
+      console.log('supportercard zoom hook ', data.payload.tracking);
       await this.prisma.scheduledEvent.create({
         data: {
           utm_term_userId: trck.utm_term,
