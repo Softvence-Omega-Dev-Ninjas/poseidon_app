@@ -190,8 +190,6 @@ export class SupporterService {
         },
       });
 
-    console.log('schedullink----------------->>>>>', schedullink);
-
     const paymentPandingData = await this.prisma.supporterPay.create({
       data: {
         author_id: supporterCardInfo.author_id,
