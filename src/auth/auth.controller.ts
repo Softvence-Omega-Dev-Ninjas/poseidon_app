@@ -54,7 +54,7 @@ export class AuthController {
   @ApiBody({ type: SignUpUserDto })
   async signup(
     @Body('skip', StringToBooleanPipe) skip: boolean,
-    @UploadedFile(new ImageValidationPipe()) image: Express.Multer.File,
+    @UploadedFile(new ImageValidationPipe(10)) image: Express.Multer.File,
     @Body(new ValidationPipe()) createAuthDto: SignUpUserDto,
   ) {
     // call cloudinary profile image upload - this area
