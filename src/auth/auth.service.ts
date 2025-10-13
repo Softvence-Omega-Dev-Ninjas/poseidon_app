@@ -211,7 +211,10 @@ export class AuthService {
         };
       }
       const checkVarify =
-        await this.authUserService.afterLoginVarifyAccountSystem(data.username, data.email);
+        await this.authUserService.afterLoginVarifyAccountSystem(
+          data.username,
+          data.email,
+        );
       if (!checkVarify)
         return cResponseData({
           message: 'Account not found',
@@ -274,7 +277,10 @@ export class AuthService {
       message,
     );
 
-    if (resData.accepted.length < 1 || !resData.response.includes('OK')) {
+    if (
+      resData.accepted.length < 1 ||
+      !resData.response.includes('250 2.0.0')
+    ) {
       throw new HttpException(
         {
           message: 'Email not sent',
