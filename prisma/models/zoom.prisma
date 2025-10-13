@@ -26,8 +26,8 @@ model ScheduledEvent {
   membershipVideoCallAccessTb PermissionVideoCallAccess? @relation(name: "membershipScheduledEvent", fields: [membershipTbId_utm_medium], references: [id])
   serviceOrderTbId_utm_medium String?                    @unique // utm_medium
   serviceOrderTb              ServiceOrder?              @relation(name: "serviceOrderScheduledEvent", fields: [serviceOrderTbId_utm_medium], references: [id])
-  supporterPayId_utm_medium   String?                    @unique // utm_medium
-  supporterPay                SupporterPay?              @relation(name: "supporterPayScheduledEvent", fields: [supporterPayId_utm_medium], references: [id])
+  supporterPayTbId_utm_medium String?                    @unique // utm_medium
+  supporterPayTb              SupporterPay?              @relation(name: "supporterPayScheduledEvent", fields: [supporterPayTbId_utm_medium], references: [id])
 }
 
 enum SchedulType {
