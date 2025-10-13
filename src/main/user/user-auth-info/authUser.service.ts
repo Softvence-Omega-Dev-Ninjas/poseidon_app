@@ -476,7 +476,7 @@ export class AuthUserService {
   }
 
   async checkUsername(username: string) {
-    const regex = /^[a-z0-9]+$/;
+    const regex = /^[a-z0-9_-]+$/;
     if (!regex.test(username)) {
       return {
         message:
