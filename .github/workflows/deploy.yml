@@ -49,6 +49,8 @@ jobs:
             echo "Removing old images..."
             docker compose rm -f
 
+            docker rmi ${{ secrets.DOCKER_USERNAME }}/${{ secrets.PROJECT_NAME }}:latest
+
             echo "Pulling latest images..."
             docker compose pull
 
