@@ -50,16 +50,10 @@ export class MembershipService {
       data: {
         enableMembership: true,
         MembershipAccessToVideoCall: {
-          create: [
-            { duration: 'ONE_MONTH', totalVideoCalls: 10 },
-            { duration: 'ONE_YEAR', totalVideoCalls: 10 },
-          ],
+          create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
         },
         MembershipAccessToMessages: {
-          create: [
-            { duration: 'ONE_MONTH', totalMessages: 50 },
-            { duration: 'ONE_YEAR', totalMessages: 50 },
-          ],
+          create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],
         },
         MembershipAccessToGallery: {
           create: [{ duration: 'ONE_MONTH' }, { duration: 'ONE_YEAR' }],

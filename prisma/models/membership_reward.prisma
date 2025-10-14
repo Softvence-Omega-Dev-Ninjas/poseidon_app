@@ -4,7 +4,7 @@ model MembershipAccessToVideoCall {
   title               String           @default("Video Call Access")
   description         String?          @default("Access to video calls with the owner")
   totalVideoCalls     Int              @default(0)
-  unlimitedVideoCalls Boolean          @default(false)
+  unlimitedVideoCalls Boolean          @default(true)
   duration            Duration
   updateUrl           String           @default("video_call_update")
   Membership_owner    Membership_owner @relation("MembershipAccessToVideoCall", fields: [membership_ownerId], references: [id])
@@ -16,7 +16,7 @@ model MembershipAccessToMessages {
   title              String           @default("Messages Access")
   description        String?          @default("Access to messages with the owner")
   totalMessages      Int              @default(0)
-  unlimitedMessages  Boolean          @default(false)
+  unlimitedMessages  Boolean          @default(true)
   duration           Duration
   updateUrl          String           @default("messages_update")
   Membership_owner   Membership_owner @relation("AccessToMessages", fields: [membership_ownerId], references: [id])
