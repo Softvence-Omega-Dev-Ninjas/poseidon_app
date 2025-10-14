@@ -47,10 +47,12 @@ jobs:
             docker compose --profile prod down --remove-orphans
 
             echo "Removing old images..."
+            docker compose rm -f
+
             docker rmi ${{ secrets.DOCKER_USERNAME }}/${{ secrets.PROJECT_NAME }}:latest
 
             echo "Pulling latest images..."
-            # docker compose pull
+            docker compose pull
 
             echo "Starting new containers..."
             docker compose --profile prod up -d
