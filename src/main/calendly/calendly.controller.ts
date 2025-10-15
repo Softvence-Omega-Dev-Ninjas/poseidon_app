@@ -34,7 +34,7 @@ export class CalendlyController {
 
   // IMPORTANT WEB-HOOK ENDPOINT
   @Public()
-  @Post('invites')
+  @Post('invite')
   async handleInvite(
     @Req() req: Request,
     @Res() res: Response,

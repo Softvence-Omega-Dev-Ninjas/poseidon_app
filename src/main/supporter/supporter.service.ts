@@ -143,14 +143,14 @@ export class SupporterService {
   async create(createSupporterDto: CreateSupporterPayDto, userid: string) {
     const { order_package_name, id: pkId, ...rootData } = createSupporterDto;
 
-    if (!!order_package_name && !userid) {
-      return {
-        message: 'User id is required',
-        error: 'No data found',
-        success: false,
-        redirect_url: `${process.env.FRONTEND_URL}/login`,
-      };
-    }
+    // if (!!order_package_name && !userid) {
+    //   return {
+    //     message: 'User id is required',
+    //     error: 'No data found',
+    //     success: false,
+    //     redirect_url: `${process.env.FRONTEND_URL}/login`,
+    //   };
+    // }
     // const newSupport: any = await this.prisma.$transaction(async (tx) => {
     const supporterCardInfo = await this.prisma.supportCartLayout.findFirst({
       where: { id: pkId },
@@ -196,6 +196,7 @@ export class SupporterService {
         total_price: rootData.total_price,
         user_id: userid ? userid : null,
         name: rootData.name,
+        email: rootData.email,
         country: rootData.country,
         massage: rootData.message,
       },
@@ -203,6 +204,7 @@ export class SupporterService {
         id: true,
         total_price: true,
         author_id: true,
+        email: true,
       },
     });
 
@@ -218,7 +220,7 @@ export class SupporterService {
       cheerslivepackagetype?.scheduling_url &&
       cheerslivepackagetype.uri
     ) {
-      schedullink.scheduling_url = `${cheerslivepackagetype.scheduling_url}?utm_term=${userid}&salesforce_uuid=${paymentPandingData.author_id}&utm_medium=${paymentPandingData.id}&utm_source=${'supportercard'}`;
+      schedullink.scheduling_url = `${cheerslivepackagetype.scheduling_url}?utm_term=${userid}&salesforce_uuid=${paymentPandingData.author_id}&utm_medium=${paymentPandingData.id}&utm_content=${paymentPandingData.email}&utm_source=${'supportercard'}`;
       schedullink.uri = cheerslivepackagetype.uri;
 
       await this.prisma.supporterPay.update({
@@ -309,7 +311,10 @@ export class SupporterService {
       });
 
       if (paymentIntentData && paymentIntentData.oder_package_name) {
-        const scheduling_url = `${paymentIntentData.scheduling_url}?utm_term=${paymentIntentData.user_id}&salesforce_uuid=${paymentIntentData.author_id}&utm_medium=${paymentIntentData.id}&utm_source=${'supportercard'}`;
+        const ss = paymentIntentData.scheduling_url;
+        const scheduling_url =
+          ss ??
+          `${paymentIntentData.scheduling_url}?utm_term=${paymentIntentData.user_id}&salesforce_uuid=${paymentIntentData.author_id}&utm_medium=${paymentIntentData.id}&utm_content=${paymentIntentData.email}&utm_source=${'supportercard'}`;
         return cResponseData({
           message: 'Payment successfully complated',
           data: paymentIntentData,

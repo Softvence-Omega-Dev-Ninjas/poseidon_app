@@ -4,6 +4,7 @@ model SupporterPay {
   author_id         String
   total_price       Float
   name              String
+  email             String
   country           String
   massage           String
   createAt          DateTime           @default(now())

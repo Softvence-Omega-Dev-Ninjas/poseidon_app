@@ -59,6 +59,7 @@ export class SchedulService {
       console.log('supportercard zoom hook ', data.payload.tracking);
       await this.prisma.scheduledEvent.create({
         data: {
+          email: trck.utm_content,
           utm_term_userId: trck.utm_term,
           salesforce_uuid_bergirlId: trck.salesforce_uuid,
           schedulType_utm_source: 'supportercard', //trck.utm_source,
