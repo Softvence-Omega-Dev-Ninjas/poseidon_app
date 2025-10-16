@@ -77,9 +77,9 @@ export class VideoCallChatService {
         where: {
           utm_term_userId: null,
           // email: userEmailByid.email,
-          end_time: {
-            gt: new Date(),
-          },
+          // end_time: {
+          //   gt: new Date(),
+          // },
         },
       });
 
