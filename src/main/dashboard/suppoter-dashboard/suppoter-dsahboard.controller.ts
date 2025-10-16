@@ -5,6 +5,7 @@ import { Roles } from 'src/auth/guard/roles.decorator';
 import { Role } from 'src/auth/guard/role.enum';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { VideoCallChatService } from './videocall.service';
+import { Public } from 'src/auth/guard/public.decorator';
 // import { Public } from 'src/auth/guard/public.decorator';
 // import { Public } from 'src/auth/guard/public.decorator';
 // import { FileInterceptor } from '@nestjs/platform-express';
@@ -85,5 +86,11 @@ export class SuppoterDashboardController {
   @Get('total-purchases')
   async getTotalPurchases(@Req() req: Request) {
     return this.referralService.getTotalPurchases(req['sub'] as string);
+  }
+
+  @Public()
+  @Get('scheduledEvent-Lists')
+  async scheduledEventLists() {
+    return this.videoCallChatService.scheduledEventLists();
   }
 }
