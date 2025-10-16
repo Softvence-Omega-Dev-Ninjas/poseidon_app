@@ -213,9 +213,11 @@ export class AuthController {
   ) {
     try {
       const res = await this.authHandlerService.store(body, query);
+      console.info('res: ', res);
       cookieHandler(response, 'set', res?.access_token);
       return response.status(HttpStatus.OK).json(res);
     } catch (err: any) {
+      console.info(err);
       return response
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: err.message || 'something went wrong!' });
