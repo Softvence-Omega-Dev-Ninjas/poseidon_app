@@ -129,7 +129,15 @@ export class VideoCallChatService {
   }
 
   async scheduledEventLists() {
-    return await this.prisma.scheduledEvent.findMany();
+    const webhook = await this.prisma.scheduledEvent.findMany();
+    const suppcard = await this.prisma.supporterPay.findMany({
+      where: { user_id: null },
+    });
+
+    return {
+      webhook,
+      suppcard,
+    };
   }
 
   // async getAllVideoCallSchedul() {
