@@ -73,18 +73,30 @@ export class VideoCallChatService {
     console.log('userEmailByid getVideoCallSchedul =>>>>>>', userEmailByid);
 
     if (userEmailByid && userEmailByid.email) {
-      await this.prisma.scheduledEvent.updateMany({
+      const list = await this.prisma.scheduledEvent.findMany({
         where: {
           utm_term_userId: null,
-          email: userEmailByid.email,
+          // email: userEmailByid.email,
           end_time: {
             gt: new Date(),
           },
         },
-        data: {
-          utm_term_userId: userid,
-        },
       });
+
+      console.log('list =>>>>>> getVideoCallSchedul =====>>>> null', list);
+
+      // await this.prisma.scheduledEvent.updateMany({
+      //   where: {
+      //     utm_term_userId: null,
+      //     email: userEmailByid.email,
+      //     end_time: {
+      //       gt: new Date(),
+      //     },
+      //   },
+      //   data: {
+      //     utm_term_userId: userid,
+      //   },
+      // });
     }
 
     const getCallSchedul = await this.prisma.scheduledEvent.findMany({
@@ -242,6 +254,35 @@ export class VideoCallChatService {
   }
 
   async drinksCheersLive(userId: string) {
+    const userEmail = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      select: {
+        email: true,
+      },
+    });
+
+    if (userEmail && userEmail.email) {
+      const list = await this.prisma.supporterPay.findMany({
+        where: {
+          user_id: null,
+          paymemtStatus: 'paid',
+          // email: userEmail.email,
+          oder_package_name: {
+            isNot: null,
+          },
+          scheduledEvent: {
+            is: null,
+          },
+        },
+        include: {
+          oder_package_name: true,
+        },
+      });
+      console.log('list =>>>>>> drinksCheersLive =====>>>> null', list);
+    }
+
     const supporter = await this.prisma.supporterPay.findMany({
       where: {
         paymemtStatus: 'paid',
