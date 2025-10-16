@@ -77,18 +77,18 @@ export class VideoCallChatService {
 
       console.log('list =>>>>>> getVideoCallSchedul =====>>>> null', list);
 
-      // await this.prisma.scheduledEvent.updateMany({
-      //   where: {
-      //     utm_term_userId: null,
-      //     email: userEmailByid.email,
-      //     end_time: {
-      //       gt: new Date(),
-      //     },
-      //   },
-      //   data: {
-      //     utm_term_userId: userid,
-      //   },
-      // });
+      await this.prisma.scheduledEvent.updateMany({
+        where: {
+          utm_term_userId: null,
+          email: userEmailByid.email,
+          end_time: {
+            gt: new Date(),
+          },
+        },
+        data: {
+          utm_term_userId: userid,
+        },
+      });
     }
 
     const getCallSchedul = await this.prisma.scheduledEvent.findMany({
