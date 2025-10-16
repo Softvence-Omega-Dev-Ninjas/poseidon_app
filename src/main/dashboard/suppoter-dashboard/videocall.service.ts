@@ -268,23 +268,16 @@ export class VideoCallChatService {
     });
 
     if (userEmail && userEmail.email) {
-      const list = await this.prisma.supporterPay.findMany({
+      await this.prisma.supporterPay.updateMany({
         where: {
           user_id: null,
           paymemtStatus: 'paid',
-          // email: userEmail.email,
-          oder_package_name: {
-            isNot: null,
-          },
-          scheduledEvent: {
-            is: null,
-          },
+          email: userEmail.email,
         },
-        include: {
-          oder_package_name: true,
+        data: {
+          user_id: userId,
         },
       });
-      console.log('list =>>>>>> drinksCheersLive =====>>>> null', list);
     }
 
     const supporter = await this.prisma.supporterPay.findMany({
