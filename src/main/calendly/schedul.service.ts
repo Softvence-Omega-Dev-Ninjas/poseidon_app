@@ -17,13 +17,7 @@ export class SchedulService {
 
   async setSchedulSystem(data: any) {
     const trck: trck = data.payload.tracking;
-    if (
-      !trck.utm_term ||
-      !trck.utm_medium ||
-      !trck.salesforce_uuid ||
-      !trck.utm_source
-    )
-      return;
+    if (!trck.utm_medium || !trck.salesforce_uuid || !trck.utm_source) return;
 
     // membership
     if (data.payload.tracking?.utm_source == 'membership') {
