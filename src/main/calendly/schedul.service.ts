@@ -55,6 +55,10 @@ export class SchedulService {
         },
       });
     }
+    console.log(
+      'supportercard zoom hook ----------payload----------->> ',
+      data.payload,
+    );
     if (data.payload.tracking?.utm_source == 'supportercard') {
       console.log('supportercard zoom hook ', data.payload.tracking);
       await this.prisma.scheduledEvent.create({
