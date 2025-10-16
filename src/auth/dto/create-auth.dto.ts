@@ -21,7 +21,7 @@ export class CredentialsSignInInfo {
   })
   @IsNotEmpty({ message: 'Password should not be empty' })
   @Matches(
-    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+={}[\]|:;"'<>,.?/~`]).{6,15}$/,
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+={}[\]|:;"'<>,.?/~`]).{6,}$/,
     {
       message:
         'Password must be 6-15 characters long, include at least 1 uppercase letter, 1 number, and 1 special character',

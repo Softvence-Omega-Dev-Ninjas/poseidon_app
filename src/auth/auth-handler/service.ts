@@ -87,7 +87,7 @@ export class AuthHandlerService {
           access_token: `Bearer ${token}`,
           user: {
             ...userObj,
-            profile_varify: user.varify,
+            // profile_varify: user.varify,
             financial_account:
               ['user', 'admin'].includes(user?.role) || isStrip,
             isFirst: !profileRequiments.every(
@@ -113,7 +113,7 @@ export class AuthHandlerService {
           access_token: `Bearer ${token}`,
           user: {
             ...userObj,
-            profile_varify: isUser.varify,
+            // profile_varify: isUser.varify,
             financial_account:
               isUser?.role == 'user' || isUser?.role == 'admin'
                 ? true

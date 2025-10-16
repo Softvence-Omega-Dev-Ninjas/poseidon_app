@@ -71,6 +71,7 @@ export class ProfileSettingService {
             name: updateData.name?.trim() || user.profile.name,
             country: updateData.country?.trim() || user.profile.country,
             image: uploadedImageUrl?.trim() || user.profile.image,
+            description: updateData.description?.trim() || user.profile.description,
           },
         });
       } else {
@@ -80,6 +81,7 @@ export class ProfileSettingService {
             name: updateData.name ?? '',
             country: updateData.country ?? '',
             image: uploadedImageUrl ?? '',
+            description: updateData.description ?? '',
           },
         });
       }

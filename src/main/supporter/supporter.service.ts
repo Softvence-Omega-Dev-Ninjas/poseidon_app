@@ -8,6 +8,7 @@ import { UpdateSupporterLayputDto } from './dto/update-supporter.dto';
 import { SupporterCardPaymentService } from 'src/utils/stripe/supporterCard.service';
 import { BuyMembershipResponseDto } from '../membership/onluUseUserMembershipInfo/dto/buyMembership.dto';
 import { StripeService } from 'src/utils/stripe/stripe.service';
+import { CalendlyService } from '../calendly/calendly.service';
 // import { UpdateSupporterDto } from './dto/update-supporter.dto';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class SupporterService {
     private readonly prisma: PrismaService,
     private readonly supporterCardPaymentService: SupporterCardPaymentService,
     private readonly stripeService: StripeService,
+    private readonly calendlyService: CalendlyService,
   ) {}
 
   async getSupporterCartLayout(userId: string) {
@@ -79,6 +81,32 @@ export class SupporterService {
         support_cart_layout_id: id,
       },
     });
+
+    if (!createNewData || !createNewData.id)
+      return cResponseData({
+        message: 'Create Failed',
+        error: 'Create Failed',
+        success: false,
+      });
+
+    const eventData = await this.calendlyService.createEvent({
+      name: createNewData.package_name,
+      description: createNewData.package_name,
+      duration: Number(createNewData.package_time), // need to be get form input
+    });
+
+    console.log('==========================', eventData);
+
+    await this.prisma.cheers_live_package_type.update({
+      where: {
+        id: createNewData.id,
+      },
+      data: {
+        scheduling_url: eventData.resource.scheduling_url,
+        uri: eventData.resource.uri,
+      },
+    });
+
     return cResponseData({
       message: 'Create Success',
       data: createNewData,
@@ -115,23 +143,34 @@ export class SupporterService {
   async create(createSupporterDto: CreateSupporterPayDto, userid: string) {
     const { order_package_name, id: pkId, ...rootData } = createSupporterDto;
 
-    if (!!order_package_name && !userid) {
-      return {
-        message: 'User id is required',
-        error: 'No data found',
-        success: false,
-        redirect_url: `${process.env.FRONTEND_URL}/login`,
-      };
-    }
+    // if (!!order_package_name && !userid) {
+    //   return {
+    //     message: 'User id is required',
+    //     error: 'No data found',
+    //     success: false,
+    //     redirect_url: `${process.env.FRONTEND_URL}/login`,
+    //   };
+    // }
     // const newSupport: any = await this.prisma.$transaction(async (tx) => {
-    const supporterCardInfo = await this.prisma.supportCartLayout.findUnique({
+    const supporterCardInfo = await this.prisma.supportCartLayout.findFirst({
       where: { id: pkId },
+      // include: {},
       select: {
         id: true,
         author_id: true,
         author: {
           select: {
             stripeAccountId: true,
+          },
+        },
+        cheers_live_package_type: {
+          select: {
+            id: true,
+            package_name: true,
+            package_price: true,
+            package_time: true,
+            scheduling_url: true,
+            uri: true,
           },
         },
       },
@@ -144,12 +183,20 @@ export class SupporterService {
       });
     }
 
+    const cheerslivepackagetype =
+      await this.prisma.cheers_live_package_type.findFirst({
+        where: {
+          support_cart_layout_id: supporterCardInfo.id,
+        },
+      });
+
     const paymentPandingData = await this.prisma.supporterPay.create({
       data: {
         author_id: supporterCardInfo.author_id,
         total_price: rootData.total_price,
         user_id: userid ? userid : null,
         name: rootData.name,
+        email: rootData.email,
         country: rootData.country,
         massage: rootData.message,
       },
@@ -157,8 +204,37 @@ export class SupporterService {
         id: true,
         total_price: true,
         author_id: true,
+        email: true,
       },
     });
+
+    const schedullink = {
+      scheduling_url: '',
+      uri: '',
+    };
+
+    if (
+      paymentPandingData &&
+      paymentPandingData.id &&
+      cheerslivepackagetype &&
+      cheerslivepackagetype?.scheduling_url &&
+      cheerslivepackagetype.uri
+    ) {
+      schedullink.scheduling_url = `${cheerslivepackagetype.scheduling_url}?utm_term=${userid}&salesforce_uuid=${paymentPandingData.author_id}&utm_medium=${paymentPandingData.id}&utm_content=${paymentPandingData.email}&utm_source=${'supportercard'}`;
+      schedullink.uri = cheerslivepackagetype.uri;
+
+      await this.prisma.supporterPay.update({
+        where: {
+          id: paymentPandingData.id,
+        },
+        data: {
+          scheduling_url: schedullink.scheduling_url,
+          uri: schedullink.uri,
+        },
+      });
+    }
+
+    console.log('paymentPandingData----------------->>>>>', paymentPandingData);
 
     if (
       order_package_name &&
@@ -229,7 +305,24 @@ export class SupporterService {
         data: {
           paymemtStatus: 'paid',
         },
+        include: {
+          oder_package_name: true,
+        },
       });
+
+      if (paymentIntentData && paymentIntentData.oder_package_name) {
+        const ss = paymentIntentData.scheduling_url;
+        const scheduling_url =
+          ss ??
+          `${paymentIntentData.scheduling_url}?utm_term=${paymentIntentData.user_id}&salesforce_uuid=${paymentIntentData.author_id}&utm_medium=${paymentIntentData.id}&utm_content=${paymentIntentData.email}&utm_source=${'supportercard'}`;
+        return cResponseData({
+          message: 'Payment successfully complated',
+          data: paymentIntentData,
+          scheduling_url,
+          success: true,
+        });
+      }
+
       return cResponseData({
         message: 'Payment successfully complated',
         data: paymentIntentData,

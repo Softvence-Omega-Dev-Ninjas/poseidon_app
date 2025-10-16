@@ -16,13 +16,11 @@ export class VideoCallChatService {
         OR: [{ unlimitedVideoCalls: true }, { totalVideoCalls: { gt: 0 } }],
       },
       include: {
-        paymentDetails: {
-          select: {
-            endDate: true,
-          },
-        },
+        paymentDetails: true,
         supporter: {
           select: {
+            id: true,
+            username: true,
             profile: {
               select: {
                 name: true,
@@ -64,6 +62,43 @@ export class VideoCallChatService {
   }
 
   async getVideoCallSchedul(userid: string) {
+    const userEmailByid = await this.prisma.user.findFirst({
+      where: {
+        id: userid,
+      },
+      select: { email: true },
+    });
+
+    // const
+    console.log('userEmailByid getVideoCallSchedul =>>>>>>', userEmailByid);
+
+    if (userEmailByid && userEmailByid.email) {
+      const list = await this.prisma.scheduledEvent.findMany({
+        where: {
+          utm_term_userId: null,
+          // email: userEmailByid.email,
+          end_time: {
+            gt: new Date(),
+          },
+        },
+      });
+
+      console.log('list =>>>>>> getVideoCallSchedul =====>>>> null', list);
+
+      // await this.prisma.scheduledEvent.updateMany({
+      //   where: {
+      //     utm_term_userId: null,
+      //     email: userEmailByid.email,
+      //     end_time: {
+      //       gt: new Date(),
+      //     },
+      //   },
+      //   data: {
+      //     utm_term_userId: userid,
+      //   },
+      // });
+    }
+
     const getCallSchedul = await this.prisma.scheduledEvent.findMany({
       where: {
         utm_term_userId: userid,
@@ -74,6 +109,8 @@ export class VideoCallChatService {
       include: {
         bergirl: {
           select: {
+            id: true,
+            username: true,
             profile: {
               select: {
                 name: true,
@@ -88,7 +125,10 @@ export class VideoCallChatService {
       },
     });
 
-    console.log('getCallSchedul =>>>>>>', getCallSchedul);
+    console.log(
+      'getCallSchedul =>>>>>>=======???????????------->',
+      getCallSchedul,
+    );
     return cResponseData({
       message: 'Video calling Schedul',
       data: getCallSchedul,
@@ -96,32 +136,32 @@ export class VideoCallChatService {
     });
   }
 
-  async getAllVideoCallSchedul() {
-    const getCallSchedul = await this.prisma.scheduledEvent.findMany({
-      include: {
-        bergirl: {
-          select: {
-            profile: {
-              select: {
-                name: true,
-                image: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: {
-        start_time: 'desc',
-      },
-    });
+  // async getAllVideoCallSchedul() {
+  //   const getCallSchedul = await this.prisma.scheduledEvent.findMany({
+  //     include: {
+  //       bergirl: {
+  //         select: {
+  //           profile: {
+  //             select: {
+  //               name: true,
+  //               image: true,
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //     orderBy: {
+  //       start_time: 'desc',
+  //     },
+  //   });
 
-    console.log('getCallSchedul =>>>>>>', getCallSchedul);
-    return cResponseData({
-      message: 'Video calling Schedul',
-      data: getCallSchedul,
-      success: true,
-    });
-  }
+  //   console.log('getCallSchedul =>>>>>>', getCallSchedul);
+  //   return cResponseData({
+  //     message: 'Video calling Schedul',
+  //     data: getCallSchedul,
+  //     success: true,
+  //   });
+  // }
 
   async getVideoCallSingleData(id: string) {
     const getCallSchedul = await this.prisma.scheduledEvent.findUnique({
@@ -131,6 +171,8 @@ export class VideoCallChatService {
       include: {
         bergirl: {
           select: {
+            id: true,
+            username: true,
             profile: {
               select: {
                 name: true,
@@ -141,6 +183,8 @@ export class VideoCallChatService {
         },
         user: {
           select: {
+            id: true,
+            username: true,
             profile: {
               select: {
                 name: true,
@@ -175,6 +219,8 @@ export class VideoCallChatService {
         service: true,
         seller: {
           select: {
+            id: true,
+            username: true,
             profile: {
               select: {
                 name: true,
@@ -203,6 +249,70 @@ export class VideoCallChatService {
     return cResponseData({
       message: 'Video calling Schedul by ServiceOrder',
       data: setUrlCallSchedul,
+      success: true,
+    });
+  }
+
+  async drinksCheersLive(userId: string) {
+    const userEmail = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      select: {
+        email: true,
+      },
+    });
+
+    if (userEmail && userEmail.email) {
+      const list = await this.prisma.supporterPay.findMany({
+        where: {
+          user_id: null,
+          paymemtStatus: 'paid',
+          // email: userEmail.email,
+          oder_package_name: {
+            isNot: null,
+          },
+          scheduledEvent: {
+            is: null,
+          },
+        },
+        include: {
+          oder_package_name: true,
+        },
+      });
+      console.log('list =>>>>>> drinksCheersLive =====>>>> null', list);
+    }
+
+    const supporter = await this.prisma.supporterPay.findMany({
+      where: {
+        paymemtStatus: 'paid',
+        user_id: userId,
+        oder_package_name: {
+          isNot: null,
+        },
+        scheduledEvent: {
+          is: null,
+        },
+      },
+      include: {
+        oder_package_name: true,
+        author: {
+          select: {
+            id: true,
+            username: true,
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return cResponseData({
+      message: 'drinksCheersLive',
+      data: supporter,
       success: true,
     });
   }

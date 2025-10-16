@@ -25,6 +25,7 @@ import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { StringToBooleanPipe } from 'src/common/utils/stringToBoolean.pipe';
 import {
   CheckVarifyEmail,
+  CheckVarifyEmailAfterLogin,
   ForgetPasswordCodeCheck,
   ForgetPasswordSendEmail,
   ForgetPasswordToken,
@@ -34,6 +35,8 @@ import { cResponseData } from 'src/common/utils/common-responseData';
 import { CreateLoginDto, RefDto } from './dto/create-or-login';
 import { AuthHandlerService } from './auth-handler/service';
 import { cookieHandler } from 'src/common/utils/cookie-handler';
+import { Roles } from './guard/roles.decorator';
+import { Role } from './guard/role.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -51,7 +54,7 @@ export class AuthController {
   @ApiBody({ type: SignUpUserDto })
   async signup(
     @Body('skip', StringToBooleanPipe) skip: boolean,
-    @UploadedFile(new ImageValidationPipe()) image: Express.Multer.File,
+    @UploadedFile(new ImageValidationPipe(10)) image: Express.Multer.File,
     @Body(new ValidationPipe()) createAuthDto: SignUpUserDto,
   ) {
     // call cloudinary profile image upload - this area
@@ -148,7 +151,6 @@ export class AuthController {
   }
 
   // signup varify email
-
   @Public()
   @Post('varify-email')
   varifyemail(
@@ -162,6 +164,12 @@ export class AuthController {
   @Post('checkVarifyEmail')
   checkVarifyEmail(@Body() data: CheckVarifyEmail) {
     return this.authService.checkVarifyEmail(data);
+  }
+
+  @Roles(Role.Admin, Role.Supporter, Role.User)
+  @Post('checkVarifyEmailAfterLogin')
+  checkVarifyEmailAfterLogin(@Body() data: CheckVarifyEmailAfterLogin) {
+    return this.authService.checkVarifyEmailAfterLogin(data);
   }
 
   // change password

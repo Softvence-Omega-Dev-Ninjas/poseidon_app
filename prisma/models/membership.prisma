@@ -52,7 +52,7 @@ model CalligSubscriptionPlan {
   title                        String
   description                  String
   totalVideoCalls              Int                        @default(0)
-  unlimitedVideoCalls          Boolean                    @default(false)
+  unlimitedVideoCalls          Boolean                    @default(true)
   MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id], onDelete: Cascade)
 }
 
@@ -63,7 +63,7 @@ model MessagesSubscriptionPlan {
   title                        String
   description                  String
   totalMessages                Int                        @default(0)
-  unlimitedMessages            Boolean                    @default(false)
+  unlimitedMessages            Boolean                    @default(true)
   MembershipSubscriptionPlan   MembershipSubscriptionPlan @relation(fields: [membershipSubscriptionPlanId], references: [id], onDelete: Cascade)
 }
 

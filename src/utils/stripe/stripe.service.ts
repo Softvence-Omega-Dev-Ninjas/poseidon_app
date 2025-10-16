@@ -100,10 +100,10 @@ export class StripeService {
     return { client_secret: paymentAction.client_secret, id: paymentAction.id };
   }
 
-  // paymentIntents supporter card
-  async supporterCardPaymentIntents() {
-    return await this.stripe.accounts.retrieve('acct_1SAdi58uRi3mkP2j');
-  }
+  // // paymentIntents supporter card
+  // async supporterCardPaymentIntents() {
+  //   return await this.stripe.accounts.retrieve('acct_1SAdi58uRi3mkP2j');
+  // }
 
   async paymentIntentCheck(pi: string) {
     return await this.stripe.paymentIntents.retrieve(pi);

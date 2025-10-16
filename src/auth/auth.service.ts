@@ -10,10 +10,12 @@ import {
   ForgetPasswordToken,
   ForgetPasswordCodeCheck,
   CheckVarifyEmail,
+  CheckVarifyEmailAfterLogin,
 } from './dto/varify.dto';
 import { generateCode } from 'src/common/utils/generateCode';
 import { MailService } from 'src/utils/mail/mail.service';
 import { AuthUserService } from 'src/main/user/user-auth-info/authUser.service';
+import { cResponseData } from 'src/common/utils/common-responseData';
 
 @Injectable()
 export class AuthService {
@@ -51,6 +53,7 @@ export class AuthService {
       role: user?.role,
       profile: user?.profile,
       shop_id: user?.shop?.id || '',
+      varify: user?.varify,
       memberships_owner_id: user?.memberships_owner?.id || '',
     };
 
@@ -75,7 +78,7 @@ export class AuthService {
       access_token: `Bearer ${access_token}`,
       user: {
         ...payload,
-        profile_varify: user?.varify,
+        // profile_varify: user?.varify,
         financial_account:
           user?.role == 'user' || user?.role == 'admin'
             ? true
@@ -126,10 +129,10 @@ export class AuthService {
       message,
     );
 
-    // console.log('email resData', resData);
+    console.log('email resData', resData);
     // console.log('email resData', resData.response.includes('OK'));
 
-    if (resData.accepted.length < 1 || !resData.response.includes('OK')) {
+    if (!resData.response.includes('250 2.0.0')) {
       throw new HttpException(
         {
           message: 'Email not sent',
@@ -184,6 +187,62 @@ export class AuthService {
     }
   }
 
+  async checkVarifyEmailAfterLogin(data: CheckVarifyEmailAfterLogin) {
+    if (!data.username || !data.email)
+      return cResponseData({
+        message: 'Username is required',
+        data: null,
+        success: false,
+        error: 'BAD_REQUEST',
+        next_page: false,
+      });
+    try {
+      const payload = await this.jwtService.verifyAsync<{
+        email: string;
+        code: number;
+      }>(data.token, {
+        secret: this.configService.get<string>('AUTHSECRET'),
+      });
+      if (payload.code != Number(data.code)) {
+        return {
+          message: 'Incorrect OTP. Please try again.',
+          data: null,
+          success: false,
+        };
+      }
+      const checkVarify =
+        await this.authUserService.afterLoginVarifyAccountSystem(
+          data.username,
+          data.email,
+        );
+      if (!checkVarify)
+        return cResponseData({
+          message: 'Account not found',
+          data: null,
+          success: false,
+          error: 'BAD_REQUEST',
+          next_page: false,
+        });
+      return {
+        message: 'Email verified successfully',
+        data: 'Email verified successfully',
+        success: true,
+        varify: checkVarify,
+        next_page: true,
+      };
+    } catch (err) {
+      // console.log(err);
+      throw new HttpException(
+        {
+          message: 'Incorrect OTP. Please try again.',
+          data: null,
+          success: false,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
   // forgetpassword system send email
   async forgetPasswordGenaredCode(data: VarifyEmailDto) {
     const userinfo = await this.authUserService.getUserInfo(data.email);
@@ -218,7 +277,9 @@ export class AuthService {
       message,
     );
 
-    if (resData.accepted.length < 1 || !resData.response.includes('OK')) {
+    console.log('forget pass ', resData);
+
+    if (!resData.response.includes('250 2.0.0')) {
       throw new HttpException(
         {
           message: 'Email not sent',

@@ -108,14 +108,14 @@ export class SupporterController {
     return this.supporterService.paymentStatusCheck(createSupporterDto);
   }
 
-  @Public()
-  @Post('checkout-acccount-this')
-  async payment(@Body() data: any) {
-    // console.log(data);
-    const acc = await this.stripe.supporterCardPaymentIntents();
-    // console.log(acc.requirements);
-    return acc;
-  }
+  // @Public()
+  // @Post('checkout-acccount-this')
+  // async payment(@Body() data: any) {
+  //   // console.log(data);
+  //   const acc = await this.stripe.supporterCardPaymentIntents();
+  //   // console.log(acc.requirements);
+  //   return acc;
+  // }
 
   // @Public()
   // @Get('payment-check/:pi')

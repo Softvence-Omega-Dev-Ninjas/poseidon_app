@@ -52,6 +52,12 @@ export class CreateSupporterPayDto {
 
   @ApiProperty({
     required: true,
+    example: 'user@gmail.com',
+  })
+  email: string;
+
+  @ApiProperty({
+    required: true,
     example: 'usa',
   })
   country: string;

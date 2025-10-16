@@ -123,6 +123,7 @@ export class AuthUserService {
         username: createUserDto.username,
         password: hashedPassword,
         role: createUserDto.role as 'user',
+        varify: true,
         profile: {
           create: {
             ...createUserDto.profile,
@@ -366,6 +367,7 @@ export class AuthUserService {
           username: createUserDto.username,
           password: createUserDto.password,
           role: createUserDto.role as 'supporter',
+          varify: true,
           profile: {
             create: {
               ...createUserDto.profile,
@@ -396,6 +398,11 @@ export class AuthUserService {
               postcode: true,
               state: true,
               description: true,
+            },
+          },
+          support_cart_layout: {
+            select: {
+              id: true,
             },
           },
         },
@@ -469,7 +476,7 @@ export class AuthUserService {
   }
 
   async checkUsername(username: string) {
-    const regex = /^[a-z0-9]+$/;
+    const regex = /^[a-z0-9_-]+$/;
     if (!regex.test(username)) {
       return {
         message:
@@ -490,5 +497,31 @@ export class AuthUserService {
       message: !user ? 'Ok' : 'Username already exists',
       success: !user,
     };
+  }
+
+  async afterLoginVarifyAccountSystem(username: string, email: string) {
+    const result = await this.prisma.user.findFirst({
+      where: {
+        username,
+        deactivate: false,
+      },
+      select: {
+        id: true,
+        email: true,
+        deactivate: true,
+      },
+    });
+    if (!result || !result.id) return false;
+    const updateVarify = await this.prisma.user.update({
+      where: {
+        id: result.id,
+      },
+      data: {
+        varify: true,
+        email: email,
+      },
+    });
+    if (!updateVarify || !updateVarify.varify) return false;
+    return true;
   }
 }
