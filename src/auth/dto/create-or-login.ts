@@ -13,7 +13,13 @@ import {
 import { ProfileDto } from '../auth-handler/dto/profile.dto';
 import { Type } from 'class-transformer';
 
-export const authProviders = ['x', 'facebook', 'google', 'tiktok'] as const;
+export const authProviders = [
+  'x',
+  'facebook',
+  'google',
+  'tiktok',
+  'apple',
+] as const;
 export type AuthProvider = (typeof authProviders)[number];
 export const roles = ['admin', 'supporter', 'user'] as const;
 export type TRole = (typeof roles)[number];
