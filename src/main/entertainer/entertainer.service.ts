@@ -21,6 +21,7 @@ export class EntertainerService {
       where: { role: Roles.supporter },
       select: {
         id: true,
+        username: true,
         profile: {
           select: {
             name: true,
