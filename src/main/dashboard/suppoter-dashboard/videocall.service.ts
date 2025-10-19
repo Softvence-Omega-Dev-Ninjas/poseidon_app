@@ -77,18 +77,18 @@ export class VideoCallChatService {
 
       console.log('list =>>>>>> getVideoCallSchedul =====>>>> null', list);
 
-      // await this.prisma.scheduledEvent.updateMany({
-      //   where: {
-      //     utm_term_userId: null,
-      //     email: userEmailByid.email,
-      //     end_time: {
-      //       gt: new Date(),
-      //     },
-      //   },
-      //   data: {
-      //     utm_term_userId: userid,
-      //   },
-      // });
+      await this.prisma.scheduledEvent.updateMany({
+        where: {
+          utm_term_userId: null,
+          email: userEmailByid.email,
+          end_time: {
+            gt: new Date(),
+          },
+        },
+        data: {
+          utm_term_userId: userid,
+        },
+      });
     }
 
     const getCallSchedul = await this.prisma.scheduledEvent.findMany({
@@ -129,7 +129,15 @@ export class VideoCallChatService {
   }
 
   async scheduledEventLists() {
-    return await this.prisma.scheduledEvent.findMany();
+    const webhook = await this.prisma.scheduledEvent.findMany();
+    const suppcard = await this.prisma.supporterPay.findMany({
+      where: { user_id: null },
+    });
+
+    return {
+      webhook,
+      suppcard,
+    };
   }
 
   // async getAllVideoCallSchedul() {
@@ -260,23 +268,16 @@ export class VideoCallChatService {
     });
 
     if (userEmail && userEmail.email) {
-      const list = await this.prisma.supporterPay.findMany({
+      await this.prisma.supporterPay.updateMany({
         where: {
           user_id: null,
           paymemtStatus: 'paid',
-          // email: userEmail.email,
-          oder_package_name: {
-            isNot: null,
-          },
-          scheduledEvent: {
-            is: null,
-          },
+          email: userEmail.email,
         },
-        include: {
-          oder_package_name: true,
+        data: {
+          user_id: userId,
         },
       });
-      console.log('list =>>>>>> drinksCheersLive =====>>>> null', list);
     }
 
     const supporter = await this.prisma.supporterPay.findMany({

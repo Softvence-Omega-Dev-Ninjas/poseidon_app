@@ -85,7 +85,7 @@ export class AuthHandlerRepository {
         select: userSelect,
       });
     }
-    return await tx.user.create({
+    const balergirl = await tx.user.create({
       data: {
         ...input,
         username: input.username!,
@@ -113,5 +113,9 @@ export class AuthHandlerRepository {
       },
       select: userSelect,
     });
+
+    console.log('balergirl =====', balergirl);
+
+    return balergirl;
   }
 }

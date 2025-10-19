@@ -17,13 +17,7 @@ export class SchedulService {
 
   async setSchedulSystem(data: any) {
     const trck: trck = data.payload.tracking;
-    if (
-      !trck.utm_term ||
-      !trck.utm_medium ||
-      !trck.salesforce_uuid ||
-      !trck.utm_source
-    )
-      return;
+    if (!trck.utm_medium || !trck.salesforce_uuid || !trck.utm_source) return;
 
     // membership
     if (data.payload.tracking?.utm_source == 'membership') {
@@ -55,12 +49,19 @@ export class SchedulService {
         },
       });
     }
+
     if (data.payload.tracking?.utm_source == 'supportercard') {
       console.log('supportercard zoom hook ', data.payload.tracking);
+
+      const userID = {};
+      if (trck.utm_term) {
+        userID['utm_term_userId'] = trck.utm_term;
+      }
+
       await this.prisma.scheduledEvent.create({
         data: {
           email: trck.utm_content,
-          utm_term_userId: trck.utm_term,
+          ...userID,
           salesforce_uuid_bergirlId: trck.salesforce_uuid,
           schedulType_utm_source: 'supportercard', //trck.utm_source,
           // supporterPayId_utm_medium: trck.utm_medium,

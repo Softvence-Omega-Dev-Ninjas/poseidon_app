@@ -65,12 +65,15 @@ export class AuthHandlerService {
           role: user?.role,
           profile: user?.profile,
           shop_id: user?.shop?.id || '',
+          varify: user?.varify,
           memberships_owner_id: user?.memberships_owner?.id || '',
         };
         // user created so, now create token and check strip and then return for sending response from controller
         const token = await this.generateToken({
           ...payload,
+          stripeAccountId: user?.stripeAccountId || '',
         });
+
         const isStrip =
           user.role === 'supporter' && user.stripeAccountId
             ? await this.stripeSellerService.checkAccountsInfoSystem(
@@ -86,7 +89,7 @@ export class AuthHandlerService {
         return {
           access_token: `Bearer ${token}`,
           user: {
-            ...userObj,
+            ...payload,
             // profile_varify: user.varify,
             financial_account:
               ['user', 'admin'].includes(user?.role) || isStrip,
@@ -98,8 +101,22 @@ export class AuthHandlerService {
       } else {
         // if user found then based on the page ref send them the response
         // user created so, now create token and check strip and then return for sending response from controller
+
+        const payload = {
+          id: isUser?.id,
+          username: isUser?.username,
+          provider: isUser?.provider,
+          email: isUser?.email,
+          role: isUser?.role,
+          profile: isUser?.profile,
+          shop_id: isUser?.shop?.id || '',
+          varify: isUser?.varify,
+          memberships_owner_id: isUser?.memberships_owner?.id || '',
+        };
+
         const token = await this.generateToken({
-          ...isUser,
+          ...payload,
+          stripeAccountId: isUser?.stripeAccountId || '',
         });
         const isStrip =
           isUser.role === 'supporter' && isUser.stripeAccountId
@@ -112,7 +129,7 @@ export class AuthHandlerService {
         return {
           access_token: `Bearer ${token}`,
           user: {
-            ...userObj,
+            ...payload,
             // profile_varify: isUser.varify,
             financial_account:
               isUser?.role == 'user' || isUser?.role == 'admin'
