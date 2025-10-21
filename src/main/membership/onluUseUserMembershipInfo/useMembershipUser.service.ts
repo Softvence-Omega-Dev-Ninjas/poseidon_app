@@ -208,6 +208,9 @@ export class MembershipServiceUseToUserOnly {
     const payStatus = await this.stripeService.paymentIntentCheck(
       data.paymentIntentId,
     );
+
+    console.log('membership payStatus', payStatus);
+
     if (!payStatus || payStatus.status !== 'succeeded') {
       throw new HttpException(
         cResponseData({
