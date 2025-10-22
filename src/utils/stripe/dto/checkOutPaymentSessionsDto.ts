@@ -24,11 +24,11 @@ export class CheckOutPaymentSessionsDto {
 
   @ApiProperty({
     type: String,
-    required: true,
+    required: false,
     description: 'The ID of the buyer',
     example: 'buyer_123',
   })
-  buyerId: string;
+  buyerId?: string;
 
   @ApiProperty({
     type: String,

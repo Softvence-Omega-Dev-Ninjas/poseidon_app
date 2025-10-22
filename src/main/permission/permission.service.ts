@@ -140,7 +140,7 @@ export class PermissionService {
               usedMessages = await this.prisma.message.count({
                 where: {
                   senderId: authId,
-                  receiverId: p.user_id,
+                  receiverId: p.user_id ?? '',
                   createdAt: { gte: p.createAt },
                 },
               });

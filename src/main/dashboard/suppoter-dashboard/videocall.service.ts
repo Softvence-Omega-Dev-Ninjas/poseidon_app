@@ -7,6 +7,48 @@ export class VideoCallChatService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getVideoCallChatList(userid: string) {
+    const userinfo = await this.prisma.user.findFirst({
+      where: { id: userid },
+      select: { id: true, email: true },
+    });
+
+    if (userinfo && userinfo.email) {
+      const payList = await this.prisma.paymentDetails.findMany({
+        where: {
+          buyerId: null,
+          email: userinfo.email,
+          paymemtStatus: 'paid',
+        },
+        select: {
+          id: true,
+        },
+      });
+      await Promise.all(
+        payList.map(async (updateItem) => {
+          const rewardUpdaID = await this.prisma.paymentDetails.update({
+            where: { id: updateItem.id },
+            data: { buyerId: userinfo.id },
+          });
+          await this.prisma.permissionVideoCallAccess.update({
+            where: { paymentId: rewardUpdaID.id },
+            data: { user_id: userinfo.id },
+          });
+          await this.prisma.permissionMessagesAccess.update({
+            where: { paymentId: rewardUpdaID.id },
+            data: { user_id: userinfo.id },
+          });
+          await this.prisma.permissionGalleryAccess.update({
+            where: { paymentId: rewardUpdaID.id },
+            data: { user_id: userinfo.id },
+          });
+          await this.prisma.permissionPostsAccess.update({
+            where: { paymentId: rewardUpdaID.id },
+            data: { user_id: userinfo.id },
+          });
+        }),
+      );
+    }
+
     const data = await this.prisma.permissionVideoCallAccess.findMany({
       where: {
         user_id: userid,

@@ -47,7 +47,7 @@ export class StripeService {
       application_fee_amount: platformFee(data.amount), //20%
       metadata: {
         paymentDetails: data.payment_info_id,
-        buyerId: data.buyerId,
+        buyerId: data.buyerId ?? '',
         sellerId: data.sellerId,
         productName: data.serviceName,
         amount: data.amount,
@@ -96,6 +96,8 @@ export class StripeService {
         endDate,
       },
     });
+
+    console.log('payment init', paymentAction);
 
     return { client_secret: paymentAction.client_secret, id: paymentAction.id };
   }

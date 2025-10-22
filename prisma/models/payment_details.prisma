@@ -1,6 +1,7 @@
 model paymentDetails {
   id                        String                     @id @unique @default(uuid())
   buyerId                   String?
+  email                     String?
   sellerId                  String
   amount                    Float
   serviceType               ServiceType

@@ -108,9 +108,17 @@ export class MembershipServiceUseToUserOnly {
 
     const plainAccess = membershipLevel?.MembershipSubscriptionPlan[0];
     // Defualt create payment info and status pending
+
+    const userIdenty = {};
+    const userIdentybuyer = {};
+    if (userId) {
+      userIdenty['user_id'] = userId;
+      userIdentybuyer['buyerId'] = userId;
+    }
+
     const payment_info = await this.prisma.paymentDetails.create({
       data: {
-        buyerId: userId,
+        ...userIdentybuyer,
         sellerId: membershipLevel?.membership.owner.id as string,
         serviceName: membershipLevel?.titleName as string,
         amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
@@ -121,7 +129,7 @@ export class MembershipServiceUseToUserOnly {
         PermissionVideoCallAccess: plainAccess?.CalligSubscriptionPlan
           ? {
               create: {
-                user_id: userId,
+                ...userIdenty,
                 supporter_id: membershipLevel?.membership.owner.id as string,
                 totalVideoCalls: membershipLevel?.MembershipSubscriptionPlan[0]
                   .CalligSubscriptionPlan?.totalVideoCalls as number,
@@ -136,7 +144,7 @@ export class MembershipServiceUseToUserOnly {
         PermissionMessagesAccess: plainAccess?.MessagesSubscriptionPlan
           ? {
               create: {
-                user_id: userId,
+                ...userIdenty,
                 supporter_id: membershipLevel?.membership.owner.id as string,
                 totalMessages: membershipLevel?.MembershipSubscriptionPlan[0]
                   .MessagesSubscriptionPlan?.totalMessages as number,
@@ -149,7 +157,7 @@ export class MembershipServiceUseToUserOnly {
         PermissionGalleryAccess: plainAccess?.GallerySubscriptionPlan
           ? {
               create: {
-                user_id: userId,
+                ...userIdenty,
                 supporter_id: membershipLevel?.membership.owner.id as string,
               },
             }
@@ -157,7 +165,7 @@ export class MembershipServiceUseToUserOnly {
         PermissionPostsAccess: plainAccess?.PostsSubscriptionPlan
           ? {
               create: {
-                user_id: userId,
+                ...userIdenty,
                 supporter_id: membershipLevel?.membership.owner.id as string,
               },
             }
@@ -176,7 +184,7 @@ export class MembershipServiceUseToUserOnly {
         payment_info_id: payment_info.id,
         planDuration: plan,
         amount: Number(membershipLevel?.MembershipSubscriptionPlan[0].price),
-        buyerId: userId,
+        buyerId: userId ?? '',
         sellerId: membershipLevel?.membership.owner.id as string,
         serviceName: membershipLevel?.titleName as string,
         serviceType: 'membership',
@@ -209,7 +217,9 @@ export class MembershipServiceUseToUserOnly {
       data.paymentIntentId,
     );
 
-    console.log('membership payStatus', payStatus);
+    console.log('membership payStatus ----------------------------------\n');
+    console.log(payStatus);
+    console.log('membership payStatus ----------------------------------\n');
 
     if (!payStatus || payStatus.status !== 'succeeded') {
       throw new HttpException(
@@ -230,6 +240,7 @@ export class MembershipServiceUseToUserOnly {
         },
         data: {
           paymemtStatus: 'paid',
+          email: payStatus.receipt_email,
         },
       });
       // console.log('paymentIntentData = succeeded', paymentIntentData);

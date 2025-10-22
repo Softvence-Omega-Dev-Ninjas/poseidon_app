@@ -29,6 +29,7 @@ export class MembershipUseToUserOnly {
     return this.membershipServiceUser.getLevels(id);
   }
 
+  @Public()
   @Roles(Role.User, Role.Supporter)
   @Post('buy')
   buyMembership(
@@ -45,6 +46,7 @@ export class MembershipUseToUserOnly {
     );
   }
 
+  @Public()
   @Roles(Role.User, Role.Supporter)
   @Post('payment-Status')
   paymentStatus(@Body() data: BuyMembershipResponseDto) {
