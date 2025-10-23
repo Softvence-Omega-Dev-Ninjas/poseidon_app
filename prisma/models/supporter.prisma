@@ -35,7 +35,7 @@ model SupportCartLayout {
   id                       String                      @unique @default(uuid())
   author_id                String                      @unique
   choose_layout            LayoutType                  @default(standard)
-  default_price            Int                         @default(5)
+  default_price            SupportCart_default_price[]
   cheers_live_package_type Cheers_live_package_type[]
   author                   User                        @relation(fields: [author_id], references: [id], onDelete: Cascade)
   SuggestQuantity          SupportCartLayoutQuantity[]
@@ -63,4 +63,12 @@ model SupportCartLayoutQuantity {
 enum LayoutType {
   standard
   suggest
+}
+
+model SupportCart_default_price {
+  id                     String            @id @unique @default(uuid())
+  support_cart_layout_id String
+  support_cart_layout    SupportCartLayout @relation(fields: [support_cart_layout_id], references: [id], onDelete: Cascade)
+  name                   String            @default("one short drink")
+  price                  Int               @default(5)
 }

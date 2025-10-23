@@ -1,7 +1,10 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateSupporterPayDto } from './dto/create-supporter.dto';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
-import { SupportCartLayoutQuantity } from './dto/supportCartLayoutQuantity.dto';
+import {
+  CreateDefaultPrice,
+  SupportCartLayoutQuantity,
+} from './dto/supportCartLayoutQuantity.dto';
 import { CheersLivePackageType } from './dto/create-supporter-layout';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { UpdateSupporterLayputDto } from './dto/update-supporter.dto';
@@ -9,6 +12,7 @@ import { SupporterCardPaymentService } from 'src/utils/stripe/supporterCard.serv
 import { BuyMembershipResponseDto } from '../membership/onluUseUserMembershipInfo/dto/buyMembership.dto';
 import { StripeService } from 'src/utils/stripe/stripe.service';
 import { CalendlyService } from '../calendly/calendly.service';
+import { UpdateDefaultPrice } from './dto/update-supporter.dto';
 // import { UpdateSupporterDto } from './dto/update-supporter.dto';
 
 @Injectable()
@@ -26,6 +30,7 @@ export class SupporterService {
         author_id: userId,
       },
       include: {
+        default_price: true,
         cheers_live_package_type: true,
         SuggestQuantity: true,
       },
@@ -43,7 +48,6 @@ export class SupporterService {
     const updateCartLayout = await this.prisma.supportCartLayout.update({
       where: { author_id: userid },
       data: {
-        default_price: data.default_price,
         choose_layout:
           data.choose_layout == 'suggest'
             ? 'suggest'
@@ -65,6 +69,51 @@ export class SupporterService {
       },
     });
   }
+
+  // ---------Start---DefaultPrice Area------------
+  async createDefaultPrice(data: CreateDefaultPrice) {
+    const defaultPriceNewData =
+      await this.prisma.supportCart_default_price.create({
+        data: {
+          support_cart_layout_id: data.supportCartLayoutId,
+          ...data,
+        },
+      });
+    return cResponseData({
+      message: 'Create Success',
+      data: defaultPriceNewData,
+    });
+  }
+
+  async updateDefaultPrice(id: string, data: UpdateDefaultPrice) {
+    const defaultPriceNewData =
+      await this.prisma.supportCart_default_price.update({
+        where: {
+          id,
+        },
+        data: {
+          ...data,
+        },
+      });
+    return cResponseData({
+      message: 'update Success',
+      data: defaultPriceNewData,
+    });
+  }
+
+  async removeDefaultPrice(id: string) {
+    const defaultPriceNewData =
+      await this.prisma.supportCart_default_price.delete({
+        where: {
+          id,
+        },
+      });
+    return cResponseData({
+      message: 'update Success',
+      data: defaultPriceNewData,
+    });
+  }
+  // ---------End---DefaultPrice Area------------
 
   async deleteSuggestQuantity(id: string) {
     return await this.prisma.supportCartLayoutQuantity.delete({

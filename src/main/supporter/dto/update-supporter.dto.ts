@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 // import { SupportCartLayout } from 'generated/prisma';
 // import { SupportCartLayoutQuantity } from './supportCartLayoutQuantity.dto';
 // import { CreateSupporterDto } from './create-supporter.dto';
@@ -13,11 +13,22 @@ export class UpdateSupporterLayputDto {
   })
   @IsString()
   choose_layout: string;
+}
+
+export class UpdateDefaultPrice {
+  @ApiProperty({
+    required: false,
+    example: 'one short drink',
+  })
+  @IsString()
+  @IsOptional()
+  name?: string;
 
   @ApiProperty({
-    required: true,
-    example: 10,
+    required: false,
+    example: 8,
   })
   @IsNumber()
-  default_price: number;
+  @IsOptional()
+  price?: number;
 }

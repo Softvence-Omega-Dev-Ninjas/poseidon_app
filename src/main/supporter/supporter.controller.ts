@@ -11,7 +11,10 @@ import {
 import { SupporterService } from './supporter.service';
 import { CreateSupporterPayDto } from './dto/create-supporter.dto';
 import { UpdateSupporterLayputDto } from './dto/update-supporter.dto';
-import { SupportCartLayoutQuantity } from './dto/supportCartLayoutQuantity.dto';
+import {
+  CreateDefaultPrice,
+  SupportCartLayoutQuantity,
+} from './dto/supportCartLayoutQuantity.dto';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { Request } from 'express';
 import { Roles } from 'src/auth/guard/roles.decorator';
@@ -20,6 +23,7 @@ import { CheersLivePackageType } from './dto/create-supporter-layout';
 import { StripeService } from 'src/utils/stripe/stripe.service';
 import { Public } from 'src/auth/guard/public.decorator';
 import { BuyMembershipResponseDto } from '../membership/onluUseUserMembershipInfo/dto/buyMembership.dto';
+import { UpdateDefaultPrice } from './dto/update-supporter.dto';
 
 @Controller('supporter')
 export class SupporterController {
@@ -75,6 +79,30 @@ export class SupporterController {
   createSuggestUpdateQuantity(@Body() data: SupportCartLayoutQuantity) {
     return this.supporterService.createSuggestQuantity(data);
   }
+
+  // ---------Start---DefaultPrice Area------------
+
+  @Roles(Role.Supporter)
+  @Delete('create-default-price/:id')
+  removeDefaultPrice(@Param('id') id: string) {
+    return this.supporterService.removeDefaultPrice(id);
+  }
+
+  @Roles(Role.Supporter)
+  @Post('create-default-price')
+  createDefaultPrice(@Body() data: CreateDefaultPrice) {
+    return this.supporterService.createDefaultPrice(data);
+  }
+
+  @Roles(Role.Supporter)
+  @Patch('create-default-price/:id')
+  updateDefaultPrice(
+    @Body() data: UpdateDefaultPrice,
+    @Param('id') id: string,
+  ) {
+    return this.supporterService.updateDefaultPrice(id, data);
+  }
+  // ---------End---DefaultPrice Area------------
 
   @Roles(Role.Supporter)
   @Delete('create-suggest-quantity/:id')

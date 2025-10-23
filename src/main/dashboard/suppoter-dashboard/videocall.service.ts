@@ -252,6 +252,31 @@ export class VideoCallChatService {
 
   // get VideoCallSchedul ServiceOrder
   async getVideoCallSchedulServiceOrder(userid: string) {
+    const userInfo = await this.prisma.user.findFirst({
+      where: {
+        id: userid,
+      },
+      select: {
+        id: true,
+        email: true,
+      },
+    });
+
+    if (userInfo && userInfo.email && userInfo.id) {
+      await this.prisma.serviceOrder.updateMany({
+        where: {
+          userId: null,
+          paymentDetails: {
+            paymemtStatus: 'paid',
+          },
+          email: userInfo.email,
+        },
+        data: {
+          userId: userInfo.id,
+        },
+      });
+    }
+
     const getCallSchedul = await this.prisma.serviceOrder.findMany({
       where: {
         userId: userid,

@@ -122,6 +122,7 @@ export class SupporterProfileService {
           },
         },
         include: {
+          default_price: true,
           cheers_live_package_type: true,
           SuggestQuantity: true,
         },

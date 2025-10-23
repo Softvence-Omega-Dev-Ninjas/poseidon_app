@@ -299,6 +299,19 @@ export class AuthUserService {
         },
       });
 
+      if (
+        newSupporter.support_cart_layout &&
+        newSupporter.support_cart_layout.id
+      ) {
+        await this.prisma.supportCart_default_price.create({
+          data: {
+            support_cart_layout_id: newSupporter.support_cart_layout.id,
+            name: 'one Short Drink - lili',
+            price: 5,
+          },
+        });
+      }
+
       if (skip) {
         const jwtData = await this.userCredentialsAuthenticationWithSignUp({
           id: newSupporter.id,
