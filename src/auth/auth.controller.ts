@@ -56,6 +56,7 @@ export class AuthController {
     @Body('skip', StringToBooleanPipe) skip: boolean,
     @UploadedFile(new ImageValidationPipe(10)) image: Express.Multer.File,
     @Body(new ValidationPipe()) createAuthDto: SignUpUserDto,
+    @Res() res: Response,
   ) {
     // call cloudinary profile image upload - this area
     const { imageUrl } = await this.cloudinaryService.profileImageUpload(image);
@@ -71,7 +72,7 @@ export class AuthController {
 
     // console.log('skip ------------+++', skipAuth);
 
-    return this.authUserService.createUser(
+    const { payload, ...resData } = await this.authUserService.createUser(
       {
         role,
         email,
@@ -85,6 +86,17 @@ export class AuthController {
       },
       skip,
     );
+
+    res.cookie('accessToken', payload.access_token, {
+      httpOnly: true, // cannot be accessed via JS
+      secure: true, // set true if using HTTPS
+      sameSite: 'none', // allow cross-site
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
+      // partitioned: true,
+    });
+    return res
+      .status(HttpStatus.CREATED)
+      .json(cResponseData({ ...resData, data: payload }));
   }
 
   @Public()

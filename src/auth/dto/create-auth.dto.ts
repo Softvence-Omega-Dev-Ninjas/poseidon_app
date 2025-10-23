@@ -32,7 +32,7 @@ export class CredentialsSignInInfo {
 
 type profileDto = {
   name: string;
-  image: string;
+  image?: string | null;
 };
 
 export class authenticationUserDto {

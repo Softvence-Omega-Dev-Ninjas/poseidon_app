@@ -53,7 +53,7 @@ export class MembershipController {
     membershipSubscriptionPlan: MembershipSubscriptionPlan[],
     @Body('isPublic', StringToBooleanPipe) isPublic: boolean,
     @Body() createMembershipLevelDto: CreateMembershipLevelDto,
-    @UploadedFile(new ImageValidationPipe())
+    @UploadedFile(new ImageValidationPipe(20))
     levelImage: Express.Multer.File,
   ) {
     return this.membershipService.createMembershipLevel(

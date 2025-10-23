@@ -105,40 +105,31 @@ export class MembershipService {
         MembershipSubscriptionPlan: {
           create: MembershipSubscriptionPlan.map((plan) => ({
             ...plan,
-            CalligSubscriptionPlan: plan.CalligSubscriptionPlan
-              ? {
-                  create: {
-                    ...plan.CalligSubscriptionPlan,
-                    duration: plan.duration,
-                    totalVideoCalls:
-                      plan.CalligSubscriptionPlan.totalVideoCalls,
-                  },
-                }
-              : undefined,
-            MessagesSubscriptionPlan: plan.MessagesSubscriptionPlan
-              ? {
-                  create: {
-                    ...plan.MessagesSubscriptionPlan,
-                    duration: plan.duration,
-                  },
-                }
-              : undefined,
-            GallerySubscriptionPlan: plan.GallerySubscriptionPlan
-              ? {
-                  create: {
-                    ...plan.GallerySubscriptionPlan,
-                    duration: plan.duration,
-                  },
-                }
-              : undefined,
-            PostsSubscriptionPlan: plan.PostsSubscriptionPlan
-              ? {
-                  create: {
-                    ...plan.PostsSubscriptionPlan,
-                    duration: plan.duration,
-                  },
-                }
-              : undefined,
+            CalligSubscriptionPlan: plan.CalligSubscriptionPlan && {
+              create: {
+                ...plan.CalligSubscriptionPlan,
+                duration: plan.duration,
+                totalVideoCalls: plan.CalligSubscriptionPlan.totalVideoCalls,
+              },
+            },
+            MessagesSubscriptionPlan: plan.MessagesSubscriptionPlan && {
+              create: {
+                ...plan.MessagesSubscriptionPlan,
+                duration: plan.duration,
+              },
+            },
+            GallerySubscriptionPlan: plan.GallerySubscriptionPlan && {
+              create: {
+                ...plan.GallerySubscriptionPlan,
+                duration: plan.duration,
+              },
+            },
+            PostsSubscriptionPlan: plan.PostsSubscriptionPlan && {
+              create: {
+                ...plan.PostsSubscriptionPlan,
+                duration: plan.duration,
+              },
+            },
           })),
         },
       },
