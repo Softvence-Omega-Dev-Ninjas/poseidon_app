@@ -326,6 +326,10 @@ export class ServiceService {
         data: null,
       });
     }
+
+    const userInfo = {};
+    if (userId) userInfo['userId'] = userId;
+
     const OderSerderSave = await this.prisma.serviceOrder.create({
       data: {
         paymentDetails: {
@@ -333,7 +337,7 @@ export class ServiceService {
             amount: service.price,
           },
         },
-        userId: userId,
+        ...userInfo,
         sellerId: service.userId,
         serviceId: service.id,
         scheduling_url: service.scheduling_url,
@@ -359,7 +363,6 @@ export class ServiceService {
 
     if (
       !id ||
-      !user ||
       !sellerId ||
       !serviceId ||
       !createdAt ||
@@ -381,11 +384,10 @@ export class ServiceService {
       await this.servicePaymentService.servicePaymentIntent({
         id,
         serviceId,
-        userId: user.id,
+        userId: user ? user.id : '',
         sellerId,
         createdAt,
         paymentDetails,
-        name: user.profile?.name,
         stripeAccountId: service.user.stripeAccountId,
       });
 
@@ -693,18 +695,37 @@ export class ServiceService {
     }
     // console.log('paymentIntent - pi checkout', payStatus);
     if (payStatus.status === 'succeeded') {
-      const paymentIntentData =
-        await this.prisma.paymentDetailsByServices.update({
-          where: {
-            id: payStatus.metadata.paymentDetailsId,
+      const paymentIntentData = await this.prisma.serviceOrder.update({
+        where: {
+          id: payStatus.metadata.serviceOrderId,
+        },
+        data: {
+          email: payStatus.receipt_email,
+          paymentDetails: {
+            update: {
+              data: {
+                paymemtStatus: 'paid',
+              },
+            },
           },
-          data: {
-            paymemtStatus: 'paid',
-          },
-        });
+        },
+        include: {
+          paymentDetails: true,
+        },
+      });
+
+      // const paymentIntentData =
+      //   await this.prisma.paymentDetailsByServices.update({
+      //     where: {
+      //       id: payStatus.metadata.paymentDetailsId,
+      //     },
+      //     data: {
+      //       paymemtStatus: 'paid',
+      //     },
+      //   });
       return cResponseData({
         message: 'Payment successfully complated',
-        data: paymentIntentData,
+        data: paymentIntentData.paymentDetails,
         success: true,
       });
     }

@@ -90,6 +90,7 @@ export class ServiceController {
     return this.serviceService.findAllUser(req.sub, page, limit, draft);
   }
 
+  @Public() // Sharif create order
   @Roles(Role.User, Role.Supporter)
   @Post('/createOrder')
   @ApiOperation({ summary: 'Create a new service order' })
@@ -204,6 +205,7 @@ export class ServiceController {
     return this.serviceService.getServicesBuyPayemtData(req['sub'] as string);
   }
 
+  @Public() // Sharif - order paymentStatusCheck by stripe
   @Roles(Role.User, Role.Supporter)
   @Post('getServices/paymentStatusCheck')
   paymentStatusCheck(@Body() body: PiStripeId) {
