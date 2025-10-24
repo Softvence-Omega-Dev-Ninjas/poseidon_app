@@ -1,0 +1,12 @@
+model Report {
+    id                    String   @id @unique @default(uuid())
+    report_username       String
+    reported_user         User     @relation(fields: [report_username], references: [username])
+    report_type           String
+    report_description    String
+    report_relevant_link  String?
+    report_relevant_link2 String?
+    report_relevant_file  String?
+    report_created_email  String
+    createdAt             DateTime @default(now())
+}

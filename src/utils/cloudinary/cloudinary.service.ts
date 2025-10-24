@@ -176,4 +176,51 @@ export class CloudinaryService {
       return { id: null };
     }
   }
+
+  async uploadFileReport(file: Express.Multer.File) {
+    try {
+      // 1️⃣ Detect file type
+      const mimeType = file.mimetype;
+
+      // 2️⃣ Map the resource type for Cloudinary
+      let resourceType: 'image' | 'video' | 'raw' = 'raw';
+
+      if (mimeType.startsWith('image/')) {
+        resourceType = 'image';
+      } else if (mimeType.startsWith('video/')) {
+        resourceType = 'video';
+      } else {
+        // PDFs or other files
+        resourceType = 'raw';
+      }
+
+      // 3️⃣ Upload to Cloudinary using upload_stream
+      const result = await new Promise<any>((resolve, reject) => {
+        const uploadStream = this.cloudinary.uploader.upload_stream(
+          {
+            public_id: file.originalname,
+            resource_type: resourceType, // dynamically assigned
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          },
+        );
+
+        streamifier.createReadStream(file.buffer).pipe(uploadStream);
+      });
+
+      return {
+        url: result.secure_url,
+        type: resourceType,
+        public_id: result.public_id,
+      };
+    } catch {
+      return {
+        url: '',
+        type: '',
+        public_id: '',
+      };
+    }
+  }
 }

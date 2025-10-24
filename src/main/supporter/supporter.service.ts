@@ -76,7 +76,8 @@ export class SupporterService {
       await this.prisma.supportCart_default_price.create({
         data: {
           support_cart_layout_id: data.supportCartLayoutId,
-          ...data,
+          name: data.name,
+          price: data.price,
         },
       });
     return cResponseData({

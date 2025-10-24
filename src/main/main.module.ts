@@ -23,6 +23,7 @@ import { ProfileSettingModule } from './profile-setting/profile-setting.module';
 import { PermissionModule } from './permission/permission.module';
 import { CalendlyModule } from './calendly/calendly.module';
 import { VideoCallSchedulHistoryModule } from './video-call-schedul-history/video-call-schedul-history.module';
+import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { VideoCallSchedulHistoryModule } from './video-call-schedul-history/vide
     // appointment group module
     CalendlyModule,
     VideoCallSchedulHistoryModule,
+    ReportModule,
   ],
   controllers: [],
   providers: [],
