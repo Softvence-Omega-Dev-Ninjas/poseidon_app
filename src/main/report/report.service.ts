@@ -26,6 +26,22 @@ export class ReportService {
         error: 'Report Username is required',
       });
 
+    const repoUser = await this.prisma.user.findFirst({
+      where: {
+        username: createReportDto.report_username,
+      },
+      select: {
+        id: true,
+        username: true,
+      },
+    });
+
+    if (!repoUser)
+      return cResponseData({
+        message: 'Your Report User not found',
+        error: 'User not found',
+      });
+
     // upload file by cloudinaryService
     const { report_relevant_file: file, ...rest } = createReportDto;
     const reportFile = {};
