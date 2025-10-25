@@ -24,6 +24,7 @@ import { PermissionModule } from './permission/permission.module';
 import { CalendlyModule } from './calendly/calendly.module';
 import { VideoCallSchedulHistoryModule } from './video-call-schedul-history/video-call-schedul-history.module';
 import { ReportModule } from './report/report.module';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { ReportModule } from './report/report.module';
     CalendlyModule,
     VideoCallSchedulHistoryModule,
     ReportModule,
+    ContactModule,
   ],
   controllers: [],
   providers: [],

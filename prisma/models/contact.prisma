@@ -1,0 +1,8 @@
+model Contact {
+    id       String   @id @unique @default(uuid())
+    name     String
+    email    String
+    message  String
+    see      Boolean  @default(false)
+    createAt DateTime @default(now())
+}
