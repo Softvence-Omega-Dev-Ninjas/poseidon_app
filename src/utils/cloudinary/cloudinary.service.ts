@@ -19,11 +19,25 @@ export class CloudinaryService {
     try {
       if (!file) return { mediaId: '' };
 
+      const mimeType = file.mimetype;
+
+      // 2️⃣ Map the resource type for Cloudinary
+      let resourceType: 'image' | 'video' | 'raw' = 'raw';
+
+      if (mimeType.startsWith('image/')) {
+        resourceType = 'image';
+      } else if (mimeType.startsWith('video/')) {
+        resourceType = 'video';
+      } else {
+        // PDFs or other files
+        throw new Error('Unsupported file type');
+      }
+
       const uploadRes = await new Promise<any>((resolve, reject) => {
         const uploadStream = this.cloudinary.uploader.upload_stream(
           {
             public_id: file.originalname,
-            resource_type: 'image',
+            resource_type: resourceType,
           },
           (error, result) => {
             if (error) return reject(error);
