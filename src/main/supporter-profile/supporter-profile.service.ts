@@ -1,6 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { cResponseData } from 'src/common/utils/common-responseData';
 import { PrismaService } from 'src/prisma-client/prisma-client.service';
+import { SellerService } from 'src/utils/stripe/seller.service';
 // import { GetShopDataService } from './getShopData.service';
 
 @Injectable()
@@ -8,6 +9,7 @@ export class SupporterProfileService {
   constructor(
     private readonly prisma: PrismaService,
     // private readonly getShopDataService: GetShopDataService,
+    private readonly stripeSellerService: SellerService,
   ) {}
   private async getMedia(mediaIds: string[]) {
     if (!mediaIds || mediaIds.length === 0) {
@@ -55,17 +57,29 @@ export class SupporterProfileService {
   }
 
   async profilePage(username: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        username: username,
+        role: 'supporter',
+      },
+      select: {
+        id: true,
+        username: true,
+        stripeAccountId: true,
+      },
+    });
+    const stripeCompleted: { stripe: boolean } = {
+      stripe: false,
+    };
+
+    if (user && user.stripeAccountId) {
+      const result = await this.stripeSellerService.checkAccountsInfoSystem(
+        user.stripeAccountId,
+      );
+      stripeCompleted.stripe = result;
+    }
+
     return await this.prisma.$transaction(async (tx) => {
-      const user = await tx.user.findFirst({
-        where: {
-          username: username,
-          role: 'supporter',
-        },
-        select: {
-          id: true,
-          username: true,
-        },
-      });
       if (!user || !user.id) {
         throw new HttpException(
           cResponseData({
@@ -77,6 +91,7 @@ export class SupporterProfileService {
           400,
         );
       }
+
       const userid = user.id;
       // // console.log('userssssssssssss ', user);
       const profileInfo = await tx.profile.findUnique({
@@ -93,18 +108,6 @@ export class SupporterProfileService {
           description: true,
         },
       });
-      // if (profileInfo && profileInfo?.cover_image) {
-      //   profileInfo.cover_image =
-      // }
-
-      // if (profileInfo && profileInfo.cover_image) {
-      //   const coverImages = await this.getMedia([profileInfo.cover_image]);
-      //   if (coverImages && coverImages.length && coverImages[0].id) {
-      //     profileInfo.cover_image = coverImages[0];
-      //   }
-      //   // const coverImageMap = new Map(coverImages.map((m) => [m.id, m]));
-      //   // profileInfo.cover_image = coverImageMap.get(profileInfo.cover_image);
-      // }
 
       // total supporter count
       const totalSupporter = await tx.supporterPay.count({
@@ -234,6 +237,7 @@ export class SupporterProfileService {
       return {
         userid: userid,
         username: user.username,
+        financial_account: stripeCompleted.stripe,
         totalSupporter,
         profileInfo: {
           ...profileInfo,

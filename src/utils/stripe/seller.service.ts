@@ -107,15 +107,15 @@ export class SellerService {
       // cryptoTotal
       const cCurrency = ['usdc', 'usdp', 'usdg'];
 
-      const cryptoAvailable = balance.available.reduce(
-        (sum, b) => (cCurrency.includes(b.currency) ? sum + b.amount : 0),
-        0,
-      );
+      // const cryptoAvailable = balance.available.reduce(
+      //   (sum, b) => (cCurrency.includes(b.currency) ? sum + b.amount : 0),
+      //   0,
+      // );
       const cryptoPending = balance.pending.reduce(
         (sum, b) => (cCurrency.includes(b.currency) ? sum + b.amount : 0),
         0,
       );
-      const cryptoTotal = cryptoAvailable + cryptoPending;
+      // const cryptoTotal = cryptoAvailable + cryptoPending;
 
       // console.log('cryptoTotal', cryptoTotal);
 
