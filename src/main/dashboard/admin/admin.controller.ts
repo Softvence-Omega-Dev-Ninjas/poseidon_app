@@ -138,4 +138,10 @@ export class AdminController {
   async deleteGeneralUser(@Param('id') id: string) {
     return this.generalUserService.remove(id);
   }
+
+  @Get('top-up-income/bar-girl-profiles')
+  @Roles(Role.Admin)
+  async getTopUpIncomeBarGirlProfile() {
+    return this.overviewService.getTopUpIncomeBarGirlProfile();
+  }
 }

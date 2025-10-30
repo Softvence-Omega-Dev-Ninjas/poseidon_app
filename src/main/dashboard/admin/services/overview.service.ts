@@ -205,4 +205,92 @@ export class AdminOverviewService {
   async visitorChart() {
     return await this.userService.getVisitsByCountry();
   }
+
+  async getTopUpIncomeBarGirlProfile() {
+    const berGrilProfiles = await this.prisma.user.findMany({
+      where: {
+        role: 'supporter',
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        profile: {
+          select: {
+            name: true,
+            image: true,
+            description: true,
+          },
+        },
+      },
+    });
+
+    const profilesWithIncome = await Promise.all(
+      berGrilProfiles.map(async (girlProfile) => {
+        const totalAmount = await this.getGirlTopUpIncome(girlProfile.id);
+        return { ...girlProfile, totalAmount };
+      }),
+    );
+    return profilesWithIncome.sort((a, b) => b.totalAmount - a.totalAmount);
+  }
+
+  private async getGirlTopUpIncome(girlId: string) {
+    const servicePayment = await this.prisma.paymentDetailsByServices.aggregate(
+      {
+        where: {
+          paymemtStatus: 'paid',
+          serviceOrderInfo: {
+            sellerId: girlId,
+          },
+        },
+        _sum: {
+          amount: true,
+        },
+      },
+    );
+
+    const shopPayment = await this.prisma.paymentDetailsByShop.aggregate({
+      where: {
+        paymemtStatus: 'paid',
+        order: {
+          product: {
+            shop: {
+              userId: girlId,
+            },
+          },
+        },
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+
+    const supporterPayment = await this.prisma.supporterPay.aggregate({
+      where: {
+        paymemtStatus: 'paid',
+        author_id: girlId,
+      },
+      _sum: {
+        total_price: true,
+      },
+    });
+
+    const paymentDetails = await this.prisma.paymentDetails.aggregate({
+      where: {
+        paymemtStatus: 'paid',
+        sellerId: girlId,
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+    // Calculate total amount
+    const totalAmount =
+      (servicePayment._sum.amount || 0) +
+      (shopPayment._sum.amount || 0) +
+      (paymentDetails._sum.amount || 0) +
+      (supporterPayment._sum.total_price || 0);
+
+    return Number(totalAmount.toFixed(2));
+  }
 }
