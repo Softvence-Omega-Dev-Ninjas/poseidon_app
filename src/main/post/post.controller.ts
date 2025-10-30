@@ -94,6 +94,8 @@ export class PostController {
   }
 
   @Get(':id')
+  @Public()
+  @Roles(Role.Admin, Role.Supporter, Role.User)
   @ApiOperation({ summary: 'Get a single post by ID' })
   @ApiResponse({ status: 200, description: 'Returns the post.' })
   @ApiResponse({ status: 404, description: 'Post not found.' })
