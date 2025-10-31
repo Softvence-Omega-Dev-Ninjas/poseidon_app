@@ -231,7 +231,9 @@ export class AdminOverviewService {
         return { ...girlProfile, totalAmount };
       }),
     );
-    return profilesWithIncome.sort((a, b) => b.totalAmount - a.totalAmount);
+    return profilesWithIncome
+      .sort((a, b) => b.totalAmount - a.totalAmount)
+      .slice(0, 5);
   }
 
   private async getGirlTopUpIncome(girlId: string) {
