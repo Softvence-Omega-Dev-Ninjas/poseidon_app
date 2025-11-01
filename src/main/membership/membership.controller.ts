@@ -26,6 +26,7 @@ import {
   UpdateMembershipLevelDto,
 } from './dto/update-membership-level.dto';
 import { StringToBooleanPipe } from 'src/common/utils/stringToBoolean.pipe';
+import { Public } from 'src/auth/guard/public.decorator';
 
 @Controller('membership')
 export class MembershipController {
@@ -68,7 +69,8 @@ export class MembershipController {
   }
 
   // upadte Membership Level
-  @Roles(Role.Supporter)
+  // @Roles(Role.Supporter)
+  @Public()
   @Patch('update-levels')
   updateMembershipLevel(
     @Body() updateMembershipLevelDto: UpdateMembershipLevelDto,
@@ -76,6 +78,13 @@ export class MembershipController {
     return this.membershipService.updateMembershipLevel(
       updateMembershipLevelDto,
     );
+  }
+
+  // upadte Membership Level isPublic
+  @Roles(Role.Supporter)
+  @Patch('update-ispublic/:levelId')
+  updateMembershipLevelIsPublic(@Param('levelId') levelId: string) {
+    return this.membershipService.updateMembershipLevelIsPublic(levelId);
   }
 
   @Roles(Role.Supporter)

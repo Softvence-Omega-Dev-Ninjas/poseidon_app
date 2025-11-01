@@ -177,70 +177,98 @@ export class MembershipService {
     });
   }
 
+  // upadte Membership Level
   async updateMembershipLevel(dto: UpdateMembershipLevelDto) {
+    const { MembershipSubscriptionPlan: planDto, ...rest } = dto;
+    console.log('UpdateMembershipLevelDto', dto);
     const updateNewData = await this.prisma.membership_levels.update({
       where: { id: dto.id },
-      data: {
-        levelName: dto.levelName,
-        titleName: dto.titleName,
-        levelDescription: dto.levelDescription,
-        levelImage: dto.levelImage,
-        isPublic: dto.isPublic,
-        Wellcome_note: dto.Wellcome_note ?? null,
-
+      data: { ...rest },
+      include: {
         MembershipSubscriptionPlan: {
-          update: dto.MembershipSubscriptionPlan.map((plan) => ({
-            where: { id: plan.id },
-            data: {
-              duration: plan.duration,
-              price: plan.price,
-
-              CalligSubscriptionPlan: plan.CalligSubscriptionPlan
-                ? { update: { ...plan.CalligSubscriptionPlan } }
-                : { delete: true },
-
-              MessagesSubscriptionPlan: plan.MessagesSubscriptionPlan
-                ? { update: { ...plan.MessagesSubscriptionPlan } }
-                : { delete: true },
-
-              GallerySubscriptionPlan: plan.GallerySubscriptionPlan
-                ? { update: { ...plan.GallerySubscriptionPlan } }
-                : { delete: true },
-
-              PostsSubscriptionPlan: plan.PostsSubscriptionPlan
-                ? { update: { ...plan.PostsSubscriptionPlan } }
-                : { delete: true },
-            },
-          })),
+          include: {
+            CalligSubscriptionPlan: true,
+            MessagesSubscriptionPlan: true,
+            GallerySubscriptionPlan: true,
+            PostsSubscriptionPlan: true,
+          },
         },
       },
     });
 
-    const existingLavel = await this.prisma.membership_levels.findUnique({
-      where: { id: dto.id },
-      include: {
-        MembershipSubscriptionPlan: true,
-      },
-    });
+    const { MembershipSubscriptionPlan } = updateNewData;
+    await Promise.all(
+      MembershipSubscriptionPlan.map(async (plan) => {
+        const matchedPlanDto = planDto?.find((p) => p.id === plan.id);
+        if (matchedPlanDto) {
+          await this.prisma.membershipSubscriptionPlan.update({
+            where: { id: plan.id },
+            data: {
+              CalligSubscriptionPlan: matchedPlanDto.CalligSubscriptionPlan && {
+                delete: true,
+              },
+              MessagesSubscriptionPlan:
+                matchedPlanDto.MessagesSubscriptionPlan && { delete: true },
+              GallerySubscriptionPlan:
+                matchedPlanDto.GallerySubscriptionPlan && { delete: true },
+              PostsSubscriptionPlan: matchedPlanDto.PostsSubscriptionPlan && {
+                delete: true,
+              },
+            },
+          });
+        }
+      }),
+    );
 
-    // Check if the lavel before try to update entity
-    if (!existingLavel) {
-      throw new NotFoundException(
-        `Membership lavel with ID ${dto.id} not found`,
+    if (planDto && planDto.length > 0) {
+      await Promise.all(
+        planDto.map(async (plan) => {
+          await this.prisma.membershipSubscriptionPlan.update({
+            where: { id: plan.id },
+            data: {
+              duration: plan.duration,
+              price: plan.price,
+              CalligSubscriptionPlan: plan.CalligSubscriptionPlan
+                ? {
+                    update: { ...plan.CalligSubscriptionPlan },
+                  }
+                : undefined,
+              MessagesSubscriptionPlan: plan.MessagesSubscriptionPlan
+                ? {
+                    update: { ...plan.MessagesSubscriptionPlan },
+                  }
+                : undefined,
+              GallerySubscriptionPlan: plan.GallerySubscriptionPlan
+                ? {
+                    update: { ...plan.GallerySubscriptionPlan },
+                  }
+                : undefined,
+              PostsSubscriptionPlan: plan.PostsSubscriptionPlan
+                ? {
+                    update: { ...plan.PostsSubscriptionPlan },
+                  }
+                : undefined,
+            },
+          });
+        }),
       );
     }
 
-    // TODO(coderboysobuj) handle image upload if file is provided
-    // let lavelImageUrl : string | undefined = undefined;
-    // if(dto.levelImage) {
-    //     try {
-    //         const uploadResult = await this.cloudinaryService.imageUpload(dto.levelImage)
-    //         lavelImageUrl = uploadResult.mediaId;
-    //     } catch (error: any) {
-    //          throw new BadRequestException('Failed to upload image');
-    //          console.error("Error upload image for `membership_levels` update", error);
-    //     }
-    // }
+    const updateFind = await this.prisma.membership_levels.findUnique({
+      where: { id: dto.id },
+      include: {
+        MembershipSubscriptionPlan: {
+          include: {
+            CalligSubscriptionPlan: true,
+            MessagesSubscriptionPlan: true,
+            GallerySubscriptionPlan: true,
+            PostsSubscriptionPlan: true,
+          },
+        },
+      },
+    });
+
+    console.log('Updated Membership Level Data: =========', updateFind);
 
     return cResponseData({
       message: 'Membership level updated successfully',
@@ -249,6 +277,42 @@ export class MembershipService {
     });
   }
 
+  // update Membership Level isPublic
+  async updateMembershipLevelIsPublic(levelId: string) {
+    const existingLavel = await this.prisma.membership_levels.findUnique({
+      where: { id: levelId },
+      select: { id: true, isPublic: true },
+    });
+    if (!existingLavel) {
+      throw new NotFoundException(
+        `Membership lavel with ID ${levelId} not found`,
+      );
+    }
+    const updatedLavel = await this.prisma.membership_levels.update({
+      where: { id: existingLavel.id },
+      data: {
+        isPublic: !existingLavel.isPublic,
+      },
+      select: {
+        id: true,
+        isPublic: true,
+      },
+    });
+
+    if (updatedLavel && !updatedLavel?.isPublic) {
+      return cResponseData({
+        message: 'Membership level is now saved as draft successfully',
+        data: updatedLavel,
+        success: true,
+      });
+    }
+
+    return cResponseData({
+      message: 'Membership level public status updated successfully',
+      data: updatedLavel,
+      success: true,
+    });
+  }
   // user for only bergirl
   async getMembershipLevelsUseForbergirl(mId: string) {
     return await this.prisma.$transaction(async (tx) => {

@@ -38,7 +38,7 @@ export class AdminOverviewService {
         stats: visitorStats,
       },
       incomes: {
-        adminNetIncome: adminNetIncome,
+        ...adminNetIncome,
       },
     };
   }
@@ -51,7 +51,7 @@ export class AdminOverviewService {
       daysIncome: daysIncome,
     };
   }
-  async calculateAdminNetIncome(): Promise<number> {
+  async calculateAdminNetIncome() {
     // Net Income
     // PaymentDetailsByServices
     // PaymentDetailsByShop
@@ -93,15 +93,29 @@ export class AdminOverviewService {
       },
     });
     // Calculate total amount
+
+    const servicePaymentNetIncome = servicePayment._sum.amount || 0;
+    const shopPaymentNetIncome = shopPayment._sum.amount || 0;
+    const supporterPaymentNetIncome = supporterPayment._sum.total_price || 0;
+    const paymentDetailsNetIncome = paymentDetails._sum.amount || 0;
+
     const totalAmount =
-      (servicePayment._sum.amount || 0) +
-      (shopPayment._sum.amount || 0) +
-      (paymentDetails._sum.amount || 0) +
-      (supporterPayment._sum.total_price || 0);
+      servicePaymentNetIncome +
+      shopPaymentNetIncome +
+      supporterPaymentNetIncome +
+      paymentDetailsNetIncome;
 
     // Get 10% from all income
     const adminNetIncome = totalAmount * this.ADMIN_COMMISION;
-    return adminNetIncome;
+    return {
+      adminNetIncome,
+      servicePaymentNetIncome: servicePaymentNetIncome * this.ADMIN_COMMISION,
+      shopPaymentNetIncome: shopPaymentNetIncome * this.ADMIN_COMMISION,
+      supporterPaymentNetIncome:
+        supporterPaymentNetIncome * this.ADMIN_COMMISION,
+      membershipPaymentNetIncome:
+        paymentDetailsNetIncome * this.ADMIN_COMMISION,
+    };
   }
   async calculateIncomeByDay(month: number, year: number) {
     const endDate = new Date(year, month, 0);

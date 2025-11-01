@@ -222,26 +222,31 @@ export class UpdateMembershipLevelDto {
   levelDescription?: string;
 
   @ApiProperty({
+    required: false,
     type: String,
     description: 'ID of the level image',
     example: '679b649f-75ee-49bd-80ec-ac7bf7f49be2',
   })
   @IsString()
-  levelImage: string;
+  @IsOptional()
+  levelImage?: string;
 
   @ApiProperty({
+    required: false,
     type: Boolean,
     description: 'Whether the level is public',
     example: true,
   })
   @IsBoolean()
-  isPublic: boolean;
+  @IsOptional()
+  isPublic?: boolean;
 
   @ApiProperty({
+    required: false,
     type: [UpdateMembershipSubscriptionPlanDto],
     description: 'List of subscription plans for this membership level',
   })
-  MembershipSubscriptionPlan: UpdateMembershipSubscriptionPlanDto[];
+  MembershipSubscriptionPlan?: UpdateMembershipSubscriptionPlanDto[];
 
   @ApiProperty({
     type: String,
