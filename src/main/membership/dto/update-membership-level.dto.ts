@@ -145,8 +145,8 @@ export class UpdatePostsSubscriptionPlanDto {
 export class UpdateMembershipSubscriptionPlanDto {
   @ApiProperty({
     type: String,
-    description: 'ID of the subscription plan',
-    example: '7328dea6-0b44-4a4f-b315-46974c5d042a',
+    description: 'ID of the membership subscription plan',
+    example: '91ffdf09-4a2e-4447-9727-089f959e9d54',
   })
   @IsString()
   id: string;

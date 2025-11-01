@@ -180,13 +180,16 @@ export class MembershipService {
   // upadte Membership Level
   async updateMembershipLevel(dto: UpdateMembershipLevelDto) {
     const { MembershipSubscriptionPlan: planDto, ...rest } = dto;
-    console.log('UpdateMembershipLevelDto', dto);
+
     const updateNewData = await this.prisma.membership_levels.update({
       where: { id: dto.id },
       data: { ...rest },
       include: {
         MembershipSubscriptionPlan: {
-          include: {
+          select: {
+            id: true,
+            duration: true,
+            price: true,
             CalligSubscriptionPlan: true,
             MessagesSubscriptionPlan: true,
             GallerySubscriptionPlan: true,
@@ -199,22 +202,30 @@ export class MembershipService {
     const { MembershipSubscriptionPlan } = updateNewData;
     await Promise.all(
       MembershipSubscriptionPlan.map(async (plan) => {
-        const matchedPlanDto = planDto?.find((p) => p.id === plan.id);
-        if (matchedPlanDto) {
-          await this.prisma.membershipSubscriptionPlan.update({
-            where: { id: plan.id },
-            data: {
-              CalligSubscriptionPlan: matchedPlanDto.CalligSubscriptionPlan && {
-                delete: true,
-              },
-              MessagesSubscriptionPlan:
-                matchedPlanDto.MessagesSubscriptionPlan && { delete: true },
-              GallerySubscriptionPlan:
-                matchedPlanDto.GallerySubscriptionPlan && { delete: true },
-              PostsSubscriptionPlan: matchedPlanDto.PostsSubscriptionPlan && {
-                delete: true,
-              },
-            },
+        const {
+          CalligSubscriptionPlan,
+          MessagesSubscriptionPlan,
+          GallerySubscriptionPlan,
+          PostsSubscriptionPlan,
+        } = plan;
+        if (CalligSubscriptionPlan) {
+          await this.prisma.calligSubscriptionPlan.delete({
+            where: { id: CalligSubscriptionPlan.id },
+          });
+        }
+        if (MessagesSubscriptionPlan) {
+          await this.prisma.messagesSubscriptionPlan.delete({
+            where: { id: MessagesSubscriptionPlan.id },
+          });
+        }
+        if (GallerySubscriptionPlan) {
+          await this.prisma.gallerySubscriptionPlan.delete({
+            where: { id: GallerySubscriptionPlan.id },
+          });
+        }
+        if (PostsSubscriptionPlan) {
+          await this.prisma.postsSubscriptionPlan.delete({
+            where: { id: PostsSubscriptionPlan.id },
           });
         }
       }),
@@ -228,26 +239,31 @@ export class MembershipService {
             data: {
               duration: plan.duration,
               price: plan.price,
-              CalligSubscriptionPlan: plan.CalligSubscriptionPlan
-                ? {
-                    update: { ...plan.CalligSubscriptionPlan },
-                  }
-                : undefined,
-              MessagesSubscriptionPlan: plan.MessagesSubscriptionPlan
-                ? {
-                    update: { ...plan.MessagesSubscriptionPlan },
-                  }
-                : undefined,
-              GallerySubscriptionPlan: plan.GallerySubscriptionPlan
-                ? {
-                    update: { ...plan.GallerySubscriptionPlan },
-                  }
-                : undefined,
-              PostsSubscriptionPlan: plan.PostsSubscriptionPlan
-                ? {
-                    update: { ...plan.PostsSubscriptionPlan },
-                  }
-                : undefined,
+              CalligSubscriptionPlan: plan.CalligSubscriptionPlan && {
+                create: {
+                  ...plan.CalligSubscriptionPlan,
+                  duration: plan.duration,
+                  totalVideoCalls: plan.CalligSubscriptionPlan.totalVideoCalls,
+                },
+              },
+              MessagesSubscriptionPlan: plan.MessagesSubscriptionPlan && {
+                create: {
+                  ...plan.MessagesSubscriptionPlan,
+                  duration: plan.duration,
+                },
+              },
+              GallerySubscriptionPlan: plan.GallerySubscriptionPlan && {
+                create: {
+                  ...plan.GallerySubscriptionPlan,
+                  duration: plan.duration,
+                },
+              },
+              PostsSubscriptionPlan: plan.PostsSubscriptionPlan && {
+                create: {
+                  ...plan.PostsSubscriptionPlan,
+                  duration: plan.duration,
+                },
+              },
             },
           });
         }),
@@ -258,7 +274,10 @@ export class MembershipService {
       where: { id: dto.id },
       include: {
         MembershipSubscriptionPlan: {
-          include: {
+          select: {
+            id: true,
+            duration: true,
+            price: true,
             CalligSubscriptionPlan: true,
             MessagesSubscriptionPlan: true,
             GallerySubscriptionPlan: true,
@@ -268,11 +287,9 @@ export class MembershipService {
       },
     });
 
-    console.log('Updated Membership Level Data: =========', updateFind);
-
     return cResponseData({
       message: 'Membership level updated successfully',
-      data: updateNewData,
+      data: updateFind,
       success: true,
     });
   }
