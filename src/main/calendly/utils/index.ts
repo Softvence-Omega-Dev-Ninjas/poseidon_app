@@ -15,3 +15,13 @@ export const axios = Axios.create({
   },
   withCredentials: true,
 });
+
+export const extractSubscriptionId = (uri: string): string | null => {
+  try {
+    const parts = uri.trim().split('/');
+    const id = parts.pop();
+    return id && id.length > 0 ? id : null;
+  } catch {
+    return null;
+  }
+};

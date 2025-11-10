@@ -5,11 +5,16 @@ import { CalendlyRepository } from './calendly.repository';
 import { CalendlyWebhook } from './calendly.webhook';
 import { PrismaClientModule } from 'src/prisma-client/prisma-client.module';
 import { SchedulService } from './schedul.service';
+import { CalendlyCornJob } from './corn/calendly.corn';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
-  imports: [PrismaClientModule],
+  imports: [
+    ScheduleModule.forRoot()
+  ,PrismaClientModule],
   controllers: [CalendlyController],
   providers: [
+    CalendlyCornJob,
     CalendlyRepository,
     CalendlyService,
     CalendlyWebhook,

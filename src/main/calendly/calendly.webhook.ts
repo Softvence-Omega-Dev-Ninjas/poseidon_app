@@ -37,6 +37,14 @@ export class CalendlyWebhook extends CalendlyService {
     return data.collection;
   }
 
+  async DeleteWebHook(uuid: string) {
+    const res = await axios.delete(`/webhook_subscriptions/${uuid}`);
+    if (res.status !== 204)
+      throw new InternalServerErrorException(
+        'Fail to delete existing webhoook',
+      );
+  }
+
   private requestBody() {
     const obj = {
       url: `${this.BACKEND_URL}/calendly/invite`,
