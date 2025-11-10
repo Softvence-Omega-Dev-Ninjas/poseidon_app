@@ -11,7 +11,7 @@ export class CalendlyCornJob {
   constructor(private readonly webhook: CalendlyWebhook) {}
 
   // the cron job will execute every 5 hours
-  @Cron(CronExpression.EVERY_5_HOURS)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   // @Cron(CronExpression.EVERY_5_MINUTES)
   async handleCronJob() {
     this.logger.log('Cron job is running');
