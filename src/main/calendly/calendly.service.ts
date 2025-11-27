@@ -15,15 +15,36 @@ import { defaultCalendlyPayload } from './constants';
 import { slugify } from 'src/auth/auth-handler/utils';
 import { ConfigService } from '@nestjs/config';
 import { UpdateCalendlyEventDto } from './dto/create-event.dto';
-import { axios } from './utils';
 import { EventResponse } from './types/event.response.types';
+import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { AxiosInstance } from 'axios';
+import axios from 'axios';
 
 @Injectable()
 export class CalendlyService {
+  private readonly http: AxiosInstance;
   protected CALENDLY_AUTH_URI: string;
+  protected CALENDLY_PERSONAL_ACCESS_TOKEN: string;
+  protected CALENDLY_BASE_URL: string;
 
   constructor(protected readonly config: ConfigService) {
     this.CALENDLY_AUTH_URI = config.getOrThrow('CALENDLY_AUTH_URI');
+    this.CALENDLY_PERSONAL_ACCESS_TOKEN = config.getOrThrow(
+      'CALENDLY_PERSONAL_ACCESS_TOKEN',
+    );
+    this.CALENDLY_BASE_URL = config.getOrThrow('CALENDLY_BASE_URL');
+
+    if (!this.CALENDLY_PERSONAL_ACCESS_TOKEN || !this.CALENDLY_BASE_URL)
+      throw new Error('Access token OR base not found on env');
+
+    this.http = axios.create({
+      baseURL: this.CALENDLY_BASE_URL,
+      headers: {
+        Authorization: `Bearer ${config.getOrThrow('CALENDLY_PERSONAL_ACCESS_TOKEN')}`,
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true,
+    });
   }
 
   public async createEvent(input: Partial<CalendlyPayload>) {
@@ -44,7 +65,7 @@ export class CalendlyService {
     this.isEventExist(collections, { ...payload, slug: payload.slug! }); // if evnet is already exist then throw error
 
     // create event
-    const { data } = await axios.post(`/event_types`, payload);
+    const { data } = await this.http.post(`/event_types`, payload);
     return {
       message: 'Event type created successfully' as string,
       resource: data.resource as EventResponse['event'], // we jsut need scheduling_url <-> resource.scheduling_url
@@ -54,19 +75,45 @@ export class CalendlyService {
   public async getEventById(uuid: string) {
     if (!uuid) throw new NotFoundException('Event uuid is required!');
 
-    const { data } = await axios.get(`/event_types/${uuid}`);
+    const { data } = await this.http.get(`/event_types/${uuid}`);
     return data;
+  }
+
+  public async updateEventTypeSchedule(uuid: string, body: UpdateScheduleDto) {
+    if (!uuid) throw new NotFoundException('Event uuid is required!');
+
+    try {
+      const { data } = await this.http.post(
+        `/event_types/${uuid}/availability_schedules`,
+        body,
+      );
+      return data;
+    } catch (e) {
+      throw new InternalServerErrorException(e.response?.data || e);
+    }
+  }
+
+  async getSchedules(eventTypeUuid: string) {
+    try {
+      const { data } = await this.http.get(
+        `/event_types/${eventTypeUuid}/availability_schedules`,
+      );
+      return data;
+    } catch (e) {
+      throw new InternalServerErrorException(e.response?.data || e);
+    }
   }
 
   public async updateEventType(uuid: string, input: UpdateCalendlyEventDto) {
     if (!uuid) throw new NotFoundException('Event uuid is required!');
 
-    const { data } = await axios.put(`/event_types/${uuid}`, { ...input });
+    const { data } = await this.http.put(`/event_types/${uuid}`, { ...input });
     return data;
   }
+
   public async getme<T extends object>(): Promise<T> {
     // need to store me in redis db
-    const { data } = await axios.get(`/users/me`);
+    const { data } = await this.http.get(`/users/me`);
     // console.log(data.resource);
     const { uri, current_organization } = data.resource;
     if (!uri || !current_organization)
@@ -78,7 +125,7 @@ export class CalendlyService {
     uri?: string,
   ): Promise<T> {
     const url = uri ?? this.CALENDLY_AUTH_URI;
-    const { data } = await axios.get(`/event_types?user=${url}`);
+    const { data } = await this.http.get(`/event_types?user=${url}`);
 
     return data.collection ?? [];
   }
