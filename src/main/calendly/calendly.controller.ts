@@ -3,10 +3,10 @@ import {
   Controller,
   Delete,
   Get,
-  Headers,
   Param,
   Patch,
   Post,
+  Put,
   Req,
   Res,
 } from '@nestjs/common';
@@ -18,10 +18,10 @@ import {
 import { Public } from 'src/auth/guard/public.decorator';
 import { ApiParam } from '@nestjs/swagger';
 import { CalendlyWebhook } from './calendly.webhook';
-import { GlobalMailService } from 'src/common/mail/global-mail.service';
 import { Request, Response } from 'express';
 import { CalendlyWebhookPayload } from './types/webhookPayload';
 import { SchedulService } from './schedul.service';
+import { UpdateScheduleDto } from './dto/update-schedule.dto';
 
 @Controller('calendly')
 export class CalendlyController {
@@ -29,7 +29,6 @@ export class CalendlyController {
   constructor(
     private readonly service: CalendlyService,
     private readonly webhook: CalendlyWebhook,
-    private readonly mailService: GlobalMailService,
     private readonly schedulService: SchedulService,
   ) {}
 
@@ -100,6 +99,33 @@ export class CalendlyController {
       return err;
     }
   }
+
+  @Public()
+  @ApiParam({ name: 'uuid', required: true, type: String })
+  @Get('event-schedule/:uuid')
+  async getEventTypeSchedule(@Param('uuid') uuid: string) {
+    try {
+      const event = await this.service.getSchedules(uuid);
+      return event;
+    } catch (err) {
+      return err;
+    }
+  }
+
+  @ApiParam({ name: 'uuid', required: true, type: String })
+  @Put('update-event-schedule/:uuid')
+  async updateEventTypeSchedule(
+    @Param('uuid') uuid: string,
+    @Body() body: UpdateScheduleDto,
+  ) {
+    try {
+      const event = await this.service.updateEventTypeSchedule(uuid, body);
+      return event;
+    } catch (err) {
+      return err;
+    }
+  }
+
   // OPTIONAL //
 
   @Public()
