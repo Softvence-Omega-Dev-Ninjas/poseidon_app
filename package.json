@@ -7,10 +7,10 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "node api.js && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
-    "dev": "nest start --watch",
+    "start": "node api.js && nest start",
+    "dev": "node api.js && nest start --watch",
     "start:dev": "nest start --watch",
     "prisma:dev": "prisma generate && prisma migrate dev",
     "start:debug": "nest start --debug --watch",
@@ -31,6 +31,7 @@
   "dependencies": {
     "@nestjs/axios": "^4.0.1",
     "@nestjs/bullmq": "^11.0.4",
+    "node-fetch": "^3.3.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
