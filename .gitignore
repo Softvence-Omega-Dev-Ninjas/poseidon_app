@@ -39,7 +39,6 @@ docker-compose.yml*
 !.vscode/extensions.json
 
 # dotenv environment variable files
-.env
 .env.development.local
 .env.test.local
 .env.production.local
@@ -64,3 +63,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 docker-compose.yml
 
 
+temp_auto_push.bat
+temp_interactive_push.bat
+branch_structure.json
